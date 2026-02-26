@@ -1,0 +1,91 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import { prisma } from '@/lib/prisma/client';
+import { generateToken } from '@/lib/auth';
+import { ApiResponse, AuthToken } from '@/types';
+import { withApiHandler, sendSuccessResponse, sendErrorResponse } from '@/lib/api-handler';
+import { validateInput, handleValidationError, commonSchemas } from '@/lib/validation';
+import { createAppError, ErrorCode, logError } from '@/lib/errors';
+import bcrypt from 'bcryptjs';
+
+const loginSchema = {
+  email: commonSchemas.email,
+  password: {
+    required: true,
+    type: 'string',
+    message: 'Password is required',
+  },
+};
+
+async function handleLogin(
+  req: NextApiRequest,
+  res: NextApiResponse<ApiResponse<AuthToken | null>>
+) {
+  if (req.method !== 'POST') {
+    return sendErrorResponse(res, 405, 'Method not allowed', ErrorCode.INTERNAL_SERVER_ERROR);
+  }
+
+  const { email, password } = req.body || {};
+
+  // Validate input
+  const validationErrors = validateInput({ email, password }, loginSchema);
+  if (Object.keys(validationErrors).length > 0) {
+    return handleValidationError(res, validationErrors);
+  }
+
+  try {
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        password: true,
+        isActive: true,
+      },
+    });
+
+    if (!user) {
+      return sendErrorResponse(res, 401, 'Invalid email or password', ErrorCode.INVALID_CREDENTIALS);
+    }
+
+    if (!user.isActive) {
+      return sendErrorResponse(res, 403, 'User account is disabled', ErrorCode.USER_DISABLED);
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return sendErrorResponse(res, 401, 'Invalid email or password', ErrorCode.INVALID_CREDENTIALS);
+    }
+
+    // Generate token
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      role: 'rider', // Default role
+    });
+
+    const authToken: AuthToken = {
+      token,
+      expiresIn: 7 * 24 * 60 * 60, // 7 days in seconds
+      user: {
+        id: user.id,
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+        role: 'rider',
+      },
+    };
+
+    return sendSuccessResponse(res, 200, 'Login successful', authToken);
+  } catch (error) {
+    logError(error, 'handleLogin');
+    return sendErrorResponse(res, 500, 'Internal server error', ErrorCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
+export default withApiHandler(handleLogin, {
+  allowedMethods: ['POST', 'OPTIONS'],
+});

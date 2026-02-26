@@ -1,0 +1,11 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/dashboard": "pages/dashboard.js",
+  "/auth/login": "pages/auth/login.js",
+  "/events": "pages/events.js",
+  "/clubs": "pages/clubs.js",
+  "/registrations": "pages/registrations.js",
+  "/financial": "pages/financial.js"
+}

@@ -1,0 +1,388 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USER & AUTH ====================
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  designation String?
+  gender      String?
+  phone       String?
+  address     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  roles         Role[]         @relation("UserRoles")
+  permissions   Permission[]
+  clubs         Club[]         @relation("ClubPrimaryContact")
+  riders        Rider[]        @relation("RiderUser")
+  horsesOwned   Horse[]        @relation("HorseOwner")
+  registrations Registration[] @relation("RegistrationUser")
+  auditLogs     AuditLog[]
+
+  @@index([email])
+}
+
+// ==================== ROLES & PERMISSIONS ====================
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users User[] @relation("UserRoles")
+
+  @@index([name])
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String // Can Edit Event, Can View Financial, Can Export, Can Publish, etc.
+  resource  String // Event, Financial, User, etc.
+  isGranted Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, action, resource])
+  @@index([userId])
+  @@index([resource])
+}
+
+// ==================== EVENTS ====================
+model Event {
+  id          String   @id @default(cuid())
+  eId         String   @unique @default(cuid())
+  eventType   String // KSEC, EPL, EIRS Show
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  startTime   String?
+  endTime     String?
+  fileUrl     String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Venue Information
+  venueName    String?
+  venueAddress String?
+  venueLat     Float?
+  venueLng     Float?
+
+  // Terms & Conditions
+  termsAndConditions String?
+
+  // Relations
+  venue         Venue?          @relation(fields: [venueId], references: [id])
+  venueId       String?
+  categories    EventCategory[] @relation("EventToCategory")
+  registrations Registration[]  @relation("EventRegistrations")
+  stables       Stable[]        @relation("EventStables")
+
+  @@index([startDate])
+  @@index([isPublished])
+  @@index([eventType])
+}
+
+model EventCategory {
+  id          String   @id @default(cuid())
+  eId         String   @unique @default(cuid())
+  name        String
+  price       Float
+  cgst        Float    @default(0)
+  sgst        Float    @default(0)
+  igst        Float    @default(0)
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  events        Event[]        @relation("EventToCategory")
+  registrations Registration[] @relation("RegistrationCategory")
+
+  @@index([name])
+}
+
+model EventType {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  shortCode   String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==================== CLUBS ====================
+model Club {
+  id                 String   @id @default(cuid())
+  eId                String   @unique @default(cuid())
+  name               String
+  shortCode          String   @unique
+  registrationNumber String?
+  contactNumber      String?
+  email              String?
+  address            String?
+  city               String?
+  state              String?
+  country            String?
+  pincode            String?
+  gstNumber          String?
+  logoUrl            String?
+  description        String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Primary Contact
+  primaryContactId String
+  primaryContact   User   @relation("ClubPrimaryContact", fields: [primaryContactId], references: [id])
+
+  // Relations
+  riders         Rider[]         @relation("ClubRiders")
+  horses         Horse[]         @relation("ClubHorses")
+  registrations  Registration[]  @relation("ClubRegistrations")
+  stableBookings StableBooking[] @relation("ClubStableBookings")
+
+  @@index([shortCode])
+  @@index([email])
+}
+
+// ==================== RIDERS ====================
+model Rider {
+  id            String    @id @default(cuid())
+  eId           String    @unique @default(cuid())
+  efiRiderId    String?
+  firstName     String
+  lastName      String
+  email         String    @unique
+  dob           DateTime?
+  gender        String?
+  mobile        String?
+  address       String?
+  aadhaarNumber String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user          User?          @relation("RiderUser", fields: [userId], references: [id])
+  userId        String?
+  club          Club?          @relation("ClubRiders", fields: [clubId], references: [id])
+  clubId        String?
+  horses        Horse[]        @relation("RiderHorses")
+  registrations Registration[] @relation("RiderRegistrations")
+
+  @@index([efiRiderId])
+  @@index([email])
+  @@index([clubId])
+}
+
+// ==================== HORSES ====================
+model Horse {
+  id             String   @id @default(cuid())
+  eId            String   @unique @default(cuid())
+  name           String
+  color          String?
+  passportNumber String?
+  horseCode      String?
+  gender         String // Stallion, Mare, Gelding
+  yearOfBirth    Int?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  owner         User?          @relation("HorseOwner", fields: [ownerId], references: [id])
+  ownerId       String?
+  rider         Rider?         @relation("RiderHorses", fields: [riderId], references: [id])
+  riderId       String?
+  club          Club?          @relation("ClubHorses", fields: [clubId], references: [id])
+  clubId        String?
+  registrations Registration[] @relation("HorseRegistrations")
+
+  @@index([name])
+  @@index([passportNumber])
+  @@index([riderId])
+  @@index([clubId])
+  @@index([ownerId])
+}
+
+// ==================== EVENT REGISTRATIONS ====================
+model Registration {
+  id            String        @id @default(cuid())
+  eId           String        @unique @default(cuid())
+  eventId       String
+  riderId       String
+  horseid       String
+  clubId        String?
+  categoryId    String
+  paymentStatus PaymentStatus @default(UNPAID)
+
+  // Pricing
+  eventAmount  Float @default(0)
+  stableAmount Float @default(0)
+  gstAmount    Float @default(0)
+  totalAmount  Float @default(0)
+
+  registeredAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  event    Event         @relation("EventRegistrations", fields: [eventId], references: [id], onDelete: Cascade)
+  rider    Rider         @relation("RiderRegistrations", fields: [riderId], references: [id], onDelete: Cascade)
+  horse    Horse         @relation("HorseRegistrations", fields: [horseid], references: [id], onDelete: Cascade)
+  club     Club?         @relation("ClubRegistrations", fields: [clubId], references: [id])
+  category EventCategory @relation("RegistrationCategory", fields: [categoryId], references: [id])
+  user     User?         @relation("RegistrationUser", fields: [userId], references: [id])
+  userId   String?
+
+  stableBookings StableBooking[] @relation("RegistrationBookings")
+  transactions   Transaction[]   @relation("RegistrationTransactions")
+
+  @@unique([eventId, riderId, horseid])
+  @@index([eventId])
+  @@index([riderId])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+enum PaymentStatus {
+  PAID
+  UNPAID
+  PARTIAL
+  CANCELLED
+}
+
+// ==================== STABLES ====================
+model Venue {
+  id        String   @id @default(cuid())
+  name      String?
+  address   String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events  Event[]  @relation()
+  stables Stable[] @relation("VenueStables")
+}
+
+model Stable {
+  id             String   @id @default(cuid())
+  eId            String   @unique @default(cuid())
+  eventId        String
+  number         String // Stable A, Stable B, etc.
+  capacity       Int      @default(1)
+  pricePerStable Float    @default(0)
+  isAvailable    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  event    Event           @relation("EventStables", fields: [eventId], references: [id], onDelete: Cascade)
+  venue    Venue?          @relation("VenueStables", fields: [venueId], references: [id])
+  venueId  String?
+  bookings StableBooking[] @relation("StableBookings")
+
+  @@index([eventId])
+  @@index([isAvailable])
+}
+
+model StableBooking {
+  id              String   @id @default(cuid())
+  eId             String   @unique @default(cuid())
+  registrationId  String
+  stableId        String
+  clubId          String?
+  numberOfStables Int      @default(1)
+  totalPrice      Float    @default(0)
+  bookingDate     DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  registration Registration @relation("RegistrationBookings", fields: [registrationId], references: [id], onDelete: Cascade)
+  stable       Stable       @relation("StableBookings", fields: [stableId], references: [id], onDelete: Cascade)
+  club         Club?        @relation("ClubStableBookings", fields: [clubId], references: [id])
+
+  @@index([registrationId])
+  @@index([stableId])
+}
+
+// ==================== FINANCIAL ====================
+model Transaction {
+  id              String        @id @default(cuid())
+  eId             String        @unique @default(cuid())
+  registrationId  String
+  amount          Float
+  gstAmount       Float         @default(0)
+  totalAmount     Float
+  transactionDate DateTime      @default(now())
+  status          PaymentStatus @default(UNPAID)
+  paymentMethod   String? // Credit Card, Debit Card, UPI, etc.
+  referenceNumber String?
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  registration Registration @relation("RegistrationTransactions", fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@index([registrationId])
+  @@index([status])
+  @@index([transactionDate])
+}
+
+// ==================== AUDIT LOGGING ====================
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String // EventEdited, PaymentChanged, RiderDisabled, etc.
+  entity    String // Event, Rider, Horse, etc.
+  entityId  String
+  oldValues Json?
+  newValues Json?
+  changes   String[] @default([])
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([entity])
+  @@index([entityId])
+  @@index([createdAt])
+}
+
+// ==================== SETTINGS ====================
+model Settings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  valueType   String // string, number, boolean, json
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+}
