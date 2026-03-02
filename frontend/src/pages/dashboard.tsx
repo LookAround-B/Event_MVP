@@ -198,12 +198,12 @@ function DashboardContent() {
       <div className="space-y-8">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-          <p className="text-gray-600 mt-2">Welcome to your event management dashboard</p>
+          <h2 className="text-2xl font-bold text-white">Dashboard</h2>
+          <p className="text-gray-300 mt-2">Welcome to your event management dashboard</p>
         </div>
 
         {error && (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded">
+          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded">
             {error}
           </div>
         )}
@@ -211,8 +211,8 @@ function DashboardContent() {
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading dashboard stats...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500 mx-auto mb-4"></div>
+              <p className="text-gray-300">Loading dashboard stats...</p>
             </div>
           </div>
         ) : (
@@ -254,8 +254,8 @@ function DashboardContent() {
             {/* Charts Row 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Event Breakdown Chart */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Breakdown</h3>
+              <div className="glass p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Event Breakdown</h3>
                 {eventChartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={eventChartData}>
@@ -270,13 +270,13 @@ function DashboardContent() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-gray-600">No event data available</p>
+                  <p className="text-gray-300">No event data available</p>
                 )}
               </div>
 
               {/* Monthly Revenue Chart */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Revenue Trend</h3>
+              <div className="glass p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Monthly Revenue Trend</h3>
                 {monthlyRevenue.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={monthlyRevenue}>
@@ -288,7 +288,7 @@ function DashboardContent() {
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-gray-600">No revenue data available</p>
+                  <p className="text-gray-300">No revenue data available</p>
                 )}
               </div>
             </div>
@@ -296,8 +296,8 @@ function DashboardContent() {
             {/* Charts Row 2 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Registration Trend */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Registration Trend (7 Days)</h3>
+              <div className="glass p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Registration Trend (7 Days)</h3>
                 {registrationTrend.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={registrationTrend}>
@@ -309,23 +309,23 @@ function DashboardContent() {
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-gray-600">No registration data available</p>
+                  <p className="text-gray-300">No registration data available</p>
                 )}
               </div>
 
               {/* Top Active Clubs & Riders */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Top Active Participants</h3>
+              <div className="glass p-6">
+                <h3 className="text-lg font-semibold text-white mb-6">Top Active Participants</h3>
                 
                 <div className="grid grid-cols-2 gap-6">
                   {/* Top Clubs */}
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-3 text-sm">Top Clubs</h4>
+                    <h4 className="font-medium text-white mb-3 text-sm">Top Clubs</h4>
                     <div className="space-y-2">
                       {topClubs.map((club, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                          <span className="text-sm text-gray-700">{club.name}</span>
-                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                        <div key={idx} className="flex justify-between items-center p-2 bg-white bg-opacity-5 backdrop-blur-sm rounded">
+                          <span className="text-sm text-gray-200">{club.name}</span>
+                          <span className="px-2 py-1 bg-primary-500 bg-opacity-30 text-primary-200 rounded text-xs font-medium">
                             {club.registrations}
                           </span>
                         </div>
@@ -338,9 +338,9 @@ function DashboardContent() {
                     <h4 className="font-medium text-gray-900 mb-3 text-sm">Top Riders</h4>
                     <div className="space-y-2">
                       {topRiders.map((rider, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                          <span className="text-sm text-gray-700">{rider.name}</span>
-                          <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                        <div key={idx} className="flex justify-between items-center p-2 bg-white bg-opacity-5 backdrop-blur-sm rounded">
+                          <span className="text-sm text-gray-200">{rider.name}</span>
+                          <span className="px-2 py-1 bg-secondary-500 bg-opacity-30 text-secondary-200 rounded text-xs font-medium">
                             {rider.registrations}
                           </span>
                         </div>
@@ -353,46 +353,46 @@ function DashboardContent() {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="glass p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
                 <div className="space-y-2">
-                  <Link href="/events" className="block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-center transition">
+                  <Link href="/events" className="block px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-center transition">
                     View Events
                   </Link>
-                  <Link href="/riders" className="block px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-center transition">
+                  <Link href="/riders" className="block px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 text-center transition">
                     View Riders
                   </Link>
-                  <Link href="/horses" className="block px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-center transition">
+                  <Link href="/horses" className="block px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 text-center transition">
                     View Horses
                   </Link>
-                  <Link href="/registrations" className="block px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-center transition">
+                  <Link href="/registrations" className="block px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 text-center transition">
                     Manage Registrations
                   </Link>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
+              <div className="glass p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">System Status</h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Backend API:</span>
-                    <span className="text-green-600 font-medium flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-600 rounded-full"></span> Online
+                    <span className="text-gray-300">Backend API:</span>
+                    <span className="text-emerald-400 font-medium flex items-center gap-1">
+                      <span className="w-2 h-2 bg-emerald-400 rounded-full"></span> Online
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Database:</span>
-                    <span className="text-green-600 font-medium flex items-center gap-1">
-                      <span className="w-2 h-2 bg-green-600 rounded-full"></span> Connected
+                    <span className="text-gray-300">Database:</span>
+                    <span className="text-emerald-400 font-medium flex items-center gap-1">
+                      <span className="w-2 h-2 bg-emerald-400 rounded-full"></span> Connected
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">API Version:</span>
-                    <span className="text-gray-900 font-medium">1.0</span>
+                    <span className="text-gray-300">API Version:</span>
+                    <span className="text-white font-medium">1.0</span>
                   </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                    <span className="text-gray-600">Last Updated:</span>
-                    <span className="text-gray-900 font-medium text-xs">{new Date().toLocaleTimeString()}</span>
+                  <div className="flex justify-between items-center pt-2 border-t border-white border-opacity-10">
+                    <span className="text-gray-300">Last Updated:</span>
+                    <span className="text-white font-medium text-xs">{new Date().toLocaleTimeString()}</span>
                   </div>
                 </div>
               </div>

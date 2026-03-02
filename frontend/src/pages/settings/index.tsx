@@ -122,17 +122,17 @@ export default function Settings() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Settings</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Settings</h1>
 
       {/* Tabs */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="glass">
         <div className="flex border-b">
           <button
             onClick={() => setActiveTab('general')}
             className={`px-6 py-3 font-semibold ${
               activeTab === 'general'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'border-b-2 border-primary-500 text-primary-400'
+                : 'text-gray-300 hover:text-white'
             }`}
           >
             General
@@ -141,8 +141,8 @@ export default function Settings() {
             onClick={() => setActiveTab('eventTypes')}
             className={`px-6 py-3 font-semibold ${
               activeTab === 'eventTypes'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'border-b-2 border-primary-500 text-primary-400'
+                : 'text-gray-300 hover:text-white'
             }`}
           >
             Event Types
@@ -151,8 +151,8 @@ export default function Settings() {
             onClick={() => setActiveTab('eventCategories')}
             className={`px-6 py-3 font-semibold ${
               activeTab === 'eventCategories'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'border-b-2 border-primary-500 text-primary-400'
+                : 'text-gray-300 hover:text-white'
             }`}
           >
             Event Categories
@@ -164,39 +164,39 @@ export default function Settings() {
             <p>Loading...</p>
           ) : activeTab === 'general' ? (
             <div>
-              <h2 className="text-xl font-bold mb-4">General Settings</h2>
+              <h2 className="text-xl font-bold mb-4 text-white">General Settings</h2>
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Venue Address</label>
+                  <label className="block text-sm font-semibold mb-2 text-white">Venue Address</label>
                   <input
                     type="text"
                     value={generalSettings.venue_address}
                     onChange={e =>
                       setGeneralSettings({ ...generalSettings, venue_address: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                    className="form-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Number of Stables</label>
+                  <label className="block text-sm font-semibold mb-2 text-white">Number of Stables</label>
                   <input
                     type="number"
                     value={generalSettings.stable_count}
                     onChange={e =>
                       setGeneralSettings({ ...generalSettings, stable_count: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                    className="form-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Price per Stable</label>
+                  <label className="block text-sm font-semibold mb-2 text-white">Price per Stable</label>
                   <input
                     type="number"
                     value={generalSettings.stable_price}
                     onChange={e =>
                       setGeneralSettings({ ...generalSettings, stable_price: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                    className="form-input"
                   />
                 </div>
                 <div>

@@ -101,7 +101,7 @@ export default function Financial() {
     <ProtectedRoute>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Financial Management</h2>
+          <h2 className="text-3xl font-bold text-white">Financial Management</h2>
           <Link href="/financial/transactions/create" className="btn-primary">
             <FiPlus className="inline mr-2" /> Record Transaction
           </Link>
@@ -110,25 +110,25 @@ export default function Financial() {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="card">
-            <p className="text-gray-600 text-sm font-medium">Total Revenue</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">
+            <p className="text-gray-300 text-sm font-medium">Total Revenue</p>
+            <p className="text-3xl font-bold text-white mt-2">
               ${(summary.totalRevenue / 100).toFixed(2)}
             </p>
           </div>
           <div className="card">
-            <p className="text-gray-600 text-sm font-medium">Total Transactions</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{summary.totalTransactions}</p>
+            <p className="text-gray-300 text-sm font-medium">Total Transactions</p>
+            <p className="text-3xl font-bold text-white mt-2">{summary.totalTransactions}</p>
           </div>
           <div className="card">
-            <p className="text-gray-600 text-sm font-medium">Average Transaction</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">
+            <p className="text-gray-300 text-sm font-medium">Average Transaction</p>
+            <p className="text-3xl font-bold text-white mt-2">
               ${(summary.averageTransaction / 100).toFixed(2)}
             </p>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-6">
+          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
@@ -136,7 +136,7 @@ export default function Financial() {
         {/* Filters */}
         <div className="card mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Type</label>
+            <label className="block text-sm font-medium text-white mb-2">Filter by Type</label>
             <select
               value={typeFilter}
               onChange={(e) => {
@@ -152,7 +152,7 @@ export default function Financial() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+            <label className="block text-sm font-medium text-white mb-2">Filter by Status</label>
             <select
               value={statusFilter}
               onChange={(e) => {
@@ -174,11 +174,11 @@ export default function Financial() {
         <div className="card table-container">
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Loading transactions...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
+              <p className="text-gray-300 mt-2">Loading transactions...</p>
             </div>
           ) : transactions.length === 0 ? (
-            <div className="text-center py-8 text-gray-600">
+            <div className="text-center py-8 text-gray-300">
               No transactions found. Record one to get started!
             </div>
           ) : (

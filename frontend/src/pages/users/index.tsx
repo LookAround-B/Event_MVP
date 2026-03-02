@@ -114,8 +114,8 @@ export default function Users() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Users Management</h1>
-            <p className="text-gray-600 mt-2">Manage system users and permissions</p>
+            <h1 className="text-3xl font-bold text-white">Users Management</h1>
+            <p className="text-gray-300 mt-2">Manage system users and permissions</p>
           </div>
           <Link href="/users/create" className="btn-primary flex items-center gap-2">
             <FiPlus /> Add User
@@ -123,7 +123,7 @@ export default function Users() {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded">
             {error}
           </div>
         )}
@@ -146,8 +146,8 @@ export default function Users() {
           {loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading users...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500 mx-auto mb-4"></div>
+                <p className="text-gray-300">Loading users...</p>
               </div>
             </div>
           ) : users.length === 0 ? (
