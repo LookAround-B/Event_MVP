@@ -70,12 +70,12 @@ async function handler(
 
   if (method === 'POST') {
     try {
-      const { eventId, riderId, horseid, categoryId } = req.body;
+      const { eventId, riderId, horseId, categoryId } = req.body;
 
       const validation = validateInput({
         eventId: { type: 'string', required: true },
         riderId: { type: 'string', required: true },
-        horseid: { type: 'string', required: true },
+        horseId: { type: 'string', required: true },
         categoryId: { type: 'string', required: true },
       }, req.body);
 
@@ -94,7 +94,7 @@ async function handler(
         where: {
           eventId,
           riderId,
-          horseid,
+          horseId,
         },
       });
 
@@ -107,22 +107,52 @@ async function handler(
         });
       }
 
+      // Fetch category to get price
+      const category = await prisma.eventCategory.findUnique({
+        where: { id: categoryId },
+        select: { id: true, name: true, price: true },
+      });
+
+      if (!category) {
+        return res.status(404).json({
+          success: false,
+          message: 'Category not found',
+          error: 'NOT_FOUND',
+          statusCode: 404,
+        });
+      }
+
+      // Default GST rates (CGST: 9%, SGST: 9%, IGST: 18%)
+      const CGST_RATE = 9;
+      const SGST_RATE = 9;
+      const IGST_RATE = 18;
+
+      // Calculate amounts
+      const eventAmount = category.price || 0;
+      const stableAmount = 0; // Can be configured later
+      const subtotal = eventAmount + stableAmount;
+      
+      // Use IGST by default (18%)
+      const gstAmount = Math.round((subtotal * IGST_RATE) / 100);
+      const totalAmount = subtotal + gstAmount;
+
       const registration = await prisma.registration.create({
         data: {
           eventId,
           riderId,
-          horseid,
+          horseId,
           categoryId,
           paymentStatus: 'UNPAID',
-          eventAmount: 0,
-          stableAmount: 0,
-          gstAmount: 0,
-          totalAmount: 0,
+          eventAmount,
+          stableAmount,
+          gstAmount,
+          totalAmount,
         },
         include: {
           rider: true,
           horse: true,
           event: true,
+          category: true,
         },
       });
 

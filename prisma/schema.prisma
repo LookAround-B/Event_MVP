@@ -235,7 +235,7 @@ model Registration {
   eId           String        @unique @default(cuid())
   eventId       String
   riderId       String
-  horseid       String
+  horseId       String
   clubId        String?
   categoryId    String
   paymentStatus PaymentStatus @default(UNPAID)
@@ -253,7 +253,7 @@ model Registration {
   // Relations
   event    Event         @relation("EventRegistrations", fields: [eventId], references: [id], onDelete: Cascade)
   rider    Rider         @relation("RiderRegistrations", fields: [riderId], references: [id], onDelete: Cascade)
-  horse    Horse         @relation("HorseRegistrations", fields: [horseid], references: [id], onDelete: Cascade)
+  horse    Horse         @relation("HorseRegistrations", fields: [horseId], references: [id], onDelete: Cascade)
   club     Club?         @relation("ClubRegistrations", fields: [clubId], references: [id])
   category EventCategory @relation("RegistrationCategory", fields: [categoryId], references: [id])
   user     User?         @relation("RegistrationUser", fields: [userId], references: [id])
@@ -262,7 +262,7 @@ model Registration {
   stableBookings StableBooking[] @relation("RegistrationBookings")
   transactions   Transaction[]   @relation("RegistrationTransactions")
 
-  @@unique([eventId, riderId, horseid])
+  @@unique([eventId, riderId, horseId])
   @@index([eventId])
   @@index([riderId])
   @@index([paymentStatus])

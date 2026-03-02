@@ -28,6 +28,11 @@ const signupSchema = {
     type: 'string',
     message: 'Password confirmation is required',
   },
+  role: {
+    required: false,
+    type: 'string',
+    message: 'Role must be admin, club, or rider',
+  },
 };
 
 async function handleSignup(
@@ -38,12 +43,17 @@ async function handleSignup(
     return sendErrorResponse(res, 405, 'Method not allowed', ErrorCode.INTERNAL_SERVER_ERROR);
   }
 
-  const { email, password, confirmPassword, firstName, lastName } = req.body || {};
+  const { email, password, confirmPassword, firstName, lastName, role = 'rider' } = req.body || {};
 
   const validationErrors = validateInput(
     { email, password, confirmPassword, firstName, lastName },
     signupSchema
   );
+
+  // Validate role
+  if (!['admin', 'club', 'rider'].includes(role)) {
+    validationErrors.role = ['Role must be admin, club, or rider'];
+  }
   
   if (password !== confirmPassword) {
     validationErrors.confirmPassword = ['Passwords do not match'];
@@ -64,6 +74,21 @@ async function handleSignup(
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Get or create the role
+    let roleRecord = await prisma.role.findUnique({
+      where: { name: role },
+    });
+
+    if (!roleRecord) {
+      roleRecord = await prisma.role.create({
+        data: {
+          name: role,
+          description: `${role.charAt(0).toUpperCase() + role.slice(1)} role`,
+          isActive: true,
+        },
+      });
+    }
+
     const user = await prisma.user.create({
       data: {
         email,
@@ -71,6 +96,9 @@ async function handleSignup(
         firstName,
         lastName,
         isActive: true,
+        roles: {
+          connect: [{ id: roleRecord.id }],
+        },
       },
       select: {
         id: true,
@@ -84,7 +112,7 @@ async function handleSignup(
     const token = generateToken({
       id: user.id,
       email: user.email,
-      role: 'rider',
+      role,
     });
 
     const authToken: AuthToken = {
@@ -94,7 +122,7 @@ async function handleSignup(
         id: user.id,
         email: user.email,
         name: `${user.firstName} ${user.lastName}`,
-        role: 'rider',
+        role,
       },
     };
 

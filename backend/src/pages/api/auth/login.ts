@@ -41,6 +41,9 @@ async function handleLogin(
         lastName: true,
         password: true,
         isActive: true,
+        roles: {
+          select: { name: true },
+        },
       },
     });
 
@@ -58,10 +61,13 @@ async function handleLogin(
       return sendErrorResponse(res, 401, 'Invalid email or password', ErrorCode.INVALID_CREDENTIALS);
     }
 
+    // Get user role - use first role or default to 'rider'
+    const userRole = user.roles?.[0]?.name || 'rider';
+
     const token = generateToken({
       id: user.id,
       email: user.email,
-      role: 'rider',
+      role: userRole,
     });
 
     const authToken: AuthToken = {
@@ -71,7 +77,7 @@ async function handleLogin(
         id: user.id,
         email: user.email,
         name: `${user.firstName} ${user.lastName}`.trim(),
-        role: 'rider',
+        role: userRole,
       },
     };
 
