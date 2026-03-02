@@ -184,6 +184,7 @@ async function handler(
       } catch (error) {
         console.error('Club DELETE error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to delete club',
         });
@@ -192,6 +193,7 @@ async function handler(
   }
 
   return res.status(405).json({
+    success: false,
     statusCode: 405,
     message: `Method ${req.method} not allowed`,
   });

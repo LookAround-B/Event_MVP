@@ -56,8 +56,8 @@ async function handler(
         data: {
           horses: horses.map(h => ({
             ...h,
-            registrationCount: h.registrations.length,
-            registrations: undefined,
+            registrationCount: h._count.registrations,
+            _count: undefined,
           })),
           pagination: {
             page: pageNum,
@@ -80,14 +80,15 @@ async function handler(
 
   if (method === 'POST') {
     try {
-      const { name, breed, age, color, height } = req.body;
+      const { name, color, gender, yearOfBirth, passportNumber, horseCode } = req.body;
 
       const validation = validateInput({
         name: { type: 'string', required: true, min: 1, max: 100 },
-        breed: { type: 'string', required: true, min: 1, max: 100 },
-        age: { type: 'number', required: true, min: 0 },
+        gender: { type: 'string', required: true },
+        yearOfBirth: { type: 'number', required: false },
         color: { type: 'string', required: false, max: 100 },
-        height: { type: 'number', required: false, min: 0 },
+        passportNumber: { type: 'string', required: false, max: 100 },
+        horseCode: { type: 'string', required: false, max: 100 },
       }, req.body);
 
       if (!validation.valid) {
@@ -103,10 +104,11 @@ async function handler(
       const horse = await prisma.horse.create({
         data: {
           name,
-          breed,
-          age,
           color,
-          height,
+          gender,
+          yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : undefined,
+          passportNumber,
+          horseCode,
         },
       });
 

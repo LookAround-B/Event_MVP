@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiCalendar, FiUsers, FiBarChart3, FiDollarSign, FiTrendingUp } from 'react-icons/fi';
+import { FiCalendar, FiUsers, FiBarChart, FiDollarSign, FiTrendingUp } from 'react-icons/fi';
 import { FiBox } from 'react-icons/fi';
 import Link from 'next/link';
 import api from '@/lib/api';
@@ -238,7 +238,7 @@ function DashboardContent() {
                 color="bg-purple-500"
               />
               <StatCard 
-                icon={FiBarChart3} 
+                icon={FiBarChart} 
                 title="Registrations" 
                 value={stats.totalRegistrations}
                 color="bg-orange-500"

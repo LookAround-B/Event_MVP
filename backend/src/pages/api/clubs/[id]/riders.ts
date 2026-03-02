@@ -22,6 +22,7 @@ async function handler(
 
   if (!clubId) {
     return res.status(400).json({
+      success: false,
       statusCode: 400,
       message: 'Club ID is required',
     });
@@ -48,6 +49,7 @@ async function handler(
         });
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'Club riders retrieved successfully',
           data: riders.map(r => ({
@@ -59,6 +61,7 @@ async function handler(
       } catch (error) {
         console.error('Get club riders error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to retrieve riders',
         });
@@ -82,6 +85,7 @@ async function handler(
 
         if (!firstName || !lastName || !email) {
           return authRes.status(400).json({
+            success: false,
             statusCode: 400,
             message: 'firstName, lastName, and email are required',
           });
@@ -102,6 +106,7 @@ async function handler(
         });
 
         return authRes.status(201).json({
+          success: true,
           statusCode: 201,
           message: 'Rider added to club successfully',
           data: {
@@ -113,6 +118,7 @@ async function handler(
       } catch (error) {
         console.error('Add rider error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to add rider',
         });
@@ -121,6 +127,7 @@ async function handler(
   }
 
   return res.status(405).json({
+    success: false,
     statusCode: 405,
     message: `Method ${req.method} not allowed`,
   });

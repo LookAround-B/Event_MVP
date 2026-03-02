@@ -54,8 +54,9 @@ export default function EditUser() {
 
     try {
       await api.put(`/api/users/${id}`, {
-        name: formData.name,
-        role: formData.role,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        designation: formData.designation,
       });
       router.push('/users');
     } catch (err: any) {

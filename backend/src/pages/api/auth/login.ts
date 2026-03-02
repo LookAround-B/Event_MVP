@@ -41,6 +41,8 @@ async function handleLogin(
         lastName: true,
         password: true,
         isActive: true,
+        isApproved: true,
+        profileComplete: true,
         roles: {
           select: { name: true },
         },
@@ -68,6 +70,8 @@ async function handleLogin(
       id: user.id,
       email: user.email,
       role: userRole,
+      isApproved: user.isApproved,
+      profileComplete: user.profileComplete,
     });
 
     const authToken: AuthToken = {
@@ -78,6 +82,8 @@ async function handleLogin(
         email: user.email,
         name: `${user.firstName} ${user.lastName}`.trim(),
         role: userRole,
+        isApproved: user.isApproved,
+        profileComplete: user.profileComplete,
       },
     };
 

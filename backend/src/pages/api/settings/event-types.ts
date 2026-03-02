@@ -25,6 +25,7 @@ async function handler(
         });
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'Event types retrieved successfully',
           data: eventTypes,
@@ -32,6 +33,7 @@ async function handler(
       } catch (error) {
         console.error('GET event types error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to retrieve event types',
         });
@@ -46,6 +48,7 @@ async function handler(
 
         if (!name || !shortCode) {
           return authRes.status(400).json({
+            success: false,
             statusCode: 400,
             message: 'Name and short code are required',
           });
@@ -56,6 +59,7 @@ async function handler(
         });
 
         return authRes.status(201).json({
+          success: true,
           statusCode: 201,
           message: 'Event type created successfully',
           data: eventType,
@@ -63,6 +67,7 @@ async function handler(
       } catch (error) {
         console.error('POST event type error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to create event type',
         });
@@ -71,6 +76,7 @@ async function handler(
   }
 
   return res.status(405).json({
+    success: false,
     statusCode: 405,
     message: `Method ${req.method} not allowed`,
   });

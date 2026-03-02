@@ -36,7 +36,7 @@ This is a production-ready backend API built with:
 npm install
 
 # Set up environment variables
-cp .env.example .env.local
+
 ```
 
 ### 2. Environment Configuration

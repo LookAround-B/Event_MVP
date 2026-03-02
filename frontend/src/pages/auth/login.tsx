@@ -26,7 +26,6 @@ export default function Login() {
       const response = await apiClient.post('/api/auth/login', formData);
       Cookies.set('authToken', response.data.data.token, { expires: 7 });
       
-      // Check if user is approved
       if (response.data.data.user?.isApproved === false) {
         router.push('/pending-approval');
       } else {
@@ -40,19 +39,24 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-indigo-700 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated floating blobs */}
+      <div className="absolute top-0 -left-40 w-80 h-80 bg-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+      <div className="absolute top-0 -right-40 w-80 h-80 bg-secondary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute -bottom-8 left-20 w-80 h-80 bg-accent-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
+
+      <div className="glass w-full max-w-md backdrop-blur-xl border-white border-opacity-20 shadow-glass-lg">
         <div className="p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-indigo-900">Equestrian</h1>
-            <p className="text-gray-600 mt-2">Event Management Platform</p>
+            <div className="text-4xl font-black bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-2">Equestrian</div>
+            <p className="text-gray-300 font-medium">Event Management Platform</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="form-group">
               <label className="form-label">Email Address</label>
               <div className="relative">
-                <FiMail className="absolute left-3 top-3 text-gray-400" />
+                <FiMail className="absolute left-3 top-3.5 text-secondary-400" />
                 <input
                   type="email"
                   name="email"
@@ -68,7 +72,7 @@ export default function Login() {
             <div className="form-group">
               <label className="form-label">Password</label>
               <div className="relative">
-                <FiLock className="absolute left-3 top-3 text-gray-400" />
+                <FiLock className="absolute left-3 top-3.5 text-secondary-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
@@ -81,29 +85,33 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-200 transition"
                 >
                   {showPassword ? <FiEyeOff /> : <FiEye />}
                 </button>
               </div>
             </div>
 
-            {error && <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm">{error}</div>}
+            {error && (
+              <div className="p-4 rounded-xl bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 backdrop-blur-sm">
+                <p className="text-red-200 text-sm font-medium">{error}</p>
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full"
+              className="btn-primary w-full mt-8"
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-white border-opacity-20"></div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or</span>
+              <div className="relative flex justify-center">
+                <span className="px-3 text-sm text-gray-300 font-medium bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">Or continue with</span>
               </div>
             </div>
 
@@ -118,7 +126,6 @@ export default function Login() {
                     });
                     Cookies.set('authToken', response.data.data.token, { expires: 7 });
                     
-                    // Check if user is approved
                     if (response.data.data.user?.isApproved === false) {
                       router.push('/pending-approval');
                     } else {
@@ -137,10 +144,10 @@ export default function Login() {
             </div>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+          <div className="mt-8 pt-6 border-t border-white border-opacity-10 text-center">
+            <p className="text-gray-300 text-sm">
               Don't have an account?{' '}
-              <Link href="/auth/signup" className="text-indigo-600 hover:text-indigo-700 font-medium">
+              <Link href="/auth/signup" className="bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent font-bold hover:from-primary-300 hover:to-secondary-300 transition">
                 Sign up
               </Link>
             </p>

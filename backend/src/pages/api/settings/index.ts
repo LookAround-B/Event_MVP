@@ -42,6 +42,7 @@ async function handler(
         });
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'Settings retrieved successfully',
           data: parsed,
@@ -49,6 +50,7 @@ async function handler(
       } catch (error) {
         console.error('GET settings error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to retrieve settings',
         });
@@ -83,12 +85,14 @@ async function handler(
         }
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'Settings updated successfully',
         });
       } catch (error) {
         console.error('PUT settings error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to update settings',
         });
@@ -97,6 +101,7 @@ async function handler(
   }
 
   return res.status(405).json({
+    success: false,
     statusCode: 405,
     message: `Method ${req.method} not allowed`,
   });

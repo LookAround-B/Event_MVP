@@ -79,14 +79,19 @@ async function handler(
 
   if (method === 'POST') {
     try {
-      const { firstName, lastName, email, phone, level } = req.body;
+      const { firstName, lastName, email, mobile, dob, gender, address, aadhaarNumber, efiRiderId, clubId } = req.body;
 
       const validation = validateInput({
         firstName: { type: 'string', required: true, min: 1, max: 100 },
         lastName: { type: 'string', required: true, min: 1, max: 100 },
         email: { type: 'string', required: true },
-        phone: { type: 'string', required: false, max: 20 },
-        level: { type: 'string', required: true, enum: ['beginner', 'intermediate', 'advanced', 'professional'] },
+        mobile: { type: 'string', required: false, max: 20 },
+        dob: { type: 'string', required: false },
+        gender: { type: 'string', required: false },
+        address: { type: 'string', required: false },
+        aadhaarNumber: { type: 'string', required: false, max: 50 },
+        efiRiderId: { type: 'string', required: false },
+        clubId: { type: 'string', required: false },
       }, req.body);
 
       if (!validation.valid) {
@@ -117,8 +122,13 @@ async function handler(
           firstName,
           lastName,
           email,
-          phone,
-          level,
+          mobile,
+          dob: dob ? new Date(dob) : undefined,
+          gender,
+          address,
+          aadhaarNumber,
+          efiRiderId,
+          clubId,
         },
       });
 

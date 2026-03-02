@@ -195,10 +195,13 @@ export default function CreateHorse() {
                     type="checkbox"
                     checked={useHorseCode}
                     onChange={() => {
-                      setUseHorseCode(!useHorseCode);\n                      setFormData(prev => ({
+                      setUseHorseCode(!useHorseCode);
+                      setFormData(prev => ({
                         ...prev,
-                        passportNumber: '',\n                        horseCode: '',
-                      }));\n                    }}
+                        passportNumber: '',
+                        horseCode: '',
+                      }));
+                    }}
                     className="w-4 h-4 border border-gray-300 rounded"
                   />
                   <span className="text-sm text-gray-700">Use Horse Code instead of Passport Number</span>

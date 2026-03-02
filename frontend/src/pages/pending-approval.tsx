@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
-import { FiClock, FiLogOut } from 'react-icons/fi';
+import { FiClock, FiLogOut, FiCheckCircle } from 'react-icons/fi';
 
 export default function PendingApproval() {
   const router = useRouter();
@@ -12,46 +12,53 @@ export default function PendingApproval() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-indigo-700 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated floating blobs */}
+      <div className="absolute top-0 -left-40 w-80 h-80 bg-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+      <div className="absolute top-0 -right-40 w-80 h-80 bg-secondary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute -bottom-8 left-20 w-80 h-80 bg-accent-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
+
+      <div className="glass w-full max-w-md backdrop-blur-xl border-white border-opacity-20 shadow-glass-lg">
         <div className="p-8 text-center">
           <div className="mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full">
-              <FiClock className="w-8 h-8 text-yellow-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 bg-opacity-10 border border-amber-400 border-opacity-30">
+              <FiClock className="w-8 h-8 text-amber-300 animate-pulse" />
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Approval Pending</h1>
-          <p className="text-gray-600 mb-6">
-            Your account has been successfully created, but it requires approval from an administrator before you can access the platform.
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-2">
+            Approval Pending
+          </h1>
+          <p className="text-gray-300 mb-8">
+            Your account has been successfully created and is awaiting administrator approval.
           </p>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800">
-              <strong>What happens next?</strong>
-              <br />
-              An administrator will review your account and approve it. You'll receive an email notification once your account is approved.
-            </p>
+          <div className="glass-dark w-full rounded-xl p-5 mb-6 border border-blue-400 border-opacity-20">
+            <div className="flex items-start gap-3">
+              <FiCheckCircle className="w-5 h-5 text-blue-300 flex-shrink-0 mt-0.5" />
+              <div className="text-left">
+                <p className="text-sm font-semibold text-blue-200 mb-1">What's next?</p>
+                <p className="text-xs text-gray-300">
+                  Our team will review your account and you'll receive an email notification once you're approved.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-700 mb-2">
-              <strong>Typical approval time:</strong>
-            </p>
-            <p className="text-gray-600">
-              Usually within 24-48 hours
-            </p>
+          <div className="glass-dark w-full rounded-xl p-5 mb-6 border border-cyan-400 border-opacity-20">
+            <p className="text-sm font-semibold text-cyan-200 mb-2">Typical approval time</p>
+            <p className="text-base text-gray-200 font-bold">24-48 hours</p>
           </div>
 
           <button
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="flex items-center justify-center gap-2 w-full px-6 py-3 btn-primary"
           >
             <FiLogOut className="w-4 h-4" />
             Logout
           </button>
 
-          <p className="text-xs text-gray-500 mt-6">
+          <p className="text-xs text-gray-400 mt-6">
             If you have any questions, please contact support.
           </p>
         </div>

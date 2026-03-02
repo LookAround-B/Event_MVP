@@ -15,5 +15,7 @@ export type AuthToken = {
     email: string;
     name: string;
     role?: string;
+    isApproved?: boolean;
+    profileComplete?: boolean;
   };
 };

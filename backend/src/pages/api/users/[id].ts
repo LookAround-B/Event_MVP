@@ -33,10 +33,11 @@ async function handler(
   const userId = typeof id === 'string' ? id : id?.[0];
 
   if (method === 'GET') {
-    return withAuth(async (authReq, authRes, user) => {
+    return withAuth(async (authReq, authRes) => {
       try {
         if (!userId) {
           return authRes.status(400).json({
+            success: false,
             statusCode: 400,
             message: 'User ID is required',
           });
@@ -55,12 +56,14 @@ async function handler(
 
         if (!targetUser) {
           return authRes.status(404).json({
+            success: false,
             statusCode: 404,
             message: 'User not found',
           });
         }
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'User retrieved successfully',
           ...(targetUser && {
@@ -72,6 +75,7 @@ async function handler(
       } catch (error) {
         console.error('User GET error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to retrieve user',
         });
@@ -80,10 +84,11 @@ async function handler(
   }
 
   if (method === 'PUT') {
-    return withAuth(async (authReq, authRes, user) => {
+    return withAuth(async (authReq, authRes) => {
       try {
         if (!userId) {
           return authRes.status(400).json({
+            success: false,
             statusCode: 400,
             message: 'User ID is required',
           });
@@ -97,6 +102,7 @@ async function handler(
 
         if (!existingUser) {
           return authRes.status(404).json({
+            success: false,
             statusCode: 404,
             message: 'User not found',
           });
@@ -119,6 +125,7 @@ async function handler(
         });
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'User updated successfully',
           ...(updatedUser && {
@@ -130,6 +137,7 @@ async function handler(
       } catch (error) {
         console.error('User PUT error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to update user',
         });
@@ -138,10 +146,11 @@ async function handler(
   }
 
   if (method === 'DELETE') {
-    return withAuth(async (authReq, authRes, user) => {
+    return withAuth(async (authReq, authRes) => {
       try {
         if (!userId) {
           return authRes.status(400).json({
+            success: false,
             statusCode: 400,
             message: 'User ID is required',
           });
@@ -153,6 +162,7 @@ async function handler(
 
         if (!existingUser) {
           return authRes.status(404).json({
+            success: false,
             statusCode: 404,
             message: 'User not found',
           });
@@ -163,12 +173,14 @@ async function handler(
         });
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'User deleted successfully',
         });
       } catch (error) {
         console.error('User DELETE error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to delete user',
         });
@@ -177,6 +189,7 @@ async function handler(
   }
 
   return res.status(405).json({
+    success: false,
     statusCode: 405,
     message: `Method ${method} not allowed`,
   });

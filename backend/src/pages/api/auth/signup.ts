@@ -96,6 +96,8 @@ async function handleSignup(
         firstName,
         lastName,
         isActive: true,
+        isApproved: false,
+        profileComplete: false,
         roles: {
           connect: [{ id: roleRecord.id }],
         },
@@ -106,6 +108,8 @@ async function handleSignup(
         firstName: true,
         lastName: true,
         isActive: true,
+        isApproved: true,
+        profileComplete: true,
       },
     });
 
@@ -113,6 +117,8 @@ async function handleSignup(
       id: user.id,
       email: user.email,
       role,
+      isApproved: user.isApproved,
+      profileComplete: user.profileComplete,
     });
 
     const authToken: AuthToken = {
@@ -123,6 +129,8 @@ async function handleSignup(
         email: user.email,
         name: `${user.firstName} ${user.lastName}`,
         role,
+        isApproved: user.isApproved,
+        profileComplete: user.profileComplete,
       },
     };
 

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FiMenu, FiX, FiLogOut, FiHome, FiCalendar, FiUsers, FiTrendingUp, FiSettings, FiFileText } from 'react-icons/fi';
-import { GiHorseBust } from 'react-icons/gi';
+import { FiMenu, FiX, FiLogOut, FiHome, FiCalendar, FiUsers, FiTrendingUp, FiSettings, FiFileText, FiBox } from 'react-icons/fi';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,7 +21,7 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'Events', href: '/events', icon: FiCalendar },
     { name: 'Clubs', href: '/clubs', icon: FiUsers },
     { name: 'Riders', href: '/riders', icon: FiUsers },
-    { name: 'Horses', href: '/horses', icon: GiHorseBust },
+    { name: 'Horses', href: '/horses', icon: FiBox },
     { name: 'Registrations', href: '/registrations', icon: FiUsers },
     { name: 'Financial', href: '/financial', icon: FiTrendingUp },
     { name: 'Users', href: '/users', icon: FiUsers },
@@ -37,10 +36,10 @@ export default function Layout({ children }: LayoutProps) {
 
   if (!isClient) {
     return (
-      <div className="flex h-screen bg-gray-100">
-        <div className="w-64 bg-indigo-900"></div>
+      <div className="flex h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="w-64 glass border-r border-white border-opacity-20"></div>
         <div className="flex-1">
-          <div className="bg-white border-b border-gray-200 p-6"></div>
+          <div className="glass border-b border-white border-opacity-20 p-6"></div>
           <div className="flex-1 overflow-auto">
             <div className="p-6"></div>
           </div>
@@ -50,24 +49,33 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated background blobs */}
+      <div className="absolute top-0 -left-40 w-80 h-80 bg-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+      <div className="absolute top-0 -right-40 w-80 h-80 bg-secondary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute -bottom-8 left-20 w-80 h-80 bg-accent-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '4s' }}></div>
+
       {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
-        } bg-indigo-900 text-white transition-all duration-300 flex flex-col shadow-lg`}
+        } glass border-r border-white border-opacity-20 transition-all duration-300 flex flex-col shadow-glass-lg relative z-10`}
       >
-        <div className="p-6 flex items-center justify-between">
-          {sidebarOpen && <h1 className="text-xl font-bold">Equestrian</h1>}
+        <div className="p-6 flex items-center justify-between border-b border-white border-opacity-10">
+          {sidebarOpen && (
+            <h1 className="text-xl font-black bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
+              Equestrian
+            </h1>
+          )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hover:bg-indigo-800 p-2 rounded"
+            className="hover:bg-white hover:bg-opacity-10 p-2 rounded-lg transition text-gray-200"
           >
-            {sidebarOpen ? <FiX /> : <FiMenu />}
+            {sidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
           </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2">
+        <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = router.pathname ? router.pathname.startsWith(item.href) : false;
@@ -75,23 +83,23 @@ export default function Layout({ children }: LayoutProps) {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition ${
+                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                   isActive
-                    ? 'bg-indigo-700 text-white'
-                    : 'hover:bg-indigo-800 text-indigo-100'
+                    ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg'
+                    : 'text-gray-300 hover:bg-white hover:bg-opacity-10'
                 }`}
               >
                 {Icon && <Icon className="w-5 h-5" />}
-                {sidebarOpen && <span>{item.name}</span>}
+                {sidebarOpen && <span className="font-medium">{item.name}</span>}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-indigo-800">
+        <div className="p-4 border-t border-white border-opacity-10">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-indigo-800 transition text-indigo-100"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-red-500 hover:bg-opacity-20 transition text-gray-300 hover:text-red-300 font-medium"
           >
             <FiLogOut className="w-5 h-5" />
             {sidebarOpen && <span>Logout</span>}
@@ -100,16 +108,18 @@ export default function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative z-0">
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 p-6 shadow-sm">
-          <h1 className="text-3xl font-bold text-gray-900">Equestrian Event Management</h1>
-          <p className="text-gray-600 mt-1">Welcome to your event management dashboard</p>
+        <div className="glass border-b border-white border-opacity-20 p-8 shadow-glass-lg">
+          <h1 className="text-4xl font-black bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-2">
+            Equestrian Event Management
+          </h1>
+          <p className="text-gray-300 font-medium">Welcome to your event management dashboard</p>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 overflow-auto">
-          <div className="p-6">{children}</div>
+          <div className="p-8">{children}</div>
         </div>
       </div>
     </div>

@@ -26,6 +26,7 @@ async function handler(
         });
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'Event categories retrieved successfully',
           data: categories,
@@ -33,6 +34,7 @@ async function handler(
       } catch (error) {
         console.error('GET event categories error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to retrieve event categories',
         });
@@ -47,6 +49,7 @@ async function handler(
 
         if (!name || price === undefined) {
           return authRes.status(400).json({
+            success: false,
             statusCode: 400,
             message: 'Name and price are required',
           });
@@ -64,6 +67,7 @@ async function handler(
         });
 
         return authRes.status(201).json({
+          success: true,
           statusCode: 201,
           message: 'Event category created successfully',
           data: category,
@@ -71,6 +75,7 @@ async function handler(
       } catch (error) {
         console.error('POST event category error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to create event category',
         });
@@ -103,6 +108,7 @@ async function handler(
         });
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'Event category updated successfully',
           data: category,
@@ -110,6 +116,7 @@ async function handler(
       } catch (error) {
         console.error('PUT event category error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to update event category',
         });
@@ -135,12 +142,14 @@ async function handler(
         });
 
         return authRes.status(200).json({
+          success: true,
           statusCode: 200,
           message: 'Event category deleted successfully',
         });
       } catch (error) {
         console.error('DELETE event category error:', error);
         return authRes.status(500).json({
+          success: false,
           statusCode: 500,
           message: 'Failed to delete event category',
         });
@@ -149,6 +158,7 @@ async function handler(
   }
 
   return res.status(405).json({
+    success: false,
     statusCode: 405,
     message: `Method ${req.method} not allowed`,
   });

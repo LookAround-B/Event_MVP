@@ -15,6 +15,8 @@ export type AuthToken = {
     email: string;
     name: string;
     role?: string;
+    isApproved?: boolean;
+    profileComplete?: boolean;
   };
 };
 
@@ -22,6 +24,8 @@ export type DecodedToken = {
   id: string;
   email: string;
   role?: string;
+  isApproved?: boolean;
+  profileComplete?: boolean;
   iat: number;
   exp: number;
 };

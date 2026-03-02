@@ -3,8 +3,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 export const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:3001',
+  'http://localhost:4000',
+  'http://localhost:4001',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:3001',
+  'http://127.0.0.1:4000',
+  'http://127.0.0.1:4001',
   'https://yourdomain.com',
   'https://www.yourdomain.com',
 ];
@@ -18,10 +22,12 @@ export const CORS_HEADERS: Record<string, string> = {
 
 export const SECURITY_HEADERS: Record<string, string> = {
   'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
+  'X-Frame-Options': 'SAMEORIGIN',
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+  'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+  'Cross-Origin-Embedder-Policy': 'require-corp',
 };
 
 export function handleCORS(
