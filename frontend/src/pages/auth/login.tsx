@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import apiClient from '@/lib/api';
 import Cookies from 'js-cookie';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Login() {
   const router = useRouter();
@@ -24,7 +25,13 @@ export default function Login() {
     try {
       const response = await apiClient.post('/api/auth/login', formData);
       Cookies.set('authToken', response.data.data.token, { expires: 7 });
-      router.push('/dashboard');
+      
+      // Check if user is approved
+      if (response.data.data.user?.isApproved === false) {
+        router.push('/pending-approval');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
@@ -90,6 +97,44 @@ export default function Login() {
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or</span>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  setError('');
+                  setLoading(true);
+                  try {
+                    const response = await apiClient.post('/api/auth/google', {
+                      token: credentialResponse.credential,
+                    });
+                    Cookies.set('authToken', response.data.data.token, { expires: 7 });
+                    
+                    // Check if user is approved
+                    if (response.data.data.user?.isApproved === false) {
+                      router.push('/pending-approval');
+                    } else {
+                      router.push('/dashboard');
+                    }
+                  } catch (err: any) {
+                    setError(err.response?.data?.message || 'Google login failed. Please try again.');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                onError={() => {
+                  setError('Google login failed. Please try again.');
+                }}
+              />
+            </div>
           </form>
 
           <div className="mt-6 text-center">

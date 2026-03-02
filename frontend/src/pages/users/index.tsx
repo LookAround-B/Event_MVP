@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FiEdit2, FiTrash2, FiPlus, FiSearch } from 'react-icons/fi';
+import Cookies from 'js-cookie';
+import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiCheck, FiClock } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -8,7 +9,10 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: string;
+  phone?: string;
+  role?: string;
+  isApproved?: boolean;
+  profileComplete?: boolean;
   createdAt: string;
 }
 
@@ -29,6 +33,26 @@ export default function Users() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ total: 0, pages: 0, limit: 10, page: 1 });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [approving, setApproving] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if user is admin
+    const token = Cookies.get('authToken');
+    if (token) {
+      try {
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(
+            Buffer.from(tokenParts[1], 'base64').toString('utf-8')
+          );
+          setIsAdmin(payload.role === 'admin');
+        }
+      } catch (error) {
+        console.error('Error checking admin role:', error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     fetchUsers();
@@ -64,6 +88,24 @@ export default function Users() {
     } catch (err) {
       console.error('Failed to delete user:', err);
       alert('Failed to delete user');
+    }
+  };
+
+  const handleApprove = async (userId: string, userName: string) => {
+    if (!window.confirm(`Approve user ${userName}?`)) return;
+
+    try {
+      setApproving(userId);
+      await api.post(`/api/admin/approve-user`, { userId });
+      // Update the user in the list
+      setUsers(users.map(u => 
+        u.id === userId ? { ...u, isApproved: true } : u
+      ));
+      setApproving(null);
+    } catch (err: any) {
+      console.error('Failed to approve user:', err);
+      alert(err.response?.data?.message || 'Failed to approve user');
+      setApproving(null);
     }
   };
 
@@ -123,7 +165,8 @@ export default function Users() {
                     <tr>
                       <th>Email</th>
                       <th>Name</th>
-                      <th>Designation</th>
+                      <th>Phone</th>
+                      {isAdmin && <th>Status</th>}
                       <th>Created</th>
                       <th>Actions</th>
                     </tr>
@@ -133,10 +176,40 @@ export default function Users() {
                       <tr key={user.id}>
                         <td className="font-medium">{user.email}</td>
                         <td>{user.name}</td>
-                        <td>{user.designation || '-'}</td>
+                        <td>{user.phone || '-'}</td>
+                        {isAdmin && (
+                          <td>
+                            {!user.isApproved ? (
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                <FiClock className="w-4 h-4" /> Pending
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                <FiCheck className="w-4 h-4" /> Approved
+                              </span>
+                            )}
+                          </td>
+                        )}
                         <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                         <td>
                           <div className="flex gap-2">
+                            {isAdmin && !user.isApproved && (
+                              <button 
+                                onClick={() => handleApprove(user.id, user.name)}
+                                disabled={approving === user.id}
+                                className="btn-primary p-2 flex items-center gap-1 text-sm disabled:opacity-50"
+                              >
+                                {approving === user.id ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <FiCheck className="w-4 h-4" /> Approve
+                                  </>
+                                )}
+                              </button>
+                            )}
                             <Link 
                               href={`/users/${user.id}/edit`}
                               className="btn-secondary p-2 flex items-center gap-1 text-sm"

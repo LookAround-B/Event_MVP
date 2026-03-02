@@ -2,6 +2,16 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 
+interface DecodedToken {
+  id: string;
+  email: string;
+  role?: string;
+  isApproved?: boolean;
+  profileComplete?: boolean;
+  iat: number;
+  exp: number;
+}
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
@@ -35,12 +45,24 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       // Decode payload (middle part)
       const payload = JSON.parse(
         Buffer.from(tokenParts[1], 'base64').toString('utf-8')
-      );
+      ) as DecodedToken;
       
       // Check if token is expired
       if (payload.exp && payload.exp * 1000 < Date.now()) {
         Cookies.remove('authToken');
         router.push('/auth/login');
+        return;
+      }
+
+      // Check if profile is complete (but skip if user is already approved)
+      if (!payload.profileComplete && !payload.isApproved) {
+        router.push('/complete-profile');
+        return;
+      }
+
+      // Check if user is approved
+      if (!payload.isApproved) {
+        router.push('/pending-approval');
         return;
       }
 
