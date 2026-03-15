@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
+const envOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()).filter(Boolean) || [];
+
 export const ALLOWED_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:3001',
@@ -9,8 +11,7 @@ export const ALLOWED_ORIGINS = [
   'http://127.0.0.1:3001',
   'http://127.0.0.1:4000',
   'http://127.0.0.1:4001',
-  'https://yourdomain.com',
-  'https://www.yourdomain.com',
+  ...envOrigins,
 ];
 
 export const CORS_HEADERS: Record<string, string> = {
