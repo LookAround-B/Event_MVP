@@ -12,7 +12,7 @@ async function handler(
 
   if (method === 'GET') {
     try {
-      const { page = '1', limit = '10', type, registrationId } = req.query;
+      const { page = '1', limit = '10', registrationId } = req.query;
       const pageNum = Math.max(1, parseInt(page as string) || 1);
       const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
       const skip = (pageNum - 1) * limitNum;
@@ -26,13 +26,22 @@ async function handler(
           where,
           skip,
           take: limitNum,
-          include: {
-            registration: {
-              include: {
-                rider: { select: { firstName: true, lastName: true } },
-                event: { select: { name: true } },
-              },
-            },
+          select: {
+            id: true,
+            eId: true,
+            registrationId: true,
+            amount: true,
+            gstAmount: true,
+            cgstAmount: true,
+            sgstAmount: true,
+            igstAmount: true,
+            totalAmount: true,
+            transactionDate: true,
+            status: true,
+            paymentMethod: true,
+            referenceNumber: true,
+            notes: true,
+            createdAt: true,
           },
           orderBy: { createdAt: 'desc' },
         }),
