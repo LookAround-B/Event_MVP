@@ -39,10 +39,15 @@ export default function CreateTransaction() {
     try {
       setDataLoading(true);
       const response = await api.get('/api/registrations?limit=100&status=UNPAID');
-      setRegistrations(response.data.data.registrations || []);
-    } catch (err) {
+      const regData = response.data?.data?.registrations;
+      setRegistrations(Array.isArray(regData) ? regData : []);
+    } catch (err: any) {
       console.error('Failed to fetch registrations:', err);
-      setError('Failed to load registrations');
+      const message = err.response?.status === 401
+        ? 'Not authenticated. Please log in first.'
+        : 'Failed to load registrations';
+      setError(message);
+      setRegistrations([]);
     } finally {
       setDataLoading(false);
     }

@@ -10,6 +10,7 @@ async function handler(
 ) {
   const { method } = req;
 
+  // GET is public for form dropdowns, POST requires auth
   if (method === 'GET') {
     try {
       const { page = '1', limit = '10', search = '' } = req.query;
@@ -169,4 +170,10 @@ async function handler(
   });
 }
 
-export default withAuth(handler);
+// Apply auth only to POST/DELETE, not GET (GET is public for form dropdowns)
+export default async function wrappedHandler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'GET') {
+    return handler(req, res);
+  }
+  return withAuth(handler)(req, res);
+}

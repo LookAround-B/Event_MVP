@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
 import { withAuth } from '@/lib/auth-middleware';
-import { validateInput } from '@/lib/validation';
 import { ApiResponse } from '@/types';
 
 async function handler(
@@ -72,20 +71,44 @@ async function handler(
     try {
       const { eventId, riderId, horseId, categoryId } = req.body;
 
-      const validation = validateInput({
-        eventId: { type: 'string', required: true },
-        riderId: { type: 'string', required: true },
-        horseId: { type: 'string', required: true },
-        categoryId: { type: 'string', required: true },
-      }, req.body);
-
-      if (!validation.valid) {
+      // Manual field validation
+      if (!eventId || typeof eventId !== 'string' || !eventId.trim()) {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
           error: 'VALIDATION_ERROR',
           statusCode: 400,
-          data: validation.errors,
+          data: { eventId: 'Event ID is required' },
+        });
+      }
+
+      if (!riderId || typeof riderId !== 'string' || !riderId.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+          data: { riderId: 'Rider ID is required' },
+        });
+      }
+
+      if (!horseId || typeof horseId !== 'string' || !horseId.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+          data: { horseId: 'Horse ID is required' },
+        });
+      }
+
+      if (!categoryId || typeof categoryId !== 'string' || !categoryId.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+          data: { categoryId: 'Category ID is required' },
         });
       }
 

@@ -58,12 +58,23 @@ export default function CreateRegistration() {
         api.get('/api/horses?limit=100'),
       ]);
 
-      setEvents(eventsRes.data.data.events || []);
-      setRiders(ridersRes.data.data.riders || []);
-      setHorses(horsesRes.data.data.horses || []);
-    } catch (err) {
+      // Safely extract data with fallback to empty arrays
+      const eventsData = eventsRes.data?.data?.events;
+      const ridersData = ridersRes.data?.data?.riders;
+      const horsesData = horsesRes.data?.data?.horses;
+
+      setEvents(Array.isArray(eventsData) ? eventsData : []);
+      setRiders(Array.isArray(ridersData) ? ridersData : []);
+      setHorses(Array.isArray(horsesData) ? horsesData : []);
+    } catch (err: any) {
       console.error('Failed to fetch data:', err);
-      setError('Failed to load dropdown data');
+      const message = err.response?.status === 401 
+        ? 'Not authenticated. Please log in first.'
+        : 'Failed to load dropdown data';
+      setError(message);
+      setEvents([]);
+      setRiders([]);
+      setHorses([]);
     } finally {
       setDataLoading(false);
     }
