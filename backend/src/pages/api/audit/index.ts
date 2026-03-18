@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma/client';
 import { ApiResponse } from '@/types';
 import { withApiHandler, sendSuccessResponse, sendErrorResponse } from '@/lib/api-handler';
 import { ErrorCode, logError } from '@/lib/errors';
-import { verifyToken } from '@/lib/auth';
+import { withRole, AuthenticatedRequest } from '@/lib/auth-middleware';
 
 interface AuditLogEntry {
   id: string;
@@ -23,7 +23,7 @@ interface AuditLogEntry {
 }
 
 async function handleAuditLogs(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse<AuditLogEntry[] | null>>
 ) {
   if (req.method !== 'GET') {
@@ -31,19 +31,6 @@ async function handleAuditLogs(
   }
 
   try {
-    // Verify authentication
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return sendErrorResponse(res, 401, 'Unauthorized', ErrorCode.INVALID_CREDENTIALS);
-    }
-
-    const token = authHeader.substring(7);
-    const decoded = verifyToken(token);
-
-    if (!decoded) {
-      return sendErrorResponse(res, 401, 'Invalid token', ErrorCode.INVALID_CREDENTIALS);
-    }
-
     const { page = 1, limit = 20, entity, action } = req.query;
 
     const pageNum = parseInt(page as string, 10) || 1;
@@ -103,6 +90,6 @@ async function handleAuditLogs(
   }
 }
 
-export default withApiHandler(handleAuditLogs, {
+export default withApiHandler(withRole('admin')(handleAuditLogs), {
   allowedMethods: ['GET', 'OPTIONS'],
 });

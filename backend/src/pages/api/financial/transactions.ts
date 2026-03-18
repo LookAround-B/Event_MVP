@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth } from '@/lib/auth-middleware';
+import { withRole } from '@/lib/auth-middleware';
 import { validateInput } from '@/lib/validation';
 import { ApiResponse } from '@/types';
 
@@ -77,12 +77,14 @@ async function handler(
 
   if (method === 'POST') {
     try {
-      const { registrationId, amount, gstAmount = 0, paymentMethod, referenceNumber, notes } = req.body;
+      const { registrationId, amount, cgstAmount = 0, sgstAmount = 0, igstAmount = 0, paymentMethod, referenceNumber, notes } = req.body;
 
       const validation = validateInput({
         registrationId: { type: 'string', required: true },
         amount: { type: 'number', required: true, min: 0.01 },
-        gstAmount: { type: 'number', required: false, min: 0 },
+        cgstAmount: { type: 'number', required: false, min: 0 },
+        sgstAmount: { type: 'number', required: false, min: 0 },
+        igstAmount: { type: 'number', required: false, min: 0 },
         paymentMethod: { type: 'string', required: false, max: 100 },
         referenceNumber: { type: 'string', required: false, max: 100 },
         notes: { type: 'string', required: false, max: 500 },
@@ -98,13 +100,18 @@ async function handler(
         });
       }
 
-      const totalAmount = amount + (gstAmount || 0);
+      // Calculate total GST from breakdown components
+      const totalGSTAmount = (cgstAmount || 0) + (sgstAmount || 0) + (igstAmount || 0);
+      const totalAmount = amount + totalGSTAmount;
 
       const transaction = await prisma.transaction.create({
         data: {
           registrationId,
           amount,
-          gstAmount: gstAmount || 0,
+          gstAmount: totalGSTAmount, // Legacy field for backward compatibility
+          cgstAmount: cgstAmount || 0,
+          sgstAmount: sgstAmount || 0,
+          igstAmount: igstAmount || 0,
           totalAmount,
           paymentMethod,
           referenceNumber,
@@ -146,4 +153,4 @@ async function handler(
   });
 }
 
-export default withAuth(handler);
+export default withRole('admin')(handler);

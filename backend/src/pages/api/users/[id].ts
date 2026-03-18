@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth } from '@/lib/auth-middleware';
+import { withRole, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { ApiResponse } from '@/types';
 
 interface User {
@@ -13,7 +13,7 @@ interface User {
 }
 
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse | User>
 ) {
   // CORS headers - handle preflight
@@ -33,159 +33,153 @@ async function handler(
   const userId = typeof id === 'string' ? id : id?.[0];
 
   if (method === 'GET') {
-    return withAuth(async (authReq, authRes) => {
-      try {
-        if (!userId) {
-          return authRes.status(400).json({
-            success: false,
-            statusCode: 400,
-            message: 'User ID is required',
-          });
-        }
-
-        const targetUser = await prisma.user.findUnique({
-          where: { id: userId },
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-            createdAt: true,
-          },
-        });
-
-        if (!targetUser) {
-          return authRes.status(404).json({
-            success: false,
-            statusCode: 404,
-            message: 'User not found',
-          });
-        }
-
-        return authRes.status(200).json({
-          success: true,
-          statusCode: 200,
-          message: 'User retrieved successfully',
-          ...(targetUser && {
-            ...targetUser,
-            name: `${targetUser.firstName} ${targetUser.lastName}`,
-            createdAt: targetUser.createdAt.toISOString(),
-          }),
-        });
-      } catch (error) {
-        console.error('User GET error:', error);
-        return authRes.status(500).json({
+    try {
+      if (!userId) {
+        return res.status(400).json({
           success: false,
-          statusCode: 500,
-          message: 'Failed to retrieve user',
+          statusCode: 400,
+          message: 'User ID is required',
         });
       }
-    })(req, res);
+
+      const targetUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          createdAt: true,
+        },
+      });
+
+      if (!targetUser) {
+        return res.status(404).json({
+          success: false,
+          statusCode: 404,
+          message: 'User not found',
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: 'User retrieved successfully',
+        ...(targetUser && {
+          ...targetUser,
+          name: `${targetUser.firstName} ${targetUser.lastName}`,
+          createdAt: targetUser.createdAt.toISOString(),
+        }),
+      });
+    } catch (error) {
+      console.error('User GET error:', error);
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: 'Failed to retrieve user',
+      });
+    }
   }
 
   if (method === 'PUT') {
-    return withAuth(async (authReq, authRes) => {
-      try {
-        if (!userId) {
-          return authRes.status(400).json({
-            success: false,
-            statusCode: 400,
-            message: 'User ID is required',
-          });
-        }
-
-        const { firstName, lastName, designation } = authReq.body;
-
-        const existingUser = await prisma.user.findUnique({
-          where: { id: userId },
-        });
-
-        if (!existingUser) {
-          return authRes.status(404).json({
-            success: false,
-            statusCode: 404,
-            message: 'User not found',
-          });
-        }
-
-        const updatedUser = await prisma.user.update({
-          where: { id: userId },
-          data: {
-            ...(firstName && { firstName }),
-            ...(lastName && { lastName }),
-            ...(designation && { designation }),
-          },
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-            createdAt: true,
-          },
-        });
-
-        return authRes.status(200).json({
-          success: true,
-          statusCode: 200,
-          message: 'User updated successfully',
-          ...(updatedUser && {
-            ...updatedUser,
-            name: `${updatedUser.firstName} ${updatedUser.lastName}`,
-            createdAt: updatedUser.createdAt.toISOString(),
-          }),
-        });
-      } catch (error) {
-        console.error('User PUT error:', error);
-        return authRes.status(500).json({
+    try {
+      if (!userId) {
+        return res.status(400).json({
           success: false,
-          statusCode: 500,
-          message: 'Failed to update user',
+          statusCode: 400,
+          message: 'User ID is required',
         });
       }
-    })(req, res);
+
+      const { firstName, lastName, designation } = req.body;
+
+      const existingUser = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!existingUser) {
+        return res.status(404).json({
+          success: false,
+          statusCode: 404,
+          message: 'User not found',
+        });
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          ...(firstName && { firstName }),
+          ...(lastName && { lastName }),
+          ...(designation && { designation }),
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          createdAt: true,
+        },
+      });
+
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: 'User updated successfully',
+        ...(updatedUser && {
+          ...updatedUser,
+          name: `${updatedUser.firstName} ${updatedUser.lastName}`,
+          createdAt: updatedUser.createdAt.toISOString(),
+        }),
+      });
+    } catch (error) {
+      console.error('User PUT error:', error);
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: 'Failed to update user',
+      });
+    }
   }
 
   if (method === 'DELETE') {
-    return withAuth(async (authReq, authRes) => {
-      try {
-        if (!userId) {
-          return authRes.status(400).json({
-            success: false,
-            statusCode: 400,
-            message: 'User ID is required',
-          });
-        }
-
-        const existingUser = await prisma.user.findUnique({
-          where: { id: userId },
-        });
-
-        if (!existingUser) {
-          return authRes.status(404).json({
-            success: false,
-            statusCode: 404,
-            message: 'User not found',
-          });
-        }
-
-        await prisma.user.delete({
-          where: { id: userId },
-        });
-
-        return authRes.status(200).json({
-          success: true,
-          statusCode: 200,
-          message: 'User deleted successfully',
-        });
-      } catch (error) {
-        console.error('User DELETE error:', error);
-        return authRes.status(500).json({
+    try {
+      if (!userId) {
+        return res.status(400).json({
           success: false,
-          statusCode: 500,
-          message: 'Failed to delete user',
+          statusCode: 400,
+          message: 'User ID is required',
         });
       }
-    })(req, res);
+
+      const existingUser = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!existingUser) {
+        return res.status(404).json({
+          success: false,
+          statusCode: 404,
+          message: 'User not found',
+        });
+      }
+
+      await prisma.user.delete({
+        where: { id: userId },
+      });
+
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        message: 'User deleted successfully',
+      });
+    } catch (error) {
+      console.error('User DELETE error:', error);
+      return res.status(500).json({
+        success: false,
+        statusCode: 500,
+        message: 'Failed to delete user',
+      });
+    }
   }
 
   return res.status(405).json({
@@ -195,4 +189,4 @@ async function handler(
   });
 }
 
-export default handler;
+export default withRole('admin')(handler);

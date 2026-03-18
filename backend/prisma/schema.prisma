@@ -339,6 +339,9 @@ model Transaction {
   registrationId  String
   amount          Float
   gstAmount       Float         @default(0)
+  cgstAmount      Float         @default(0) // Central GST
+  sgstAmount      Float         @default(0) // State GST
+  igstAmount      Float         @default(0) // Integrated GST
   totalAmount     Float
   transactionDate DateTime      @default(now())
   status          PaymentStatus @default(UNPAID)

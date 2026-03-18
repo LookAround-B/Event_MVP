@@ -1,10 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth } from '@/lib/auth-middleware';
+import { withAuth, AuthenticatedRequest } from '@/lib/auth-middleware';
+import { createAuditLog } from '@/lib/audit';
 import { ApiResponse } from '@/types';
 
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse>
 ) {
   const { id } = req.query;
@@ -61,6 +62,20 @@ async function handler(
         });
       }
 
+      // Get existing registration for audit
+      const existingRegistration = await prisma.registration.findUnique({
+        where: { id: registrationId },
+      });
+
+      if (!existingRegistration) {
+        return res.status(404).json({
+          success: false,
+          message: 'Registration not found',
+          error: 'NOT_FOUND',
+          statusCode: 404,
+        });
+      }
+
       const registration = await prisma.registration.update({
         where: { id: registrationId },
         data: {
@@ -72,6 +87,21 @@ async function handler(
           event: true,
         },
       });
+
+      // Create audit log if payment status changed
+      if (paymentStatus && paymentStatus !== existingRegistration.paymentStatus && req.user?.id) {
+        await createAuditLog({
+          userId: req.user.id,
+          action: 'Payment Status Changed',
+          entity: 'Registration',
+          entityId: registrationId,
+          oldValues: { paymentStatus: existingRegistration.paymentStatus },
+          newValues: { paymentStatus: registration.paymentStatus },
+          changes: ['paymentStatus'],
+          ipAddress: req.headers['x-forwarded-for']?.toString() || req.socket.remoteAddress,
+          userAgent: req.headers['user-agent'],
+        });
+      }
 
       return res.status(200).json({
         success: true,

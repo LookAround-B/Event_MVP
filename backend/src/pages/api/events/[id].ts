@@ -1,11 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth } from '@/lib/auth-middleware';
+import { withAuth, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { validateInput } from '@/lib/validation';
+import { createAuditLog } from '@/lib/audit';
 import { ApiResponse } from '@/types';
 
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse>
 ) {
   const { id } = req.query;
@@ -53,7 +54,7 @@ async function handler(
 
   if (req.method === 'PUT') {
     try {
-      const { name, startDate, endDate, venueName, description, eventType } = req.body;
+      const { name, startDate, endDate, venueName, description, eventType, isPublished, termsAndConditions, fileUrl } = req.body;
 
       const validation = validateInput({
         name: { type: 'string', required: false, min: 1, max: 255 },
@@ -62,6 +63,7 @@ async function handler(
         venueName: { type: 'string', required: false, min: 1, max: 255 },
         description: { type: 'string', required: false, max: 1000 },
         eventType: { type: 'string', required: false, min: 1, max: 100 },
+        isPublished: { type: 'boolean', required: false },
       }, req.body);
 
       if (!validation.valid) {
@@ -74,23 +76,90 @@ async function handler(
         });
       }
 
-      const event = await prisma.event.update({
+      // Fetch existing event for audit comparison
+      const existingEvent = await prisma.event.findUnique({
         where: { id: eventId },
-        data: {
-          ...(name && { name }),
-          ...(startDate && { startDate: new Date(startDate) }),
-          ...(endDate && { endDate: new Date(endDate) }),
-          ...(venueName && { venueName }),
-          ...(description !== undefined && { description }),
-          ...(eventType && { eventType }),
-        },
       });
+
+      if (!existingEvent) {
+        return res.status(404).json({
+          success: false,
+          message: 'Event not found',
+          error: 'NOT_FOUND',
+          statusCode: 404,
+        });
+      }
+
+      // Update event
+      const updateData: any = {};
+      const changedFields: string[] = [];
+
+      if (name && name !== existingEvent.name) {
+        updateData.name = name;
+        changedFields.push('name');
+      }
+      if (startDate && new Date(startDate).getTime() !== existingEvent.startDate.getTime()) {
+        updateData.startDate = new Date(startDate);
+        changedFields.push('startDate');
+      }
+      if (endDate && new Date(endDate).getTime() !== existingEvent.endDate.getTime()) {
+        updateData.endDate = new Date(endDate);
+        changedFields.push('endDate');
+      }
+      if (venueName && venueName !== existingEvent.venueName) {
+        updateData.venueName = venueName;
+        changedFields.push('venueName');
+      }
+      if (description !== undefined && description !== existingEvent.description) {
+        updateData.description = description;
+        changedFields.push('description');
+      }
+      if (eventType && eventType !== existingEvent.eventType) {
+        updateData.eventType = eventType;
+        changedFields.push('eventType');
+      }
+      if (isPublished !== undefined && isPublished !== existingEvent.isPublished) {
+        updateData.isPublished = isPublished;
+        changedFields.push('isPublished');
+      }
+      if (termsAndConditions !== undefined && termsAndConditions !== existingEvent.termsAndConditions) {
+        updateData.termsAndConditions = termsAndConditions;
+        changedFields.push('termsAndConditions');
+      }
+      if (fileUrl !== undefined && fileUrl !== existingEvent.fileUrl) {
+        updateData.fileUrl = fileUrl;
+        changedFields.push('fileUrl');
+      }
+
+      const updatedEvent = await prisma.event.update({
+        where: { id: eventId },
+        data: updateData,
+      });
+
+      // Create audit log if changes made
+      if (changedFields.length > 0 && req.user?.id) {
+        await createAuditLog({
+          userId: req.user.id,
+          action: 'Event Edited',
+          entity: 'Event',
+          entityId: eventId,
+          oldValues: {
+            ...Object.fromEntries(changedFields.map(f => [f, (existingEvent as any)[f]])),
+          },
+          newValues: {
+            ...Object.fromEntries(changedFields.map(f => [f, (updatedEvent as any)[f]])),
+          },
+          changes: changedFields,
+          ipAddress: req.headers['x-forwarded-for']?.toString() || req.socket.remoteAddress,
+          userAgent: req.headers['user-agent'],
+        });
+      }
 
       return res.status(200).json({
         success: true,
         message: 'Event updated successfully',
         statusCode: 200,
-        data: event,
+        data: updatedEvent,
       });
     } catch (error) {
       console.error('Event PUT error:', error);
@@ -105,9 +174,37 @@ async function handler(
 
   if (req.method === 'DELETE') {
     try {
-      await prisma.event.delete({
+      // Check if event has registrations (prevent deletion if it does)
+      const registrationCount = await prisma.registration.count({
+        where: { eventId: eventId },
+      });
+
+      if (registrationCount > 0) {
+        return res.status(409).json({
+          success: false,
+          message: `Cannot delete event with ${registrationCount} active registrations`,
+          error: 'CONFLICT',
+          statusCode: 409,
+        });
+      }
+
+      const deletedEvent = await prisma.event.delete({
         where: { id: eventId },
       });
+
+      // Create audit log
+      if (req.user?.id) {
+        await createAuditLog({
+          userId: req.user.id,
+          action: 'Event Deleted',
+          entity: 'Event',
+          entityId: eventId,
+          oldValues: deletedEvent,
+          changes: ['Event deleted'],
+          ipAddress: req.headers['x-forwarded-for']?.toString() || req.socket.remoteAddress,
+          userAgent: req.headers['user-agent'],
+        });
+      }
 
       return res.status(200).json({
         success: true,
