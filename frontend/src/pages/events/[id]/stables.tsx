@@ -1,0 +1,290 @@
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import api from '@/lib/api';
+import ProtectedRoute from '@/lib/protected-route';
+import { FiArrowLeft, FiPlus, FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
+
+interface Stable {
+  id: string;
+  eId: string;
+  number: string;
+  capacity: number;
+  pricePerStable: number;
+  isAvailable: boolean;
+  bookingCount: number;
+  createdAt: string;
+}
+
+interface EventInfo {
+  id: string;
+  name: string;
+}
+
+export default function EventStables() {
+  const router = useRouter();
+  const { id: eventId } = router.query;
+  const [stables, setStables] = useState<Stable[]>([]);
+  const [eventInfo, setEventInfo] = useState<EventInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState({ number: '', capacity: '1', pricePerStable: '0', isAvailable: true });
+
+  useEffect(() => {
+    if (eventId) fetchStables();
+  }, [eventId]);
+
+  const fetchStables = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/api/events/${eventId}/stables`);
+      setStables(response.data.data.stables);
+      setEventInfo(response.data.data.event);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch stables:', err);
+      setError('Failed to load stables');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setForm({ number: '', capacity: '1', pricePerStable: '0', isAvailable: true });
+    setShowForm(false);
+    setEditingId(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        number: form.number,
+        capacity: parseInt(form.capacity) || 1,
+        pricePerStable: parseFloat(form.pricePerStable) || 0,
+        isAvailable: form.isAvailable,
+      };
+
+      if (editingId) {
+        await api.put(`/api/stables/${editingId}`, payload);
+      } else {
+        await api.post(`/api/events/${eventId}/stables`, payload);
+      }
+      resetForm();
+      fetchStables();
+    } catch (err) {
+      console.error('Failed to save stable:', err);
+      alert('Failed to save stable');
+    }
+  };
+
+  const handleEdit = (stable: Stable) => {
+    setForm({
+      number: stable.number,
+      capacity: String(stable.capacity),
+      pricePerStable: String(stable.pricePerStable),
+      isAvailable: stable.isAvailable,
+    });
+    setEditingId(stable.id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this stable?')) return;
+    try {
+      await api.delete(`/api/stables/${id}`);
+      setStables(stables.filter(s => s.id !== id));
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || 'Failed to delete stable';
+      alert(msg);
+    }
+  };
+
+  const handleToggleAvailability = async (stable: Stable) => {
+    try {
+      await api.put(`/api/stables/${stable.id}`, { isAvailable: !stable.isAvailable });
+      setStables(stables.map(s => s.id === stable.id ? { ...s, isAvailable: !s.isAvailable } : s));
+    } catch (err) {
+      console.error('Failed to update availability:', err);
+    }
+  };
+
+  return (
+    <ProtectedRoute>
+      <div>
+        <div className="flex items-center gap-4 mb-8">
+          <Link href={`/events/${eventId}`} className="text-gray-400 hover:text-white">
+            <FiArrowLeft size={24} />
+          </Link>
+          <div>
+            <h2 className="text-3xl font-bold text-white">Stable Management</h2>
+            {eventInfo && <p className="text-gray-400 mt-1">{eventInfo.name}</p>}
+          </div>
+          <div className="ml-auto">
+            <button
+              onClick={() => { resetForm(); setShowForm(!showForm); }}
+              className="btn-primary"
+            >
+              <FiPlus className="inline mr-2" /> Add Stable
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
+            {error}
+          </div>
+        )}
+
+        {/* Add/Edit Form */}
+        {showForm && (
+          <div className="card mb-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              {editingId ? 'Edit Stable' : 'Add New Stable'}
+            </h3>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Stable Name/Number</label>
+                <input
+                  type="text"
+                  value={form.number}
+                  onChange={(e) => setForm({ ...form, number: e.target.value })}
+                  className="form-input"
+                  placeholder="e.g. Stable A"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Capacity</label>
+                <input
+                  type="number"
+                  value={form.capacity}
+                  onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                  className="form-input"
+                  min="1"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Price per Stable (₹)</label>
+                <input
+                  type="number"
+                  value={form.pricePerStable}
+                  onChange={(e) => setForm({ ...form, pricePerStable: e.target.value })}
+                  className="form-input"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              <div className="flex items-end gap-3">
+                <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.isAvailable}
+                    onChange={(e) => setForm({ ...form, isAvailable: e.target.checked })}
+                    className="rounded border-gray-600 bg-gray-700 text-primary-500"
+                  />
+                  Available
+                </label>
+                <button type="submit" className="btn-primary">
+                  {editingId ? 'Update' : 'Create'}
+                </button>
+                <button type="button" onClick={resetForm} className="btn-secondary">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Stables Table */}
+        <div className="card table-container">
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
+              <p className="text-gray-300 mt-2">Loading stables...</p>
+            </div>
+          ) : stables.length === 0 ? (
+            <div className="text-center py-8 text-gray-300">
+              No stables configured for this event. Click &quot;Add Stable&quot; to get started.
+            </div>
+          ) : (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Name/Number</th>
+                  <th>Capacity</th>
+                  <th>Price (₹)</th>
+                  <th>Available</th>
+                  <th>Bookings</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stables.map((stable) => (
+                  <tr key={stable.id}>
+                    <td className="font-medium text-white">{stable.number}</td>
+                    <td>{stable.capacity}</td>
+                    <td>₹{stable.pricePerStable.toLocaleString('en-IN')}</td>
+                    <td>
+                      <button
+                        onClick={() => handleToggleAvailability(stable)}
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium cursor-pointer ${
+                          stable.isAvailable
+                            ? 'bg-green-500 bg-opacity-20 text-green-300'
+                            : 'bg-red-500 bg-opacity-20 text-red-300'
+                        }`}
+                      >
+                        {stable.isAvailable ? <><FiCheck size={12} /> Yes</> : <><FiX size={12} /> No</>}
+                      </button>
+                    </td>
+                    <td>{stable.bookingCount}</td>
+                    <td>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(stable)}
+                          className="text-blue-400 hover:text-blue-300"
+                          title="Edit"
+                        >
+                          <FiEdit2 size={16} />
+                        </button>
+                        {stable.bookingCount === 0 && (
+                          <button
+                            onClick={() => handleDelete(stable.id)}
+                            className="text-red-400 hover:text-red-300"
+                            title="Delete"
+                          >
+                            <FiTrash2 size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Summary */}
+        {stables.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="card text-center">
+              <p className="text-gray-400 text-sm">Total Stables</p>
+              <p className="text-2xl font-bold text-white">{stables.length}</p>
+            </div>
+            <div className="card text-center">
+              <p className="text-gray-400 text-sm">Available</p>
+              <p className="text-2xl font-bold text-green-400">{stables.filter(s => s.isAvailable).length}</p>
+            </div>
+            <div className="card text-center">
+              <p className="text-gray-400 text-sm">Total Bookings</p>
+              <p className="text-2xl font-bold text-blue-400">{stables.reduce((sum, s) => sum + s.bookingCount, 0)}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </ProtectedRoute>
+  );
+}

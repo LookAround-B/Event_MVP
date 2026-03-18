@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft, FiMapPin } from 'react-icons/fi';
+import VenueMapPicker from '@/components/VenueMapPicker';
+import { FiArrowLeft, FiMapPin, FiUpload } from 'react-icons/fi';
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -26,6 +29,8 @@ export default function CreateEventPage() {
     categoryIds: [] as string[],
   });
 
+  const [fileUrl, setFileUrl] = useState<string>('');
+  const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
@@ -66,6 +71,7 @@ export default function CreateEventPage() {
         termsAndConditions: event.termsAndConditions || '',
         categoryIds: event.categories?.map((c: any) => c.id) || [],
       });
+      setFileUrl(event.fileUrl || '');
     } catch (err) {
       console.error('Failed to fetch event:', err);
       setError('Failed to load event');
@@ -80,6 +86,26 @@ export default function CreateEventPage() {
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await api.post('/api/upload', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setFileUrl(res.data.data.fileUrl);
+      toast.success('File uploaded successfully');
+    } catch (err) {
+      console.error('Upload failed:', err);
+      toast.error('File upload failed');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleCategoryToggle = (categoryId: string) => {
@@ -98,29 +124,45 @@ export default function CreateEventPage() {
 
     // Validation
     if (!formData.eventType || !formData.name) {
-      setError('Event type and name are required');
+      const msg = 'Event type and name are required';
+      setError(msg);
+      toast.error(msg);
       setSubmitting(false);
       return;
     }
 
     if (!formData.startDate || !formData.endDate) {
-      setError('Start date and end date are required');
+      const msg = 'Start date and end date are required';
+      setError(msg);
+      toast.error(msg);
+      setSubmitting(false);
+      return;
+    }
+
+    // Validate date range
+    if (new Date(formData.endDate) < new Date(formData.startDate)) {
+      const msg = 'End date must be on or after the start date';
+      setError(msg);
+      toast.error(msg);
       setSubmitting(false);
       return;
     }
 
     try {
+      const payload = { ...formData, fileUrl };
       if (isEdit && id) {
-        await api.put(`/api/events/${id}`, formData);
-        alert('Event updated successfully!');
+        await api.put(`/api/events/${id}`, payload);
+        toast.success('Event updated successfully!');
       } else {
-        await api.post('/api/events', formData);
-        alert('Event created successfully!');
+        await api.post('/api/events', payload);
+        toast.success('Event created successfully!');
       }
       router.push('/events');
     } catch (err: any) {
       console.error('Failed to save event:', err);
-      setError(err.response?.data?.message || 'Failed to save event');
+      const message = err.response?.data?.message || 'Failed to save event';
+      setError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -141,6 +183,7 @@ export default function CreateEventPage() {
 
   return (
     <ProtectedRoute>
+      <Head><title>{isEdit ? 'Edit Event' : 'Create Event'} | Equestrian Events</title></Head>
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-8">
           <Link href="/events" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
@@ -211,6 +254,32 @@ export default function CreateEventPage() {
                   rows={4}
                   className="form-input"
                 />
+              </div>
+
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Event File / Banner
+                </label>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 cursor-pointer transition text-sm">
+                    <FiUpload />
+                    {uploading ? 'Uploading...' : 'Choose File'}
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+                  {fileUrl && (
+                    <span className="text-sm text-green-300">
+                      File uploaded: {fileUrl.split('/').pop()}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Accepted: Images (JPG, PNG, GIF) and PDF. Max 10MB.</p>
               </div>
 
               {/* Start Date & Time (Mandatory) */}
@@ -303,34 +372,19 @@ export default function CreateEventPage() {
                     placeholder="Full address for venue"
                     className="form-input"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Note: Google Maps integration coming soon</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white mb-2">Latitude</label>
-                    <input
-                      type="number"
-                      name="venueLat"
-                      value={formData.venueLat}
-                      onChange={handleChange}
-                      placeholder="e.g., 40.7128"
-                      step="0.0001"
-                      className="form-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white mb-2">Longitude</label>
-                    <input
-                      type="number"
-                      name="venueLng"
-                      value={formData.venueLng}
-                      onChange={handleChange}
-                      placeholder="e.g., -74.0060"
-                      step="0.0001"
-                      className="form-input"
-                    />
-                  </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+                    <FiMapPin /> Venue Location
+                  </label>
+                  <VenueMapPicker
+                    lat={formData.venueLat}
+                    lng={formData.venueLng}
+                    onLocationChange={(lat, lng) =>
+                      setFormData(prev => ({ ...prev, venueLat: lat, venueLng: lng }))
+                    }
+                  />
                 </div>
               </div>
 

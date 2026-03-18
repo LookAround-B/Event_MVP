@@ -128,6 +128,74 @@ export default function EventDetail() {
     a.href = url;
     a.download = `${event?.name}-registrations.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const exportToExcel = () => {
+    if (registrations.length === 0) {
+      alert('No registrations to export');
+      return;
+    }
+
+    // Build XML Spreadsheet (opens natively in Excel)
+    const escapeXml = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+    const headers = ['Rider Name', 'Email', 'Horse Name', 'Horse Color', 'Club Name', 'Category', 'Event Amount (₹)', 'Stable Amount (₹)', 'GST Amount (₹)', 'Total Amount (₹)', 'Payment Status'];
+
+    const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${escapeXml(h)}</Data></Cell>`).join('');
+
+    const dataRows = registrations.map(r => {
+      const cells = [
+        { v: `${r.rider.firstName} ${r.rider.lastName}`, t: 'String' },
+        { v: r.rider.email, t: 'String' },
+        { v: r.horse.name, t: 'String' },
+        { v: r.horse.color, t: 'String' },
+        { v: r.club?.name || '-', t: 'String' },
+        { v: r.category.name, t: 'String' },
+        { v: r.eventAmount, t: 'Number' },
+        { v: r.stableAmount, t: 'Number' },
+        { v: r.gstAmount, t: 'Number' },
+        { v: r.totalAmount, t: 'Number' },
+        { v: r.paymentStatus, t: 'String' },
+      ];
+      return `<Row>${cells.map(c => `<Cell><Data ss:Type="${c.t}">${escapeXml(c.v)}</Data></Cell>`).join('')}</Row>`;
+    });
+
+    // Summary row
+    const totalEvent = registrations.reduce((s, r) => s + r.eventAmount, 0);
+    const totalStable = registrations.reduce((s, r) => s + r.stableAmount, 0);
+    const totalGst = registrations.reduce((s, r) => s + r.gstAmount, 0);
+    const grandTotal = registrations.reduce((s, r) => s + r.totalAmount, 0);
+
+    const summaryRow = `<Row>
+      <Cell><Data ss:Type="String">TOTAL</Data></Cell>
+      <Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell><Cell><Data ss:Type="String"></Data></Cell>
+      <Cell><Data ss:Type="Number">${totalEvent}</Data></Cell>
+      <Cell><Data ss:Type="Number">${totalStable}</Data></Cell>
+      <Cell><Data ss:Type="Number">${totalGst}</Data></Cell>
+      <Cell><Data ss:Type="Number">${grandTotal}</Data></Cell>
+      <Cell><Data ss:Type="String"></Data></Cell>
+    </Row>`;
+
+    const xml = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Worksheet ss:Name="Registrations">
+    <Table>
+      <Row>${headerRow}</Row>
+      ${dataRows.join('\n      ')}
+      ${summaryRow}
+    </Table>
+  </Worksheet>
+</Workbook>`;
+
+    const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${event?.name}-registrations.xls`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -228,6 +296,14 @@ export default function EventDetail() {
                   <p className="text-gray-900">{event.venueName}</p>
                   <p className="text-sm text-gray-600">{event.venueAddress}</p>
                 </div>
+                <div className="flex items-end">
+                  <Link
+                    href={`/events/${id}/stables`}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium"
+                  >
+                    Manage Stables
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -241,6 +317,12 @@ export default function EventDetail() {
               <p className="text-sm text-gray-600 mt-1">{registeredCount} registrations</p>
             </div>
             <div className="flex gap-2">
+              <button
+                onClick={exportToExcel}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                <FiDownload /> Export Excel
+              </button>
               <button
                 onClick={exportToCSV}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

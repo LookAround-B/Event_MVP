@@ -44,36 +44,67 @@ async function handler(
 
   if (method === 'GET') {
     try {
-      const { page = '1', limit = '10', search = '' } = req.query;
+      const { page = '1', limit = '10', search = '', role, format } = req.query;
       const pageNum = Math.max(1, parseInt(page as string) || 1);
       const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
       const skip = (pageNum - 1) * limitNum;
 
-      const where = search
-        ? {
-            OR: [
-              { email: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-              { firstName: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-              { lastName: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-            ],
-          }
-        : {};
+      const where: any = {};
+      if (search) {
+        where.OR = [
+          { email: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+          { firstName: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+          { lastName: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+        ];
+      }
+      if (role) {
+        where.roles = { some: { name: role as string } };
+      }
+
+      const userSelect = {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        isApproved: true,
+        profileComplete: true,
+        createdAt: true,
+        roles: { select: { name: true } },
+      };
+
+      // CSV export
+      if (format === 'csv') {
+        const allUsers = await prisma.user.findMany({
+          where,
+          select: userSelect,
+          orderBy: { createdAt: 'desc' },
+        });
+
+        const csvHeader = 'Email,Name,Phone,Role,Status,Created\n';
+        const csvRows = allUsers.map(u =>
+          [
+            u.email,
+            `${u.firstName} ${u.lastName}`,
+            u.phone || '',
+            u.roles.map(r => r.name).join(';') || 'user',
+            u.isApproved ? 'Approved' : 'Pending',
+            new Date(u.createdAt).toLocaleDateString(),
+          ].join(',')
+        ).join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=users.csv');
+        res.write(csvHeader + csvRows);
+        return res.end();
+      }
 
       const [users, total] = await Promise.all([
         prisma.user.findMany({
           where,
           skip,
           take: limitNum,
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-            phone: true,
-            isApproved: true,
-            profileComplete: true,
-            createdAt: true,
-          },
+          select: userSelect,
           orderBy: { createdAt: 'desc' },
         }),
         prisma.user.count({ where }),
@@ -86,6 +117,7 @@ async function handler(
         data: users.map(u => ({
           ...u,
           name: `${u.firstName} ${u.lastName}`,
+          role: u.roles.map(r => r.name).join(', ') || 'user',
           createdAt: u.createdAt.toISOString(),
         })),
         pagination: {

@@ -10,11 +10,22 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isClient, setIsClient] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     setIsClient(true);
+    // Check if mobile on mount
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Auto-close sidebar on mobile
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false);
+  }, [isMobile]);
 
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard', icon: FiHome },
@@ -55,11 +66,21 @@ export default function Layout({ children }: LayoutProps) {
       <div className="absolute top-0 -right-40 w-80 h-80 bg-secondary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
       <div className="absolute -bottom-8 left-20 w-80 h-80 bg-accent-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '4s' }}></div>
 
+      {/* Mobile Overlay - close sidebar when clicking outside on mobile */}
+      {isMobile && sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-5 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
-        } glass border-r border-white border-opacity-20 transition-all duration-300 flex flex-col shadow-glass-lg relative z-10`}
+        } glass border-r border-white border-opacity-20 transition-all duration-300 flex flex-col shadow-glass-lg relative z-10 ${
+          isMobile && !sidebarOpen ? 'hidden' : ''
+        } md:flex`}
       >
         <div className="p-6 flex items-center justify-between border-b border-white border-opacity-10">
           {sidebarOpen && (
@@ -110,16 +131,16 @@ export default function Layout({ children }: LayoutProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden relative z-0">
         {/* Top Bar */}
-        <div className="glass border-b border-white border-opacity-20 p-8 shadow-glass-lg">
-          <h1 className="text-4xl font-black bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-2">
+        <div className="glass border-b border-white border-opacity-20 p-4 md:p-8 shadow-glass-lg">
+          <h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-1 md:mb-2">
             Equestrian Event Management
           </h1>
-          <p className="text-gray-300 font-medium">Welcome to your event management dashboard</p>
+          <p className="text-gray-300 font-medium text-xs md:text-base hidden sm:block">Welcome to your event management dashboard</p>
         </div>
 
         {/* Content Area */}
         <div className="flex-1 overflow-auto">
-          <div className="p-8">{children}</div>
+          <div className="p-4 md:p-8">{children}</div>
         </div>
       </div>
     </div>

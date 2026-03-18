@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye } from 'react-icons/fi';
+import toast from 'react-hot-toast';
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiDownload } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -48,26 +50,51 @@ export default function Riders() {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const params: any = { format: 'csv' };
+      if (searchTerm) params.search = searchTerm;
+      const res = await api.get('/api/riders', { params, responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'riders.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Riders exported successfully');
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+      toast.error('Failed to export CSV');
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this rider?')) return;
 
     try {
       await api.delete(`/api/riders/${id}`);
       setRiders(riders.filter(r => r.id !== id));
+      toast.success('Rider deleted successfully');
     } catch (err) {
       console.error('Failed to delete rider:', err);
-      alert('Failed to delete rider');
+      toast.error('Failed to delete rider');
     }
   };
 
   return (
     <ProtectedRoute>
+      <Head><title>Riders | Equestrian Events</title></Head>
       <div>
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-white">Riders</h2>
-          <Link href="/riders/create" className="btn-primary">
-            <FiPlus className="inline mr-2" /> New Rider
-          </Link>
+          <div className="flex gap-3">
+            <button onClick={handleExportCSV} className="btn-secondary">
+              <FiDownload className="inline mr-2" /> Export CSV
+            </button>
+            <Link href="/riders/create" className="btn-primary">
+              <FiPlus className="inline mr-2" /> New Rider
+            </Link>
+          </div>
         </div>
 
         {error && (

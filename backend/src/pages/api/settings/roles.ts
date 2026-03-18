@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
 import { withRole, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { ApiResponse } from '@/types';
@@ -7,66 +7,56 @@ async function handler(
   req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse>
 ) {
-  const origin = req.headers.origin || 'http://localhost:3000';
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
   if (req.method === 'GET') {
     try {
-      const eventTypes = await prisma.eventType.findMany({
+      const roles = await prisma.role.findMany({
         orderBy: { name: 'asc' },
       });
 
       return res.status(200).json({
         success: true,
         statusCode: 200,
-        message: 'Event types retrieved successfully',
-        data: eventTypes,
+        message: 'Roles retrieved successfully',
+        data: roles,
       });
     } catch (error) {
-      console.error('GET event types error:', error);
+      console.error('GET roles error:', error);
       return res.status(500).json({
         success: false,
         statusCode: 500,
-        message: 'Failed to retrieve event types',
+        message: 'Failed to retrieve roles',
       });
     }
   }
 
   if (req.method === 'POST') {
     try {
-      const { name, shortCode, description } = req.body;
+      const { name, description } = req.body;
 
-      if (!name || !shortCode) {
+      if (!name || typeof name !== 'string' || !name.trim()) {
         return res.status(400).json({
           success: false,
           statusCode: 400,
-          message: 'Name and short code are required',
+          message: 'Role name is required',
         });
       }
 
-      const eventType = await prisma.eventType.create({
-        data: { name, shortCode, description },
+      const role = await prisma.role.create({
+        data: { name: name.trim(), description: description || null },
       });
 
       return res.status(201).json({
         success: true,
         statusCode: 201,
-        message: 'Event type created successfully',
-        data: eventType,
+        message: 'Role created successfully',
+        data: role,
       });
     } catch (error) {
-      console.error('POST event type error:', error);
+      console.error('POST role error:', error);
       return res.status(500).json({
         success: false,
         statusCode: 500,
-        message: 'Failed to create event type',
+        message: 'Failed to create role',
       });
     }
   }
@@ -79,23 +69,23 @@ async function handler(
         return res.status(400).json({
           success: false,
           statusCode: 400,
-          message: 'Event type ID is required',
+          message: 'Role ID is required',
         });
       }
 
-      await prisma.eventType.delete({ where: { id } });
+      await prisma.role.delete({ where: { id } });
 
       return res.status(200).json({
         success: true,
         statusCode: 200,
-        message: 'Event type deleted successfully',
+        message: 'Role deleted successfully',
       });
     } catch (error) {
-      console.error('DELETE event type error:', error);
+      console.error('DELETE role error:', error);
       return res.status(500).json({
         success: false,
         statusCode: 500,
-        message: 'Failed to delete event type',
+        message: 'Failed to delete role',
       });
     }
   }

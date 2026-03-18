@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withRole } from '@/lib/auth-middleware';
+import { withPermission } from '@/lib/auth-middleware';
 import { ApiResponse } from '@/types';
+import { PaymentStatus } from '@prisma/client';
 
 async function handler(
   req: NextApiRequest,
@@ -11,13 +12,14 @@ async function handler(
 
   if (method === 'GET') {
     try {
-      const { page = '1', limit = '10', registrationId } = req.query;
+      const { page = '1', limit = '10', registrationId, status, format } = req.query;
       const pageNum = Math.max(1, parseInt(page as string) || 1);
       const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
       const skip = (pageNum - 1) * limitNum;
 
-      const where = {
+      const where: any = {
         ...(registrationId && { registrationId: registrationId as string }),
+        ...(status && { status: (status as string).toUpperCase() as PaymentStatus }),
       };
 
       const [transactions, total] = await Promise.all([
@@ -46,6 +48,47 @@ async function handler(
         }),
         prisma.transaction.count({ where }),
       ]);
+
+      // CSV export - return all matching transactions
+      if (format === 'csv') {
+        const allTransactions = await prisma.transaction.findMany({
+          where,
+          select: {
+            id: true,
+            referenceNumber: true,
+            amount: true,
+            cgstAmount: true,
+            sgstAmount: true,
+            igstAmount: true,
+            totalAmount: true,
+            status: true,
+            paymentMethod: true,
+            notes: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        const csvHeader = 'Reference,Amount,CGST,SGST,IGST,Total,Method,Status,Date\n';
+        const csvRows = allTransactions.map(t =>
+          [
+            t.referenceNumber || t.id.slice(0, 8),
+            t.amount,
+            t.cgstAmount,
+            t.sgstAmount,
+            t.igstAmount,
+            t.totalAmount,
+            t.paymentMethod || '',
+            t.status,
+            new Date(t.createdAt).toLocaleDateString(),
+          ].join(',')
+        ).join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=transactions.csv');
+        res.write(csvHeader + csvRows);
+        return res.end();
+      }
 
       // Calculate summary stats
       const stats = await prisma.transaction.aggregate({
@@ -175,4 +218,4 @@ async function handler(
   });
 }
 
-export default withRole('admin')(handler);
+export default withPermission('View', 'Financial')(handler);

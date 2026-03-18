@@ -13,7 +13,7 @@ async function handler(
   // GET is public for form dropdowns, POST requires auth
   if (method === 'GET') {
     try {
-      const { page = '1', limit = '10', search = '' } = req.query;
+      const { page = '1', limit = '10', search = '', format } = req.query;
       const pageNum = Math.max(1, parseInt(page as string) || 1);
       const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
       const skip = (pageNum - 1) * limitNum;
@@ -27,6 +27,23 @@ async function handler(
             ],
           }
         : {};
+
+      if (format === 'csv') {
+        const allRiders = await prisma.rider.findMany({
+          where,
+          select: { firstName: true, lastName: true, email: true, mobile: true, gender: true, _count: { select: { registrations: true } } },
+          orderBy: { lastName: 'asc' },
+        });
+        const header = 'First Name,Last Name,Email,Mobile,Gender,Registrations';
+        const rows = allRiders.map(r =>
+          `"${r.firstName}","${r.lastName}","${r.email}","${r.mobile || ''}","${r.gender || ''}","${r._count.registrations}"`
+        );
+        const csv = [header, ...rows].join('\n');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=riders.csv');
+        res.write(csv as any);
+        return res.end();
+      }
 
       const [riders, total] = await Promise.all([
         prisma.rider.findMany({

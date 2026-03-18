@@ -44,6 +44,8 @@ export default function RiderPortal() {
   const [myEvents, setMyEvents] = useState<Registration[]>([]);
   const [horses, setHorses] = useState<Horse[]>([]);
   const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [featuredEvents, setFeaturedEvents] = useState<Event[]>([]);
+  const [termsConditions, setTermsConditions] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +58,8 @@ export default function RiderPortal() {
       fetchMyHorses();
     } else if (activeTab === 'events') {
       fetchAllEvents();
+    } else if (activeTab === 'featured') {
+      fetchFeaturedEvents();
     }
   }, [activeTab]);
 
@@ -116,6 +120,31 @@ export default function RiderPortal() {
     } catch (err) {
       console.error('Failed to fetch events:', err);
       setError('Failed to load events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFeaturedEvents = async () => {
+    try {
+      setLoading(true);
+      const [eventsRes, settingsRes] = await Promise.all([
+        api.get('/api/events?limit=10'),
+        api.get('/api/settings').catch(() => ({ data: { data: [] } })),
+      ]);
+      const events = eventsRes.data.data?.events || eventsRes.data.data || [];
+      // Show published upcoming events as featured
+      const now = new Date();
+      const upcoming = events.filter((e: Event) => new Date(e.startDate) >= now);
+      setFeaturedEvents(upcoming.length > 0 ? upcoming : events.slice(0, 5));
+
+      // Get T&C from settings
+      const settings = settingsRes.data.data || [];
+      const tc = settings.find((s: any) => s.key === 'terms_and_conditions');
+      setTermsConditions(tc?.value || '');
+    } catch (err) {
+      console.error('Failed to fetch featured events:', err);
+      setError('Failed to load featured events');
     } finally {
       setLoading(false);
     }
@@ -342,11 +371,55 @@ export default function RiderPortal() {
 
         {/* Featured Events Tab */}
         {activeTab === 'featured' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-900">Featured Events</h2>
-            <div className="bg-gray-50 border border-gray-200 text-gray-800 px-4 py-6 rounded text-center">
-              <p>Featured events content coming soon!</p>
-            </div>
+            {loading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : featuredEvents.length === 0 ? (
+              <div className="bg-gray-50 border border-gray-200 text-gray-800 px-4 py-6 rounded text-center">
+                <p>No featured events at this time.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {featuredEvents.map(event => (
+                  <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                      <h3 className="text-xl font-bold text-white">{event.name}</h3>
+                      <p className="text-blue-100 text-sm mt-1">
+                        {new Date(event.startDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        {event.endDate && ` — ${new Date(event.endDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`}
+                      </p>
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          {event.registrationCount !== undefined && (
+                            <span className="flex items-center gap-1">
+                              <FiTrendingUp className="text-green-500" /> {event.registrationCount} registrations
+                            </span>
+                          )}
+                        </div>
+                        <Link
+                          href={`/events/${event.id}`}
+                          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition"
+                        >
+                          View & Register
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {termsConditions && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Terms & Conditions</h3>
+                <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                  {termsConditions}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye } from 'react-icons/fi';
+import toast from 'react-hot-toast';
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiCopy, FiToggleLeft, FiToggleRight, FiDownload } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -11,6 +13,7 @@ interface Event {
   endDate: string;
   venueName: string;
   description: string;
+  isPublished: boolean;
   registrationCount: number;
 }
 
@@ -54,20 +57,67 @@ export default function Events() {
     try {
       await api.delete(`/api/events/${id}`);
       setEvents(events.filter(e => e.id !== id));
+      toast.success('Event deleted successfully');
     } catch (err) {
       console.error('Failed to delete event:', err);
-      alert('Failed to delete event');
+      toast.error('Failed to delete event');
+    }
+  };
+
+  const handleDuplicate = async (id: string) => {
+    try {
+      await api.post(`/api/events/${id}/duplicate`);
+      fetchEvents();
+      toast.success('Event duplicated successfully');
+    } catch (err) {
+      console.error('Failed to duplicate event:', err);
+      toast.error('Failed to duplicate event');
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const params: any = { format: 'csv' };
+      if (searchTerm) params.search = searchTerm;
+      const res = await api.get('/api/events', { params, responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'events.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('Events exported successfully');
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+      toast.error('Failed to export CSV');
+    }
+  };
+
+  const handleTogglePublish = async (id: string, currentStatus: boolean) => {
+    try {
+      await api.patch(`/api/events/${id}/publish`, { isPublished: !currentStatus });
+      setEvents(events.map(e => e.id === id ? { ...e, isPublished: !currentStatus } : e));
+      toast.success(`Event ${!currentStatus ? 'published' : 'unpublished'}`);
+    } catch (err) {
+      console.error('Failed to toggle publish:', err);
+      toast.error('Failed to update publish status');
     }
   };
 
   return (
     <ProtectedRoute>
+      <Head><title>Events | Equestrian Events</title></Head>
       <div>
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-white">Events</h2>
-          <Link href="/events/create" className="btn-primary">
-            <FiPlus className="inline mr-2" /> New Event
-          </Link>
+          <div className="flex gap-3">
+            <button onClick={handleExportCSV} className="btn-secondary">
+              <FiDownload className="inline mr-2" /> Export CSV
+            </button>
+            <Link href="/events/create" className="btn-primary">
+              <FiPlus className="inline mr-2" /> New Event
+            </Link>
+          </div>
         </div>
 
         {error && (
@@ -110,6 +160,7 @@ export default function Events() {
                     <th>Event Name</th>
                     <th>Venue</th>
                     <th>Start Date</th>
+                    <th>Published</th>
                     <th>Registrations</th>
                     <th>Actions</th>
                   </tr>
@@ -121,18 +172,39 @@ export default function Events() {
                       <td>{event.venueName || 'N/A'}</td>
                       <td>{new Date(event.startDate).toLocaleDateString()}</td>
                       <td>
+                        <button
+                          onClick={() => handleTogglePublish(event.id, event.isPublished)}
+                          className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded ${
+                            event.isPublished
+                              ? 'bg-green-500 bg-opacity-20 text-green-300'
+                              : 'bg-gray-500 bg-opacity-20 text-gray-400'
+                          }`}
+                          title={event.isPublished ? 'Click to unpublish' : 'Click to publish'}
+                        >
+                          {event.isPublished ? <FiToggleRight className="w-4 h-4" /> : <FiToggleLeft className="w-4 h-4" />}
+                          {event.isPublished ? 'Published' : 'Draft'}
+                        </button>
+                      </td>
+                      <td>
                         <span className="badge badge-success">
                           {event.registrationCount}
                         </span>
                       </td>
                       <td>
                         <div className="flex space-x-2">
-                          <Link href={`/events/${event.id}`} className="text-purple-400 hover:text-purple-300">
-                            <FiEye className="w-4 h-4" title="View" />
+                          <Link href={`/events/${event.id}`} className="text-purple-400 hover:text-purple-300" title="View">
+                            <FiEye className="w-4 h-4" />
                           </Link>
-                          <Link href={`/events/create?id=${event.id}`} className="text-amber-400 hover:text-amber-300">
-                            <FiEdit className="w-4 h-4" title="Edit" />
+                          <Link href={`/events/create?id=${event.id}`} className="text-amber-400 hover:text-amber-300" title="Edit">
+                            <FiEdit className="w-4 h-4" />
                           </Link>
+                          <button
+                            onClick={() => handleDuplicate(event.id)}
+                            className="text-blue-400 hover:text-blue-300"
+                            title="Duplicate"
+                          >
+                            <FiCopy className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => handleDelete(event.id)}
                             className="text-red-400 hover:text-red-300"

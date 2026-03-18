@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { FiArrowLeft } from 'react-icons/fi';
@@ -96,15 +97,17 @@ export default function CreateHorse() {
 
       if (isEdit) {
         await api.put(`/api/horses/${router.query.id}`, payload);
-        alert('Horse updated successfully!');
+        toast.success('Horse updated successfully!');
       } else {
         await api.post('/api/horses', payload);
-        alert('Horse registered successfully!');
+        toast.success('Horse registered successfully!');
       }
       router.push('/horses');
     } catch (err: any) {
       console.error('Failed to save horse:', err);
-      setError(err.response?.data?.message || 'Failed to save horse');
+      const message = err.response?.data?.message || 'Failed to save horse';
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { FiArrowLeft, FiCheck } from 'react-icons/fi';
@@ -67,6 +68,12 @@ export default function CreateRider() {
       setError('Email is required');
       return false;
     }
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setError('Invalid email format');
+      return false;
+    }
     if (!formData.gender) {
       setError('Gender is required');
       return false;
@@ -102,8 +109,10 @@ export default function CreateRider() {
 
       if (isEdit) {
         await api.put(`/api/riders/${id}`, payload);
+        toast.success('Rider updated successfully!');
       } else {
         await api.post('/api/riders', payload);
+        toast.success('Rider created successfully!');
       }
 
       setSuccess(true);
@@ -112,11 +121,11 @@ export default function CreateRider() {
       }, 1500);
     } catch (err) {
       console.error('Error saving rider:', err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : `Failed to ${isEdit ? 'update' : 'create'} rider. Please try again.`
-      );
+      const message = err instanceof Error
+        ? err.message
+        : `Failed to ${isEdit ? 'update' : 'create'} rider. Please try again.`;
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

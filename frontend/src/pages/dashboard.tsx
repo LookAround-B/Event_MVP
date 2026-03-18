@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
 import { FiCalendar, FiUsers, FiBarChart, FiDollarSign, FiTrendingUp } from 'react-icons/fi';
 import { FiBox } from 'react-icons/fi';
 import Link from 'next/link';
@@ -20,12 +21,13 @@ import {
   Cell,
 } from 'recharts';
 
-interface DashboardStats {
+interface KpiCards {
   totalEvents: number;
-  totalRiders: number;
-  totalHorses: number;
-  totalRegistrations: number;
+  clubsRegistered: number;
+  ridersRegistered: number;
+  horseCount: number;
   totalRevenue: number;
+  collectibleAmount: number;
 }
 
 interface EventChartData {
@@ -46,12 +48,12 @@ interface RegistrationTrendData {
 }
 
 interface ClubStats {
-  name: string;
+  clubName: string;
   registrations: number;
 }
 
 interface RiderStats {
-  name: string;
+  riderName: string;
   registrations: number;
 }
 
@@ -81,18 +83,19 @@ function StatCard({ icon: Icon, title, value, color }: StatCardProps) {
 }
 
 function DashboardContent() {
-  const [stats, setStats] = useState<DashboardStats>({
+  const [kpiCards, setKpiCards] = useState<KpiCards>({
     totalEvents: 0,
-    totalRiders: 0,
-    totalHorses: 0,
-    totalRegistrations: 0,
+    clubsRegistered: 0,
+    ridersRegistered: 0,
+    horseCount: 0,
     totalRevenue: 0,
+    collectibleAmount: 0,
   });
   const [eventChartData, setEventChartData] = useState<EventChartData[]>([]);
   const [monthlyRevenue, setMonthlyRevenue] = useState<MonthlyRevenueData[]>([]);
   const [registrationTrend, setRegistrationTrend] = useState<RegistrationTrendData[]>([]);
-  const [topClubs, setTopClubs] = useState<ClubStats[]>([]);
-  const [topRiders, setTopRiders] = useState<RiderStats[]>([]);
+  const [topClubs, setTopClubs] = useState<ClubStats | null>(null);
+  const [topRiders, setTopRiders] = useState<RiderStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,103 +106,33 @@ function DashboardContent() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Fetch stats
-      const [eventsRes, ridersRes, horsesRes, registrationsRes] = await Promise.all([
-        api.get('/api/events?limit=1').catch(() => ({ data: { data: { pagination: { total: 0 }, data: [] } } })),
-        api.get('/api/riders?limit=1').catch(() => ({ data: { data: { pagination: { total: 0 }, data: [] } } })),
-        api.get('/api/horses?limit=1').catch(() => ({ data: { data: { pagination: { total: 0 }, data: [] } } })),
-        api.get('/api/registrations?limit=1000').catch(() => ({ data: { data: { pagination: { total: 0 }, data: [] } } })),
-      ]);
+      const res = await api.get('/api/dashboard');
+      const data = res.data.data;
 
-      const totalEvents = eventsRes.data.data?.pagination?.total || 0;
-      const totalRiders = ridersRes.data.data?.pagination?.total || 0;
-      const totalHorses = horsesRes.data.data?.pagination?.total || 0;
-      const totalRegistrations = registrationsRes.data.data?.pagination?.total || 0;
-
-      setStats({
-        totalEvents,
-        totalRiders,
-        totalHorses,
-        totalRegistrations,
-        totalRevenue: 0,
-      });
-
-      // Generate mock chart data (in production, this would come from API)
-      generateChartData(eventsRes.data.data?.data || [], registrationsRes.data.data?.data || []);
-      
+      setKpiCards(data.kpiCards);
+      setEventChartData(data.charts.eventBreakdown || []);
+      setMonthlyRevenue(data.charts.monthlyRevenue || []);
+      setRegistrationTrend(data.charts.registrationTrend || []);
+      setTopClubs(data.charts.mostActiveClub);
+      setTopRiders(data.charts.mostActiveRider);
       setError(null);
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
-      setError('Failed to load some dashboard data');
+      setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
 
-  const generateChartData = (events: any[], registrations: any[]) => {
-    // Event breakdown chart
-    const eventData: EventChartData[] = (events || []).slice(0, 5).map((event: any) => ({
-      eventName: event.name?.substring(0, 15) || 'Event',
-      unpaidRegistrations: Math.floor(Math.random() * 20),
-      totalRiders: Math.floor(Math.random() * 50),
-      totalHorses: Math.floor(Math.random() * 40),
-    }));
-    setEventChartData(eventData.length > 0 ? eventData : generateMockEventData());
-
-    // Monthly revenue chart
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    const monthlyData = months.map(month => ({
-      month,
-      revenue: Math.floor(Math.random() * 50000) + 10000,
-    }));
-    setMonthlyRevenue(monthlyData);
-
-    // Registration trend chart
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (6 - i));
-      return {
-        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        registrations: Math.floor(Math.random() * 30) + 5,
-      };
-    });
-    setRegistrationTrend(days);
-
-    // Top clubs
-    const clubs = [
-      { name: 'Elite Riders Club', registrations: 45 },
-      { name: 'Equestrian Society', registrations: 38 },
-      { name: 'Racing Association', registrations: 32 },
-      { name: 'Horse Lovers', registrations: 28 },
-    ];
-    setTopClubs(clubs);
-
-    // Top riders
-    const riders = [
-      { name: 'John Smith', registrations: 8 },
-      { name: 'Sarah Johnson', registrations: 7 },
-      { name: 'Mike Davis', registrations: 6 },
-      { name: 'Emily Brown', registrations: 5 },
-    ];
-    setTopRiders(riders);
-  };
-
-  const generateMockEventData = () => [
-    { eventName: 'Spring Show', unpaidRegistrations: 5, totalRiders: 25, totalHorses: 20 },
-    { eventName: 'Summer Cup', unpaidRegistrations: 8, totalRiders: 32, totalHorses: 28 },
-    { eventName: 'Fall Championship', unpaidRegistrations: 3, totalRiders: 28, totalHorses: 24 },
-  ];
-
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   return (
     <ProtectedRoute>
+      <Head><title>Dashboard | Equestrian Events</title></Head>
       <div className="space-y-8">
         {/* Header */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white">Dashboard</h2>
-          <p className="text-gray-300 mt-2">Welcome to your event management dashboard</p>
         </div>
 
         {error && (
@@ -218,36 +151,42 @@ function DashboardContent() {
         ) : (
           <>
             {/* Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
               <StatCard 
                 icon={FiCalendar} 
                 title="Total Events" 
-                value={stats.totalEvents}
+                value={kpiCards.totalEvents}
                 color="bg-blue-500"
               />
               <StatCard 
                 icon={FiUsers} 
+                title="Clubs Registered" 
+                value={kpiCards.clubsRegistered}
+                color="bg-teal-500"
+              />
+              <StatCard 
+                icon={FiUsers} 
                 title="Total Riders" 
-                value={stats.totalRiders}
+                value={kpiCards.ridersRegistered}
                 color="bg-green-500"
               />
               <StatCard 
                 icon={FiBox} 
                 title="Total Horses" 
-                value={stats.totalHorses}
+                value={kpiCards.horseCount}
                 color="bg-purple-500"
-              />
-              <StatCard 
-                icon={FiBarChart} 
-                title="Registrations" 
-                value={stats.totalRegistrations}
-                color="bg-orange-500"
               />
               <StatCard 
                 icon={FiDollarSign} 
                 title="Total Revenue" 
-                value="$0"
+                value={`₹${kpiCards.totalRevenue.toLocaleString('en-IN')}`}
                 color="bg-pink-500"
+              />
+              <StatCard 
+                icon={FiTrendingUp} 
+                title="Collectible" 
+                value={`₹${kpiCards.collectibleAmount.toLocaleString('en-IN')}`}
+                color="bg-orange-500"
               />
             </div>
 
@@ -283,7 +222,7 @@ function DashboardContent() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
-                      <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+                      <Tooltip formatter={(value: number) => `₹${value.toLocaleString('en-IN')}`} />
                       <Line type="monotone" dataKey="revenue" stroke="#0088FE" strokeWidth={2} dot={{ r: 5 }} />
                     </LineChart>
                   </ResponsiveContainer>
@@ -297,7 +236,7 @@ function DashboardContent() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Registration Trend */}
               <div className="glass p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Registration Trend (7 Days)</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">Registration Trend</h3>
                 {registrationTrend.length > 0 ? (
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={registrationTrend}>
@@ -318,34 +257,34 @@ function DashboardContent() {
                 <h3 className="text-lg font-semibold text-white mb-6">Top Active Participants</h3>
                 
                 <div className="grid grid-cols-2 gap-6">
-                  {/* Top Clubs */}
+                  {/* Top Club */}
                   <div>
-                    <h4 className="font-medium text-white mb-3 text-sm">Top Clubs</h4>
-                    <div className="space-y-2">
-                      {topClubs.map((club, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-2 bg-white bg-opacity-5 backdrop-blur-sm rounded">
-                          <span className="text-sm text-gray-200">{club.name}</span>
-                          <span className="px-2 py-1 bg-primary-500 bg-opacity-30 text-primary-200 rounded text-xs font-medium">
-                            {club.registrations}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <h4 className="font-medium text-white mb-3 text-sm">Most Active Club</h4>
+                    {topClubs ? (
+                      <div className="flex justify-between items-center p-2 bg-white bg-opacity-5 backdrop-blur-sm rounded">
+                        <span className="text-sm text-gray-200">{topClubs.clubName}</span>
+                        <span className="px-2 py-1 bg-primary-500 bg-opacity-30 text-primary-200 rounded text-xs font-medium">
+                          {topClubs.registrations}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 text-sm">No club data</p>
+                    )}
                   </div>
 
-                  {/* Top Riders */}
+                  {/* Top Rider */}
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-3 text-sm">Top Riders</h4>
-                    <div className="space-y-2">
-                      {topRiders.map((rider, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-2 bg-white bg-opacity-5 backdrop-blur-sm rounded">
-                          <span className="text-sm text-gray-200">{rider.name}</span>
-                          <span className="px-2 py-1 bg-secondary-500 bg-opacity-30 text-secondary-200 rounded text-xs font-medium">
-                            {rider.registrations}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <h4 className="font-medium text-white mb-3 text-sm">Most Active Rider</h4>
+                    {topRiders ? (
+                      <div className="flex justify-between items-center p-2 bg-white bg-opacity-5 backdrop-blur-sm rounded">
+                        <span className="text-sm text-gray-200">{topRiders.riderName}</span>
+                        <span className="px-2 py-1 bg-secondary-500 bg-opacity-30 text-secondary-200 rounded text-xs font-medium">
+                          {topRiders.registrations}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-gray-400 text-sm">No rider data</p>
+                    )}
                   </div>
                 </div>
               </div>

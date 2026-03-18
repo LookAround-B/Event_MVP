@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiCheck, FiClock } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiCheck, FiClock, FiDownload, FiShield } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -31,6 +32,7 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ total: 0, pages: 0, limit: 10, page: 1 });
   const [isAdmin, setIsAdmin] = useState(false);
@@ -56,7 +58,7 @@ export default function Users() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, search]);
+  }, [page, search, roleFilter]);
 
   const fetchUsers = async () => {
     try {
@@ -65,6 +67,7 @@ export default function Users() {
         page: page.toString(),
         limit: '10',
         ...(search && { search }),
+        ...(roleFilter && { role: roleFilter }),
       });
 
       const response = await api.get<UsersResponse>(`/api/users?${params}`);
@@ -109,17 +112,44 @@ export default function Users() {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const params = new URLSearchParams({
+        format: 'csv',
+        ...(roleFilter && { role: roleFilter }),
+        ...(search && { search }),
+      });
+      const response = await api.get(`/api/users?${params}`, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'users.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export users:', err);
+      alert('Failed to export users');
+    }
+  };
+
   return (
     <ProtectedRoute>
+      <Head><title>Users | Equestrian Events</title></Head>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-white">Users Management</h1>
             <p className="text-gray-300 mt-2">Manage system users and permissions</p>
           </div>
-          <Link href="/users/create" className="btn-primary flex items-center gap-2">
-            <FiPlus /> Add User
-          </Link>
+          <div className="flex items-center gap-3">
+            <button onClick={handleExportCSV} className="btn-secondary flex items-center gap-2">
+              <FiDownload /> Export CSV
+            </button>
+            <Link href="/users/create" className="btn-primary flex items-center gap-2">
+              <FiPlus /> Add User
+            </Link>
+          </div>
         </div>
 
         {error && (
@@ -129,18 +159,32 @@ export default function Users() {
         )}
 
         <div className="card">
-          <div className="flex items-center gap-2 mb-6">
-            <FiSearch className="text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search users by email or name..."
-              className="form-input"
-              value={search}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-2 flex-1">
+              <FiSearch className="text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search users by email or name..."
+                className="form-input"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+            <select
+              className="form-input w-48"
+              value={roleFilter}
               onChange={(e) => {
-                setSearch(e.target.value);
+                setRoleFilter(e.target.value);
                 setPage(1);
               }}
-            />
+            >
+              <option value="">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+            </select>
           </div>
 
           {loading ? (
@@ -166,6 +210,7 @@ export default function Users() {
                       <th>Email</th>
                       <th>Name</th>
                       <th>Phone</th>
+                      <th>Role</th>
                       {isAdmin && <th>Status</th>}
                       <th>Created</th>
                       <th>Actions</th>
@@ -177,6 +222,13 @@ export default function Users() {
                         <td className="font-medium">{user.email}</td>
                         <td>{user.name}</td>
                         <td>{user.phone || '-'}</td>
+                        <td>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            user.role?.includes('admin') ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {user.role || 'user'}
+                          </span>
+                        </td>
                         {isAdmin && (
                           <td>
                             {!user.isApproved ? (
@@ -209,6 +261,15 @@ export default function Users() {
                                   </>
                                 )}
                               </button>
+                            )}
+                            {isAdmin && (
+                              <Link
+                                href={`/users/${user.id}/permissions`}
+                                className="btn-secondary p-2 flex items-center gap-1 text-sm"
+                                title="Manage Permissions"
+                              >
+                                <FiShield className="w-4 h-4" />
+                              </Link>
                             )}
                             <Link 
                               href={`/users/${user.id}/edit`}

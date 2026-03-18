@@ -31,7 +31,7 @@ async function handler(
   if (req.method === 'GET') {
     return withAuth(async (authReq, authRes) => {
       try {
-        const { page = '1', limit = '10', search = '' } = authReq.query;
+        const { page = '1', limit = '10', search = '', format } = authReq.query;
         const pageNum = Math.max(1, parseInt(page as string) || 1);
         const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
         const skip = (pageNum - 1) * limitNum;
@@ -45,6 +45,23 @@ async function handler(
               ],
             }
           : {};
+
+        if (format === 'csv') {
+          const allClubs = await prisma.club.findMany({
+            where,
+            select: { name: true, shortCode: true, email: true, contactNumber: true, city: true, isActive: true, primaryContact: { select: { firstName: true, lastName: true } } },
+            orderBy: { createdAt: 'desc' },
+          });
+          const header = 'Name,Short Code,Email,Contact Number,City,Contact Person,Active';
+          const rows = allClubs.map(c =>
+            `"${c.name}","${c.shortCode || ''}","${c.email || ''}","${c.contactNumber || ''}","${c.city || ''}","${c.primaryContact ? `${c.primaryContact.firstName} ${c.primaryContact.lastName}` : ''}","${c.isActive ? 'Yes' : 'No'}"`
+          );
+          const csv = [header, ...rows].join('\n');
+          authRes.setHeader('Content-Type', 'text/csv');
+          authRes.setHeader('Content-Disposition', 'attachment; filename=clubs.csv');
+        authRes.write(csv as any);
+        return authRes.end();
+        }
 
         const [clubs, total] = await Promise.all([
           prisma.club.findMany({

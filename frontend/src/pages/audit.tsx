@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
 import api from '@/lib/api';
 import { FiFilter, FiSearch } from 'react-icons/fi';
 import ProtectedRoute from '@/lib/protected-route';
@@ -71,6 +72,7 @@ export default function AuditLogs() {
 
   return (
     <ProtectedRoute>
+      <Head><title>Audit Logs | Equestrian Events</title></Head>
       <div>
         <h2 className="text-3xl font-bold text-white mb-8">Audit Logs</h2>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
-import { FiPlus, FiEdit, FiTrash2, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiDownload } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -72,6 +73,25 @@ export default function Financial() {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const response = await api.get('/api/financial/transactions', {
+        params: { format: 'csv', status: statusFilter },
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'transactions.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       PAID: 'badge-success',
@@ -84,12 +104,18 @@ export default function Financial() {
 
   return (
     <ProtectedRoute>
+      <Head><title>Financial | Equestrian Events</title></Head>
       <div>
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-white">Financial Management</h2>
-          <Link href="/financial/transactions/create" className="btn-primary">
-            <FiPlus className="inline mr-2" /> Record Transaction
-          </Link>
+          <div className="flex gap-3">
+            <button onClick={handleExportCSV} className="btn-secondary">
+              <FiDownload className="inline mr-2" /> Export CSV
+            </button>
+            <Link href="/financial/transactions/create" className="btn-primary">
+              <FiPlus className="inline mr-2" /> Record Transaction
+            </Link>
+          </div>
         </div>
 
         {/* Summary Cards */}
@@ -147,10 +173,10 @@ export default function Financial() {
               className="form-input"
             >
               <option value="">All Statuses</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="PAID">Paid</option>
+              <option value="UNPAID">Unpaid</option>
+              <option value="PARTIAL">Partial</option>
+              <option value="CANCELLED">Cancelled</option>
             </select>
           </div>
         </div>

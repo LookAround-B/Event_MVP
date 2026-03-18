@@ -11,7 +11,7 @@ async function handler(
 
   if (method === 'GET') {
     try {
-      const { page = '1', limit = '10', eventId, status } = req.query;
+      const { page = '1', limit = '10', eventId, status, format } = req.query;
       const pageNum = Math.max(1, parseInt(page as string) || 1);
       const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
       const skip = (pageNum - 1) * limitNum;
@@ -20,6 +20,27 @@ async function handler(
         ...(eventId && { eventId: eventId as string }),
         ...(status && { paymentStatus: status as 'PAID' | 'UNPAID' | 'PARTIAL' | 'CANCELLED' }),
       };
+
+      if (format === 'csv') {
+        const allRegs = await prisma.registration.findMany({
+          where,
+          include: {
+            rider: { select: { firstName: true, lastName: true, email: true } },
+            horse: { select: { name: true } },
+            event: { select: { name: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+        const header = 'Rider Name,Email,Horse,Event,Event Amount,Stable Amount,GST Amount,Total Amount,Payment Status,Created';
+        const rows = allRegs.map(r =>
+          `"${r.rider.firstName} ${r.rider.lastName}","${r.rider.email}","${r.horse.name}","${r.event.name}","${r.eventAmount}","${r.stableAmount}","${r.gstAmount}","${r.totalAmount}","${r.paymentStatus}","${r.createdAt.toISOString().split('T')[0]}"`
+        );
+        const csv = [header, ...rows].join('\n');
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=registrations.csv');
+        res.write(csv as any);
+        return res.end();
+      }
 
       const [registrations, total] = await Promise.all([
         prisma.registration.findMany({
@@ -130,10 +151,10 @@ async function handler(
         });
       }
 
-      // Fetch category to get price
+      // Fetch category to get price and GST rates
       const category = await prisma.eventCategory.findUnique({
         where: { id: categoryId },
-        select: { id: true, name: true, price: true },
+        select: { id: true, name: true, price: true, cgst: true, sgst: true, igst: true },
       });
 
       if (!category) {
@@ -145,18 +166,58 @@ async function handler(
         });
       }
 
-      // Default GST rates (CGST: 9%, SGST: 9%, IGST: 18%)
-      const CGST_RATE = 9;
-      const SGST_RATE = 9;
-      const IGST_RATE = 18;
+      // Use category-specific GST rates (fall back to defaults if all zero)
+      const cgstRate = category.cgst || 0;
+      const sgstRate = category.sgst || 0;
+      const igstRate = category.igst || 0;
+      const hasGstRates = cgstRate > 0 || sgstRate > 0 || igstRate > 0;
+      const effectiveIgstRate = hasGstRates ? igstRate : 18;
+      const effectiveCgstRate = hasGstRates ? cgstRate : 9;
+      const effectiveSgstRate = hasGstRates ? sgstRate : 9;
 
-      // Calculate amounts
+      // Calculate event amount from category price
       const eventAmount = category.price || 0;
-      const stableAmount = 0; // Can be configured later
+
+      // Calculate stable amount if stableId provided
+      const { stableId, clubId, numberOfStables = 1 } = req.body;
+      let stableAmount = 0;
+
+      if (stableId) {
+        const stable = await prisma.stable.findUnique({
+          where: { id: stableId },
+          select: { id: true, pricePerStable: true, isAvailable: true, eventId: true },
+        });
+
+        if (!stable || stable.eventId !== eventId) {
+          return res.status(404).json({
+            success: false,
+            message: 'Stable not found for this event',
+            error: 'NOT_FOUND',
+            statusCode: 404,
+          });
+        }
+
+        if (!stable.isAvailable) {
+          return res.status(400).json({
+            success: false,
+            message: 'Stable is not available',
+            error: 'STABLE_UNAVAILABLE',
+            statusCode: 400,
+          });
+        }
+
+        stableAmount = (stable.pricePerStable || 0) * (Number(numberOfStables) || 1);
+      }
+
       const subtotal = eventAmount + stableAmount;
-      
-      // Use IGST by default (18%)
-      const gstAmount = Math.round((subtotal * IGST_RATE) / 100);
+
+      // Apply IGST if set, otherwise CGST+SGST
+      let gstAmount: number;
+      if (effectiveIgstRate > 0) {
+        gstAmount = Math.round((subtotal * effectiveIgstRate) / 100);
+      } else {
+        gstAmount = Math.round((subtotal * (effectiveCgstRate + effectiveSgstRate)) / 100);
+      }
       const totalAmount = subtotal + gstAmount;
 
       const registration = await prisma.registration.create({
@@ -165,6 +226,7 @@ async function handler(
           riderId,
           horseId,
           categoryId,
+          ...(clubId && { clubId }),
           paymentStatus: 'UNPAID',
           eventAmount,
           stableAmount,
@@ -178,6 +240,20 @@ async function handler(
           category: true,
         },
       });
+
+      // Create stable booking if stable was selected
+      if (stableId) {
+        await prisma.stableBooking.create({
+          data: {
+            registrationId: registration.id,
+            stableId,
+            ...(clubId && { clubId }),
+            numberOfStables: Number(numberOfStables) || 1,
+            totalPrice: stableAmount,
+            bookingDate: new Date(),
+          },
+        });
+      }
 
       return res.status(201).json({
         success: true,

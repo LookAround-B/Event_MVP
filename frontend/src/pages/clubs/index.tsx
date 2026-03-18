@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiPlus, FiDownload } from 'react-icons/fi';
 
 interface Club {
   id: string;
@@ -48,6 +49,23 @@ export default function ClubsList() {
     }
   };
 
+  const handleExportCSV = async () => {
+    try {
+      const params: any = { format: 'csv' };
+      if (search) params.search = search;
+      const res = await api.get('/api/clubs', { params, responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'clubs.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+      alert('Failed to export CSV');
+    }
+  };
+
   const deleteClub = async (id: string) => {
     if (confirm('Are you sure you want to delete this club?')) {
       try {
@@ -63,11 +81,17 @@ export default function ClubsList() {
 
   return (
     <div>
+      <Head><title>Clubs | Equestrian Events</title></Head>
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-white">Clubs</h2>
-        <Link href="/clubs/create" className="btn-primary">
-          <FiPlus className="inline mr-2" /> Add Club
-        </Link>
+        <div className="flex gap-3">
+          <button onClick={handleExportCSV} className="btn-secondary">
+            <FiDownload className="inline mr-2" /> Export CSV
+          </button>
+          <Link href="/clubs/create" className="btn-primary">
+            <FiPlus className="inline mr-2" /> Add Club
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
