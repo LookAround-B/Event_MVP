@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
 import { withRole } from '@/lib/auth-middleware';
-import { validateInput } from '@/lib/validation';
 import { ApiResponse } from '@/types';
 
 async function handler(
@@ -88,24 +87,38 @@ async function handler(
     try {
       const { registrationId, amount, cgstAmount = 0, sgstAmount = 0, igstAmount = 0, paymentMethod, referenceNumber, notes } = req.body;
 
-      const validation = validateInput({
-        registrationId: { type: 'string', required: true },
-        amount: { type: 'number', required: true, min: 0.01 },
-        cgstAmount: { type: 'number', required: false, min: 0 },
-        sgstAmount: { type: 'number', required: false, min: 0 },
-        igstAmount: { type: 'number', required: false, min: 0 },
-        paymentMethod: { type: 'string', required: false, max: 100 },
-        referenceNumber: { type: 'string', required: false, max: 100 },
-        notes: { type: 'string', required: false, max: 500 },
-      }, req.body);
-
-      if (!validation.valid) {
+      // Manual field validation
+      if (!registrationId || typeof registrationId !== 'string' || !registrationId.trim()) {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
           error: 'VALIDATION_ERROR',
           statusCode: 400,
-          data: validation.errors,
+          data: { registrationId: 'Registration ID is required' },
+        });
+      }
+
+      if (!amount || typeof amount !== 'number' || amount <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+          data: { amount: 'Amount must be greater than 0' },
+        });
+      }
+
+      // Verify registration exists
+      const registration = await prisma.registration.findUnique({
+        where: { id: registrationId },
+      });
+
+      if (!registration) {
+        return res.status(404).json({
+          success: false,
+          message: 'Registration not found',
+          error: 'NOT_FOUND',
+          statusCode: 404,
         });
       }
 

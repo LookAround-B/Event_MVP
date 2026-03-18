@@ -216,6 +216,9 @@ async function main() {
           ...event,
           isPublished: false,
           venueId: venue.id,
+          categories: {
+            connect: createdCategories.map(cat => ({ id: cat.id })),
+          },
         },
       });
     }

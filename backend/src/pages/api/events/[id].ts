@@ -17,6 +17,7 @@ async function handler(
       const event = await prisma.event.findUnique({
         where: { id: eventId },
         include: {
+          categories: true,
           registrations: {
             include: {
               rider: true,

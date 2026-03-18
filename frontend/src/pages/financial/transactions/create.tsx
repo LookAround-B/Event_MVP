@@ -1,0 +1,311 @@
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import api from '@/lib/api';
+import ProtectedRoute from '@/lib/protected-route';
+import { FiArrowLeft } from 'react-icons/fi';
+
+interface Registration {
+  id: string;
+  rider: { firstName: string; lastName: string };
+  event: { name: string };
+  totalAmount: number;
+}
+
+export default function CreateTransaction() {
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    registrationId: '',
+    amount: '',
+    cgstAmount: '',
+    sgstAmount: '',
+    igstAmount: '',
+    paymentMethod: 'Credit Card',
+    referenceNumber: '',
+    notes: '',
+  });
+
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchRegistrations();
+  }, []);
+
+  const fetchRegistrations = async () => {
+    try {
+      setDataLoading(true);
+      const response = await api.get('/api/registrations?limit=100&status=UNPAID');
+      setRegistrations(response.data.data.registrations || []);
+    } catch (err) {
+      console.error('Failed to fetch registrations:', err);
+      setError('Failed to load registrations');
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const handleRegistrationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const regId = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      registrationId: regId,
+      amount: '',
+      cgstAmount: '',
+      sgstAmount: '',
+      igstAmount: '',
+    }));
+
+    const reg = registrations.find(r => r.id === regId) || null;
+    setSelectedRegistration(reg);
+
+    if (reg) {
+      setFormData(prev => ({
+        ...prev,
+        amount: reg.totalAmount.toString(),
+      }));
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    if (!formData.registrationId || !formData.amount) {
+      setError('Registration and amount are required');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const payload = {
+        registrationId: formData.registrationId,
+        amount: parseFloat(formData.amount),
+        cgstAmount: parseFloat(formData.cgstAmount || '0'),
+        sgstAmount: parseFloat(formData.sgstAmount || '0'),
+        igstAmount: parseFloat(formData.igstAmount || '0'),
+        paymentMethod: formData.paymentMethod || null,
+        referenceNumber: formData.referenceNumber || null,
+        notes: formData.notes || null,
+      };
+
+      await api.post('/api/financial/transactions', payload);
+      alert('Transaction created successfully!');
+      router.push('/financial');
+    } catch (err: any) {
+      console.error('Failed to create transaction:', err);
+      setError(err.response?.data?.message || 'Failed to create transaction');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (dataLoading) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+              <p className="text-gray-300 mt-4">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  return (
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center mb-8">
+            <Link href="/financial" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
+              <FiArrowLeft /> Back to Financial
+            </Link>
+          </div>
+
+          <div className="card overflow-hidden">
+            {/* Title Section */}
+            <div className="px-8 py-6 border-b border-white border-opacity-10">
+              <h1 className="text-3xl font-bold text-white">Record Payment</h1>
+              <p className="text-gray-300 mt-2">Create a new transaction record</p>
+            </div>
+
+            {/* Form Section */}
+            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+              {error && (
+                <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-4">
+                  <p className="text-red-300 font-medium">{error}</p>
+                </div>
+              )}
+
+              {/* Registration - Mandatory */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Registration <span className="text-red-400">*</span>
+                </label>
+                <select
+                  name="registrationId"
+                  value={formData.registrationId}
+                  onChange={handleRegistrationChange}
+                  required
+                  className="form-input"
+                >
+                  <option value="">Select a registration</option>
+                  {registrations.map(reg => (
+                    <option key={reg.id} value={reg.id} className="bg-slate-800 text-white">
+                      {reg.rider.firstName} {reg.rider.lastName} - {reg.event.name} (₹{reg.totalAmount})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Amount Section */}
+              <div className="border-t border-white border-opacity-10 pt-6">
+                <h3 className="text-sm font-semibold text-white mb-4">Payment Amount</h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Amount <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="amount"
+                      value={formData.amount}
+                      onChange={handleChange}
+                      required
+                      step="0.01"
+                      min="0.01"
+                      placeholder="0.00"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">Payment Method</label>
+                    <select
+                      name="paymentMethod"
+                      value={formData.paymentMethod}
+                      onChange={handleChange}
+                      className="form-input"
+                    >
+                      <option value="Credit Card" className="bg-slate-800 text-white">Credit Card</option>
+                      <option value="Debit Card" className="bg-slate-800 text-white">Debit Card</option>
+                      <option value="UPI" className="bg-slate-800 text-white">UPI</option>
+                      <option value="Bank Transfer" className="bg-slate-800 text-white">Bank Transfer</option>
+                      <option value="Cheque" className="bg-slate-800 text-white">Cheque</option>
+                      <option value="Cash" className="bg-slate-800 text-white">Cash</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* GST Breakdown */}
+                <div className="grid grid-cols-3 gap-4 mt-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">CGST (9%)</label>
+                    <input
+                      type="number"
+                      name="cgstAmount"
+                      value={formData.cgstAmount}
+                      onChange={handleChange}
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">SGST (9%)</label>
+                    <input
+                      type="number"
+                      name="sgstAmount"
+                      value={formData.sgstAmount}
+                      onChange={handleChange}
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      className="form-input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">IGST (18%)</label>
+                    <input
+                      type="number"
+                      name="igstAmount"
+                      value={formData.igstAmount}
+                      onChange={handleChange}
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Reference Section */}
+              <div className="border-t border-white border-opacity-10 pt-6">
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Reference Number</label>
+                  <input
+                    type="text"
+                    name="referenceNumber"
+                    value={formData.referenceNumber}
+                    onChange={handleChange}
+                    placeholder="e.g., CHQ-12345, TXN-67890"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="mt-6">
+                  <label className="block text-sm font-semibold text-white mb-2">Notes</label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleChange}
+                    placeholder="Any additional details about this transaction..."
+                    rows={4}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              {/* Submit */}
+              <div className="flex gap-4 pt-6 border-t border-white border-opacity-10">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 btn-primary"
+                >
+                  {loading ? 'Creating...' : 'Record Payment'}
+                </button>
+                <Link
+                  href="/financial"
+                  className="flex-1 text-center btn-secondary"
+                >
+                  Cancel
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+}
