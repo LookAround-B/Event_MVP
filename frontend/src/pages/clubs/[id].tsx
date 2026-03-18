@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import axios from 'axios';
+import api from '@/lib/api';
 import { FiArrowLeft, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 interface Rider {
@@ -65,7 +65,7 @@ export default function ClubDetail() {
 
   const fetchClubDetails = async () => {
     try {
-      const response = await axios.get(`/api/clubs/${id}`);
+      const response = await api.get(`/api/clubs/${id}`);
       setClub(response.data.data);
       fetchRiders();
       fetchHorses();
@@ -78,7 +78,7 @@ export default function ClubDetail() {
 
   const fetchRiders = async () => {
     try {
-      const response = await axios.get(`/api/clubs/${id}/riders`);
+      const response = await api.get(`/api/clubs/${id}/riders`);
       setRiders(response.data.data || []);
     } catch (error) {
       console.error('Failed to fetch riders:', error);
@@ -87,7 +87,7 @@ export default function ClubDetail() {
 
   const fetchHorses = async () => {
     try {
-      const response = await axios.get(`/api/clubs/${id}/horses`);
+      const response = await api.get(`/api/clubs/${id}/horses`);
       setHorses(response.data.data || []);
     } catch (error) {
       console.error('Failed to fetch horses:', error);
@@ -97,7 +97,7 @@ export default function ClubDetail() {
   const addRider = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`/api/clubs/${id}/riders`, riderForm);
+      await api.post(`/api/clubs/${id}/riders`, riderForm);
       setRiderForm({ firstName: '', lastName: '', email: '', mobile: '', efiRiderId: '', dob: '', gender: 'Male' });
       setShowAddRider(false);
       fetchRiders();
@@ -109,7 +109,7 @@ export default function ClubDetail() {
   const addHorse = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`/api/clubs/${id}/horses`, horseForm);
+      await api.post(`/api/clubs/${id}/horses`, horseForm);
       setHorseForm({ name: '', color: '', gender: 'Mare', yearOfBirth: new Date().getFullYear(), passportNumber: '' });
       setShowAddHorse(false);
       fetchHorses();
@@ -121,7 +121,7 @@ export default function ClubDetail() {
   const deleteRider = async (riderId: string) => {
     if (confirm('Delete this rider?')) {
       try {
-        await axios.delete(`/api/riders/${riderId}`);
+        await api.delete(`/api/riders/${riderId}`);
         fetchRiders();
       } catch (error) {
         console.error('Failed to delete rider:', error);
@@ -132,7 +132,7 @@ export default function ClubDetail() {
   const deleteHorse = async (horseId: string) => {
     if (confirm('Delete this horse?')) {
       try {
-        await axios.delete(`/api/horses/${horseId}`);
+        await api.delete(`/api/horses/${horseId}`);
         fetchHorses();
       } catch (error) {
         console.error('Failed to delete horse:', error);

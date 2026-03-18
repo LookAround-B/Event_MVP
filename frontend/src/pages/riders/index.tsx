@@ -9,8 +9,8 @@ interface Rider {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
-  level: string;
+  mobile?: string;
+  gender?: string;
   registrationCount: number;
 }
 
@@ -60,35 +60,25 @@ export default function Riders() {
     }
   };
 
-  const getLevelColor = (level: string) => {
-    const colors: Record<string, string> = {
-      beginner: 'badge-info',
-      intermediate: 'badge-success',
-      advanced: 'badge-warning',
-      professional: 'badge-danger',
-    };
-    return colors[level] || 'badge-secondary';
-  };
-
   return (
     <ProtectedRoute>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Riders</h2>
+          <h2 className="text-3xl font-bold text-white">Riders</h2>
           <Link href="/riders/create" className="btn-primary">
             <FiPlus className="inline mr-2" /> New Rider
           </Link>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-6">
+          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
 
         <div className="mb-6 card">
           <div className="relative">
-            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+            <FiSearch className="absolute left-3 top-3 text-gray-500" />
             <input
               type="text"
               placeholder="Search riders by name, email..."
@@ -105,11 +95,11 @@ export default function Riders() {
         <div className="card table-container">
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Loading riders...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
+              <p className="text-gray-300 mt-2">Loading riders...</p>
             </div>
           ) : riders.length === 0 ? (
-            <div className="text-center py-8 text-gray-600">
+            <div className="text-center py-8 text-gray-300">
               {searchTerm ? 'No riders match your search' : 'No riders registered yet. Add one to get started!'}
             </div>
           ) : (
@@ -120,7 +110,7 @@ export default function Riders() {
                     <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
-                    <th>Level</th>
+                    <th>Gender</th>
                     <th>Registrations</th>
                     <th>Actions</th>
                   </tr>
@@ -130,24 +120,20 @@ export default function Riders() {
                     <tr key={rider.id}>
                       <td className="font-medium">{rider.firstName} {rider.lastName}</td>
                       <td>{rider.email}</td>
-                      <td>{rider.phone || '-'}</td>
-                      <td>
-                        <span className={`badge ${getLevelColor(rider.level)}`}>
-                          {rider.level.charAt(0).toUpperCase() + rider.level.slice(1)}
-                        </span>
-                      </td>
+                      <td>{rider.mobile || '-'}</td>
+                      <td>{rider.gender || '-'}</td>
                       <td>{rider.registrationCount}</td>
                       <td>
                         <div className="flex space-x-2">
-                          <Link href={`/riders/${rider.id}`} className="text-blue-600 hover:text-blue-900">
+                          <Link href={`/riders/${rider.id}`} className="text-blue-400 hover:text-blue-300">
                             <FiEye className="w-4 h-4" title="View" />
                           </Link>
-                          <Link href={`/riders/${rider.id}/edit`} className="text-green-600 hover:text-green-900">
+                          <Link href={`/riders/${rider.id}/edit`} className="text-green-400 hover:text-green-300">
                             <FiEdit className="w-4 h-4" title="Edit" />
                           </Link>
                           <button
                             onClick={() => handleDelete(rider.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-400 hover:text-red-300"
                             title="Delete"
                           >
                             <FiTrash2 className="w-4 h-4" />
@@ -168,7 +154,7 @@ export default function Riders() {
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2">
+                  <span className="px-4 py-2 text-gray-300">
                     Page {page} of {totalPages}
                   </span>
                   <button

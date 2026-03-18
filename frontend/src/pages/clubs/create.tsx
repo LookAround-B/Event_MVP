@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import axios from 'axios';
+import api from '@/lib/api';
 
 export default function CreateClub() {
   const router = useRouter();
@@ -35,7 +35,7 @@ export default function CreateClub() {
     setLoading(true);
 
     try {
-      await axios.post('/api/clubs', formData);
+      await api.post('/api/clubs', formData);
       router.push('/clubs');
     } catch (error: any) {
       console.error('Failed to create club:', error);

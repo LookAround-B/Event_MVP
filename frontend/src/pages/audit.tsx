@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '@/lib/api';
 import { FiFilter, FiSearch } from 'react-icons/fi';
+import ProtectedRoute from '@/lib/protected-route';
 
 interface AuditLog {
   id: string;
@@ -35,7 +36,7 @@ export default function AuditLogs() {
   const fetchAuditLogs = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/audit', {
+      const response = await api.get('/api/audit', {
         params: {
           page,
           limit,
@@ -69,14 +70,14 @@ export default function AuditLogs() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Audit Logs</h1>
+    <ProtectedRoute>
+      <div>
+        <h2 className="text-3xl font-bold text-white mb-8">Audit Logs</h2>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Filters */}
+        <div className="card mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Entity</label>
+            <label className="block text-sm font-medium text-white mb-2">Entity</label>
             <input
               type="text"
               value={entity}
@@ -85,11 +86,11 @@ export default function AuditLogs() {
                 setPage(1);
               }}
               placeholder="e.g., User, Event, Club"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="form-input"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Action</label>
+            <label className="block text-sm font-medium text-white mb-2">Action</label>
             <input
               type="text"
               value={action}
@@ -98,7 +99,7 @@ export default function AuditLogs() {
                 setPage(1);
               }}
               placeholder="e.g., CREATE, UPDATE, DELETE"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="form-input"
             />
           </div>
           <div className="flex items-end">
@@ -108,127 +109,90 @@ export default function AuditLogs() {
                 setAction('');
                 setPage(1);
               }}
-              className="w-full px-4 py-2 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition"
+              className="btn-secondary w-full"
             >
               Clear Filters
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Logs Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        {loading ? (
-          <div className="p-6 text-center text-gray-500">Loading audit logs...</div>
-        ) : logs.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">No audit logs found.</div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+        {/* Logs Table */}
+        <div className="card table-container">
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
+              <p className="text-gray-300 mt-2">Loading audit logs...</p>
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="text-center py-8 text-gray-300">No audit logs found.</div>
+          ) : (
+            <>
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Date & Time
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Entity
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Action
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Changes
-                    </th>
+                    <th>Date & Time</th>
+                    <th>User</th>
+                    <th>Entity</th>
+                    <th>Action</th>
+                    <th>Changes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody>
                   {logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(log.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <tr key={log.id}>
+                      <td className="text-sm">{formatDate(log.createdAt)}</td>
+                      <td className="text-sm">
                         <div className="font-medium">{log.user.firstName} {log.user.lastName}</div>
-                        <div className="text-gray-500 text-xs">{log.user.email}</div>
+                        <div className="text-gray-400 text-xs">{log.user.email}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                          {log.entity}
-                        </span>
+                      <td className="text-sm">
+                        <span className="badge badge-info">{log.entity}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="text-sm">
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
                             log.action.includes('CREATED') || log.action.includes('CREATE')
-                              ? 'bg-green-100 text-green-800'
+                              ? 'bg-green-500/20 text-green-300'
                               : log.action.includes('UPDATED') || log.action.includes('UPDATE')
-                              ? 'bg-yellow-100 text-yellow-800'
+                              ? 'bg-yellow-500/20 text-yellow-300'
                               : log.action.includes('DELETED') || log.action.includes('DELETE')
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-gray-100 text-gray-800'
+                              ? 'bg-red-500/20 text-red-300'
+                              : 'bg-gray-500/20 text-gray-300'
                           }`}
                         >
                           {log.action}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
+                      <td className="text-sm text-gray-400 max-w-xs truncate">
                         {getChangesSummary(log)}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
 
-            {/* Pagination */}
-            <div className="bg-white px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-              <div className="text-sm text-gray-600">
-                Showing {logs.length > 0 ? (page - 1) * limit + 1 : 0} to{' '}
-                {Math.min(page * limit, total)} of {total} results
-              </div>
-              <div className="flex gap-2">
+              {/* Pagination */}
+              <div className="flex justify-center gap-2 mt-4">
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="btn-secondary disabled:opacity-50"
                 >
                   Previous
                 </button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    const startPage = Math.max(1, page - 2);
-                    const endPage = Math.min(totalPages, startPage + 4);
-                    return i + startPage;
-                  }).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`px-3 py-2 rounded-lg transition ${
-                        p === page
-                          ? 'bg-indigo-600 text-white'
-                          : 'border border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
+                <span className="px-4 py-2 text-gray-300">Page {page} of {totalPages}</span>
                 <button
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="btn-secondary disabled:opacity-50"
                 >
                   Next
                 </button>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

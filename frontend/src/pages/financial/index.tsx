@@ -6,21 +6,19 @@ import ProtectedRoute from '@/lib/protected-route';
 
 interface Transaction {
   id: string;
-  type: 'payment' | 'refund' | 'adjustment';
+  registrationId: string;
   amount: number;
-  method: string;
+  gstAmount: number;
+  cgstAmount: number;
+  sgstAmount: number;
+  igstAmount: number;
+  totalAmount: number;
+  transactionDate: string;
   status: string;
-  description: string;
+  paymentMethod?: string;
+  referenceNumber?: string;
+  notes?: string;
   createdAt: string;
-  registration: {
-    rider: {
-      firstName: string;
-      lastName: string;
-    };
-    event: {
-      name: string;
-    };
-  };
 }
 
 interface Summary {
@@ -74,27 +72,14 @@ export default function Financial() {
     }
   };
 
-  const getTypeColor = (type: string) => {
-    const colors: Record<string, string> = {
-      payment: 'text-green-600',
-      refund: 'text-red-600',
-      adjustment: 'text-blue-600',
-    };
-    return colors[type] || 'text-gray-600';
-  };
-
-  const getTypeSign = (type: string) => {
-    return type === 'refund' ? '-' : '+';
-  };
-
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      completed: 'badge-success',
-      pending: 'badge-warning',
-      failed: 'badge-danger',
-      cancelled: 'badge-secondary',
+      PAID: 'badge-success',
+      PARTIAL: 'badge-warning',
+      UNPAID: 'badge-danger',
+      CANCELLED: 'badge-secondary',
     };
-    return colors[status] || 'badge-secondary';
+    return colors[status?.toUpperCase()] || 'badge-secondary';
   };
 
   return (
@@ -112,7 +97,7 @@ export default function Financial() {
           <div className="card">
             <p className="text-gray-300 text-sm font-medium">Total Revenue</p>
             <p className="text-3xl font-bold text-white mt-2">
-              ${(summary.totalRevenue / 100).toFixed(2)}
+              ₹{(summary.totalRevenue).toFixed(2)}
             </p>
           </div>
           <div className="card">
@@ -122,7 +107,7 @@ export default function Financial() {
           <div className="card">
             <p className="text-gray-300 text-sm font-medium">Average Transaction</p>
             <p className="text-3xl font-bold text-white mt-2">
-              ${(summary.averageTransaction / 100).toFixed(2)}
+              ₹{(summary.averageTransaction).toFixed(2)}
             </p>
           </div>
         </div>
@@ -186,34 +171,33 @@ export default function Financial() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Rider / Event</th>
+                    <th>Ref #</th>
                     <th>Amount</th>
-                    <th>Type</th>
+                    <th>CGST</th>
+                    <th>SGST</th>
+                    <th>IGST</th>
+                    <th>Total</th>
                     <th>Method</th>
                     <th>Status</th>
                     <th>Date</th>
-                    <th>Description</th>
                   </tr>
                 </thead>
                 <tbody>
                   {transactions.map((trans) => (
                     <tr key={trans.id}>
-                      <td className="font-medium">
-                        <div>{trans.registration.rider.firstName} {trans.registration.rider.lastName}</div>
-                        <div className="text-sm text-gray-600">{trans.registration.event.name}</div>
-                      </td>
-                      <td className={`font-bold ${getTypeColor(trans.type)}`}>
-                        {getTypeSign(trans.type)}${(trans.amount / 100).toFixed(2)}
-                      </td>
-                      <td className="capitalize">{trans.type}</td>
-                      <td className="capitalize">{trans.method.replace('_', ' ')}</td>
+                      <td className="font-medium text-sm">{trans.referenceNumber || trans.id.slice(0, 8)}</td>
+                      <td>₹{trans.amount.toFixed(2)}</td>
+                      <td className="text-sm">₹{trans.cgstAmount.toFixed(2)}</td>
+                      <td className="text-sm">₹{trans.sgstAmount.toFixed(2)}</td>
+                      <td className="text-sm">₹{trans.igstAmount.toFixed(2)}</td>
+                      <td className="font-bold text-green-600">₹{trans.totalAmount.toFixed(2)}</td>
+                      <td className="capitalize">{trans.paymentMethod?.replace('_', ' ') || '-'}</td>
                       <td>
                         <span className={`badge ${getStatusColor(trans.status)}`}>
                           {trans.status.charAt(0).toUpperCase() + trans.status.slice(1)}
                         </span>
                       </td>
                       <td>{new Date(trans.createdAt).toLocaleDateString()}</td>
-                      <td className="text-sm text-gray-600">{trans.description || '-'}</td>
                     </tr>
                   ))}
                 </tbody>

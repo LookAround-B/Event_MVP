@@ -64,14 +64,14 @@ export default function Events() {
     <ProtectedRoute>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Events</h2>
+          <h2 className="text-3xl font-bold text-white">Events</h2>
           <Link href="/events/create" className="btn-primary">
             <FiPlus className="inline mr-2" /> New Event
           </Link>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-6">
+          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}

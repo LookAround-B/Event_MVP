@@ -1,10 +1,10 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
+// Use relative URLs so requests go through Next.js proxy rewrites
+// locally → proxied to localhost:4000, on Vercel → proxied to NEXT_PUBLIC_API_URL
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: '',
   headers: {
     'Content-Type': 'application/json',
   },

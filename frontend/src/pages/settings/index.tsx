@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '@/lib/api';
 import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
 
 interface EventType {
@@ -48,8 +48,8 @@ export default function Settings() {
     try {
       setLoading(true);
       const [types, categories] = await Promise.all([
-        axios.get('/api/settings/event-types'),
-        axios.get('/api/settings/event-categories'),
+        api.get('/api/settings/event-types'),
+        api.get('/api/settings/event-categories'),
       ]);
       setEventTypes(types.data.data || []);
       setEventCategories(categories.data.data || []);
@@ -62,7 +62,7 @@ export default function Settings() {
 
   const saveGeneralSettings = async () => {
     try {
-      await axios.put('/api/settings', generalSettings);
+      await api.put('/api/settings', generalSettings);
       alert('Settings saved successfully');
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -75,7 +75,7 @@ export default function Settings() {
       return;
     }
     try {
-      await axios.post('/api/settings/event-types', newEventType);
+      await api.post('/api/settings/event-types', newEventType);
       setNewEventType({ name: '', shortCode: '' });
       fetchSettings();
     } catch (error) {
@@ -101,7 +101,7 @@ export default function Settings() {
       return;
     }
     try {
-      await axios.post('/api/settings/event-categories', newCategory);
+      await api.post('/api/settings/event-categories', newCategory);
       setNewCategory({ name: '', price: '', cgst: '', sgst: '', igst: '' });
       fetchSettings();
     } catch (error) {
@@ -112,7 +112,7 @@ export default function Settings() {
   const deleteCategory = async (id: string) => {
     if (confirm('Delete this category?')) {
       try {
-        await axios.delete('/api/settings/event-categories', { data: { id } });
+        await api.delete('/api/settings/event-categories', { data: { id } });
         fetchSettings();
       } catch (error) {
         console.error('Failed to delete:', error);

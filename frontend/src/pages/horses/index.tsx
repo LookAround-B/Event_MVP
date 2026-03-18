@@ -64,21 +64,21 @@ export default function Horses() {
     <ProtectedRoute>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Horses</h2>
+          <h2 className="text-3xl font-bold text-white">Horses</h2>
           <Link href="/horses/create" className="btn-primary">
             <FiPlus className="inline mr-2" /> New Horse
           </Link>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-6">
+          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
 
         <div className="mb-6 card">
           <div className="relative">
-            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+            <FiSearch className="absolute left-3 top-3 text-gray-500" />
             <input
               type="text"
               placeholder="Search horses by name, breed, color..."
@@ -95,11 +95,11 @@ export default function Horses() {
         <div className="card table-container">
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Loading horses...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
+              <p className="text-gray-300 mt-2">Loading horses...</p>
             </div>
           ) : horses.length === 0 ? (
-            <div className="text-center py-8 text-gray-600">
+            <div className="text-center py-8 text-gray-300">
               {searchTerm ? 'No horses match your search' : 'No horses in inventory yet. Add one to get started!'}
             </div>
           ) : (
@@ -127,15 +127,15 @@ export default function Horses() {
                       <td><span className="badge badge-info">{horse.registrationCount}</span></td>
                       <td>
                         <div className="flex space-x-2">
-                          <Link href={`/horses/${horse.id}`} className="text-blue-600 hover:text-blue-900">
+                          <Link href={`/horses/${horse.id}`} className="text-blue-400 hover:text-blue-300">
                             <FiEye className="w-4 h-4" title="View" />
                           </Link>
-                          <Link href={`/horses/${horse.id}/edit`} className="text-green-600 hover:text-green-900">
+                          <Link href={`/horses/${horse.id}/edit`} className="text-green-400 hover:text-green-300">
                             <FiEdit className="w-4 h-4" title="Edit" />
                           </Link>
                           <button
                             onClick={() => handleDelete(horse.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-400 hover:text-red-300"
                             title="Delete"
                           >
                             <FiTrash2 className="w-4 h-4" />
