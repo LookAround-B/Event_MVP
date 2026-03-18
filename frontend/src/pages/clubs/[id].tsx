@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import api from '@/lib/api';
+import ProtectedRoute from '@/lib/protected-route';
 import { FiArrowLeft, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 interface Rider {
@@ -140,82 +142,107 @@ export default function ClubDetail() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (!club) return <div className="p-6">Club not found</div>;
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+            <p className="text-gray-300 mt-2">Loading...</p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!club) {
+    return (
+      <ProtectedRoute>
+        <div className="text-center py-8 text-gray-400">Club not found</div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <button
-        onClick={() => router.back()}
-        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6"
-      >
-        <FiArrowLeft /> Back
-      </button>
-
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h1 className="text-3xl font-bold mb-2">{club.name}</h1>
-        <p className="text-gray-600 mb-4">{club.shortCode}</p>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="font-semibold">Email:</span> {club.email}
-          </div>
-          <div>
-            <span className="font-semibold">City:</span> {club.city}
-          </div>
-          <div>
-            <span className="font-semibold">Address:</span> {club.address}
-          </div>
-          <div>
-            <span className="font-semibold">Description:</span> {club.description}
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="flex border-b">
-          <button
-            onClick={() => setActiveTab('riders')}
-            className={`px-6 py-3 font-semibold ${
-              activeTab === 'riders'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            Riders ({riders.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('horses')}
-            className={`px-6 py-3 font-semibold ${
-              activeTab === 'horses'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            Horses ({horses.length})
-          </button>
+    <ProtectedRoute>
+      <div className="space-y-6">
+        <div className="flex items-center gap-4 mb-8">
+          <Link href="/clubs" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
+            <FiArrowLeft /> Back to Clubs
+          </Link>
         </div>
 
-        <div className="p-6">
+        {/* Club Details Card */}
+        <div className="card">
+          <h1 className="text-3xl font-bold text-white mb-4">{club.name}</h1>
+          <div className="grid grid-cols-2 gap-4 text-gray-300">
+            <div>
+              <span className="text-gray-400">Code:</span> 
+              <p className="text-white">{club.shortCode}</p>
+            </div>
+            <div>
+              <span className="text-gray-400">Email:</span> 
+              <p className="text-white">{club.email}</p>
+            </div>
+            <div>
+              <span className="text-gray-400">City:</span> 
+              <p className="text-white">{club.city}</p>
+            </div>
+            <div>
+              <span className="text-gray-400">Address:</span> 
+              <p className="text-white">{club.address}</p>
+            </div>
+            <div className="col-span-2">
+              <span className="text-gray-400">Description:</span> 
+              <p className="text-white">{club.description}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="card">
+          <div className="flex border-b border-white border-opacity-10 mb-6">
+            <button
+              onClick={() => setActiveTab('riders')}
+              className={`px-6 py-3 font-semibold transition-colors ${
+                activeTab === 'riders'
+                  ? 'text-purple-400 border-b-2 border-purple-400'
+                  : 'text-gray-400 hover:text-gray-300'
+              }`}
+            >
+              Riders ({riders.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('horses')}
+              className={`px-6 py-3 font-semibold transition-colors ${
+                activeTab === 'horses'
+                  ? 'text-purple-400 border-b-2 border-purple-400'
+                  : 'text-gray-400 hover:text-gray-300'
+              }`}
+            >
+              Horses ({horses.length})
+            </button>
+          </div>
+
           {activeTab === 'riders' && (
             <div>
               <button
                 onClick={() => setShowAddRider(!showAddRider)}
-                className="mb-4 bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700"
+                className="btn-secondary mb-4 flex items-center gap-2"
               >
                 <FiPlus /> Add Rider
               </button>
 
               {showAddRider && (
-                <form onSubmit={addRider} className="bg-gray-100 p-4 rounded mb-4">
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                <form onSubmit={addRider} className="space-y-4 mb-6 pb-6 border-b border-white border-opacity-10">
+                  <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
                       placeholder="First Name"
                       value={riderForm.firstName}
                       onChange={e => setRiderForm({ ...riderForm, firstName: e.target.value })}
                       required
-                      className="px-3 py-2 border border-gray-300 rounded"
+                      className="form-input"
                     />
                     <input
                       type="text"
@@ -223,7 +250,7 @@ export default function ClubDetail() {
                       value={riderForm.lastName}
                       onChange={e => setRiderForm({ ...riderForm, lastName: e.target.value })}
                       required
-                      className="px-3 py-2 border border-gray-300 rounded"
+                      className="form-input"
                     />
                     <input
                       type="email"
@@ -231,24 +258,24 @@ export default function ClubDetail() {
                       value={riderForm.email}
                       onChange={e => setRiderForm({ ...riderForm, email: e.target.value })}
                       required
-                      className="px-3 py-2 border border-gray-300 rounded"
+                      className="form-input"
                     />
                     <input
                       type="tel"
                       placeholder="Mobile"
                       value={riderForm.mobile}
                       onChange={e => setRiderForm({ ...riderForm, mobile: e.target.value })}
-                      className="px-3 py-2 border border-gray-300 rounded"
+                      className="form-input"
                     />
                   </div>
                   <div className="flex gap-2">
-                    <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <button type="submit" className="btn-primary">
                       Save
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowAddRider(false)}
-                      className="bg-gray-400 text-white px-4 py-2 rounded"
+                      className="btn-secondary"
                     >
                       Cancel
                     </button>
@@ -257,37 +284,37 @@ export default function ClubDetail() {
               )}
 
               {riders.length === 0 ? (
-                <p className="text-gray-500">No riders yet</p>
+                <p className="text-gray-400">No riders yet</p>
               ) : (
-                <table className="w-full">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="px-4 py-2 text-left">Name</th>
-                      <th className="px-4 py-2 text-left">Email</th>
-                      <th className="px-4 py-2 text-left">Mobile</th>
-                      <th className="px-4 py-2 text-left">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {riders.map(rider => (
-                      <tr key={rider.id} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-2">
-                          {rider.firstName} {rider.lastName}
-                        </td>
-                        <td className="px-4 py-2">{rider.email}</td>
-                        <td className="px-4 py-2">{rider.mobile}</td>
-                        <td className="px-4 py-2">
-                          <button
-                            onClick={() => deleteRider(rider.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </td>
+                <div className="table-container">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                        <th>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {riders.map(rider => (
+                        <tr key={rider.id}>
+                          <td className="font-medium">{rider.firstName} {rider.lastName}</td>
+                          <td>{rider.email}</td>
+                          <td>{rider.mobile}</td>
+                          <td>
+                            <button
+                              onClick={() => deleteRider(rider.id)}
+                              className="text-red-400 hover:text-red-300"
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           )}
@@ -296,54 +323,54 @@ export default function ClubDetail() {
             <div>
               <button
                 onClick={() => setShowAddHorse(!showAddHorse)}
-                className="mb-4 bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700"
+                className="btn-secondary mb-4 flex items-center gap-2"
               >
                 <FiPlus /> Add Horse
               </button>
 
               {showAddHorse && (
-                <form onSubmit={addHorse} className="bg-gray-100 p-4 rounded mb-4">
-                  <div className="grid grid-cols-2 gap-4 mb-4">
+                <form onSubmit={addHorse} className="space-y-4 mb-6 pb-6 border-b border-white border-opacity-10">
+                  <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
                       placeholder="Horse Name"
                       value={horseForm.name}
                       onChange={e => setHorseForm({ ...horseForm, name: e.target.value })}
                       required
-                      className="px-3 py-2 border border-gray-300 rounded"
+                      className="form-input"
                     />
                     <input
                       type="text"
                       placeholder="Color"
                       value={horseForm.color}
                       onChange={e => setHorseForm({ ...horseForm, color: e.target.value })}
-                      className="px-3 py-2 border border-gray-300 rounded"
+                      className="form-input"
                     />
                     <input
                       type="text"
                       placeholder="Passport Number"
                       value={horseForm.passportNumber}
                       onChange={e => setHorseForm({ ...horseForm, passportNumber: e.target.value })}
-                      className="px-3 py-2 border border-gray-300 rounded"
+                      className="form-input"
                     />
                     <select
                       value={horseForm.gender}
                       onChange={e => setHorseForm({ ...horseForm, gender: e.target.value })}
-                      className="px-3 py-2 border border-gray-300 rounded"
+                      className="form-input"
                     >
-                      <option>Stallion</option>
-                      <option>Mare</option>
-                      <option>Gelding</option>
+                      <option value="Stallion" className="bg-slate-800 text-white">Stallion</option>
+                      <option value="Mare" className="bg-slate-800 text-white">Mare</option>
+                      <option value="Gelding" className="bg-slate-800 text-white">Gelding</option>
                     </select>
                   </div>
                   <div className="flex gap-2">
-                    <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <button type="submit" className="btn-primary">
                       Save
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowAddHorse(false)}
-                      className="bg-gray-400 text-white px-4 py-2 rounded"
+                      className="btn-secondary"
                     >
                       Cancel
                     </button>
@@ -352,44 +379,46 @@ export default function ClubDetail() {
               )}
 
               {horses.length === 0 ? (
-                <p className="text-gray-500">No horses yet</p>
+                <p className="text-gray-400">No horses yet</p>
               ) : (
-                <table className="w-full">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="px-4 py-2 text-left">Name</th>
-                      <th className="px-4 py-2 text-left">Color</th>
-                      <th className="px-4 py-2 text-left">Gender</th>
-                      <th className="px-4 py-2 text-left">Year of Birth</th>
-                      <th className="px-4 py-2 text-left">Passport</th>
-                      <th className="px-4 py-2 text-left">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {horses.map(horse => (
-                      <tr key={horse.id} className="border-b hover:bg-gray-50">
-                        <td className="px-4 py-2">{horse.name}</td>
-                        <td className="px-4 py-2">{horse.color}</td>
-                        <td className="px-4 py-2">{horse.gender}</td>
-                        <td className="px-4 py-2">{horse.yearOfBirth}</td>
-                        <td className="px-4 py-2">{horse.passportNumber}</td>
-                        <td className="px-4 py-2">
-                          <button
-                            onClick={() => deleteHorse(horse.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </td>
+                <div className="table-container">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Color</th>
+                        <th>Gender</th>
+                        <th>Year of Birth</th>
+                        <th>Passport</th>
+                        <th>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {horses.map(horse => (
+                        <tr key={horse.id}>
+                          <td className="font-medium">{horse.name}</td>
+                          <td>{horse.color}</td>
+                          <td>{horse.gender}</td>
+                          <td>{horse.yearOfBirth}</td>
+                          <td>{horse.passportNumber}</td>
+                          <td>
+                            <button
+                              onClick={() => deleteHorse(horse.id)}
+                              className="text-red-400 hover:text-red-300"
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           )}
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

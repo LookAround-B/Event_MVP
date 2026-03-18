@@ -53,40 +53,58 @@ async function handler(
 
   if (req.method === 'PUT') {
     try {
-      const { firstName, lastName, email, mobile, gender, dob, aadhaarNumber } = req.body;
+      const { firstName, lastName, email, mobile, gender, dob, aadhaarNumber, address, designation } = req.body;
 
-      const validation = validateInput({
-        firstName: { type: 'string', required: false, min: 1, max: 100 },
-        lastName: { type: 'string', required: false, min: 1, max: 100 },
-        email: { type: 'string', required: false },
-        mobile: { type: 'string', required: false, max: 20 },
-        gender: { type: 'string', required: false, max: 50 },
-        dob: { type: 'string', required: false },
-        aadhaarNumber: { type: 'string', required: false, max: 100 },
-      }, req.body);
+      console.log('Rider PUT request for ID:', riderId, 'Body:', req.body);
 
-      if (!validation.valid) {
-        return res.status(400).json({
+      // Check if rider exists
+      const existing = await prisma.rider.findUnique({
+        where: { id: riderId },
+      });
+
+      if (!existing) {
+        return res.status(404).json({
           success: false,
-          message: 'Validation failed',
-          error: 'VALIDATION_ERROR',
-          statusCode: 400,
-          data: validation.errors,
+          message: 'Rider not found',
+          error: 'NOT_FOUND',
+          statusCode: 404,
         });
+      }
+
+      // Manual field updates
+      const updateData: any = {};
+
+      if (firstName && typeof firstName === 'string' && firstName.trim()) {
+        updateData.firstName = firstName.trim();
+      }
+      if (lastName && typeof lastName === 'string' && lastName.trim()) {
+        updateData.lastName = lastName.trim();
+      }
+      if (email && typeof email === 'string' && email.trim()) {
+        updateData.email = email.trim();
+      }
+      if (mobile) {
+        updateData.mobile = mobile;
+      }
+      if (gender) {
+        updateData.gender = gender;
+      }
+      if (dob) {
+        updateData.dob = new Date(dob);
+      }
+      if (aadhaarNumber) {
+        updateData.aadhaarNumber = aadhaarNumber;
+      }
+      if (address) {
+        updateData.address = address;
       }
 
       const rider = await prisma.rider.update({
         where: { id: riderId },
-        data: {
-          ...(firstName && { firstName }),
-          ...(lastName && { lastName }),
-          ...(email && { email }),
-          ...(mobile !== undefined && { mobile }),
-          ...(gender && { gender }),
-          ...(dob && { dob: new Date(dob) }),
-          ...(aadhaarNumber && { aadhaarNumber }),
-        },
+        data: updateData,
       });
+
+      console.log('Rider updated successfully:', riderId);
 
       return res.status(200).json({
         success: true,

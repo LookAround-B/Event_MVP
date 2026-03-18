@@ -128,7 +128,7 @@ export default function Riders() {
                           <Link href={`/riders/${rider.id}`} className="text-blue-400 hover:text-blue-300">
                             <FiEye className="w-4 h-4" title="View" />
                           </Link>
-                          <Link href={`/riders/${rider.id}/edit`} className="text-green-400 hover:text-green-300">
+                          <Link href={`/riders/create?id=${rider.id}`} className="text-green-400 hover:text-green-300">
                             <FiEdit className="w-4 h-4" title="Edit" />
                           </Link>
                           <button

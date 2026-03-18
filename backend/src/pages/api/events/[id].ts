@@ -54,27 +54,7 @@ async function handler(
 
   if (req.method === 'PUT') {
     try {
-      const { name, startDate, endDate, venueName, description, eventType, isPublished, termsAndConditions, fileUrl } = req.body;
-
-      const validation = validateInput({
-        name: { type: 'string', required: false, min: 1, max: 255 },
-        startDate: { type: 'string', required: false },
-        endDate: { type: 'string', required: false },
-        venueName: { type: 'string', required: false, min: 1, max: 255 },
-        description: { type: 'string', required: false, max: 1000 },
-        eventType: { type: 'string', required: false, min: 1, max: 100 },
-        isPublished: { type: 'boolean', required: false },
-      }, req.body);
-
-      if (!validation.valid) {
-        return res.status(400).json({
-          success: false,
-          message: 'Validation failed',
-          error: 'VALIDATION_ERROR',
-          statusCode: 400,
-          data: validation.errors,
-        });
-      }
+      const { name, startDate, startTime, endDate, endTime, venueName, venueAddress, venueLat, venueLng, description, eventType, isPublished, termsAndConditions, fileUrl, categoryIds } = req.body;
 
       // Fetch existing event for audit comparison
       const existingEvent = await prisma.event.findUnique({
@@ -106,9 +86,29 @@ async function handler(
         updateData.endDate = new Date(endDate);
         changedFields.push('endDate');
       }
-      if (venueName && venueName !== existingEvent.venueName) {
+      if (startTime && startTime !== existingEvent.startTime) {
+        updateData.startTime = startTime;
+        changedFields.push('startTime');
+      }
+      if (endTime && endTime !== existingEvent.endTime) {
+        updateData.endTime = endTime;
+        changedFields.push('endTime');
+      }
+      if (venueName !== undefined && venueName !== existingEvent.venueName) {
         updateData.venueName = venueName;
         changedFields.push('venueName');
+      }
+      if (venueAddress !== undefined && venueAddress !== existingEvent.venueAddress) {
+        updateData.venueAddress = venueAddress;
+        changedFields.push('venueAddress');
+      }
+      if (venueLat !== undefined && venueLat !== existingEvent.venueLat) {
+        updateData.venueLat = venueLat ? parseFloat(venueLat) : null;
+        changedFields.push('venueLat');
+      }
+      if (venueLng !== undefined && venueLng !== existingEvent.venueLng) {
+        updateData.venueLng = venueLng ? parseFloat(venueLng) : null;
+        changedFields.push('venueLng');
       }
       if (description !== undefined && description !== existingEvent.description) {
         updateData.description = description;
@@ -131,9 +131,20 @@ async function handler(
         changedFields.push('fileUrl');
       }
 
+      // Handle categories
+      if (categoryIds && Array.isArray(categoryIds) && categoryIds.length > 0) {
+        updateData.categories = {
+          set: categoryIds.map((id: string) => ({ id })),
+        };
+        changedFields.push('categories');
+      }
+
       const updatedEvent = await prisma.event.update({
         where: { id: eventId },
         data: updateData,
+        include: {
+          categories: true,
+        },
       });
 
       // Create audit log if changes made

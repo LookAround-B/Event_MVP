@@ -53,36 +53,33 @@ async function handler(
 
   if (req.method === 'PUT') {
     try {
-      const { name, color, gender, yearOfBirth, passportNumber, horseCode } = req.body;
+      const { name, breed, color, height, gender, yearOfBirth, passportNumber, horseCode } = req.body;
 
-      const validation = validateInput({
-        name: { type: 'string', required: false, min: 1, max: 100 },
-        color: { type: 'string', required: false, max: 100 },
-        gender: { type: 'string', required: false, min: 1, max: 50 },
-        yearOfBirth: { type: 'number', required: false, min: 1900 },
-        passportNumber: { type: 'string', required: false, max: 100 },
-        horseCode: { type: 'string', required: false, max: 100 },
-      }, req.body);
+      // Check if horse exists
+      const existingHorse = await prisma.horse.findUnique({
+        where: { id: horseId },
+      });
 
-      if (!validation.valid) {
-        return res.status(400).json({
+      if (!existingHorse) {
+        return res.status(404).json({
           success: false,
-          message: 'Validation failed',
-          error: 'VALIDATION_ERROR',
-          statusCode: 400,
-          data: validation.errors,
+          message: 'Horse not found',
+          error: 'NOT_FOUND',
+          statusCode: 404,
         });
       }
 
       const horse = await prisma.horse.update({
         where: { id: horseId },
         data: {
-          ...(name && { name }),
-          ...(color !== undefined && { color }),
+          ...(name && { name: name.trim() }),
+          ...(breed !== undefined && { breed: breed || null }),
+          ...(color !== undefined && { color: color || null }),
+          ...(height !== undefined && { height: height ? parseFloat(height) : null }),
           ...(gender && { gender }),
-          ...(yearOfBirth !== undefined && { yearOfBirth }),
-          ...(passportNumber && { passportNumber }),
-          ...(horseCode && { horseCode }),
+          ...(yearOfBirth !== undefined && { yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : null }),
+          ...(passportNumber !== undefined && { passportNumber: passportNumber || null }),
+          ...(horseCode !== undefined && { horseCode: horseCode || null }),
         },
       });
 

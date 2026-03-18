@@ -207,7 +207,9 @@ model Horse {
   id             String   @id @default(cuid())
   eId            String   @unique @default(cuid())
   name           String
+  breed          String?
   color          String?
+  height         Float?
   passportNumber String?
   horseCode      String?
   gender         String // Stallion, Mare, Gelding

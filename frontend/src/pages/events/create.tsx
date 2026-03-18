@@ -131,8 +131,8 @@ export default function CreateEventPage() {
       <ProtectedRoute>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="text-gray-600 mt-2">Loading...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+            <p className="text-gray-300 mt-2">Loading...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -143,21 +143,21 @@ export default function CreateEventPage() {
     <ProtectedRoute>
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/events" className="text-blue-600 hover:text-blue-900 flex items-center gap-2">
+          <Link href="/events" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
             <FiArrowLeft /> Back to Events
           </Link>
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold text-white">
             {isEdit ? 'Edit Event' : 'Create New Event'}
           </h2>
         </div>
 
         <div className="space-y-8">
           {/* SECTION 1: Event Information */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-6">Event Information</h3>
+          <div className="card">
+            <h3 className="text-lg font-bold text-white mb-6">Event Information</h3>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-6">
+              <div className="bg-red-500 bg-opacity-20 border border-red-400 text-red-200 px-4 py-3 rounded mb-6">
                 {error}
               </div>
             )}
@@ -165,26 +165,26 @@ export default function CreateEventPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Event Type (Mandatory) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Event Type <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Event Type <span className="text-red-400">*</span>
                 </label>
                 <select
                   name="eventType"
                   value={formData.eventType}
                   onChange={handleChange}
                   required
-                  className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="form-input"
                 >
-                  <option value="KSEC">KSEC</option>
-                  <option value="EPL">EPL</option>
-                  <option value="EIRS Show">EIRS Show</option>
+                  <option value="KSEC" className="bg-slate-800 text-white">KSEC</option>
+                  <option value="EPL" className="bg-slate-800 text-white">EPL</option>
+                  <option value="EIRS Show" className="bg-slate-800 text-white">EIRS Show</option>
                 </select>
               </div>
 
               {/* Event Name (Mandatory) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Event Name <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Event Name <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -193,14 +193,14 @@ export default function CreateEventPage() {
                   onChange={handleChange}
                   required
                   placeholder="e.g., Spring Championship 2026"
-                  className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="form-input"
                 />
               </div>
 
               {/* Description (Mandatory) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Description <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   name="description"
@@ -209,15 +209,15 @@ export default function CreateEventPage() {
                   required
                   placeholder="Event details and requirements..."
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="form-input"
                 />
               </div>
 
               {/* Start Date & Time (Mandatory) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Start Date <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="date"
@@ -225,12 +225,12 @@ export default function CreateEventPage() {
                     value={formData.startDate}
                     onChange={handleChange}
                     required
-                    className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="form-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Time <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Start Time <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="time"
@@ -238,7 +238,7 @@ export default function CreateEventPage() {
                     value={formData.startTime}
                     onChange={handleChange}
                     required
-                    className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="form-input"
                   />
                 </div>
               </div>
@@ -246,8 +246,8 @@ export default function CreateEventPage() {
               {/* End Date & Time (Mandatory) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Date <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    End Date <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="date"
@@ -255,12 +255,12 @@ export default function CreateEventPage() {
                     value={formData.endDate}
                     onChange={handleChange}
                     required
-                    className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="form-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Time <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    End Time <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="time"
@@ -268,17 +268,17 @@ export default function CreateEventPage() {
                     value={formData.endTime}
                     onChange={handleChange}
                     required
-                    className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="form-input"
                   />
                 </div>
               </div>
 
               {/* Venue Section */}
-              <div className="border-t pt-6">
-                <h4 className="text-md font-semibold text-gray-900 mb-4">Event Venue</h4>
+              <div className="border-t border-white border-opacity-10 pt-6">
+                <h4 className="text-md font-semibold text-white mb-4">Event Venue</h4>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Venue Name
                   </label>
                   <input
@@ -287,12 +287,12 @@ export default function CreateEventPage() {
                     value={formData.venueName}
                     onChange={handleChange}
                     placeholder="e.g., County Fairgrounds"
-                    className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="form-input"
                   />
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
                     <FiMapPin /> Venue Address
                   </label>
                   <input
@@ -301,14 +301,14 @@ export default function CreateEventPage() {
                     value={formData.venueAddress}
                     onChange={handleChange}
                     placeholder="Full address for venue"
-                    className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="form-input"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Note: Google Maps integration coming soon</p>
+                  <p className="text-xs text-gray-400 mt-1">Note: Google Maps integration coming soon</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Latitude</label>
+                    <label className="block text-sm font-medium text-white mb-2">Latitude</label>
                     <input
                       type="number"
                       name="venueLat"
@@ -316,11 +316,11 @@ export default function CreateEventPage() {
                       onChange={handleChange}
                       placeholder="e.g., 40.7128"
                       step="0.0001"
-                      className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                      className="form-input"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Longitude</label>
+                    <label className="block text-sm font-medium text-white mb-2">Longitude</label>
                     <input
                       type="number"
                       name="venueLng"
@@ -328,40 +328,40 @@ export default function CreateEventPage() {
                       onChange={handleChange}
                       placeholder="e.g., -74.0060"
                       step="0.0001"
-                      className="w-full h-10 px-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                      className="form-input"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Terms & Conditions Section */}
-              <div className="border-t pt-6">
-                <h4 className="text-md font-semibold text-gray-900 mb-4">Terms & Conditions</h4>
+              <div className="border-t border-white border-opacity-10 pt-6">
+                <h4 className="text-md font-semibold text-white mb-4">Terms & Conditions</h4>
                 <textarea
                   name="termsAndConditions"
                   value={formData.termsAndConditions}
                   onChange={handleChange}
                   placeholder="Enter event terms and conditions (optional)"
                   rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="form-input"
                 />
-                <p className="text-xs text-gray-500 mt-1">Note: Rich-text editor coming soon</p>
+                <p className="text-xs text-gray-400 mt-1">Note: Rich-text editor coming soon</p>
               </div>
 
               {/* Event Categories Section */}
               {categories.length > 0 && (
-                <div className="border-t pt-6">
-                  <h4 className="text-md font-semibold text-gray-900 mb-4">Event Categories</h4>
+                <div className="border-t border-white border-opacity-10 pt-6">
+                  <h4 className="text-md font-semibold text-white mb-4">Event Categories</h4>
                   <div className="space-y-3">
                     {categories.map(category => (
-                      <label key={category.id} className="flex items-center gap-2 cursor-pointer">
+                      <label key={category.id} className="flex items-center gap-2 cursor-pointer text-gray-300 hover:text-white">
                         <input
                           type="checkbox"
                           checked={formData.categoryIds.includes(category.id)}
                           onChange={() => handleCategoryToggle(category.id)}
-                          className="w-4 h-4 border border-gray-300 rounded"
+                          className="w-4 h-4 border border-white border-opacity-20 rounded"
                         />
-                        <span className="text-sm text-gray-700">
+                        <span className="text-sm">
                           {category.name} - ₹{category.price}
                           {category.cgst > 0 && ` (CGST: ${category.cgst}%)`}
                         </span>
@@ -372,17 +372,17 @@ export default function CreateEventPage() {
               )}
 
               {/* Submit Buttons */}
-              <div className="flex gap-4 pt-6 border-t">
+              <div className="flex gap-4 pt-6 border-t border-white border-opacity-10">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting ? 'Saving...' : isEdit ? 'Update Event' : 'Create Event'}
                 </button>
                 <Link
                   href="/events"
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  className="btn-secondary"
                 >
                   Cancel
                 </Link>

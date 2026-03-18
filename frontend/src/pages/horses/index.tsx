@@ -7,10 +7,11 @@ import ProtectedRoute from '@/lib/protected-route';
 interface Horse {
   id: string;
   name: string;
-  breed: string;
-  age: number;
-  color: string;
-  height: number;
+  breed: string | null;
+  color: string | null;
+  height: number | null;
+  gender: string;
+  yearOfBirth: number | null;
   registrationCount: number;
 }
 
@@ -117,11 +118,14 @@ export default function Horses() {
                   </tr>
                 </thead>
                 <tbody>
-                  {horses.map((horse) => (
+                  {horses.map((horse) => {
+                    const currentYear = new Date().getFullYear();
+                    const age = horse.yearOfBirth ? currentYear - horse.yearOfBirth : 0;
+                    return (
                     <tr key={horse.id}>
                       <td className="font-medium">{horse.name}</td>
-                      <td>{horse.breed}</td>
-                      <td>{horse.age} years</td>
+                      <td>{horse.breed || '-'}</td>
+                      <td>{age} years</td>
                       <td>{horse.color || '-'}</td>
                       <td>{horse.height ? `${horse.height}h` : '-'}</td>
                       <td><span className="badge badge-info">{horse.registrationCount}</span></td>
@@ -130,7 +134,7 @@ export default function Horses() {
                           <Link href={`/horses/${horse.id}`} className="text-blue-400 hover:text-blue-300">
                             <FiEye className="w-4 h-4" title="View" />
                           </Link>
-                          <Link href={`/horses/${horse.id}/edit`} className="text-green-400 hover:text-green-300">
+                          <Link href={`/horses/create?id=${horse.id}`} className="text-green-400 hover:text-green-300">
                             <FiEdit className="w-4 h-4" title="Edit" />
                           </Link>
                           <button
@@ -143,7 +147,8 @@ export default function Horses() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
 

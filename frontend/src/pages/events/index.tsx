@@ -7,10 +7,10 @@ import ProtectedRoute from '@/lib/protected-route';
 interface Event {
   id: string;
   name: string;
-  date: string;
-  location: string;
+  startDate: string;
+  endDate: string;
+  venueName: string;
   description: string;
-  capacity: number;
   registrationCount: number;
 }
 
@@ -108,9 +108,8 @@ export default function Events() {
                 <thead>
                   <tr>
                     <th>Event Name</th>
-                    <th>Location</th>
-                    <th>Date</th>
-                    <th>Capacity</th>
+                    <th>Venue</th>
+                    <th>Start Date</th>
                     <th>Registrations</th>
                     <th>Actions</th>
                   </tr>
@@ -119,25 +118,24 @@ export default function Events() {
                   {events.map((event) => (
                     <tr key={event.id}>
                       <td className="font-medium">{event.name}</td>
-                      <td>{event.location}</td>
-                      <td>{new Date(event.date).toLocaleDateString()}</td>
-                      <td>{event.capacity}</td>
+                      <td>{event.venueName || 'N/A'}</td>
+                      <td>{new Date(event.startDate).toLocaleDateString()}</td>
                       <td>
-                        <span className="badge badge-info">
-                          {event.registrationCount}/{event.capacity}
+                        <span className="badge badge-success">
+                          {event.registrationCount}
                         </span>
                       </td>
                       <td>
                         <div className="flex space-x-2">
-                          <Link href={`/events/${event.id}`} className="text-blue-600 hover:text-blue-900">
+                          <Link href={`/events/${event.id}`} className="text-purple-400 hover:text-purple-300">
                             <FiEye className="w-4 h-4" title="View" />
                           </Link>
-                          <Link href={`/events/${event.id}/edit`} className="text-green-600 hover:text-green-900">
+                          <Link href={`/events/create?id=${event.id}`} className="text-amber-400 hover:text-amber-300">
                             <FiEdit className="w-4 h-4" title="Edit" />
                           </Link>
                           <button
                             onClick={() => handleDelete(event.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-400 hover:text-red-300"
                             title="Delete"
                           >
                             <FiTrash2 className="w-4 h-4" />

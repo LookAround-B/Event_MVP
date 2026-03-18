@@ -79,28 +79,38 @@ async function handler(
 
   if (method === 'POST') {
     try {
-      const { firstName, lastName, email, mobile, dob, gender, address, aadhaarNumber, efiRiderId, clubId } = req.body;
+      const { firstName, lastName, email, mobile, dob, gender, address, aadhaarNumber, efiRiderId, clubId, designation } = req.body;
 
-      const validation = validateInput({
-        firstName: { type: 'string', required: true, min: 1, max: 100 },
-        lastName: { type: 'string', required: true, min: 1, max: 100 },
-        email: { type: 'string', required: true },
-        mobile: { type: 'string', required: false, max: 20 },
-        dob: { type: 'string', required: false },
-        gender: { type: 'string', required: false },
-        address: { type: 'string', required: false },
-        aadhaarNumber: { type: 'string', required: false, max: 50 },
-        efiRiderId: { type: 'string', required: false },
-        clubId: { type: 'string', required: false },
-      }, req.body);
+      console.log('Riders POST request body:', req.body);
 
-      if (!validation.valid) {
+      // Manual field validation instead of strict validateInput
+      if (!firstName || typeof firstName !== 'string' || !firstName.trim()) {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
           error: 'VALIDATION_ERROR',
           statusCode: 400,
-          data: validation.errors,
+          data: { firstName: 'First name is required' },
+        });
+      }
+
+      if (!lastName || typeof lastName !== 'string' || !lastName.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+          data: { lastName: 'Last name is required' },
+        });
+      }
+
+      if (!email || typeof email !== 'string' || !email.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+          data: { email: 'Email is required' },
         });
       }
 
@@ -119,18 +129,20 @@ async function handler(
 
       const rider = await prisma.rider.create({
         data: {
-          firstName,
-          lastName,
-          email,
-          mobile,
-          dob: dob ? new Date(dob) : undefined,
-          gender,
-          address,
-          aadhaarNumber,
-          efiRiderId,
-          clubId,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          mobile: mobile || null,
+          dob: dob ? new Date(dob) : null,
+          gender: gender || null,
+          address: address || null,
+          aadhaarNumber: aadhaarNumber || null,
+          efiRiderId: efiRiderId || null,
+          clubId: clubId || null,
         },
       });
+
+      console.log('Rider created successfully:', rider.id);
 
       return res.status(201).json({
         success: true,

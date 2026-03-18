@@ -35,7 +35,9 @@ async function handler(
           select: {
             id: true,
             name: true,
+            breed: true,
             color: true,
+            height: true,
             gender: true,
             yearOfBirth: true,
             passportNumber: true,
@@ -80,37 +82,45 @@ async function handler(
 
   if (method === 'POST') {
     try {
-      const { name, color, gender, yearOfBirth, passportNumber, horseCode } = req.body;
+      const { name, breed, color, height, gender, yearOfBirth, passportNumber, horseCode } = req.body;
 
-      const validation = validateInput({
-        name: { type: 'string', required: true, min: 1, max: 100 },
-        gender: { type: 'string', required: true },
-        yearOfBirth: { type: 'number', required: false },
-        color: { type: 'string', required: false, max: 100 },
-        passportNumber: { type: 'string', required: false, max: 100 },
-        horseCode: { type: 'string', required: false, max: 100 },
-      }, req.body);
+      console.log('Horses POST request body:', req.body);
 
-      if (!validation.valid) {
+      // Manual field validation
+      if (!name || typeof name !== 'string' || !name.trim()) {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
           error: 'VALIDATION_ERROR',
           statusCode: 400,
-          data: validation.errors,
+          data: { name: 'Horse name is required' },
+        });
+      }
+
+      if (!gender || typeof gender !== 'string') {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+          data: { gender: 'Gender is required' },
         });
       }
 
       const horse = await prisma.horse.create({
         data: {
-          name,
-          color,
+          name: name.trim(),
+          breed: breed || null,
+          color: color || null,
+          height: height ? parseFloat(height) : null,
           gender,
-          yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : undefined,
-          passportNumber,
-          horseCode,
+          yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : null,
+          passportNumber: passportNumber || null,
+          horseCode: horseCode || null,
         },
       });
+
+      console.log('Horse created successfully:', horse.id);
 
       return res.status(201).json({
         success: true,
