@@ -109,7 +109,7 @@ export default function EventDetail() {
       r.rider.email,
       r.horse.name,
       r.club?.name || '-',
-      r.category.name,
+      r.category?.name || '-',
       r.eventAmount,
       r.stableAmount,
       r.gstAmount,
@@ -151,7 +151,7 @@ export default function EventDetail() {
         { v: r.horse.name, t: 'String' },
         { v: r.horse.color, t: 'String' },
         { v: r.club?.name || '-', t: 'String' },
-        { v: r.category.name, t: 'String' },
+        { v: r.category?.name || '-', t: 'String' },
         { v: r.eventAmount, t: 'Number' },
         { v: r.stableAmount, t: 'Number' },
         { v: r.gstAmount, t: 'Number' },
@@ -385,7 +385,7 @@ export default function EventDetail() {
                         <p className="text-gray-900">{reg.horse.name}</p>
                         <p className="text-xs text-gray-600">{reg.horse.color}</p>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{reg.category.name}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{reg.category?.name || '-'}</td>
                       <td className="px-4 py-3 text-sm font-semibold text-gray-900">₹{reg.totalAmount}</td>
                       <td className="px-4 py-3 text-sm">
                         <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
@@ -457,7 +457,7 @@ export default function EventDetail() {
 
                   <div className="border-b pb-3">
                     <p className="text-gray-600">Category</p>
-                    <p className="font-semibold text-gray-900">{bookingModal.registration.category.name}</p>
+                    <p className="font-semibold text-gray-900">{bookingModal.registration.category?.name || '-'}</p>
                   </div>
 
                   <div className="border-t pt-3 mt-4 space-y-2">

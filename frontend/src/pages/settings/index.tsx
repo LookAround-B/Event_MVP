@@ -303,15 +303,15 @@ export default function Settings() {
             </div>
           ) : activeTab === 'eventTypes' ? (
             <div>
-              <h2 className="text-xl font-bold mb-4">Event Types</h2>
-              <div className="bg-gray-100 p-4 rounded mb-4">
+              <h2 className="text-xl font-bold mb-4 text-white">Event Types</h2>
+              <div className="card mb-4 p-4">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <input
                     type="text"
                     placeholder="Event Type Name"
                     value={newEventType.name}
                     onChange={e => setNewEventType({ ...newEventType, name: e.target.value })}
-                    className="px-3 py-2 border border-gray-300 rounded"
+                    className="form-input"
                   />
                   <input
                     type="text"
@@ -320,42 +320,45 @@ export default function Settings() {
                     onChange={e =>
                       setNewEventType({ ...newEventType, shortCode: e.target.value })
                     }
-                    className="px-3 py-2 border border-gray-300 rounded"
+                    className="form-input"
                   />
                 </div>
                 <button
                   onClick={addEventType}
-                  className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700"
+                  className="btn-primary flex items-center gap-2"
                 >
                   <FiPlus /> Add Event Type
                 </button>
               </div>
 
-              <table className="w-full">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-4 py-2 text-left">Name</th>
-                    <th className="px-4 py-2 text-left">Short Code</th>
-                    <th className="px-4 py-2 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {eventTypes.map(et => (
-                    <tr key={et.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-2">{et.name}</td>
-                      <td className="px-4 py-2">{et.shortCode}</td>
-                      <td className="px-4 py-2">
-                        <button
-                          onClick={() => deleteEventType(et.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </td>
+              <div className="card table-container">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Short Code</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {eventTypes.map(et => (
+                      <tr key={et.id}>
+                        <td className="text-sm text-gray-300">{et.name}</td>
+                        <td className="text-sm text-gray-300">{et.shortCode}</td>
+                        <td>
+                          <button
+                            onClick={() => deleteEventType(et.id)}
+                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : activeTab === 'eventCategories' ? (
             <div>

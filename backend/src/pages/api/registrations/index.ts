@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
 import { withAuth } from '@/lib/auth-middleware';
+import { sendRegistrationConfirmation } from '@/lib/email';
 import { ApiResponse } from '@/types';
 
 async function handler(
@@ -254,6 +255,9 @@ async function handler(
           },
         });
       }
+
+      // Send confirmation email
+      sendRegistrationConfirmation(registration.id).catch(console.error);
 
       return res.status(201).json({
         success: true,

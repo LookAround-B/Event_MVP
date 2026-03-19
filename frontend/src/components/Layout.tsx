@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FiMenu, FiX, FiLogOut, FiHome, FiCalendar, FiUsers, FiTrendingUp, FiSettings, FiFileText, FiBox } from 'react-icons/fi';
+import { FiMenu, FiX, FiLogOut, FiHome, FiCalendar, FiUsers, FiTrendingUp, FiSettings, FiFileText, FiBox, FiBell, FiBarChart2, FiCheckCircle } from 'react-icons/fi';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -34,8 +34,12 @@ export default function Layout({ children }: LayoutProps) {
     { name: 'Riders', href: '/riders', icon: FiUsers },
     { name: 'Horses', href: '/horses', icon: FiBox },
     { name: 'Registrations', href: '/registrations', icon: FiUsers },
+    { name: 'Approvals', href: '/registrations/approvals', icon: FiCheckCircle },
     { name: 'Financial', href: '/financial', icon: FiTrendingUp },
+    { name: 'Reports', href: '/reports', icon: FiBarChart2 },
+    { name: 'Notifications', href: '/notifications', icon: FiBell },
     { name: 'Users', href: '/users', icon: FiUsers },
+    { name: 'Admin', href: '/admin/approvals', icon: FiCheckCircle },
     { name: 'Audit Logs', href: '/audit', icon: FiFileText },
     { name: 'Settings', href: '/settings', icon: FiSettings },
   ];

@@ -45,8 +45,9 @@ export default function AuditLogs() {
           ...(action && { action }),
         },
       });
-      setLogs(response.data.data || []);
-      setTotal(response.data.pagination?.total || 0);
+      const body = response.data.data || {};
+      setLogs(Array.isArray(body.data) ? body.data : Array.isArray(body) ? body : []);
+      setTotal(body.pagination?.total || response.data.pagination?.total || 0);
     } catch (error) {
       console.error('Failed to fetch audit logs:', error);
     } finally {

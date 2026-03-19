@@ -36,6 +36,7 @@ model User {
   horsesOwned   Horse[]        @relation("HorseOwner")
   registrations Registration[] @relation("RegistrationUser")
   auditLogs     AuditLog[]
+  notifications Notification[]
 
   @@index([email])
 }
@@ -236,14 +237,21 @@ model Horse {
 
 // ==================== EVENT REGISTRATIONS ====================
 model Registration {
-  id            String        @id @default(cuid())
-  eId           String        @unique @default(cuid())
-  eventId       String
-  riderId       String
-  horseId       String
-  clubId        String?
-  categoryId    String
-  paymentStatus PaymentStatus @default(UNPAID)
+  id             String         @id @default(cuid())
+  eId            String         @unique @default(cuid())
+  eventId        String
+  riderId        String
+  horseId        String
+  clubId         String?
+  categoryId     String
+  paymentStatus  PaymentStatus  @default(UNPAID)
+  approvalStatus ApprovalStatus @default(PENDING)
+  approvedBy     String?
+  approvedAt     DateTime?
+  rejectionNotes String?
+  paymentMethod  String?        // CARD, BANK_TRANSFER, CHEQUE, UPI, CASH
+  paymentRef     String?
+  paymentNotes   String?
 
   // Pricing
   eventAmount  Float @default(0)
@@ -271,6 +279,7 @@ model Registration {
   @@index([eventId])
   @@index([riderId])
   @@index([paymentStatus])
+  @@index([approvalStatus])
   @@index([createdAt])
 }
 
@@ -279,6 +288,12 @@ enum PaymentStatus {
   UNPAID
   PARTIAL
   CANCELLED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 // ==================== STABLES ====================
@@ -379,6 +394,24 @@ model AuditLog {
   @@index([userId])
   @@index([entity])
   @@index([entityId])
+  @@index([createdAt])
+}
+
+// ==================== NOTIFICATIONS ====================
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // REGISTRATION_APPROVED, REGISTRATION_REJECTED, PAYMENT_RECEIVED, EVENT_UPDATE, SYSTEM
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
   @@index([createdAt])
 }
 
