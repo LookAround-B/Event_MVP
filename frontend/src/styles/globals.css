@@ -262,4 +262,67 @@ body {
   .text-glow {
     text-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
   }
+
+  /* Override legacy light themes everywhere to use dark glassmorphism */
+  .bg-white, .bg-gray-50, .bg-gray-100 {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-black {
+    color: #e2e8f0 !important;
+  }
+
+  .border-gray-300, .border-gray-200 {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+}
+
+@layer base {
+  /* Catch raw inputs that don't explicitly use .form-input */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    backdrop-filter: blur(10px);
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus, select:focus, textarea:focus {
+    outline: none !important;
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(124, 58, 237, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1) !important;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  /* Catch raw tables that don't explicitly use .table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    background-color: rgba(124, 58, 237, 0.1) !important;
+    color: white !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    font-weight: 600;
+  }
+
+  td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: #e2e8f0 !important;
+  }
+
+  tbody tr {
+    transition: background-color 0.2s ease;
+  }
+
+  tbody tr:hover {
+    background-color: rgba(124, 58, 237, 0.1) !important;
+  }
 }
