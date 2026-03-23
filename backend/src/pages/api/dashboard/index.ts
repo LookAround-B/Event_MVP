@@ -7,6 +7,14 @@ import { ApiResponse } from '@/types'
 /**
  * GET /api/dashboard
  * Admin dashboard - KPI cards, charts, event lists, participants
+ * Query params:
+ *   eventId - filter KPIs/charts by a specific event
+ *   participantPage / participantLimit - paginate participants
+ *   participantMonths - comma-separated YYYY-MM for month filter
+ *   participantEvents - comma-separated event IDs
+ *   participantCategories - comma-separated category IDs
+ *   participantPayment - comma-separated payment statuses
+ *   format - "csv" to export participants as CSV
  * Requires: Admin role
  */
 async function handler(
@@ -18,46 +26,68 @@ async function handler(
   }
 
   try {
+    const {
+      eventId,
+      participantPage,
+      participantLimit,
+      participantMonths,
+      participantEvents,
+      participantCategories,
+      participantPayment,
+      format,
+    } = req.query as Record<string, string | undefined>
+
+    // Build event filter for KPI/chart scoping
+    const eventFilter = eventId ? { eventId: eventId as string } : {}
+    const eventWhere = eventId ? { id: eventId as string } : {}
+
     // ====================== KPI SUMMARY CARDS ======================
     const [
       totalEvents,
       totalClubs,
       totalRiders,
       totalHorses,
-      totalRevenue,
-      collectibleAmount,
+      revenueAgg,
+      collectibleAgg,
+      receivableAgg,
     ] = await Promise.all([
-      // Total Events
-      prisma.event.count(),
-
-      // Total Clubs
-      prisma.club.count(),
-
-      // Total Riders
-      prisma.rider.count(),
-
-      // Total Horses
-      prisma.horse.count(),
-
-      // Total Revenue (sum of paid transactions)
-      prisma.transaction.aggregate({
+      prisma.event.count(eventId ? { where: { id: eventId } } : undefined),
+      eventId
+        ? prisma.registration.groupBy({ by: ['clubId'], where: { eventId, clubId: { not: null } } }).then(r => r.length)
+        : prisma.club.count(),
+      eventId
+        ? prisma.registration.groupBy({ by: ['riderId'], where: { eventId } }).then(r => r.length)
+        : prisma.rider.count(),
+      eventId
+        ? prisma.registration.groupBy({ by: ['horseId'], where: { eventId } }).then(r => r.length)
+        : prisma.horse.count(),
+      prisma.registration.aggregate({
         _sum: { totalAmount: true },
-        where: { status: 'PAID' },
+        where: { ...eventFilter, paymentStatus: 'PAID' },
       }),
-
-      // Collectible Amount (sum of unpaid transactions)
-      prisma.transaction.aggregate({
+      prisma.registration.aggregate({
         _sum: { totalAmount: true },
-        where: { status: { in: ['UNPAID', 'PARTIAL'] } },
+        where: { ...eventFilter },
+      }),
+      prisma.registration.aggregate({
+        _sum: { totalAmount: true },
+        where: { ...eventFilter, paymentStatus: { in: ['UNPAID', 'PARTIAL'] } },
       }),
     ])
 
+    // ====================== EVENT DROPDOWN LIST ======================
+    const allEventsList = await prisma.event.findMany({
+      orderBy: { startDate: 'desc' },
+      select: { id: true, name: true },
+    })
+
     // ====================== CHARTS & ANALYTICS ======================
-    // Bar Graph: Per-event breakdown (Unpaid registrations, Total Riders, Total Horses)
     const eventBreakdown = await prisma.event.findMany({
+      where: eventId ? { id: eventId } : {},
       select: {
         id: true,
         name: true,
+        startDate: true,
         registrations: {
           select: {
             paymentStatus: true,
@@ -66,6 +96,7 @@ async function handler(
           },
         },
       },
+      orderBy: { startDate: 'asc' },
     })
 
     const eventStats = eventBreakdown.map((event) => {
@@ -76,121 +107,18 @@ async function handler(
       const horseIds = new Set(event.registrations.map((r) => r.horseId))
 
       return {
+        eventId: event.id,
         eventName: event.name,
+        startDate: event.startDate,
         unpaidRegistrations: unpaidCount,
         totalRiders: riderIds.size,
         totalHorses: horseIds.size,
       }
     })
 
-    // Monthly Revenue Trend
-    const monthlyRevenue = await prisma.transaction.groupBy({
-      by: ['transactionDate'],
-      _sum: { totalAmount: true },
-      where: { status: 'PAID' },
-    })
-
-    // Group by month
-    const monthlyRevenueMap = new Map<string, number>()
-    monthlyRevenue.forEach((record) => {
-      const month = new Date(record.transactionDate).toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-      })
-      const existing = monthlyRevenueMap.get(month) || 0
-      monthlyRevenueMap.set(month, existing + (record._sum.totalAmount || 0))
-    })
-
-    const monthlyRevenueData = Array.from(monthlyRevenueMap).map(([month, revenue]) => ({
-      month,
-      revenue,
-    }))
-
-    // Registration Trend (group by date)
-    const registrationTrend = await prisma.registration.groupBy({
-      by: ['createdAt'],
-      _count: true,
-    })
-
-    const registrationTrendMap = new Map<string, number>()
-    registrationTrend.forEach((record) => {
-      const date = new Date(record.createdAt).toLocaleDateString('en-US')
-      const existing = registrationTrendMap.get(date) || 0
-      registrationTrendMap.set(date, existing + record._count)
-    })
-
-    const registrationTrendData = Array.from(registrationTrendMap).map(([date, count]) => ({
-      date,
-      registrations: count,
-    }))
-
-    // Upcoming Events Countdown
-    const now = new Date()
-    const upcomingEvents = await prisma.event.findMany({
-      where: {
-        startDate: { gt: now },
-      },
-      select: {
-        id: true,
-        name: true,
-        startDate: true,
-      },
-      orderBy: { startDate: 'asc' },
-      take: 5,
-    })
-
-    const upcomingCountdown = upcomingEvents.map((event) => {
-      const daysUntil = Math.ceil(
-        (event.startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-      )
-      return {
-        eventName: event.name,
-        daysUntil,
-        startDate: event.startDate,
-      }
-    })
-
-    // Most Active Club (by number of registrations)
-    const mostActiveClub = await prisma.registration.groupBy({
-      by: ['clubId'],
-      _count: true,
-      orderBy: { _count: { clubId: 'desc' } },
-      take: 1,
-    })
-
-    let mostActiveClubInfo = null
-    if (mostActiveClub.length > 0 && mostActiveClub[0].clubId) {
-      const club = await prisma.club.findUnique({
-        where: { id: mostActiveClub[0].clubId },
-        select: { name: true, eId: true, _count: { select: { registrations: true } } },
-      })
-      mostActiveClubInfo = {
-        clubName: club?.name,
-        registrations: mostActiveClub[0]._count,
-      }
-    }
-
-    // Most Active Rider (by number of registrations)
-    const mostActiveRider = await prisma.registration.groupBy({
-      by: ['riderId'],
-      _count: true,
-      orderBy: { _count: { riderId: 'desc' } },
-      take: 1,
-    })
-
-    let mostActiveRiderInfo = null
-    if (mostActiveRider.length > 0) {
-      const rider = await prisma.rider.findUnique({
-        where: { id: mostActiveRider[0].riderId },
-        select: { firstName: true, lastName: true, _count: { select: { registrations: true } } },
-      })
-      mostActiveRiderInfo = {
-        riderName: `${rider?.firstName} ${rider?.lastName}`,
-        registrations: mostActiveRider[0]._count,
-      }
-    }
-
     // ====================== EVENT LISTS ======================
+    const now = new Date()
+
     // Current Events (ongoing now)
     const currentEvents = await prisma.event.findMany({
       where: {
@@ -203,7 +131,11 @@ async function handler(
         name: true,
         startDate: true,
         endDate: true,
+        venueAddress: true,
+        venueName: true,
+        eventType: true,
       },
+      orderBy: { startDate: 'desc' },
     })
 
     // All Events (chronological)
@@ -216,38 +148,109 @@ async function handler(
         endDate: true,
         eventType: true,
         isPublished: true,
+        venueAddress: true,
+        venueName: true,
       },
-      take: 20, // Limit to last 20 for performance
     })
 
     // ====================== PARTICIPANTS LIST ======================
-    const participants = await prisma.registration.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        eId: true,
-        event: { select: { name: true } },
-        rider: { select: { firstName: true, lastName: true } },
-        horse: { select: { name: true } },
-        club: { select: { name: true } },
-        category: { select: { name: true } },
-        paymentStatus: true,
-        totalAmount: true,
-        registeredAt: true,
-      },
-      take: 50, // Limit to last 50 for performance
-    })
+    const pPage = Math.max(1, parseInt(participantPage || '1', 10) || 1)
+    const pLimit = Math.min(100, Math.max(1, parseInt(participantLimit || '20', 10) || 20))
+    const pSkip = (pPage - 1) * pLimit
+
+    // Build participant where clause
+    const participantWhere: any = {}
+    if (participantEvents) {
+      const ids = (participantEvents as string).split(',').map(s => s.trim()).filter(Boolean)
+      if (ids.length > 0) participantWhere.eventId = { in: ids }
+    } else if (eventId) {
+      participantWhere.eventId = eventId
+    }
+    if (participantCategories) {
+      const ids = (participantCategories as string).split(',').map(s => s.trim()).filter(Boolean)
+      if (ids.length > 0) participantWhere.categoryId = { in: ids }
+    }
+    if (participantPayment) {
+      const statuses = (participantPayment as string).split(',').map(s => s.trim()).filter(Boolean)
+      if (statuses.length > 0) participantWhere.paymentStatus = { in: statuses }
+    }
+    if (participantMonths) {
+      const months = (participantMonths as string).split(',').map(s => s.trim()).filter(Boolean)
+      if (months.length > 0) {
+        const dateRanges = months.map(m => {
+          const [year, month] = m.split('-').map(Number)
+          const start = new Date(year, month - 1, 1)
+          const end = new Date(year, month, 0, 23, 59, 59, 999)
+          return { registeredAt: { gte: start, lte: end } }
+        })
+        participantWhere.OR = dateRanges
+      }
+    }
+
+    const [participantCount, participants] = await Promise.all([
+      prisma.registration.count({ where: participantWhere }),
+      prisma.registration.findMany({
+        where: participantWhere,
+        orderBy: { createdAt: 'desc' },
+        skip: pSkip,
+        take: pLimit,
+        select: {
+          id: true,
+          eId: true,
+          paymentStatus: true,
+          paymentMethod: true,
+          totalAmount: true,
+          registeredAt: true,
+          event: { select: { id: true, name: true, startDate: true } },
+          rider: { select: { firstName: true, lastName: true } },
+          horse: { select: { name: true } },
+          club: { select: { name: true } },
+          category: { select: { id: true, name: true } },
+        },
+      }),
+    ])
 
     const participantsFormatted = participants.map((p) => ({
+      id: p.id,
       eventName: p.event.name,
-      eventDate: p.registeredAt,
+      eventId: p.event.id,
+      eventDate: p.event.startDate,
       riderName: `${p.rider.firstName} ${p.rider.lastName}`,
       clubName: p.club?.name || 'N/A',
       horseName: p.horse.name,
       eventCategory: p.category.name,
+      categoryId: p.category.id,
       price: p.totalAmount,
+      paymentMethod: p.paymentMethod || 'N/A',
       paymentStatus: p.paymentStatus,
     }))
+
+    // CSV export
+    if (format === 'csv') {
+      const headers = ['Event Name', 'Event Date', 'Rider Name', 'Club Name', 'Horse Name', 'Event Category', 'Price', 'Payment Method', 'Payment Status']
+      const rows = participantsFormatted.map(p => [
+        p.eventName,
+        new Date(p.eventDate).toLocaleDateString(),
+        p.riderName,
+        p.clubName,
+        p.horseName,
+        p.eventCategory,
+        p.price,
+        p.paymentMethod,
+        p.paymentStatus,
+      ])
+      const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n')
+      res.setHeader('Content-Type', 'text/csv')
+      res.setHeader('Content-Disposition', 'attachment; filename=participants.csv')
+      return res.status(200).send(csv as any)
+    }
+
+    // ====================== CATEGORY LIST (for filters) ======================
+    const allCategories = await prisma.eventCategory.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+    })
 
     // ====================== RESPONSE ======================
     res.status(200).json({
@@ -260,16 +263,12 @@ async function handler(
           clubsRegistered: totalClubs,
           ridersRegistered: totalRiders,
           horseCount: totalHorses,
-          totalRevenue: totalRevenue._sum.totalAmount || 0,
-          collectibleAmount: collectibleAmount._sum.totalAmount || 0,
+          totalRevenue: revenueAgg._sum.totalAmount || 0,
+          collectibleAmount: collectibleAgg._sum.totalAmount || 0,
+          receivableAmount: receivableAgg._sum.totalAmount || 0,
         },
         charts: {
           eventBreakdown: eventStats,
-          monthlyRevenue: monthlyRevenueData,
-          registrationTrend: registrationTrendData,
-          upcomingEventsCountdown: upcomingCountdown,
-          mostActiveClub: mostActiveClubInfo,
-          mostActiveRider: mostActiveRiderInfo,
         },
         eventLists: {
           currentEvents,
@@ -277,7 +276,14 @@ async function handler(
         },
         participantsList: {
           data: participantsFormatted,
-          count: participantsFormatted.length,
+          count: participantCount,
+          page: pPage,
+          limit: pLimit,
+          pages: Math.ceil(participantCount / pLimit),
+        },
+        filterOptions: {
+          events: allEventsList,
+          categories: allCategories,
         },
       },
     })
