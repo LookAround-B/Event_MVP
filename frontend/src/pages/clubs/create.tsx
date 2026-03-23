@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FiArrowLeft } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import AddressMapPicker from '@/components/AddressMapPicker';
 
 export default function CreateClub() {
   const router = useRouter();
@@ -151,6 +152,24 @@ export default function CreateClub() {
                 className="form-input"
               />
             </div>
+
+            <AddressMapPicker
+              address={formData.address}
+              city={formData.city}
+              state={formData.state}
+              country={formData.country}
+              pincode={formData.pincode}
+              onAddressChange={(components) => {
+                setFormData(prev => ({
+                  ...prev,
+                  address: components.address || prev.address,
+                  city: components.city || prev.city,
+                  state: components.state || prev.state,
+                  country: components.country || prev.country,
+                  pincode: components.pincode || prev.pincode,
+                }));
+              }}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <div>

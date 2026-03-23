@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { FiCalendar, FiUsers, FiBarChart, FiDollarSign, FiTrendingUp, FiBox, FiDownload, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import api from '@/lib/api';
@@ -190,6 +189,19 @@ function MultiSelect({ label, options, selected, onChange }: { label: string; op
   );
 }
 
+/* ===================== SECTION SPINNER ===================== */
+
+function SectionSpinner({ label }: { label?: string }) {
+  return (
+    <div className="flex items-center justify-center py-12">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto mb-3" />
+        {label && <p className="text-gray-400 text-sm">{label}</p>}
+      </div>
+    </div>
+  );
+}
+
 /* ===================== MAIN DASHBOARD ===================== */
 
 function DashboardContent() {
@@ -203,10 +215,12 @@ function DashboardContent() {
   const [eventChartData, setEventChartData] = useState<EventChartData[]>([]);
   const [selectedChartEvent, setSelectedChartEvent] = useState<string>('');
 
-  // Event lists
-  const [currentEvents, setCurrentEvents] = useState<EventListItem[]>([]);
-  const [allEvents, setAllEvents] = useState<EventListItem[]>([]);
+  // Event lists (with pagination)
+  const [events, setEvents] = useState<EventListItem[]>([]);
   const [eventTab, setEventTab] = useState<'current' | 'all'>('current');
+  const [eventPage, setEventPage] = useState(1);
+  const [eventTotalPages, setEventTotalPages] = useState(1);
+  const [eventCount, setEventCount] = useState(0);
 
   // Participants
   const [participants, setParticipants] = useState<ParticipantRow[]>([]);
@@ -230,45 +244,77 @@ function DashboardContent() {
   // Main event filter (top dropdown)
   const [mainEventFilter, setMainEventFilter] = useState<string>('');
 
-  const [loading, setLoading] = useState(true);
+  // Independent loading states
+  const [kpiLoading, setKpiLoading] = useState(true);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [participantsLoading, setParticipantsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDashboardData = useCallback(async () => {
+  // Fetch KPIs + charts + filter options (fast)
+  const fetchKpis = useCallback(async () => {
     try {
-      setLoading(true);
+      setKpiLoading(true);
       const params: any = {};
       if (mainEventFilter) params.eventId = mainEventFilter;
-      params.participantPage = participantPage;
-      params.participantLimit = 20;
-      if (filterMonths.length) params.participantMonths = filterMonths.join(',');
-      if (filterEvents.length) params.participantEvents = filterEvents.join(',');
-      if (filterCategories.length) params.participantCategories = filterCategories.join(',');
-      if (filterPayment.length) params.participantPayment = filterPayment.join(',');
-
       const res = await api.get('/api/dashboard', { params });
       const data = res.data.data;
-
       setKpiCards(data.kpiCards);
       setEventChartData(data.charts.eventBreakdown || []);
-      setCurrentEvents(data.eventLists.currentEvents || []);
-      setAllEvents(data.eventLists.allEvents || []);
-      setParticipants(data.participantsList.data || []);
-      setParticipantCount(data.participantsList.count || 0);
-      setParticipantTotalPages(data.participantsList.pages || 1);
       setEventOptions(data.filterOptions.events || []);
       setCategoryOptions(data.filterOptions.categories || []);
-      setError(null);
     } catch (err) {
-      console.error('Failed to fetch dashboard data:', err);
-      setError('Failed to load dashboard data');
+      console.error('Failed to fetch KPIs:', err);
+      setError('Failed to load dashboard KPIs');
     } finally {
-      setLoading(false);
+      setKpiLoading(false);
+    }
+  }, [mainEventFilter]);
+
+  // Fetch events (with pagination)
+  const fetchEvents = useCallback(async () => {
+    try {
+      setEventsLoading(true);
+      const params: any = { tab: eventTab, page: eventPage, limit: 15 };
+      const res = await api.get('/api/dashboard/events', { params });
+      const data = res.data.data;
+      setEvents(data.events || []);
+      setEventCount(data.count || 0);
+      setEventTotalPages(data.pages || 1);
+    } catch (err) {
+      console.error('Failed to fetch events:', err);
+    } finally {
+      setEventsLoading(false);
+    }
+  }, [eventTab, eventPage]);
+
+  // Fetch participants (with filters + pagination)
+  const fetchParticipants = useCallback(async () => {
+    try {
+      setParticipantsLoading(true);
+      const params: any = { page: participantPage, limit: 20 };
+      if (mainEventFilter) params.eventId = mainEventFilter;
+      if (filterMonths.length) params.months = filterMonths.join(',');
+      if (filterEvents.length) params.events = filterEvents.join(',');
+      if (filterCategories.length) params.categories = filterCategories.join(',');
+      if (filterPayment.length) params.payment = filterPayment.join(',');
+      const res = await api.get('/api/dashboard/participants', { params });
+      const data = res.data.data;
+      setParticipants(data.data || []);
+      setParticipantCount(data.count || 0);
+      setParticipantTotalPages(data.pages || 1);
+    } catch (err) {
+      console.error('Failed to fetch participants:', err);
+    } finally {
+      setParticipantsLoading(false);
     }
   }, [mainEventFilter, participantPage, filterMonths, filterEvents, filterCategories, filterPayment]);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+  // Load KPIs on mount / main event filter change
+  useEffect(() => { fetchKpis(); }, [fetchKpis]);
+  // Load events independently
+  useEffect(() => { fetchEvents(); }, [fetchEvents]);
+  // Load participants independently
+  useEffect(() => { fetchParticipants(); }, [fetchParticipants]);
 
   // Generate month options (last 24 months)
   const monthOptions = useMemo(() => {
@@ -330,9 +376,8 @@ function DashboardContent() {
 
   // Export events
   const handleExportEventsCSV = () => {
-    const list = eventTab === 'current' ? currentEvents : allEvents;
     const headers = ['Event Name', 'Start Date', 'End Date', 'Venue', 'Address'];
-    const rows = list.map(e => [
+    const rows = events.map(e => [
       e.name, new Date(e.startDate).toLocaleDateString(), new Date(e.endDate).toLocaleDateString(),
       e.venueName || 'N/A', e.venueAddress || 'N/A',
     ]);
@@ -340,9 +385,8 @@ function DashboardContent() {
   };
 
   const handleExportEventsExcel = () => {
-    const list = eventTab === 'current' ? currentEvents : allEvents;
     const headers = ['Event Name', 'Start Date', 'End Date', 'Venue', 'Address'];
-    const rows = list.map(e => [
+    const rows = events.map(e => [
       e.name, new Date(e.startDate).toLocaleDateString(), new Date(e.endDate).toLocaleDateString(),
       e.venueName || 'N/A', e.venueAddress || 'N/A',
     ]);
@@ -376,113 +420,88 @@ function DashboardContent() {
           <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded-xl">{error}</div>
         )}
 
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500 mx-auto mb-4" />
-              <p className="text-gray-300">Loading dashboard...</p>
+        {/* ==================== SECTION 1: KPI STAT CARDS ==================== */}
+        {kpiLoading ? (
+          <SectionSpinner label="Loading KPIs..." />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <StatCard icon={FiCalendar} title="Total Events" value={kpiCards.totalEvents} color="bg-blue-500" />
+            <StatCard icon={FiUsers} title="Clubs | Riders" value={`${kpiCards.clubsRegistered} | ${kpiCards.ridersRegistered}`} color="bg-teal-500" />
+            <StatCard icon={FiBox} title="Horse Count" value={kpiCards.horseCount} color="bg-purple-500" />
+            <StatCard icon={FiDollarSign} title="Total Amount" value={`₹${kpiCards.totalRevenue.toLocaleString('en-IN')}`} color="bg-pink-500" />
+            <StatCard icon={FiTrendingUp} title="Collectible" value={`₹${kpiCards.collectibleAmount.toLocaleString('en-IN')}`} color="bg-orange-500" />
+            <StatCard icon={FiBarChart} title="Receivable" value={`₹${kpiCards.receivableAmount.toLocaleString('en-IN')}`} color="bg-red-500" />
+          </div>
+        )}
+
+        {/* ==================== SECTION 2: BAR CHART ==================== */}
+        {kpiLoading ? (
+          <SectionSpinner label="Loading charts..." />
+        ) : (
+          <div className="glass p-6 rounded-xl">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+              <h3 className="text-lg font-semibold text-white">Event Stats</h3>
+              <select
+                value={selectedChartEvent}
+                onChange={e => setSelectedChartEvent(e.target.value)}
+                className="px-3 py-2 rounded-lg bg-white bg-opacity-10 text-sm text-gray-200 border border-white border-opacity-20"
+              >
+                <option value="" className="bg-slate-800">All Events</option>
+                {eventChartData.map(ev => (
+                  <option key={ev.eventId} value={ev.eventId} className="bg-slate-800">{ev.eventName}</option>
+                ))}
+              </select>
+            </div>
+            {chartDisplayData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={chartDisplayData} margin={{ bottom: 60 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis dataKey="eventName" angle={-35} textAnchor="end" height={80} tick={{ fill: '#94a3b8', fontSize: 11 }} interval={0} />
+                  <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: '#fff' }} />
+                  <Legend wrapperStyle={{ color: '#fff' }} />
+                  <Bar dataKey="unpaidRegistrations" fill="#f87171" name="Unpaid" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="totalRiders" fill="#34d399" name="Riders" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="totalHorses" fill="#60a5fa" name="Horses" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-400 text-center py-8">No event data</p>
+            )}
+          </div>
+        )}
+
+        {/* ==================== SECTION 3: EVENTS TABLE WITH TABS + PAGINATION ==================== */}
+        <div className="glass p-6 rounded-xl">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+            <div className="flex gap-1 bg-white bg-opacity-5 rounded-lg p-1">
+              <button
+                onClick={() => { setEventTab('current'); setEventPage(1); }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${eventTab === 'current' ? 'bg-primary-500 text-white' : 'text-gray-400 hover:text-white'}`}
+              >
+                Current Events
+              </button>
+              <button
+                onClick={() => { setEventTab('all'); setEventPage(1); }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${eventTab === 'all' ? 'bg-primary-500 text-white' : 'text-gray-400 hover:text-white'}`}
+              >
+                All Events ({eventCount})
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={handleExportEventsCSV} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white bg-opacity-10 text-gray-300 text-xs hover:bg-opacity-20 transition">
+                <FiDownload className="w-3 h-3" /> CSV
+              </button>
+              <button onClick={handleExportEventsExcel} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-600 bg-opacity-80 text-white text-xs hover:bg-opacity-100 transition">
+                <FiDownload className="w-3 h-3" /> Excel
+              </button>
             </div>
           </div>
-        ) : (
-          <>
-            {/* ==================== SECTION 1: KPI STAT CARDS ==================== */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-              <StatCard icon={FiCalendar} title="Total Events" value={kpiCards.totalEvents} color="bg-blue-500" />
-              <StatCard icon={FiUsers} title="Clubs | Riders" value={`${kpiCards.clubsRegistered} | ${kpiCards.ridersRegistered}`} color="bg-teal-500" />
-              <StatCard icon={FiBox} title="Horse Count" value={kpiCards.horseCount} color="bg-purple-500" />
-              <StatCard icon={FiDollarSign} title="Total Amount" value={`₹${kpiCards.totalRevenue.toLocaleString('en-IN')}`} color="bg-pink-500" />
-              <StatCard icon={FiTrendingUp} title="Collectible" value={`₹${kpiCards.collectibleAmount.toLocaleString('en-IN')}`} color="bg-orange-500" />
-              <StatCard icon={FiBarChart} title="Receivable" value={`₹${kpiCards.receivableAmount.toLocaleString('en-IN')}`} color="bg-red-500" />
-            </div>
 
-            {/* ==================== SECTION 2: EVENTS TIMELINE ==================== */}
-            <div className="glass p-6 rounded-xl">
-              <h3 className="text-lg font-semibold text-white mb-4">Events</h3>
-              {allEvents.length === 0 ? (
-                <p className="text-gray-400 text-sm">No events found</p>
-              ) : (
-                <div className="relative border-l-2 border-primary-500 border-opacity-40 ml-4 space-y-6">
-                  {allEvents.slice(0, 10).map(ev => (
-                    <div key={ev.id} className="ml-6 relative">
-                      <div className="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-primary-500 border-2 border-slate-800" />
-                      <Link href={`/events/${ev.id}`} className="block glass p-4 rounded-lg hover:bg-white hover:bg-opacity-10 transition group">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-white font-medium group-hover:text-primary-300 transition">{ev.name}</p>
-                            <p className="text-gray-400 text-xs mt-1">{ev.venueName || ev.venueAddress || 'No venue'}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-gray-400">{formatDate(ev.startDate)}</p>
-                            {ev.eventType && <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500 bg-opacity-20 text-purple-300 mt-1 inline-block">{ev.eventType}</span>}
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* ==================== SECTION 3: BAR CHART ==================== */}
-            <div className="glass p-6 rounded-xl">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-                <h3 className="text-lg font-semibold text-white">Event Stats</h3>
-                <select
-                  value={selectedChartEvent}
-                  onChange={e => setSelectedChartEvent(e.target.value)}
-                  className="px-3 py-2 rounded-lg bg-white bg-opacity-10 text-sm text-gray-200 border border-white border-opacity-20"
-                >
-                  <option value="" className="bg-slate-800">All Events</option>
-                  {eventChartData.map(ev => (
-                    <option key={ev.eventId} value={ev.eventId} className="bg-slate-800">{ev.eventName}</option>
-                  ))}
-                </select>
-              </div>
-              {chartDisplayData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={chartDisplayData} margin={{ bottom: 60 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                    <XAxis dataKey="eventName" angle={-35} textAnchor="end" height={80} tick={{ fill: '#94a3b8', fontSize: 11 }} interval={0} />
-                    <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} allowDecimals={false} />
-                    <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: '#fff' }} />
-                    <Legend wrapperStyle={{ color: '#fff' }} />
-                    <Bar dataKey="unpaidRegistrations" fill="#f87171" name="Unpaid" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="totalRiders" fill="#34d399" name="Riders" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="totalHorses" fill="#60a5fa" name="Horses" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <p className="text-gray-400 text-center py-8">No event data</p>
-              )}
-            </div>
-
-            {/* ==================== SECTION 4: CURRENT / ALL EVENTS TABS ==================== */}
-            <div className="glass p-6 rounded-xl">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
-                <div className="flex gap-1 bg-white bg-opacity-5 rounded-lg p-1">
-                  <button
-                    onClick={() => setEventTab('current')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${eventTab === 'current' ? 'bg-primary-500 text-white' : 'text-gray-400 hover:text-white'}`}
-                  >
-                    Current Events ({currentEvents.length})
-                  </button>
-                  <button
-                    onClick={() => setEventTab('all')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${eventTab === 'all' ? 'bg-primary-500 text-white' : 'text-gray-400 hover:text-white'}`}
-                  >
-                    All Events ({allEvents.length})
-                  </button>
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={handleExportEventsCSV} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white bg-opacity-10 text-gray-300 text-xs hover:bg-opacity-20 transition">
-                    <FiDownload className="w-3 h-3" /> CSV
-                  </button>
-                  <button onClick={handleExportEventsExcel} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-600 bg-opacity-80 text-white text-xs hover:bg-opacity-100 transition">
-                    <FiDownload className="w-3 h-3" /> Excel
-                  </button>
-                </div>
-              </div>
-
+          {eventsLoading ? (
+            <SectionSpinner label="Loading events..." />
+          ) : (
+            <>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -494,10 +513,10 @@ function DashboardContent() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(eventTab === 'current' ? currentEvents : allEvents).length === 0 ? (
+                    {events.length === 0 ? (
                       <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-500">No events found</td></tr>
                     ) : (
-                      (eventTab === 'current' ? currentEvents : allEvents).map(ev => (
+                      events.map(ev => (
                         <tr
                           key={ev.id}
                           onClick={() => router.push(`/events/${ev.id}`)}
@@ -513,55 +532,62 @@ function DashboardContent() {
                   </tbody>
                 </table>
               </div>
+              <Pagination page={eventPage} totalPages={eventTotalPages} onPageChange={setEventPage} />
+            </>
+          )}
+        </div>
+
+        {/* ==================== SECTION 4: PARTICIPANTS LIST ==================== */}
+        <div className="glass p-6 rounded-xl">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
+            <h3 className="text-lg font-semibold text-white">Participants List <span className="text-sm font-normal text-gray-400">({participantCount} total)</span></h3>
+            <div className="flex gap-2">
+              <button onClick={handleExportParticipantsCSV} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white bg-opacity-10 text-gray-300 text-xs hover:bg-opacity-20 transition">
+                <FiDownload className="w-3 h-3" /> CSV
+              </button>
+              <button onClick={handleExportParticipantsExcel} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-600 bg-opacity-80 text-white text-xs hover:bg-opacity-100 transition">
+                <FiDownload className="w-3 h-3" /> Excel
+              </button>
             </div>
+          </div>
 
-            {/* ==================== SECTION 5: PARTICIPANTS LIST ==================== */}
-            <div className="glass p-6 rounded-xl">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
-                <h3 className="text-lg font-semibold text-white">Participants List <span className="text-sm font-normal text-gray-400">({participantCount} total)</span></h3>
-                <div className="flex gap-2">
-                  <button onClick={handleExportParticipantsCSV} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white bg-opacity-10 text-gray-300 text-xs hover:bg-opacity-20 transition">
-                    <FiDownload className="w-3 h-3" /> CSV
-                  </button>
-                  <button onClick={handleExportParticipantsExcel} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-600 bg-opacity-80 text-white text-xs hover:bg-opacity-100 transition">
-                    <FiDownload className="w-3 h-3" /> Excel
-                  </button>
-                </div>
-              </div>
+          {/* Filters */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            <MultiSelect
+              label="Month & Year"
+              options={monthOptions}
+              selected={filterMonths}
+              onChange={v => { setFilterMonths(v); setParticipantPage(1); }}
+            />
+            <MultiSelect
+              label="Select Events"
+              options={eventOptions.map(e => ({ value: e.id, label: e.name }))}
+              selected={filterEvents}
+              onChange={v => { setFilterEvents(v); setParticipantPage(1); }}
+            />
+            <MultiSelect
+              label="Event Category"
+              options={categoryOptions.map(c => ({ value: c.id, label: c.name }))}
+              selected={filterCategories}
+              onChange={v => { setFilterCategories(v); setParticipantPage(1); }}
+            />
+            <MultiSelect
+              label="Payment Status"
+              options={[
+                { value: 'PAID', label: 'Paid' },
+                { value: 'UNPAID', label: 'Unpaid' },
+                { value: 'PARTIAL', label: 'Partial' },
+                { value: 'CANCELLED', label: 'Cancelled' },
+              ]}
+              selected={filterPayment}
+              onChange={v => { setFilterPayment(v); setParticipantPage(1); }}
+            />
+          </div>
 
-              {/* Filters */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                <MultiSelect
-                  label="Month & Year"
-                  options={monthOptions}
-                  selected={filterMonths}
-                  onChange={v => { setFilterMonths(v); setParticipantPage(1); }}
-                />
-                <MultiSelect
-                  label="Select Events"
-                  options={eventOptions.map(e => ({ value: e.id, label: e.name }))}
-                  selected={filterEvents}
-                  onChange={v => { setFilterEvents(v); setParticipantPage(1); }}
-                />
-                <MultiSelect
-                  label="Event Category"
-                  options={categoryOptions.map(c => ({ value: c.id, label: c.name }))}
-                  selected={filterCategories}
-                  onChange={v => { setFilterCategories(v); setParticipantPage(1); }}
-                />
-                <MultiSelect
-                  label="Payment Status"
-                  options={[
-                    { value: 'PAID', label: 'Paid' },
-                    { value: 'UNPAID', label: 'Unpaid' },
-                    { value: 'PARTIAL', label: 'Partial' },
-                    { value: 'CANCELLED', label: 'Cancelled' },
-                  ]}
-                  selected={filterPayment}
-                  onChange={v => { setFilterPayment(v); setParticipantPage(1); }}
-                />
-              </div>
-
+          {participantsLoading ? (
+            <SectionSpinner label="Loading participants..." />
+          ) : (
+            <>
               {/* Table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -625,9 +651,9 @@ function DashboardContent() {
                 </table>
               </div>
               <Pagination page={participantPage} totalPages={participantTotalPages} onPageChange={setParticipantPage} />
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </ProtectedRoute>
   );
