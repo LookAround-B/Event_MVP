@@ -33,6 +33,35 @@ interface Registration {
   createdAt: string;
 }
 
+function escapeCSVField(field: string | number): string {
+  const s = String(field);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportToExcel(headers: string[], rows: (string | number)[][], filename: string) {
+  const esc = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('');
+  const dataRows = rows.map(r => {
+    const cells = r.map(c => {
+      const t = typeof c === 'number' ? 'Number' : 'String';
+      return `<Cell><Data ss:Type="${t}">${esc(c)}</Data></Cell>`;
+    });
+    return `<Row>${cells.join('')}</Row>`;
+  });
+  const xml = `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Sheet1"><Table><Row>${headerRow}</Row>${dataRows.join('')}</Table></Worksheet></Workbook>`;
+  downloadBlob(new Blob([xml], { type: 'application/vnd.ms-excel' }), filename);
+}
+
 export default function Registrations() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +69,7 @@ export default function Registrations() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchRegistrations();
@@ -67,22 +97,49 @@ export default function Registrations() {
     }
   };
 
-  const handleExportCSV = async () => {
-    try {
-      const params: any = { format: 'csv' };
-      if (statusFilter) params.status = statusFilter;
-      const res = await api.get('/api/registrations', { params, responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'registrations.csv';
-      a.click();
-      window.URL.revokeObjectURL(url);
-      toast.success('Registrations exported successfully');
-    } catch (err) {
-      console.error('Failed to export CSV:', err);
-      toast.error('Failed to export CSV');
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === registrations.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(registrations.map(r => r.id)));
     }
+  };
+
+  const getExportData = () => {
+    const headers = ['Rider Name', 'Horse Name', 'Event Name', 'Total Amount', 'Payment Status'];
+    const source = selectedIds.size > 0 ? registrations.filter(r => selectedIds.has(r.id)) : registrations;
+    const rows = source.map(r => [
+      `${r.rider.firstName} ${r.rider.lastName}`,
+      r.horse.name,
+      r.event.name,
+      r.totalAmount,
+      r.paymentStatus,
+    ]);
+    return { headers, rows };
+  };
+
+  const handleExportCSV = () => {
+    const { headers, rows } = getExportData();
+    const csv = [
+      headers.map(escapeCSVField).join(','),
+      ...rows.map(r => r.map(escapeCSVField).join(',')),
+    ].join('\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'registrations.csv');
+    toast.success('Registrations exported as CSV');
+  };
+
+  const handleExportExcel = () => {
+    const { headers, rows } = getExportData();
+    exportToExcel(headers, rows, 'registrations.xls');
+    toast.success('Registrations exported as Excel');
   };
 
   const handleDelete = async (id: string) => {
@@ -91,6 +148,8 @@ export default function Registrations() {
     try {
       await api.delete(`/api/registrations/${id}`);
       setRegistrations(registrations.filter(r => r.id !== id));
+      selectedIds.delete(id);
+      setSelectedIds(new Set(selectedIds));
       toast.success('Registration deleted successfully');
     } catch (err) {
       console.error('Failed to delete registration:', err);
@@ -117,6 +176,9 @@ export default function Registrations() {
             <div className="flex gap-3">
               <button onClick={handleExportCSV} className="btn-secondary">
                 <FiDownload className="inline mr-2" /> Export CSV
+              </button>
+              <button onClick={handleExportExcel} className="btn-secondary">
+                <FiDownload className="inline mr-2" /> Export Excel
               </button>
               <Link href="/registrations/create" className="btn-primary">
                 <FiPlus className="inline mr-2" /> New Registration
@@ -165,17 +227,33 @@ export default function Registrations() {
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Rider</th>
-                      <th>Horse</th>
-                      <th>Event</th>
-                      <th>Amount</th>
-                      <th>Status</th>
+                      <th>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.size === registrations.length && registrations.length > 0}
+                          onChange={toggleSelectAll}
+                          className="rounded border-gray-600"
+                        />
+                      </th>
+                      <th>Rider Name</th>
+                      <th>Horse Name</th>
+                      <th>Event Name</th>
+                      <th>Total Amount</th>
+                      <th>Payment Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {registrations.map((reg) => (
                       <tr key={reg.id}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(reg.id)}
+                            onChange={() => toggleSelect(reg.id)}
+                            className="rounded border-gray-600"
+                          />
+                        </td>
                         <td className="font-medium">{reg.rider.firstName} {reg.rider.lastName}</td>
                         <td>{reg.horse.name} ({reg.horse.gender})</td>
                         <td>{reg.event.name}</td>
@@ -208,7 +286,7 @@ export default function Registrations() {
                     >
                       Previous
                     </button>
-                    <span className="px-4 py-2">
+                    <span className="px-4 py-2 text-gray-300">
                       Page {page} of {totalPages}
                     </span>
                     <button

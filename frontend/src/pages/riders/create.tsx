@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { FiArrowLeft, FiCheck } from 'react-icons/fi';
+import AddressMapPicker from '@/components/AddressMapPicker';
 
 export default function CreateRider() {
   const router = useRouter();
@@ -307,6 +308,13 @@ export default function CreateRider() {
                   placeholder="Enter address"
                   rows={3}
                   className="form-input"
+                />
+                <AddressMapPicker
+                  address={formData.address}
+                  onAddressChange={(components) => {
+                    const parts = [components.address, components.city, components.state, components.country, components.pincode].filter(Boolean);
+                    setFormData(prev => ({ ...prev, address: parts.join(', ') }));
+                  }}
                 />
               </div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { FiPlus, FiEdit, FiTrash2, FiSearch, FiDownload } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
@@ -28,6 +29,35 @@ interface Summary {
   averageTransaction: number;
 }
 
+function escapeCSVField(field: string | number): string {
+  const s = String(field);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportToExcel(headers: string[], rows: (string | number)[][], filename: string) {
+  const esc = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('');
+  const dataRows = rows.map(r => {
+    const cells = r.map(c => {
+      const t = typeof c === 'number' ? 'Number' : 'String';
+      return `<Cell><Data ss:Type="${t}">${esc(c)}</Data></Cell>`;
+    });
+    return `<Row>${cells.join('')}</Row>`;
+  });
+  const xml = `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Sheet1"><Table><Row>${headerRow}</Row>${dataRows.join('')}</Table></Worksheet></Workbook>`;
+  downloadBlob(new Blob([xml], { type: 'application/vnd.ms-excel' }), filename);
+}
+
 export default function Financial() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<Summary>({
@@ -41,6 +71,7 @@ export default function Financial() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchData();
@@ -73,23 +104,53 @@ export default function Financial() {
     }
   };
 
-  const handleExportCSV = async () => {
-    try {
-      const response = await api.get('/api/financial/transactions', {
-        params: { format: 'csv', status: statusFilter },
-        responseType: 'blob',
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'transactions.csv');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Export failed:', err);
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === transactions.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(transactions.map(t => t.id)));
     }
+  };
+
+  const getExportData = () => {
+    const headers = ['Reference #', 'Amount', 'CGST', 'SGST', 'IGST', 'Total Amount', 'Payment Method', 'Payment Status', 'Transaction Date'];
+    const source = selectedIds.size > 0 ? transactions.filter(t => selectedIds.has(t.id)) : transactions;
+    const rows = source.map(t => [
+      t.referenceNumber || t.id.slice(0, 8),
+      t.amount,
+      t.cgstAmount,
+      t.sgstAmount,
+      t.igstAmount,
+      t.totalAmount,
+      t.paymentMethod?.replace('_', ' ') || '-',
+      t.status,
+      new Date(t.createdAt).toLocaleDateString(),
+    ]);
+    return { headers, rows };
+  };
+
+  const handleExportCSV = () => {
+    const { headers, rows } = getExportData();
+    const csv = [
+      headers.map(escapeCSVField).join(','),
+      ...rows.map(r => r.map(escapeCSVField).join(',')),
+    ].join('\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'transactions.csv');
+    toast.success('Transactions exported as CSV');
+  };
+
+  const handleExportExcel = () => {
+    const { headers, rows } = getExportData();
+    exportToExcel(headers, rows, 'transactions.xls');
+    toast.success('Transactions exported as Excel');
   };
 
   const getStatusColor = (status: string) => {
@@ -111,6 +172,9 @@ export default function Financial() {
           <div className="flex gap-3">
             <button onClick={handleExportCSV} className="btn-secondary">
               <FiDownload className="inline mr-2" /> Export CSV
+            </button>
+            <button onClick={handleExportExcel} className="btn-secondary">
+              <FiDownload className="inline mr-2" /> Export Excel
             </button>
             <Link href="/financial/transactions/create" className="btn-primary">
               <FiPlus className="inline mr-2" /> Record Transaction
@@ -197,20 +261,36 @@ export default function Financial() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Ref #</th>
+                    <th>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.size === transactions.length && transactions.length > 0}
+                        onChange={toggleSelectAll}
+                        className="rounded border-gray-600"
+                      />
+                    </th>
+                    <th>Reference #</th>
                     <th>Amount</th>
                     <th>CGST</th>
                     <th>SGST</th>
                     <th>IGST</th>
-                    <th>Total</th>
-                    <th>Method</th>
-                    <th>Status</th>
-                    <th>Date</th>
+                    <th>Total Amount</th>
+                    <th>Payment Method</th>
+                    <th>Payment Status</th>
+                    <th>Transaction Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {transactions.map((trans) => (
                     <tr key={trans.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(trans.id)}
+                          onChange={() => toggleSelect(trans.id)}
+                          className="rounded border-gray-600"
+                        />
+                      </td>
                       <td className="font-medium text-sm">{trans.referenceNumber || trans.id.slice(0, 8)}</td>
                       <td>₹{trans.amount.toFixed(2)}</td>
                       <td className="text-sm">₹{trans.cgstAmount.toFixed(2)}</td>
@@ -238,7 +318,7 @@ export default function Financial() {
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2">
+                  <span className="px-4 py-2 text-gray-300">
                     Page {page} of {totalPages}
                   </span>
                   <button

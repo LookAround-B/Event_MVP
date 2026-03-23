@@ -361,7 +361,7 @@ export default function CreateEventPage() {
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+                  <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
                     <FiMapPin /> Venue Address
                   </label>
                   <input
@@ -375,7 +375,7 @@ export default function CreateEventPage() {
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+                  <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
                     <FiMapPin /> Venue Location
                   </label>
                   <VenueMapPicker

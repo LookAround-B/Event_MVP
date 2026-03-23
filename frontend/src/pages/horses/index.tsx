@@ -17,6 +17,35 @@ interface Horse {
   registrationCount: number;
 }
 
+function escapeCSVField(field: string | number): string {
+  const s = String(field);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportToExcel(headers: string[], rows: (string | number)[][], filename: string) {
+  const esc = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('');
+  const dataRows = rows.map(r => {
+    const cells = r.map(c => {
+      const t = typeof c === 'number' ? 'Number' : 'String';
+      return `<Cell><Data ss:Type="${t}">${esc(c)}</Data></Cell>`;
+    });
+    return `<Row>${cells.join('')}</Row>`;
+  });
+  const xml = `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Sheet1"><Table><Row>${headerRow}</Row>${dataRows.join('')}</Table></Worksheet></Workbook>`;
+  downloadBlob(new Blob([xml], { type: 'application/vnd.ms-excel' }), filename);
+}
+
 export default function Horses() {
   const [horses, setHorses] = useState<Horse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +53,7 @@ export default function Horses() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchHorses();
@@ -51,22 +81,51 @@ export default function Horses() {
     }
   };
 
-  const handleExportCSV = async () => {
-    try {
-      const params: any = { format: 'csv' };
-      if (searchTerm) params.search = searchTerm;
-      const res = await api.get('/api/horses', { params, responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'horses.csv';
-      a.click();
-      window.URL.revokeObjectURL(url);
-      toast.success('Horses exported successfully');
-    } catch (err) {
-      console.error('Failed to export CSV:', err);
-      toast.error('Failed to export CSV');
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === horses.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(horses.map(h => h.id)));
     }
+  };
+
+  const getExportData = () => {
+    const headers = ['Horse Name', 'Breed', 'Age', 'Color', 'Height', 'Registrations'];
+    const currentYear = new Date().getFullYear();
+    const source = selectedIds.size > 0 ? horses.filter(h => selectedIds.has(h.id)) : horses;
+    const rows = source.map(h => [
+      h.name,
+      h.breed || '-',
+      h.yearOfBirth ? `${currentYear - h.yearOfBirth} years` : '-',
+      h.color || '-',
+      h.height ? `${h.height}h` : '-',
+      h.registrationCount,
+    ]);
+    return { headers, rows };
+  };
+
+  const handleExportCSV = () => {
+    const { headers, rows } = getExportData();
+    const csv = [
+      headers.map(escapeCSVField).join(','),
+      ...rows.map(r => r.map(escapeCSVField).join(',')),
+    ].join('\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'horses.csv');
+    toast.success('Horses exported as CSV');
+  };
+
+  const handleExportExcel = () => {
+    const { headers, rows } = getExportData();
+    exportToExcel(headers, rows, 'horses.xls');
+    toast.success('Horses exported as Excel');
   };
 
   const handleDelete = async (id: string) => {
@@ -75,6 +134,8 @@ export default function Horses() {
     try {
       await api.delete(`/api/horses/${id}`);
       setHorses(horses.filter(h => h.id !== id));
+      selectedIds.delete(id);
+      setSelectedIds(new Set(selectedIds));
       toast.success('Horse deleted successfully');
     } catch (err) {
       console.error('Failed to delete horse:', err);
@@ -91,6 +152,9 @@ export default function Horses() {
           <div className="flex gap-3">
             <button onClick={handleExportCSV} className="btn-secondary">
               <FiDownload className="inline mr-2" /> Export CSV
+            </button>
+            <button onClick={handleExportExcel} className="btn-secondary">
+              <FiDownload className="inline mr-2" /> Export Excel
             </button>
             <Link href="/horses/create" className="btn-primary">
               <FiPlus className="inline mr-2" /> New Horse
@@ -135,7 +199,15 @@ export default function Horses() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Name</th>
+                    <th>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.size === horses.length && horses.length > 0}
+                        onChange={toggleSelectAll}
+                        className="rounded border-gray-600"
+                      />
+                    </th>
+                    <th>Horse Name</th>
                     <th>Breed</th>
                     <th>Age</th>
                     <th>Color</th>
@@ -150,6 +222,14 @@ export default function Horses() {
                     const age = horse.yearOfBirth ? currentYear - horse.yearOfBirth : 0;
                     return (
                     <tr key={horse.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(horse.id)}
+                          onChange={() => toggleSelect(horse.id)}
+                          className="rounded border-gray-600"
+                        />
+                      </td>
                       <td className="font-medium">{horse.name}</td>
                       <td>{horse.breed || '-'}</td>
                       <td>{age} years</td>

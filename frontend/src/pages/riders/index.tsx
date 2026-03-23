@@ -16,6 +16,35 @@ interface Rider {
   registrationCount: number;
 }
 
+function escapeCSVField(field: string | number): string {
+  const s = String(field);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportToExcel(headers: string[], rows: (string | number)[][], filename: string) {
+  const esc = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('');
+  const dataRows = rows.map(r => {
+    const cells = r.map(c => {
+      const t = typeof c === 'number' ? 'Number' : 'String';
+      return `<Cell><Data ss:Type="${t}">${esc(c)}</Data></Cell>`;
+    });
+    return `<Row>${cells.join('')}</Row>`;
+  });
+  const xml = `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Sheet1"><Table><Row>${headerRow}</Row>${dataRows.join('')}</Table></Worksheet></Workbook>`;
+  downloadBlob(new Blob([xml], { type: 'application/vnd.ms-excel' }), filename);
+}
+
 export default function Riders() {
   const [riders, setRiders] = useState<Rider[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +52,7 @@ export default function Riders() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchRiders();
@@ -50,22 +80,49 @@ export default function Riders() {
     }
   };
 
-  const handleExportCSV = async () => {
-    try {
-      const params: any = { format: 'csv' };
-      if (searchTerm) params.search = searchTerm;
-      const res = await api.get('/api/riders', { params, responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'riders.csv';
-      a.click();
-      window.URL.revokeObjectURL(url);
-      toast.success('Riders exported successfully');
-    } catch (err) {
-      console.error('Failed to export CSV:', err);
-      toast.error('Failed to export CSV');
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === riders.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(riders.map(r => r.id)));
     }
+  };
+
+  const getExportData = () => {
+    const headers = ['Rider Name', 'Email', 'Phone', 'Gender', 'Registrations'];
+    const source = selectedIds.size > 0 ? riders.filter(r => selectedIds.has(r.id)) : riders;
+    const rows = source.map(r => [
+      `${r.firstName} ${r.lastName}`,
+      r.email,
+      r.mobile || '-',
+      r.gender || '-',
+      r.registrationCount,
+    ]);
+    return { headers, rows };
+  };
+
+  const handleExportCSV = () => {
+    const { headers, rows } = getExportData();
+    const csv = [
+      headers.map(escapeCSVField).join(','),
+      ...rows.map(r => r.map(escapeCSVField).join(',')),
+    ].join('\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'riders.csv');
+    toast.success('Riders exported as CSV');
+  };
+
+  const handleExportExcel = () => {
+    const { headers, rows } = getExportData();
+    exportToExcel(headers, rows, 'riders.xls');
+    toast.success('Riders exported as Excel');
   };
 
   const handleDelete = async (id: string) => {
@@ -74,6 +131,8 @@ export default function Riders() {
     try {
       await api.delete(`/api/riders/${id}`);
       setRiders(riders.filter(r => r.id !== id));
+      selectedIds.delete(id);
+      setSelectedIds(new Set(selectedIds));
       toast.success('Rider deleted successfully');
     } catch (err) {
       console.error('Failed to delete rider:', err);
@@ -90,6 +149,9 @@ export default function Riders() {
           <div className="flex gap-3">
             <button onClick={handleExportCSV} className="btn-secondary">
               <FiDownload className="inline mr-2" /> Export CSV
+            </button>
+            <button onClick={handleExportExcel} className="btn-secondary">
+              <FiDownload className="inline mr-2" /> Export Excel
             </button>
             <Link href="/riders/create" className="btn-primary">
               <FiPlus className="inline mr-2" /> New Rider
@@ -134,7 +196,15 @@ export default function Riders() {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Name</th>
+                    <th>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.size === riders.length && riders.length > 0}
+                        onChange={toggleSelectAll}
+                        className="rounded border-gray-600"
+                      />
+                    </th>
+                    <th>Rider Name</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Gender</th>
@@ -145,6 +215,14 @@ export default function Riders() {
                 <tbody>
                   {riders.map((rider) => (
                     <tr key={rider.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(rider.id)}
+                          onChange={() => toggleSelect(rider.id)}
+                          className="rounded border-gray-600"
+                        />
+                      </td>
                       <td className="font-medium">{rider.firstName} {rider.lastName}</td>
                       <td>{rider.email}</td>
                       <td>{rider.mobile || '-'}</td>

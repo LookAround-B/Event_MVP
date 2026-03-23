@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import api from '@/lib/api';
 import { FiPlus, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import AddressMapPicker from '@/components/AddressMapPicker';
 
 interface EventType {
   id: string;
@@ -247,6 +248,13 @@ export default function Settings() {
                       setGeneralSettings({ ...generalSettings, venue_address: e.target.value })
                     }
                     className="form-input"
+                  />
+                  <AddressMapPicker
+                    address={generalSettings.venue_address}
+                    onAddressChange={(components) => {
+                      const parts = [components.address, components.city, components.state, components.country, components.pincode].filter(Boolean);
+                      setGeneralSettings(prev => ({ ...prev, venue_address: parts.join(', ') }));
+                    }}
                   />
                 </div>
                 <div>
