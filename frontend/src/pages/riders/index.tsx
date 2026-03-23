@@ -1,19 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiDownload } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiDownload, FiFilter, FiX } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
 interface Rider {
   id: string;
+  eId: string;
+  efiRiderId: string | null;
   firstName: string;
   lastName: string;
   email: string;
   mobile?: string;
   gender?: string;
+  isActive: boolean;
+  clubId?: string;
+  clubName?: string;
   registrationCount: number;
+}
+
+interface Club {
+  id: string;
+  name: string;
 }
 
 function escapeCSVField(field: string | number): string {
@@ -46,29 +57,46 @@ function exportToExcel(headers: string[], rows: (string | number)[][], filename:
 }
 
 export default function Riders() {
+  const router = useRouter();
   const [riders, setRiders] = useState<Rider[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterGender, setFilterGender] = useState('');
+  const [filterClubId, setFilterClubId] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
+  useEffect(() => {
+    fetchClubs();
+  }, []);
 
   useEffect(() => {
     fetchRiders();
-  }, [page, searchTerm]);
+  }, [page, searchTerm, filterGender, filterClubId, filterStatus]);
+
+  const fetchClubs = async () => {
+    try {
+      const res = await api.get('/api/clubs?limit=100');
+      setClubs(res.data.data?.clubs || []);
+    } catch (err) {
+      console.error('Failed to fetch clubs:', err);
+    }
+  };
 
   const fetchRiders = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/riders', {
-        params: {
-          page,
-          limit: 10,
-          search: searchTerm,
-        },
-      });
+      const params: any = { page, limit: 10, search: searchTerm };
+      if (filterGender) params.gender = filterGender;
+      if (filterClubId) params.clubId = filterClubId;
+      if (filterStatus) params.status = filterStatus;
 
+      const response = await api.get('/api/riders', { params });
       setRiders(response.data.data.riders);
       setTotalPages(response.data.data.pagination.pages);
       setError(null);
@@ -96,14 +124,31 @@ export default function Riders() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Delete ${selectedIds.size} selected rider(s)?`)) return;
+    try {
+      await Promise.all(Array.from(selectedIds).map(rid => api.delete(`/api/riders/${rid}`)));
+      toast.success(`${selectedIds.size} rider(s) deleted`);
+      setSelectedIds(new Set());
+      fetchRiders();
+    } catch (err) {
+      toast.error('Failed to delete some riders');
+    }
+  };
+
   const getExportData = () => {
-    const headers = ['Rider Name', 'Email', 'Phone', 'Gender', 'Registrations'];
+    const headers = ['First Name', 'Last Name', 'Email', 'Phone', 'Gender', 'EFI Rider ID', 'Embassy ID', 'Club', 'Registrations'];
     const source = selectedIds.size > 0 ? riders.filter(r => selectedIds.has(r.id)) : riders;
     const rows = source.map(r => [
-      `${r.firstName} ${r.lastName}`,
+      r.firstName,
+      r.lastName,
       r.email,
       r.mobile || '-',
       r.gender || '-',
+      r.efiRiderId || '-',
+      r.eId || '-',
+      r.clubName || '-',
       r.registrationCount,
     ]);
     return { headers, rows };
@@ -127,7 +172,6 @@ export default function Riders() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this rider?')) return;
-
     try {
       await api.delete(`/api/riders/${id}`);
       setRiders(riders.filter(r => r.id !== id));
@@ -140,18 +184,32 @@ export default function Riders() {
     }
   };
 
+  const clearFilters = () => {
+    setFilterGender('');
+    setFilterClubId('');
+    setFilterStatus('');
+    setPage(1);
+  };
+
+  const hasActiveFilters = filterGender || filterClubId || filterStatus;
+
   return (
     <ProtectedRoute>
       <Head><title>Riders | Equestrian Events</title></Head>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-white">Riders</h2>
+          <h2 className="text-3xl font-bold text-white">Rider List</h2>
           <div className="flex gap-3">
+            {selectedIds.size > 0 && (
+              <button onClick={handleBulkDelete} className="btn-secondary text-red-400 border-red-400">
+                <FiTrash2 className="inline mr-2" /> Delete ({selectedIds.size})
+              </button>
+            )}
             <button onClick={handleExportCSV} className="btn-secondary">
-              <FiDownload className="inline mr-2" /> Export CSV
+              <FiDownload className="inline mr-2" /> CSV
             </button>
             <button onClick={handleExportExcel} className="btn-secondary">
-              <FiDownload className="inline mr-2" /> Export Excel
+              <FiDownload className="inline mr-2" /> Excel
             </button>
             <Link href="/riders/create" className="btn-primary">
               <FiPlus className="inline mr-2" /> New Rider
@@ -165,22 +223,80 @@ export default function Riders() {
           </div>
         )}
 
+        {/* Search & Filter Bar */}
         <div className="mb-6 card">
-          <div className="relative">
-            <FiSearch className="absolute left-3 top-3 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search riders by name, email..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1);
-              }}
-              className="form-input pl-10"
-            />
+          <div className="flex gap-3 items-center">
+            <div className="relative flex-1">
+              <FiSearch className="absolute left-3 top-3 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Search riders by name, email, EFI ID..."
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                className="form-input pl-10"
+              />
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`btn-secondary flex items-center gap-2 ${hasActiveFilters ? 'border-primary-400 text-primary-400' : ''}`}
+            >
+              <FiFilter /> Filters {hasActiveFilters && '(active)'}
+            </button>
           </div>
+
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t border-white border-opacity-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Gender</label>
+                  <select
+                    value={filterGender}
+                    onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
+                    className="form-input"
+                  >
+                    <option value="">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Club</label>
+                  <select
+                    value={filterClubId}
+                    onChange={(e) => { setFilterClubId(e.target.value); setPage(1); }}
+                    className="form-input"
+                  >
+                    <option value="">All Clubs</option>
+                    {clubs.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Status</label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
+                    className="form-input"
+                  >
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              {hasActiveFilters && (
+                <button onClick={clearFilters} className="mt-3 text-sm text-gray-400 hover:text-white flex items-center gap-1">
+                  <FiX className="w-3 h-3" /> Clear all filters
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
+        {/* Table */}
         <div className="card table-container">
           {loading ? (
             <div className="text-center py-8">
@@ -189,7 +305,7 @@ export default function Riders() {
             </div>
           ) : riders.length === 0 ? (
             <div className="text-center py-8 text-gray-300">
-              {searchTerm ? 'No riders match your search' : 'No riders registered yet. Add one to get started!'}
+              {searchTerm || hasActiveFilters ? 'No riders match your search/filters' : 'No riders registered yet. Add one to get started!'}
             </div>
           ) : (
             <>
@@ -204,11 +320,14 @@ export default function Riders() {
                         className="rounded border-gray-600"
                       />
                     </th>
-                    <th>Rider Name</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>EFI Rider ID</th>
+                    <th>Embassy ID</th>
+                    <th>Club Name</th>
                     <th>Email</th>
-                    <th>Phone</th>
                     <th>Gender</th>
-                    <th>Registrations</th>
+                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -223,16 +342,31 @@ export default function Riders() {
                           className="rounded border-gray-600"
                         />
                       </td>
-                      <td className="font-medium">{rider.firstName} {rider.lastName}</td>
+                      <td className="font-medium">{rider.firstName}</td>
+                      <td>{rider.lastName || '-'}</td>
+                      <td>{rider.efiRiderId || '-'}</td>
+                      <td className="font-mono text-sm">{rider.eId}</td>
+                      <td>{rider.clubName || '-'}</td>
                       <td>{rider.email}</td>
-                      <td>{rider.mobile || '-'}</td>
                       <td>{rider.gender || '-'}</td>
-                      <td>{rider.registrationCount}</td>
+                      <td>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          rider.isActive
+                            ? 'bg-green-500 bg-opacity-20 text-green-400'
+                            : 'bg-red-500 bg-opacity-20 text-red-400'
+                        }`}>
+                          {rider.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
                       <td>
                         <div className="flex space-x-2">
-                          <Link href={`/riders/${rider.id}`} className="text-blue-400 hover:text-blue-300">
-                            <FiEye className="w-4 h-4" title="View" />
-                          </Link>
+                          <button
+                            onClick={() => router.push(`/riders/${rider.id}`)}
+                            className="text-blue-400 hover:text-blue-300"
+                            title="View"
+                          >
+                            <FiEye className="w-4 h-4" />
+                          </button>
                           <Link href={`/riders/create?id=${rider.id}`} className="text-green-400 hover:text-green-300">
                             <FiEdit className="w-4 h-4" title="Edit" />
                           </Link>

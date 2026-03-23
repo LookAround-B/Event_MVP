@@ -53,7 +53,7 @@ async function handler(
 
   if (req.method === 'PUT') {
     try {
-      const { name, breed, color, height, gender, yearOfBirth, passportNumber, horseCode } = req.body;
+      const { name, breed, color, height, gender, yearOfBirth, passportNumber, horseCode, riderId } = req.body;
 
       // Check if horse exists
       const existingHorse = await prisma.horse.findUnique({
@@ -80,6 +80,7 @@ async function handler(
           ...(yearOfBirth !== undefined && { yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : null }),
           ...(passportNumber !== undefined && { passportNumber: passportNumber || null }),
           ...(horseCode !== undefined && { horseCode: horseCode || null }),
+          ...(riderId !== undefined && { riderId: riderId || null }),
         },
       });
 

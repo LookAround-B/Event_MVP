@@ -317,7 +317,7 @@ export default function RiderPortal() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {horses.map(horse => (
-                  <div key={horse.id} className="bg-white rounded-lg shadow p-4">
+                  <Link key={horse.id} href={`/horses/${horse.id}`} className="block bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="font-semibold text-gray-900 text-lg">{horse.name}</p>
@@ -326,7 +326,7 @@ export default function RiderPortal() {
                       </div>
                       <FiBox className="text-amber-600 text-3xl" />
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -358,9 +358,9 @@ export default function RiderPortal() {
                           {event.startDate && new Date(event.startDate).toLocaleDateString()} - {event.endDate && new Date(event.endDate).toLocaleDateString()}
                         </p>
                       </div>
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                      <span className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                         View Details
-                      </button>
+                      </span>
                     </div>
                   </Link>
                 ))}

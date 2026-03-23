@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
 import { withAuth } from '@/lib/auth-middleware';
-import { validateInput } from '@/lib/validation';
 import { ApiResponse } from '@/types';
 
 async function handler(
@@ -16,6 +15,21 @@ async function handler(
       const rider = await prisma.rider.findUnique({
         where: { id: riderId },
         include: {
+          club: { select: { id: true, name: true, shortCode: true } },
+          horses: {
+            select: {
+              id: true,
+              eId: true,
+              name: true,
+              breed: true,
+              color: true,
+              gender: true,
+              yearOfBirth: true,
+              horseCode: true,
+              height: true,
+              isActive: true,
+            },
+          },
           registrations: {
             include: {
               event: true,
@@ -53,11 +67,8 @@ async function handler(
 
   if (req.method === 'PUT') {
     try {
-      const { firstName, lastName, email, mobile, gender, dob, aadhaarNumber, address, designation } = req.body;
+      const { firstName, lastName, email, mobile, gender, dob, aadhaarNumber, address, efiRiderId, socialLinks, optionalPhone, imageUrl, eId, clubId } = req.body;
 
-      console.log('Rider PUT request for ID:', riderId, 'Body:', req.body);
-
-      // Check if rider exists
       const existing = await prisma.rider.findUnique({
         where: { id: riderId },
       });
@@ -71,40 +82,36 @@ async function handler(
         });
       }
 
-      // Manual field updates
       const updateData: any = {};
 
-      if (firstName && typeof firstName === 'string' && firstName.trim()) {
-        updateData.firstName = firstName.trim();
-      }
-      if (lastName && typeof lastName === 'string' && lastName.trim()) {
-        updateData.lastName = lastName.trim();
-      }
-      if (email && typeof email === 'string' && email.trim()) {
-        updateData.email = email.trim();
-      }
-      if (mobile) {
-        updateData.mobile = mobile;
-      }
-      if (gender) {
-        updateData.gender = gender;
-      }
-      if (dob) {
-        updateData.dob = new Date(dob);
-      }
-      if (aadhaarNumber) {
-        updateData.aadhaarNumber = aadhaarNumber;
-      }
-      if (address) {
-        updateData.address = address;
-      }
+      if (firstName !== undefined) updateData.firstName = (firstName || '').trim();
+      if (lastName !== undefined) updateData.lastName = (lastName || '').trim();
+      if (email !== undefined) updateData.email = (email || '').trim();
+      if (mobile !== undefined) updateData.mobile = mobile || null;
+      if (optionalPhone !== undefined) updateData.optionalPhone = optionalPhone || null;
+      if (gender !== undefined) updateData.gender = gender || null;
+      if (dob !== undefined) updateData.dob = dob ? new Date(dob) : null;
+      if (aadhaarNumber !== undefined) updateData.aadhaarNumber = aadhaarNumber || null;
+      if (address !== undefined) updateData.address = address || null;
+      if (efiRiderId !== undefined) updateData.efiRiderId = efiRiderId || null;
+      if (eId !== undefined) updateData.eId = eId;
+      if (imageUrl !== undefined) updateData.imageUrl = imageUrl || null;
+      if (socialLinks !== undefined) updateData.socialLinks = socialLinks || null;
+      if (clubId !== undefined) updateData.clubId = clubId || null;
 
       const rider = await prisma.rider.update({
         where: { id: riderId },
         data: updateData,
+        include: {
+          club: { select: { id: true, name: true } },
+          horses: {
+            select: {
+              id: true, eId: true, name: true, breed: true, color: true,
+              gender: true, yearOfBirth: true, horseCode: true, height: true, isActive: true,
+            },
+          },
+        },
       });
-
-      console.log('Rider updated successfully:', riderId);
 
       return res.status(200).json({
         success: true,

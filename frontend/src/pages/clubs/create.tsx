@@ -5,6 +5,7 @@ import { FiArrowLeft } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import AddressMapPicker from '@/components/AddressMapPicker';
+import toast from 'react-hot-toast';
 
 export default function CreateClub() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function CreateClub() {
     shortCode: '',
     registrationNumber: '',
     contactNumber: '',
+    optionalPhone: '',
     email: '',
     address: '',
     city: '',
@@ -28,11 +30,27 @@ export default function CreateClub() {
     primaryContactEmail: '',
     primaryContactGender: 'Male',
     primaryContactMobile: '',
+    primaryContactDob: '',
+    socialLinks: {
+      instagram: '',
+      twitter: '',
+      facebook: '',
+      youtube: '',
+      website: '',
+      other: '',
+    },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSocialChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      socialLinks: { ...prev.socialLinks, [field]: value },
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,8 +59,11 @@ export default function CreateClub() {
     setError(null);
 
     try {
-      await api.post('/api/clubs', formData);
-      alert('Club created successfully!');
+      await api.post('/api/clubs', {
+        ...formData,
+        socialLinks: Object.values(formData.socialLinks).some(v => v) ? formData.socialLinks : undefined,
+      });
+      toast.success('Club created successfully!');
       router.push('/clubs');
     } catch (error: any) {
       console.error('Failed to create club:', error);
@@ -70,151 +91,172 @@ export default function CreateClub() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Club Name <span className="text-red-400">*</span></label>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Club name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="form-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Short Code <span className="text-red-400">*</span></label>
-                <input
-                  type="text"
-                  name="shortCode"
-                  placeholder="e.g., CLUB01"
-                  value={formData.shortCode}
-                  onChange={handleChange}
-                  required
-                  className="form-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="club@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="form-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Phone</label>
-                <input
-                  type="tel"
-                  name="contactNumber"
-                  placeholder="+91 9876543210"
-                  value={formData.contactNumber}
-                  onChange={handleChange}
-                  className="form-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Registration Number</label>
-                <input
-                  type="text"
-                  name="registrationNumber"
-                  placeholder="Reg. number"
-                  value={formData.registrationNumber}
-                  onChange={handleChange}
-                  className="form-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">GST Number</label>
-                <input
-                  type="text"
-                  name="gstNumber"
-                  placeholder="GST number"
-                  value={formData.gstNumber}
-                  onChange={handleChange}
-                  className="form-input"
-                />
-              </div>
-            </div>
-
+            {/* Club Information */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">Address</label>
-              <input
-                type="text"
-                name="address"
-                placeholder="Club address"
-                value={formData.address}
-                onChange={handleChange}
-                className="form-input"
-              />
+              <h2 className="text-xl font-bold text-white mb-4">Club Information</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Club Name <span className="text-red-400">*</span></label>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Club name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Club Code <span className="text-red-400">*</span></label>
+                  <input
+                    type="text"
+                    name="shortCode"
+                    placeholder="e.g., CLUB01"
+                    value={formData.shortCode}
+                    onChange={handleChange}
+                    required
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Club Contact Number</label>
+                  <input
+                    type="tel"
+                    name="contactNumber"
+                    placeholder="+91 9876543210"
+                    value={formData.contactNumber}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Optional Phone Number</label>
+                  <input
+                    type="tel"
+                    name="optionalPhone"
+                    placeholder="+91 9876543210"
+                    value={formData.optionalPhone}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Club Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="club@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Registration Number</label>
+                  <input
+                    type="text"
+                    name="registrationNumber"
+                    placeholder="Reg. number"
+                    value={formData.registrationNumber}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">GST Number</label>
+                  <input
+                    type="text"
+                    name="gstNumber"
+                    placeholder="GST number"
+                    value={formData.gstNumber}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+              </div>
             </div>
 
-            <AddressMapPicker
-              address={formData.address}
-              city={formData.city}
-              state={formData.state}
-              country={formData.country}
-              pincode={formData.pincode}
-              onAddressChange={(components) => {
-                setFormData(prev => ({
-                  ...prev,
-                  address: components.address || prev.address,
-                  city: components.city || prev.city,
-                  state: components.state || prev.state,
-                  country: components.country || prev.country,
-                  pincode: components.pincode || prev.pincode,
-                }));
-              }}
-            />
+            {/* Club Address */}
+            <div className="border-t border-white border-opacity-10 pt-6">
+              <h2 className="text-xl font-bold text-white mb-4">Club Address</h2>
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Club address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="form-input"
+                />
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">City</label>
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="City"
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="form-input"
+              <div className="mt-4">
+                <AddressMapPicker
+                  address={formData.address}
+                  city={formData.city}
+                  state={formData.state}
+                  country={formData.country}
+                  pincode={formData.pincode}
+                  onAddressChange={(components) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      address: components.address || prev.address,
+                      city: components.city || prev.city,
+                      state: components.state || prev.state,
+                      country: components.country || prev.country,
+                      pincode: components.pincode || prev.pincode,
+                    }));
+                  }}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">State</label>
-                <input
-                  type="text"
-                  name="state"
-                  placeholder="State"
-                  value={formData.state}
-                  onChange={handleChange}
-                  className="form-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Country</label>
-                <input
-                  type="text"
-                  name="country"
-                  placeholder="Country"
-                  value={formData.country}
-                  onChange={handleChange}
-                  className="form-input"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-white mb-2">Pincode</label>
-                <input
-                  type="text"
-                  name="pincode"
-                  placeholder="Pincode"
-                  value={formData.pincode}
-                  onChange={handleChange}
-                  className="form-input"
-                />
+
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">City</label>
+                  <input
+                    type="text"
+                    name="city"
+                    placeholder="City"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">State</label>
+                  <input
+                    type="text"
+                    name="state"
+                    placeholder="State"
+                    value={formData.state}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Country</label>
+                  <input
+                    type="text"
+                    name="country"
+                    placeholder="Country"
+                    value={formData.country}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Pincode</label>
+                  <input
+                    type="text"
+                    name="pincode"
+                    placeholder="Pincode"
+                    value={formData.pincode}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
               </div>
             </div>
 
@@ -230,8 +272,9 @@ export default function CreateClub() {
               />
             </div>
 
+            {/* Person Details */}
             <div className="border-t border-white border-opacity-10 pt-6">
-              <h2 className="text-xl font-bold text-white mb-4">Primary Contact <span className="text-red-400">*</span></h2>
+              <h2 className="text-xl font-bold text-white mb-4">Person Details (Contact Person) <span className="text-red-400">*</span></h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-white mb-2">First Name <span className="text-red-400">*</span></label>
@@ -258,24 +301,11 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Email <span className="text-red-400">*</span></label>
+                  <label className="block text-sm font-semibold text-white mb-2">Date of Birth</label>
                   <input
-                    type="email"
-                    name="primaryContactEmail"
-                    placeholder="contact@example.com"
-                    value={formData.primaryContactEmail}
-                    onChange={handleChange}
-                    required
-                    className="form-input"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Mobile</label>
-                  <input
-                    type="tel"
-                    name="primaryContactMobile"
-                    placeholder="+91 9876543210"
-                    value={formData.primaryContactMobile}
+                    type="date"
+                    name="primaryContactDob"
+                    value={formData.primaryContactDob}
                     onChange={handleChange}
                     className="form-input"
                   />
@@ -292,6 +322,96 @@ export default function CreateClub() {
                     <option value="Female" className="bg-slate-800 text-white">Female</option>
                     <option value="Other" className="bg-slate-800 text-white">Other</option>
                   </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Mobile Number</label>
+                  <input
+                    type="tel"
+                    name="primaryContactMobile"
+                    placeholder="+91 9876543210"
+                    value={formData.primaryContactMobile}
+                    onChange={handleChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Email <span className="text-red-400">*</span></label>
+                  <input
+                    type="email"
+                    name="primaryContactEmail"
+                    placeholder="contact@example.com"
+                    value={formData.primaryContactEmail}
+                    onChange={handleChange}
+                    required
+                    className="form-input"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="border-t border-white border-opacity-10 pt-6">
+              <h2 className="text-xl font-bold text-white mb-4">Social Links</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Instagram</label>
+                  <input
+                    type="url"
+                    placeholder="https://instagram.com/..."
+                    value={formData.socialLinks.instagram}
+                    onChange={e => handleSocialChange('instagram', e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Twitter / X</label>
+                  <input
+                    type="url"
+                    placeholder="https://twitter.com/..."
+                    value={formData.socialLinks.twitter}
+                    onChange={e => handleSocialChange('twitter', e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Facebook</label>
+                  <input
+                    type="url"
+                    placeholder="https://facebook.com/..."
+                    value={formData.socialLinks.facebook}
+                    onChange={e => handleSocialChange('facebook', e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">YouTube</label>
+                  <input
+                    type="url"
+                    placeholder="https://youtube.com/..."
+                    value={formData.socialLinks.youtube}
+                    onChange={e => handleSocialChange('youtube', e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Website</label>
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={formData.socialLinks.website}
+                    onChange={e => handleSocialChange('website', e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2">Other Link</label>
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={formData.socialLinks.other}
+                    onChange={e => handleSocialChange('other', e.target.value)}
+                    className="form-input"
+                  />
                 </div>
               </div>
             </div>

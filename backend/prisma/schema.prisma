@@ -20,6 +20,7 @@ model User {
   designation     String?
   gender          String?
   phone           String?
+  dob             DateTime?
   address         String?
   isActive        Boolean  @default(true)
   isApproved      Boolean  @default(false)
@@ -155,6 +156,8 @@ model Club {
   gstNumber          String?
   logoUrl            String?
   description        String?
+  socialLinks        Json?
+  optionalPhone      String?
   isActive           Boolean  @default(true)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -184,8 +187,11 @@ model Rider {
   dob           DateTime?
   gender        String?
   mobile        String?
+  optionalPhone String?
   address       String?
   aadhaarNumber String?
+  imageUrl      String?
+  socialLinks   Json?
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

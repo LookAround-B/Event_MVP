@@ -75,8 +75,11 @@ async function handler(
               shortCode: true,
               email: true,
               contactNumber: true,
+              optionalPhone: true,
               address: true,
               city: true,
+              state: true,
+              isActive: true,
               primaryContact: {
                 select: {
                   firstName: true,
@@ -85,7 +88,6 @@ async function handler(
                 },
               },
               createdAt: true,
-              isActive: true,
             },
             orderBy: { createdAt: 'desc' },
           }),
@@ -139,6 +141,8 @@ async function handler(
           primaryContactDob,
           primaryContactMobile,
           primaryContactEmail,
+          socialLinks,
+          optionalPhone,
         } = authReq.body;
 
         if (!name || !shortCode) {
@@ -160,6 +164,7 @@ async function handler(
               designation: 'Club Contact',
               gender: primaryContactGender,
               phone: primaryContactMobile,
+              dob: primaryContactDob ? new Date(primaryContactDob) : undefined,
             },
           });
           contactId = contact.id;
@@ -172,10 +177,24 @@ async function handler(
           });
         }
 
+        // Generate Embassy ID (EIRSCL + 5-digit sequential number)
+        const lastClub = await prisma.club.findFirst({
+          where: { eId: { startsWith: 'EIRSCL' } },
+          orderBy: { eId: 'desc' },
+          select: { eId: true },
+        });
+        let nextNum = 1;
+        if (lastClub && lastClub.eId.startsWith('EIRSCL')) {
+          const numPart = parseInt(lastClub.eId.replace('EIRSCL', ''), 10);
+          if (!isNaN(numPart)) nextNum = numPart + 1;
+        }
+        const embassyId = `EIRSCL${String(nextNum).padStart(5, '0')}`;
+
         const club = await prisma.club.create({
           data: {
             name,
             shortCode,
+            eId: embassyId,
             registrationNumber,
             contactNumber,
             email,
@@ -187,6 +206,8 @@ async function handler(
             gstNumber,
             description,
             primaryContactId: contactId,
+            socialLinks: socialLinks || undefined,
+            optionalPhone: optionalPhone || undefined,
           },
           select: {
             id: true,

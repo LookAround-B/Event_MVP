@@ -7,11 +7,20 @@ import ProtectedRoute from '@/lib/protected-route';
 import { FiArrowLeft, FiCheck } from 'react-icons/fi';
 import AddressMapPicker from '@/components/AddressMapPicker';
 
+interface SocialLinks {
+  instagram: string;
+  twitter: string;
+  facebook: string;
+  youtube: string;
+  website: string;
+  other: string;
+}
+
 export default function CreateRider() {
   const router = useRouter();
   const { id } = router.query;
   const isEdit = !!id;
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -25,10 +34,20 @@ export default function CreateRider() {
     gender: '',
     dob: '',
     mobile: '',
+    optionalPhone: '',
     address: '',
+    imageUrl: '',
   });
 
-  // Load rider data if editing
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>({
+    instagram: '',
+    twitter: '',
+    facebook: '',
+    youtube: '',
+    website: '',
+    other: '',
+  });
+
   useEffect(() => {
     if (isEdit && typeof id === 'string') {
       fetchRider();
@@ -48,7 +67,18 @@ export default function CreateRider() {
         gender: rider.gender || '',
         dob: rider.dob ? rider.dob.split('T')[0] : '',
         mobile: rider.mobile || '',
+        optionalPhone: rider.optionalPhone || '',
         address: rider.address || '',
+        imageUrl: rider.imageUrl || '',
+      });
+      const sl = (rider.socialLinks || {}) as any;
+      setSocialLinks({
+        instagram: sl.instagram || '',
+        twitter: sl.twitter || '',
+        facebook: sl.facebook || '',
+        youtube: sl.youtube || '',
+        website: sl.website || '',
+        other: sl.other || '',
       });
     } catch (err) {
       console.error('Error fetching rider:', err);
@@ -61,18 +91,17 @@ export default function CreateRider() {
       setError('First name is required');
       return false;
     }
-    if (!formData.lastName.trim()) {
-      setError('Last name is required');
-      return false;
-    }
     if (!formData.email.trim()) {
       setError('Email is required');
       return false;
     }
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email.trim())) {
       setError('Invalid email format');
+      return false;
+    }
+    if (!formData.efiRiderId.trim()) {
+      setError('EFI Rider ID is required');
       return false;
     }
     if (!formData.gender) {
@@ -90,12 +119,14 @@ export default function CreateRider() {
     e.preventDefault();
     setError(null);
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
+      const socialLinksClean = Object.fromEntries(
+        Object.entries(socialLinks).filter(([_, v]) => v && v.trim())
+      );
+
       const payload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -105,7 +136,10 @@ export default function CreateRider() {
         gender: formData.gender,
         dob: formData.dob,
         mobile: formData.mobile,
+        optionalPhone: formData.optionalPhone || null,
         address: formData.address,
+        imageUrl: formData.imageUrl || null,
+        socialLinks: Object.keys(socialLinksClean).length > 0 ? socialLinksClean : null,
       };
 
       if (isEdit) {
@@ -120,11 +154,9 @@ export default function CreateRider() {
       setTimeout(() => {
         router.push('/riders');
       }, 1500);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving rider:', err);
-      const message = err instanceof Error
-        ? err.message
-        : `Failed to ${isEdit ? 'update' : 'create'} rider. Please try again.`;
+      const message = err?.response?.data?.message || `Failed to ${isEdit ? 'update' : 'create'} rider.`;
       setError(message);
       toast.error(message);
     } finally {
@@ -164,7 +196,6 @@ export default function CreateRider() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
         <div className="max-w-2xl mx-auto">
-          {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <Link href="/riders" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
               <FiArrowLeft /> Back to Riders
@@ -172,7 +203,6 @@ export default function CreateRider() {
           </div>
 
           <div className="card overflow-hidden">
-            {/* Title Section */}
             <div className="px-8 py-6 border-b border-white border-opacity-10">
               <h1 className="text-3xl font-bold text-white">
                 {isEdit ? 'Edit Rider' : 'Register New Rider'}
@@ -182,201 +212,279 @@ export default function CreateRider() {
               </p>
             </div>
 
-            {/* Form Section */}
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-4">
-                <p className="text-red-300 font-medium">{error}</p>
-              </div>
-            )}
-
-            {/* Personal Information Section */}
-            <div>
-              <h2 className="text-xl font-bold text-white mb-6 pb-3 border-b border-white border-opacity-10">
-                Personal Information
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* First Name */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    First Name <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    placeholder="First name"
-                    className="form-input"
-                    required
-                  />
+              {error && (
+                <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-4">
+                  <p className="text-red-300 font-medium">{error}</p>
                 </div>
+              )}
 
-                {/* Last Name */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    Last Name <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    placeholder="Last name"
-                    className="form-input"
-                    required
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    Email <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="rider@example.com"
-                    className="form-input"
-                    required
-                  />
-                </div>
-
-                {/* Gender */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    Gender <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    required
-                  >
-                    <option value="" className="bg-slate-800 text-white">Select Gender</option>
-                    <option value="Male" className="bg-slate-800 text-white">Male</option>
-                    <option value="Female" className="bg-slate-800 text-white">Female</option>
-                    <option value="Other" className="bg-slate-800 text-white">Other</option>
-                  </select>
-                </div>
-
-                {/* Date of Birth */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    Date of Birth <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="dob"
-                    value={formData.dob}
-                    onChange={handleInputChange}
-                    className="form-input"
-                    required
-                  />
-                </div>
-
-                {/* Mobile */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    Mobile
-                  </label>
-                  <input
-                    type="tel"
-                    name="mobile"
-                    value={formData.mobile}
-                    onChange={handleInputChange}
-                    placeholder="+91 9876543210"
-                    className="form-input"
-                  />
-                </div>
-              </div>
-
-              {/* Address */}
+              {/* Personal Information */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Address
-                </label>
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  placeholder="Enter address"
-                  rows={3}
-                  className="form-input"
-                />
-                <AddressMapPicker
-                  address={formData.address}
-                  onAddressChange={(components) => {
-                    const parts = [components.address, components.city, components.state, components.country, components.pincode].filter(Boolean);
-                    setFormData(prev => ({ ...prev, address: parts.join(', ') }));
-                  }}
-                />
-              </div>
-            </div>
+                <h2 className="text-xl font-bold text-white mb-6 pb-3 border-b border-white border-opacity-10">
+                  Personal Information
+                </h2>
 
-            {/* Professional Information Section */}
-            <div>
-              <h2 className="text-xl font-bold text-white mb-6 pb-3 border-b border-white border-opacity-10">
-                Professional Information
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* EFI Rider ID */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    EFI Rider ID
-                  </label>
-                  <input
-                    type="text"
-                    name="efiRiderId"
-                    value={formData.efiRiderId}
-                    onChange={handleInputChange}
-                    placeholder="Optional EFI identifier"
-                    className="form-input"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      First Name <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      placeholder="First name"
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      placeholder="Last name (optional)"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Email <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="rider@example.com"
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Gender <span className="text-red-400">*</span>
+                    </label>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      required
+                    >
+                      <option value="" className="bg-slate-800 text-white">Select Gender</option>
+                      <option value="Male" className="bg-slate-800 text-white">Male</option>
+                      <option value="Female" className="bg-slate-800 text-white">Female</option>
+                      <option value="Other" className="bg-slate-800 text-white">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Date of Birth <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="dob"
+                      value={formData.dob}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Mobile
+                    </label>
+                    <input
+                      type="tel"
+                      name="mobile"
+                      value={formData.mobile}
+                      onChange={handleInputChange}
+                      placeholder="+91 9876543210"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Optional Phone
+                    </label>
+                    <input
+                      type="tel"
+                      name="optionalPhone"
+                      value={formData.optionalPhone}
+                      onChange={handleInputChange}
+                      placeholder="Alternative number"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Image URL
+                    </label>
+                    <input
+                      type="text"
+                      name="imageUrl"
+                      value={formData.imageUrl}
+                      onChange={handleInputChange}
+                      placeholder="https://..."
+                      className="form-input"
+                    />
+                  </div>
                 </div>
 
-                {/* Designation */}
+                {/* Address with Map */}
                 <div>
                   <label className="block text-sm font-semibold text-white mb-2">
-                    Designation
+                    Address
                   </label>
-                  <input
-                    type="text"
-                    name="designation"
-                    value={formData.designation}
+                  <textarea
+                    name="address"
+                    value={formData.address}
                     onChange={handleInputChange}
-                    placeholder="e.g., Professional, Amateur, Youth"
+                    placeholder="Enter address"
+                    rows={3}
                     className="form-input"
+                  />
+                  <AddressMapPicker
+                    address={formData.address}
+                    onAddressChange={(components) => {
+                      const parts = [components.address, components.city, components.state, components.country, components.pincode].filter(Boolean);
+                      setFormData(prev => ({ ...prev, address: parts.join(', ') }));
+                    }}
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4 pt-6 border-t border-white border-opacity-10">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 btn-primary"
-              >
-                {loading 
-                  ? (isEdit ? 'Updating Rider...' : 'Creating Rider...') 
-                  : (isEdit ? 'Update Rider' : 'Create Rider')
-                }
-              </button>
-              <Link
-                href="/riders"
-                className="flex-1 text-center btn-secondary"
-              >
-                Cancel
-              </Link>
-            </div>
+              {/* Professional Information */}
+              <div>
+                <h2 className="text-xl font-bold text-white mb-6 pb-3 border-b border-white border-opacity-10">
+                  Professional Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      EFI Rider ID <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="efiRiderId"
+                      value={formData.efiRiderId}
+                      onChange={handleInputChange}
+                      placeholder="EFI identifier (required)"
+                      className="form-input"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Designation
+                    </label>
+                    <input
+                      type="text"
+                      name="designation"
+                      value={formData.designation}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Professional, Amateur, Youth"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Links */}
+              <div>
+                <h2 className="text-xl font-bold text-white mb-6 pb-3 border-b border-white border-opacity-10">
+                  Social Links
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">Instagram</label>
+                    <input
+                      type="text"
+                      value={socialLinks.instagram}
+                      onChange={(e) => setSocialLinks(prev => ({ ...prev, instagram: e.target.value }))}
+                      placeholder="Instagram URL or handle"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">Twitter</label>
+                    <input
+                      type="text"
+                      value={socialLinks.twitter}
+                      onChange={(e) => setSocialLinks(prev => ({ ...prev, twitter: e.target.value }))}
+                      placeholder="Twitter URL or handle"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">Facebook</label>
+                    <input
+                      type="text"
+                      value={socialLinks.facebook}
+                      onChange={(e) => setSocialLinks(prev => ({ ...prev, facebook: e.target.value }))}
+                      placeholder="Facebook URL"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">YouTube</label>
+                    <input
+                      type="text"
+                      value={socialLinks.youtube}
+                      onChange={(e) => setSocialLinks(prev => ({ ...prev, youtube: e.target.value }))}
+                      placeholder="YouTube URL"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">Website</label>
+                    <input
+                      type="text"
+                      value={socialLinks.website}
+                      onChange={(e) => setSocialLinks(prev => ({ ...prev, website: e.target.value }))}
+                      placeholder="Website URL"
+                      className="form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">Other</label>
+                    <input
+                      type="text"
+                      value={socialLinks.other}
+                      onChange={(e) => setSocialLinks(prev => ({ ...prev, other: e.target.value }))}
+                      placeholder="Other link"
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-6 border-t border-white border-opacity-10">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 btn-primary"
+                >
+                  {loading
+                    ? (isEdit ? 'Updating Rider...' : 'Creating Rider...')
+                    : (isEdit ? 'Update Rider' : 'Create Rider')
+                  }
+                </button>
+                <Link
+                  href="/riders"
+                  className="flex-1 text-center btn-secondary"
+                >
+                  Cancel
+                </Link>
+              </div>
             </form>
           </div>
         </div>

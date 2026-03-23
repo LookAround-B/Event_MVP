@@ -1,0 +1,658 @@
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import Head from 'next/head';
+import toast from 'react-hot-toast';
+import { FiArrowLeft, FiEdit2, FiSave, FiX, FiPlus, FiTrash2, FiImage } from 'react-icons/fi';
+import api from '@/lib/api';
+import ProtectedRoute from '@/lib/protected-route';
+import AddressMapPicker from '@/components/AddressMapPicker';
+
+interface SocialLinks {
+  instagram?: string;
+  twitter?: string;
+  facebook?: string;
+  youtube?: string;
+  website?: string;
+  other?: string;
+}
+
+interface Horse {
+  id: string;
+  eId: string;
+  name: string;
+  breed?: string;
+  color?: string;
+  gender: string;
+  yearOfBirth?: number;
+  horseCode?: string;
+  height?: number;
+  isActive: boolean;
+}
+
+interface Club {
+  id: string;
+  name: string;
+  shortCode?: string;
+}
+
+interface RiderDetail {
+  id: string;
+  eId: string;
+  efiRiderId: string | null;
+  firstName: string;
+  lastName: string;
+  email: string;
+  dob: string | null;
+  gender: string | null;
+  mobile: string | null;
+  optionalPhone: string | null;
+  address: string | null;
+  imageUrl: string | null;
+  socialLinks: SocialLinks | null;
+  isActive: boolean;
+  clubId: string | null;
+  club: Club | null;
+  horses: Horse[];
+  registrations: any[];
+}
+
+interface AvailableHorse {
+  id: string;
+  name: string;
+  breed?: string;
+  gender: string;
+}
+
+export default function RiderDetail() {
+  const router = useRouter();
+  const { id, mode } = router.query;
+  const isViewMode = mode === 'view';
+
+  const [rider, setRider] = useState<RiderDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    mobile: '',
+    optionalPhone: '',
+    gender: '',
+    dob: '',
+    address: '',
+    efiRiderId: '',
+    eId: '',
+    imageUrl: '',
+    socialLinks: { instagram: '', twitter: '', facebook: '', youtube: '', website: '', other: '' } as SocialLinks,
+  });
+
+  // Horse management
+  const [availableHorses, setAvailableHorses] = useState<AvailableHorse[]>([]);
+  const [selectedHorseId, setSelectedHorseId] = useState('');
+  const [showHorseSelector, setShowHorseSelector] = useState(false);
+
+  useEffect(() => {
+    if (id && typeof id === 'string') {
+      fetchRider();
+    }
+  }, [id]);
+
+  const fetchRider = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/api/riders/${id}`);
+      const data = response.data.data;
+      setRider(data);
+      const sl = (data.socialLinks || {}) as SocialLinks;
+      setEditForm({
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        email: data.email || '',
+        mobile: data.mobile || '',
+        optionalPhone: data.optionalPhone || '',
+        gender: data.gender || '',
+        dob: data.dob ? data.dob.split('T')[0] : '',
+        address: data.address || '',
+        efiRiderId: data.efiRiderId || '',
+        eId: data.eId || '',
+        imageUrl: data.imageUrl || '',
+        socialLinks: {
+          instagram: sl.instagram || '',
+          twitter: sl.twitter || '',
+          facebook: sl.facebook || '',
+          youtube: sl.youtube || '',
+          website: sl.website || '',
+          other: sl.other || '',
+        },
+      });
+    } catch (err) {
+      console.error('Failed to fetch rider:', err);
+      toast.error('Failed to load rider details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAvailableHorses = async () => {
+    try {
+      const res = await api.get('/api/horses?limit=100');
+      const horses = res.data.data?.horses || res.data.data || [];
+      // Filter out horses already linked to this rider
+      const linkedIds = new Set(rider?.horses.map(h => h.id) || []);
+      setAvailableHorses(horses.filter((h: any) => !linkedIds.has(h.id)));
+    } catch (err) {
+      console.error('Failed to fetch horses:', err);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!editForm.firstName.trim()) {
+      toast.error('First name is required');
+      return;
+    }
+    if (!editForm.efiRiderId.trim()) {
+      toast.error('EFI Rider ID is required');
+      return;
+    }
+    if (!editForm.email.trim()) {
+      toast.error('Email is required');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const socialLinks = Object.fromEntries(
+        Object.entries(editForm.socialLinks).filter(([_, v]) => v && v.trim())
+      );
+      await api.put(`/api/riders/${id}`, {
+        ...editForm,
+        socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : null,
+        optionalPhone: editForm.optionalPhone || null,
+        imageUrl: editForm.imageUrl || null,
+      });
+      toast.success('Rider updated successfully');
+      setEditing(false);
+      fetchRider();
+    } catch (err) {
+      console.error('Failed to update rider:', err);
+      toast.error('Failed to update rider');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLinkHorse = async () => {
+    if (!selectedHorseId) return;
+    try {
+      await api.put(`/api/horses/${selectedHorseId}`, { riderId: id });
+      toast.success('Horse linked to rider');
+      setSelectedHorseId('');
+      setShowHorseSelector(false);
+      fetchRider();
+    } catch (err) {
+      console.error('Failed to link horse:', err);
+      toast.error('Failed to link horse');
+    }
+  };
+
+  const handleUnlinkHorse = async (horseId: string) => {
+    if (!confirm('Remove this horse from the rider?')) return;
+    try {
+      await api.put(`/api/horses/${horseId}`, { riderId: null });
+      toast.success('Horse removed from rider');
+      fetchRider();
+    } catch (err) {
+      console.error('Failed to unlink horse:', err);
+      toast.error('Failed to unlink horse');
+    }
+  };
+
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!rider) {
+    return (
+      <ProtectedRoute>
+        <div className="text-center py-12">
+          <p className="text-gray-300 text-lg">Rider not found</p>
+          <Link href="/riders" className="text-primary-400 hover:text-primary-300 mt-4 inline-block">
+            Back to Riders
+          </Link>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  return (
+    <ProtectedRoute>
+      <Head><title>{rider.firstName} {rider.lastName} | Rider Details</title></Head>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/riders" className="text-purple-400 hover:text-purple-300">
+              <FiArrowLeft className="w-5 h-5" />
+            </Link>
+            <h1 className="text-3xl font-bold text-white">
+              {isViewMode ? 'Rider Details' : 'Rider Profile'}
+            </h1>
+          </div>
+          <div className="flex gap-3">
+            {isViewMode ? (
+              <button
+                onClick={() => router.push(`/riders/${id}`)}
+                className="btn-primary flex items-center gap-2"
+              >
+                <FiEdit2 /> Switch to Edit
+              </button>
+            ) : !editing ? (
+              <button
+                onClick={() => setEditing(true)}
+                className="btn-primary flex items-center gap-2"
+              >
+                <FiEdit2 /> Edit Rider
+              </button>
+            ) : (
+              <>
+                <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2">
+                  <FiSave /> {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button onClick={() => { setEditing(false); fetchRider(); }} className="btn-secondary flex items-center gap-2">
+                  <FiX /> Cancel
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Rider Card */}
+        <div className="card p-6">
+          <div className="flex gap-6">
+            {/* Image */}
+            <div className="flex-shrink-0">
+              {editing ? (
+                <div className="space-y-2">
+                  {editForm.imageUrl ? (
+                    <img src={editForm.imageUrl} alt="Rider" className="w-32 h-32 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
+                      <FiImage className="w-12 h-12 text-gray-500" />
+                    </div>
+                  )}
+                  <input
+                    type="text"
+                    value={editForm.imageUrl}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, imageUrl: e.target.value }))}
+                    placeholder="Image URL"
+                    className="form-input text-sm w-32"
+                  />
+                </div>
+              ) : (
+                rider.imageUrl ? (
+                  <img src={rider.imageUrl} alt="Rider" className="w-32 h-32 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
+                    <FiImage className="w-12 h-12 text-gray-500" />
+                  </div>
+                )
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-400">Embassy ID</p>
+                {editing ? (
+                  <input
+                    type="text"
+                    value={editForm.eId}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, eId: e.target.value }))}
+                    className="form-input font-mono"
+                  />
+                ) : (
+                  <p className="text-white font-mono">{rider.eId}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">EFI Rider ID <span className="text-red-400">*</span></p>
+                {editing ? (
+                  <input
+                    type="text"
+                    value={editForm.efiRiderId}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, efiRiderId: e.target.value }))}
+                    className="form-input"
+                    required
+                  />
+                ) : (
+                  <p className="text-white">{rider.efiRiderId || '-'}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">First Name <span className="text-red-400">*</span></p>
+                {editing ? (
+                  <input
+                    type="text"
+                    value={editForm.firstName}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
+                    className="form-input"
+                    required
+                  />
+                ) : (
+                  <p className="text-white font-semibold">{rider.firstName}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Last Name</p>
+                {editing ? (
+                  <input
+                    type="text"
+                    value={editForm.lastName}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
+                    className="form-input"
+                  />
+                ) : (
+                  <p className="text-white">{rider.lastName || '-'}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Email</p>
+                {editing ? (
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                    className="form-input"
+                    required
+                  />
+                ) : (
+                  <p className="text-white">{rider.email}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Gender</p>
+                {editing ? (
+                  <select
+                    value={editForm.gender}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, gender: e.target.value }))}
+                    className="form-input"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                ) : (
+                  <p className="text-white">{rider.gender || '-'}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Date of Birth</p>
+                {editing ? (
+                  <input
+                    type="date"
+                    value={editForm.dob}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, dob: e.target.value }))}
+                    className="form-input"
+                  />
+                ) : (
+                  <p className="text-white">{rider.dob ? new Date(rider.dob).toLocaleDateString() : '-'}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Mobile</p>
+                {editing ? (
+                  <input
+                    type="tel"
+                    value={editForm.mobile}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, mobile: e.target.value }))}
+                    className="form-input"
+                  />
+                ) : (
+                  <p className="text-white">{rider.mobile || '-'}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Optional Phone</p>
+                {editing ? (
+                  <input
+                    type="tel"
+                    value={editForm.optionalPhone}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, optionalPhone: e.target.value }))}
+                    className="form-input"
+                  />
+                ) : (
+                  <p className="text-white">{rider.optionalPhone || '-'}</p>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Club</p>
+                <p className="text-white">{rider.club?.name || '-'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-400">Status</p>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  rider.isActive
+                    ? 'bg-green-500 bg-opacity-20 text-green-400'
+                    : 'bg-red-500 bg-opacity-20 text-red-400'
+                }`}>
+                  {rider.isActive ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Address Section */}
+        <div className="card p-6">
+          <h3 className="text-xl font-bold text-white mb-4">Address</h3>
+          {editing ? (
+            <div className="space-y-3">
+              <textarea
+                value={editForm.address}
+                onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                placeholder="Enter address"
+                rows={3}
+                className="form-input"
+              />
+              <AddressMapPicker
+                address={editForm.address}
+                onAddressChange={(components) => {
+                  const parts = [components.address, components.city, components.state, components.country, components.pincode].filter(Boolean);
+                  setEditForm(prev => ({ ...prev, address: parts.join(', ') }));
+                }}
+              />
+            </div>
+          ) : (
+            <p className="text-gray-300">{rider.address || 'No address provided'}</p>
+          )}
+        </div>
+
+        {/* Social Links Section */}
+        <div className="card p-6">
+          <h3 className="text-xl font-bold text-white mb-4">Social Links</h3>
+          {editing ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(['instagram', 'twitter', 'facebook', 'youtube', 'website', 'other'] as const).map(platform => (
+                <div key={platform}>
+                  <label className="block text-sm text-gray-400 mb-1 capitalize">{platform}</label>
+                  <input
+                    type="text"
+                    value={editForm.socialLinks[platform] || ''}
+                    onChange={(e) => setEditForm(prev => ({
+                      ...prev,
+                      socialLinks: { ...prev.socialLinks, [platform]: e.target.value },
+                    }))}
+                    placeholder={`${platform} URL or handle`}
+                    className="form-input"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {rider.socialLinks && typeof rider.socialLinks === 'object' ? (
+                Object.entries(rider.socialLinks as SocialLinks)
+                  .filter(([_, v]) => v)
+                  .map(([platform, url]) => (
+                    <div key={platform} className="flex items-center gap-2">
+                      <span className="text-gray-400 capitalize text-sm">{platform}:</span>
+                      <a
+                        href={url!.startsWith('http') ? url! : `https://${url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-400 hover:text-primary-300 text-sm truncate"
+                      >
+                        {url}
+                      </a>
+                    </div>
+                  ))
+              ) : (
+                <p className="text-gray-500">No social links added</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Horses Section */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-white">Horses ({rider.horses.length})</h3>
+            {!isViewMode && (
+              <button
+                onClick={() => { setShowHorseSelector(!showHorseSelector); if (!showHorseSelector) fetchAvailableHorses(); }}
+                className="btn-primary flex items-center gap-2 text-sm"
+              >
+                <FiPlus /> Add Horse
+              </button>
+            )}
+          </div>
+
+          {/* Horse Selector */}
+          {showHorseSelector && (
+            <div className="mb-4 p-4 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-10">
+              <p className="text-sm text-gray-300 mb-2">Select a horse to link to this rider:</p>
+              <div className="flex gap-3">
+                <select
+                  value={selectedHorseId}
+                  onChange={(e) => setSelectedHorseId(e.target.value)}
+                  className="form-input flex-1"
+                >
+                  <option value="">Choose a horse...</option>
+                  {availableHorses.map(h => (
+                    <option key={h.id} value={h.id}>{h.name} ({h.breed || h.gender})</option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleLinkHorse}
+                  disabled={!selectedHorseId}
+                  className="btn-primary disabled:opacity-50"
+                >
+                  Link Horse
+                </button>
+                <button
+                  onClick={() => { setShowHorseSelector(false); setSelectedHorseId(''); }}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+              </div>
+              {availableHorses.length === 0 && (
+                <p className="text-sm text-gray-500 mt-2">
+                  No available horses. <Link href="/horses/create" className="text-primary-400">Create one</Link>.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Horses Table */}
+          {rider.horses.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">No horses linked to this rider</p>
+          ) : (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Breed</th>
+                  <th>Gender</th>
+                  <th>Year of Birth</th>
+                  <th>Horse Code</th>
+                  <th>Height</th>
+                  {!isViewMode && <th>Actions</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {rider.horses.map(horse => (
+                  <tr key={horse.id}>
+                    <td className="font-medium">{horse.name}</td>
+                    <td>{horse.breed || '-'}</td>
+                    <td>{horse.gender}</td>
+                    <td>{horse.yearOfBirth || '-'}</td>
+                    <td>{horse.horseCode || '-'}</td>
+                    <td>{horse.height ? `${horse.height}m` : '-'}</td>
+                    {!isViewMode && (
+                      <td>
+                        <button
+                          onClick={() => handleUnlinkHorse(horse.id)}
+                          className="text-red-400 hover:text-red-300"
+                          title="Remove horse"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Registrations Summary */}
+        {rider.registrations.length > 0 && (
+          <div className="card p-6">
+            <h3 className="text-xl font-bold text-white mb-4">Event Registrations ({rider.registrations.length})</h3>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Horse</th>
+                  <th>Payment</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rider.registrations.map((reg: any) => (
+                  <tr key={reg.id}>
+                    <td>{reg.event?.name || '-'}</td>
+                    <td>{reg.horse?.name || '-'}</td>
+                    <td>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        reg.paymentStatus === 'PAID'
+                          ? 'bg-green-500 bg-opacity-20 text-green-400'
+                          : 'bg-yellow-500 bg-opacity-20 text-yellow-400'
+                      }`}>
+                        {reg.paymentStatus}
+                      </span>
+                    </td>
+                    <td>₹{reg.totalAmount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </ProtectedRoute>
+  );
+}

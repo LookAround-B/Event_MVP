@@ -4,7 +4,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiEdit2, FiTrash2, FiPlus, FiDownload } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiPlus, FiDownload, FiEye, FiFilter, FiX } from 'react-icons/fi';
 
 interface Club {
   id: string;
@@ -15,13 +15,14 @@ interface Club {
   contactNumber: string;
   address: string;
   city: string;
+  state: string;
+  isActive: boolean;
   primaryContact: {
     firstName: string;
     lastName: string;
     email: string;
   };
   createdAt: string;
-  isActive: boolean;
 }
 
 function escapeCSVField(field: string | number): string {
@@ -60,6 +61,11 @@ export default function ClubsList() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterCity, setFilterCity] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'' | 'active' | 'inactive'>('');
+  const [editingEmbassyId, setEditingEmbassyId] = useState<string | null>(null);
+  const [editEmbassyValue, setEditEmbassyValue] = useState('');
   const limit = 10;
 
   useEffect(() => {
@@ -90,22 +96,43 @@ export default function ClubsList() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === clubs.length) {
+    const filtered = getFilteredClubs();
+    if (selectedIds.size === filtered.length && filtered.length > 0) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(clubs.map(c => c.id)));
+      setSelectedIds(new Set(filtered.map(c => c.id)));
     }
   };
 
+  const getFilteredClubs = () => {
+    let filtered = clubs;
+    if (filterCity) {
+      filtered = filtered.filter(c => c.city?.toLowerCase().includes(filterCity.toLowerCase()));
+    }
+    if (filterStatus === 'active') {
+      filtered = filtered.filter(c => c.isActive);
+    } else if (filterStatus === 'inactive') {
+      filtered = filtered.filter(c => !c.isActive);
+    }
+    return filtered;
+  };
+
+  const clearFilters = () => {
+    setFilterCity('');
+    setFilterStatus('');
+  };
+
   const getExportData = () => {
-    const headers = ['Club Name', 'Code', 'Contact Person', 'Email', 'City'];
+    const headers = ['Club Name', 'Club Code', 'Embassy ID', 'First Name', 'Last Name', 'Email', 'City'];
     const source = selectedIds.size > 0 ? clubs.filter(c => selectedIds.has(c.id)) : clubs;
     const rows = source.map(c => [
       c.name,
       c.shortCode,
-      `${c.primaryContact.firstName} ${c.primaryContact.lastName}`,
-      c.email || c.primaryContact.email,
-      c.city,
+      c.eId || '',
+      c.primaryContact?.firstName || '',
+      c.primaryContact?.lastName || '',
+      c.email || c.primaryContact?.email || '',
+      c.city || '',
     ]);
     return { headers, rows };
   };
@@ -141,15 +168,48 @@ export default function ClubsList() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.size} selected club(s)?`)) return;
+    try {
+      await Promise.all(Array.from(selectedIds).map(id => api.delete(`/api/clubs/${id}`)));
+      setClubs(clubs.filter(c => !selectedIds.has(c.id)));
+      setSelectedIds(new Set());
+      toast.success(`${selectedIds.size} club(s) deleted successfully`);
+    } catch (error) {
+      console.error('Failed to bulk delete:', error);
+      toast.error('Failed to delete some clubs');
+    }
+  };
+
+  const saveEmbassyId = async (clubId: string) => {
+    try {
+      await api.put(`/api/clubs/${clubId}`, { eId: editEmbassyValue });
+      setClubs(clubs.map(c => c.id === clubId ? { ...c, eId: editEmbassyValue } : c));
+      setEditingEmbassyId(null);
+      toast.success('Embassy ID updated');
+    } catch (error) {
+      console.error('Failed to update Embassy ID:', error);
+      toast.error('Failed to update Embassy ID');
+    }
+  };
+
+  const filteredClubs = getFilteredClubs();
   const pages = Math.ceil(total / limit);
+  const uniqueCities = [...new Set(clubs.map(c => c.city).filter(Boolean))];
 
   return (
     <ProtectedRoute>
       <Head><title>Clubs | Equestrian Events</title></Head>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-white">Clubs</h2>
+          <h2 className="text-3xl font-bold text-white">Club Co-ordinator List</h2>
           <div className="flex gap-3">
+            {selectedIds.size > 0 && (
+              <button onClick={handleBulkDelete} className="btn-secondary text-red-400 border-red-400">
+                <FiTrash2 className="inline mr-2" /> Delete ({selectedIds.size})
+              </button>
+            )}
             <button onClick={handleExportCSV} className="btn-secondary">
               <FiDownload className="inline mr-2" /> Export CSV
             </button>
@@ -162,15 +222,65 @@ export default function ClubsList() {
           </div>
         </div>
 
-        {/* Search */}
+        {/* Search & Filters */}
         <div className="mb-6 card">
-          <input
-            type="text"
-            placeholder="Search clubs by name, email, or code..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="form-input w-full"
-          />
+          <div className="flex gap-4 items-center">
+            <input
+              type="text"
+              placeholder="Search clubs by name, email, or code..."
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1); }}
+              className="form-input flex-1"
+            />
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`btn-secondary flex items-center gap-2 ${showFilters ? 'ring-2 ring-purple-500' : ''}`}
+            >
+              <FiFilter /> Filters
+              {(filterCity || filterStatus) && (
+                <span className="bg-purple-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                  {(filterCity ? 1 : 0) + (filterStatus ? 1 : 0)}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t border-white border-opacity-10">
+              <div className="flex gap-4 items-end">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-300 mb-1">City</label>
+                  <select
+                    value={filterCity}
+                    onChange={e => setFilterCity(e.target.value)}
+                    className="form-input"
+                  >
+                    <option value="" className="bg-slate-800 text-white">All Cities</option>
+                    {uniqueCities.map(city => (
+                      <option key={city} value={city} className="bg-slate-800 text-white">{city}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-300 mb-1">Status</label>
+                  <select
+                    value={filterStatus}
+                    onChange={e => setFilterStatus(e.target.value as '' | 'active' | 'inactive')}
+                    className="form-input"
+                  >
+                    <option value="" className="bg-slate-800 text-white">All Status</option>
+                    <option value="active" className="bg-slate-800 text-white">Active</option>
+                    <option value="inactive" className="bg-slate-800 text-white">Inactive</option>
+                  </select>
+                </div>
+                {(filterCity || filterStatus) && (
+                  <button onClick={clearFilters} className="btn-secondary flex items-center gap-1 text-red-400">
+                    <FiX /> Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Table */}
@@ -180,7 +290,7 @@ export default function ClubsList() {
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
               <p className="text-gray-300 mt-2">Loading clubs...</p>
             </div>
-          ) : clubs.length === 0 ? (
+          ) : filteredClubs.length === 0 ? (
             <div className="text-center py-8 text-gray-300">No clubs found</div>
           ) : (
             <>
@@ -190,21 +300,24 @@ export default function ClubsList() {
                     <th>
                       <input
                         type="checkbox"
-                        checked={selectedIds.size === clubs.length && clubs.length > 0}
+                        checked={selectedIds.size === filteredClubs.length && filteredClubs.length > 0}
                         onChange={toggleSelectAll}
                         className="rounded border-gray-600"
                       />
                     </th>
                     <th>Club Name</th>
-                    <th>Code</th>
-                    <th>Contact Person</th>
+                    <th>Club Code</th>
+                    <th>Embassy ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
                     <th>Email</th>
                     <th>City</th>
+                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {clubs.map(club => (
+                  {filteredClubs.map(club => (
                     <tr key={club.id}>
                       <td>
                         <input
@@ -217,14 +330,53 @@ export default function ClubsList() {
                       <td className="font-medium">{club.name}</td>
                       <td>{club.shortCode}</td>
                       <td>
-                        {club.primaryContact.firstName} {club.primaryContact.lastName}
+                        {editingEmbassyId === club.id ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              value={editEmbassyValue}
+                              onChange={e => setEditEmbassyValue(e.target.value)}
+                              className="form-input text-xs py-1 px-2 w-32"
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') saveEmbassyId(club.id);
+                                if (e.key === 'Escape') setEditingEmbassyId(null);
+                              }}
+                              autoFocus
+                            />
+                            <button onClick={() => saveEmbassyId(club.id)} className="text-green-400 text-xs">Save</button>
+                            <button onClick={() => setEditingEmbassyId(null)} className="text-gray-400 text-xs">Cancel</button>
+                          </div>
+                        ) : (
+                          <span
+                            className="cursor-pointer hover:text-purple-300"
+                            onClick={() => {
+                              setEditingEmbassyId(club.id);
+                              setEditEmbassyValue(club.eId || '');
+                            }}
+                            title="Click to edit"
+                          >
+                            {club.eId || '—'}
+                          </span>
+                        )}
                       </td>
-                      <td>{club.email || club.primaryContact.email}</td>
+                      <td>{club.primaryContact?.firstName}</td>
+                      <td>{club.primaryContact?.lastName}</td>
+                      <td>{club.email || club.primaryContact?.email}</td>
                       <td>{club.city}</td>
                       <td>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          club.isActive ? 'bg-green-500 bg-opacity-20 text-green-400' : 'bg-red-500 bg-opacity-20 text-red-400'
+                        }`}>
+                          {club.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td>
                         <div className="flex space-x-2">
-                          <Link href={`/clubs/${club.id}`} className="text-blue-400 hover:text-blue-300">
-                            <FiEdit2 size={18} title="Edit" />
+                          <Link href={`/clubs/${club.id}?mode=view`} className="text-green-400 hover:text-green-300" title="View">
+                            <FiEye size={18} />
+                          </Link>
+                          <Link href={`/clubs/${club.id}`} className="text-blue-400 hover:text-blue-300" title="Edit">
+                            <FiEdit2 size={18} />
                           </Link>
                           <button
                             onClick={() => deleteClub(club.id)}
