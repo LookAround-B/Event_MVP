@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FiMenu, FiX, FiLogOut, FiHome, FiCalendar, FiUsers, FiTrendingUp, FiSettings, FiFileText, FiBox, FiBell, FiBarChart2, FiCheckCircle } from 'react-icons/fi';
+import { FiMenu, FiX, FiLogOut, FiHome, FiCalendar, FiUsers, FiTrendingUp, FiSettings, FiFileText, FiBox, FiBell, FiBarChart2, FiCheckCircle, FiUser } from 'react-icons/fi';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -29,6 +29,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard', icon: FiHome },
+    { name: 'Profile', href: '/account', icon: FiUser },
     { name: 'Events', href: '/events', icon: FiCalendar },
     { name: 'Clubs', href: '/clubs', icon: FiUsers },
     { name: 'Riders', href: '/riders', icon: FiUsers },

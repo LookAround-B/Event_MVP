@@ -25,13 +25,19 @@ async function handler(
           where: { id: userId },
           select: {
             id: true,
+            eId: true,
             email: true,
             firstName: true,
             lastName: true,
             designation: true,
             phone: true,
+            optionalPhone: true,
             gender: true,
+            dob: true,
             address: true,
+            efiRiderId: true,
+            imageUrl: true,
+            isGoogleAuth: true,
             createdAt: true,
             roles: {
               select: { name: true },
@@ -54,7 +60,6 @@ async function handler(
           statusCode: 200,
           data: {
             ...user,
-            eId: user.id,
             role: user.roles?.[0]?.name || 'rider',
           },
         });
@@ -74,7 +79,7 @@ async function handler(
     return withAuth(async (authReq, authRes) => {
       try {
         const userId = authReq.user?.id;
-        const { firstName, lastName, designation, phone, gender, address, dob } = authReq.body;
+        const { firstName, lastName, designation, phone, optionalPhone, gender, address, dob, efiRiderId, imageUrl } = authReq.body;
 
         if (!userId) {
           return authRes.status(401).json({
@@ -92,18 +97,29 @@ async function handler(
             ...(lastName && { lastName }),
             ...(designation !== undefined && { designation }),
             ...(phone !== undefined && { phone }),
+            ...(optionalPhone !== undefined && { optionalPhone }),
             ...(gender !== undefined && { gender }),
             ...(address !== undefined && { address }),
+            ...(dob !== undefined && { dob: dob ? new Date(dob) : null }),
+            ...(efiRiderId !== undefined && { efiRiderId }),
+            ...(imageUrl !== undefined && { imageUrl }),
           },
           select: {
             id: true,
+            eId: true,
             email: true,
             firstName: true,
             lastName: true,
             designation: true,
             phone: true,
+            optionalPhone: true,
             gender: true,
+            dob: true,
             address: true,
+            efiRiderId: true,
+            imageUrl: true,
+            isGoogleAuth: true,
+            createdAt: true,
             roles: {
               select: { name: true },
             },

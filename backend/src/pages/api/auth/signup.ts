@@ -89,12 +89,22 @@ async function handleSignup(
       });
     }
 
+    // Generate next EIRS code
+    const lastUser = await prisma.user.findFirst({
+      where: { eId: { startsWith: 'EIRSD' } },
+      orderBy: { eId: 'desc' },
+      select: { eId: true },
+    });
+    const nextNum = lastUser?.eId ? parseInt(lastUser.eId.replace('EIRSD', ''), 10) + 1 : 1;
+    const eId = `EIRSD${String(nextNum).padStart(5, '0')}`;
+
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         firstName,
         lastName,
+        eId,
         isActive: true,
         isApproved: false,
         profileComplete: false,

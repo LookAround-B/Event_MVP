@@ -13,6 +13,7 @@ datasource db {
 // ==================== USER & AUTH ====================
 model User {
   id              String   @id @default(cuid())
+  eId             String   @unique @default(cuid())
   email           String   @unique
   password        String
   firstName       String
@@ -20,8 +21,11 @@ model User {
   designation     String?
   gender          String?
   phone           String?
+  optionalPhone   String?
   dob             DateTime?
   address         String?
+  efiRiderId      String?
+  imageUrl        String?
   isActive        Boolean  @default(true)
   isApproved      Boolean  @default(false)
   isGoogleAuth    Boolean  @default(false)
