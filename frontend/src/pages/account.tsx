@@ -145,8 +145,10 @@ async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  const maxSize = 300;
+  const scale = Math.min(maxSize / pixelCrop.width, maxSize / pixelCrop.height, 1);
+  canvas.width = Math.round(pixelCrop.width * scale);
+  canvas.height = Math.round(pixelCrop.height * scale);
   ctx.drawImage(
     image,
     pixelCrop.x,
@@ -155,14 +157,14 @@ async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob> {
     pixelCrop.height,
     0,
     0,
-    pixelCrop.width,
-    pixelCrop.height
+    canvas.width,
+    canvas.height
   );
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
       else reject(new Error('Canvas to blob failed'));
-    }, 'image/jpeg', 0.9);
+    }, 'image/jpeg', 0.8);
   });
 }
 
@@ -293,12 +295,12 @@ export default function AccountPage() {
     try {
       setUploadingImage(true);
       const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
-      const formData = new FormData();
-      formData.append('file', croppedBlob, 'profile.jpg');
-      const uploadRes = await api.post('/api/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const reader = new FileReader();
+      const imageUrl = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(croppedBlob);
       });
-      const imageUrl = uploadRes.data.data.fileUrl;
       await api.put('/api/users/profile', { imageUrl });
       setProfile((prev) => prev ? { ...prev, imageUrl } : prev);
       setShowCropModal(false);
@@ -318,7 +320,7 @@ export default function AccountPage() {
 
   const getImageUrl = (url?: string) => {
     if (!url) return null;
-    if (url.startsWith('http')) return url;
+    if (url.startsWith('data:') || url.startsWith('http')) return url;
     return `/uploads/${url.replace(/^\/uploads\//, '')}`;
   };
 
