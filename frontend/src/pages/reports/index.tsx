@@ -120,7 +120,7 @@ export default function Reports() {
             { key: 'riders', label: 'Rider Statistics', icon: FiUsers },
             { key: 'attendance', label: 'Attendance', icon: FiBarChart2 },
           ].map(t => (
-            <button key={t.key} onClick={() => setTab(t.key as any)} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 ${tab === t.key ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}>
+            <button key={t.key} onClick={() => setTab(t.key as any)} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition ${tab === t.key ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}>
               <t.icon size={16} /> {t.label}
             </button>
           ))}
@@ -130,108 +130,106 @@ export default function Reports() {
 
         {/* Event Summary Report */}
         {!loading && tab === 'events' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100 border-b">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Event</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Type</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Date</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Registrations</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Approved</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Paid</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Revenue</th>
+          <div className="card table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Type</th>
+                  <th>Date</th>
+                  <th className="text-right">Registrations</th>
+                  <th className="text-right">Approved</th>
+                  <th className="text-right">Paid</th>
+                  <th className="text-right">Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {eventSummaries.map(ev => (
+                  <tr key={ev.id}>
+                    <td className="font-medium">{ev.name}</td>
+                    <td className="text-gray-400">{ev.eventType}</td>
+                    <td className="text-gray-400">{new Date(ev.startDate).toLocaleDateString()}</td>
+                    <td className="text-right">{ev.totalRegistrations}</td>
+                    <td className="text-right text-emerald-400">{ev.approved}</td>
+                    <td className="text-right text-blue-400">{ev.paid}</td>
+                    <td className="text-right font-semibold">₹{ev.totalRevenue.toLocaleString()}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {eventSummaries.map(ev => (
-                    <tr key={ev.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{ev.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{ev.eventType}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{new Date(ev.startDate).toLocaleDateString()}</td>
-                      <td className="px-4 py-3 text-sm text-right">{ev.totalRegistrations}</td>
-                      <td className="px-4 py-3 text-sm text-right text-green-700">{ev.approved}</td>
-                      <td className="px-4 py-3 text-sm text-right text-blue-700">{ev.paid}</td>
-                      <td className="px-4 py-3 text-sm text-right font-semibold">₹{ev.totalRevenue.toLocaleString()}</td>
-                    </tr>
-                  ))}
-                  {eventSummaries.length === 0 && (
-                    <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-600">No events found</td></tr>
-                  )}
-                </tbody>
-                {eventSummaries.length > 0 && (
-                  <tfoot className="bg-gray-50 border-t">
-                    <tr>
-                      <td colSpan={3} className="px-4 py-3 text-sm font-semibold text-gray-900">Totals</td>
-                      <td className="px-4 py-3 text-sm text-right font-semibold">{eventSummaries.reduce((s, e) => s + e.totalRegistrations, 0)}</td>
-                      <td className="px-4 py-3 text-sm text-right font-semibold text-green-700">{eventSummaries.reduce((s, e) => s + e.approved, 0)}</td>
-                      <td className="px-4 py-3 text-sm text-right font-semibold text-blue-700">{eventSummaries.reduce((s, e) => s + e.paid, 0)}</td>
-                      <td className="px-4 py-3 text-sm text-right font-bold">₹{eventSummaries.reduce((s, e) => s + e.totalRevenue, 0).toLocaleString()}</td>
-                    </tr>
-                  </tfoot>
+                ))}
+                {eventSummaries.length === 0 && (
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No events found</td></tr>
                 )}
-              </table>
-            </div>
+              </tbody>
+              {eventSummaries.length > 0 && (
+                <tfoot>
+                  <tr>
+                    <td colSpan={3} className="font-semibold">Totals</td>
+                    <td className="text-right font-semibold">{eventSummaries.reduce((s, e) => s + e.totalRegistrations, 0)}</td>
+                    <td className="text-right font-semibold text-emerald-400">{eventSummaries.reduce((s, e) => s + e.approved, 0)}</td>
+                    <td className="text-right font-semibold text-blue-400">{eventSummaries.reduce((s, e) => s + e.paid, 0)}</td>
+                    <td className="text-right font-bold">₹{eventSummaries.reduce((s, e) => s + e.totalRevenue, 0).toLocaleString()}</td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
           </div>
         )}
 
         {/* Financial Reconciliation Report */}
         {!loading && tab === 'financial' && (
           <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow p-4 flex flex-wrap gap-4 items-end">
+            <div className="card p-4 flex flex-wrap gap-4 items-end">
               <div>
-                <label className="text-sm font-medium text-gray-700 block">Start Date</label>
-                <input type="date" value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} className="px-3 py-2 border rounded-lg text-sm" />
+                <label className="text-sm font-medium text-gray-300 block mb-1">Start Date</label>
+                <input type="date" value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} className="form-input text-sm" />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 block">End Date</label>
-                <input type="date" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} className="px-3 py-2 border rounded-lg text-sm" />
+                <label className="text-sm font-medium text-gray-300 block mb-1">End Date</label>
+                <input type="date" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} className="form-input text-sm" />
               </div>
-              <button onClick={loadReport} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Apply</button>
-              <button onClick={downloadFinancialCSV} className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 flex items-center gap-1">
+              <button onClick={loadReport} className="btn-primary text-sm">Apply</button>
+              <button onClick={downloadFinancialCSV} className="btn-secondary text-sm flex items-center gap-1">
                 <FiDownload size={14} /> Export CSV
               </button>
             </div>
 
             {financialReport && (
               <>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-sm text-gray-600">Expected Revenue</p>
-                    <p className="text-xl font-bold text-gray-900">₹{financialReport.totalExpectedRevenue.toLocaleString()}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="card">
+                    <p className="text-sm text-gray-400">Expected Revenue</p>
+                    <p className="text-xl font-bold text-white mt-1">₹{financialReport.totalExpectedRevenue.toLocaleString()}</p>
                   </div>
-                  <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-sm text-gray-600">Collected</p>
-                    <p className="text-xl font-bold text-green-700">₹{financialReport.totalCollected.toLocaleString()}</p>
+                  <div className="card">
+                    <p className="text-sm text-gray-400">Collected</p>
+                    <p className="text-xl font-bold text-emerald-400 mt-1">₹{financialReport.totalCollected.toLocaleString()}</p>
                   </div>
-                  <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-sm text-gray-600">Outstanding</p>
-                    <p className="text-xl font-bold text-red-700">₹{financialReport.totalOutstanding.toLocaleString()}</p>
+                  <div className="card">
+                    <p className="text-sm text-gray-400">Outstanding</p>
+                    <p className="text-xl font-bold text-red-400 mt-1">₹{financialReport.totalOutstanding.toLocaleString()}</p>
                   </div>
-                  <div className="bg-white rounded-lg shadow p-4">
-                    <p className="text-sm text-gray-600">Transactions</p>
-                    <p className="text-xl font-bold text-gray-900">{financialReport.transactionCount}</p>
+                  <div className="card">
+                    <p className="text-sm text-gray-400">Transactions</p>
+                    <p className="text-xl font-bold text-white mt-1">{financialReport.transactionCount}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white rounded-lg shadow p-4">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">By Payment Method</h3>
+                  <div className="card">
+                    <h3 className="text-sm font-semibold text-white mb-3">By Payment Method</h3>
                     {Object.entries(financialReport.byMethod).map(([method, data]) => (
-                      <div key={method} className="flex justify-between py-1 border-b last:border-0">
-                        <span className="text-sm text-gray-700">{method}</span>
-                        <span className="text-sm font-semibold">₹{data.total.toLocaleString()} ({data.count})</span>
+                      <div key={method} className="flex justify-between py-1.5 border-b border-white/5 last:border-0">
+                        <span className="text-sm text-gray-300">{method}</span>
+                        <span className="text-sm font-semibold text-white">₹{data.total.toLocaleString()} ({data.count})</span>
                       </div>
                     ))}
                     {Object.keys(financialReport.byMethod).length === 0 && <p className="text-sm text-gray-500">No data</p>}
                   </div>
-                  <div className="bg-white rounded-lg shadow p-4">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">By Status</h3>
+                  <div className="card">
+                    <h3 className="text-sm font-semibold text-white mb-3">By Status</h3>
                     {Object.entries(financialReport.byStatus).map(([status, data]) => (
-                      <div key={status} className="flex justify-between py-1 border-b last:border-0">
-                        <span className="text-sm text-gray-700">{status}</span>
-                        <span className="text-sm font-semibold">₹{data.total.toLocaleString()} ({data.count})</span>
+                      <div key={status} className="flex justify-between py-1.5 border-b border-white/5 last:border-0">
+                        <span className="text-sm text-gray-300">{status}</span>
+                        <span className="text-sm font-semibold text-white">₹{data.total.toLocaleString()} ({data.count})</span>
                       </div>
                     ))}
                     {Object.keys(financialReport.byStatus).length === 0 && <p className="text-sm text-gray-500">No data</p>}
@@ -244,86 +242,84 @@ export default function Reports() {
 
         {/* Rider Statistics Report */}
         {!loading && tab === 'riders' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100 border-b">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Rider</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Email</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Club</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Events</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Registrations</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Horses</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Total Spent</th>
+          <div className="card table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Rider</th>
+                  <th>Email</th>
+                  <th>Club</th>
+                  <th className="text-right">Events</th>
+                  <th className="text-right">Registrations</th>
+                  <th className="text-right">Horses</th>
+                  <th className="text-right">Total Spent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {riderStats.map(r => (
+                  <tr key={r.id}>
+                    <td className="font-medium">{r.name}</td>
+                    <td className="text-gray-400">{r.email}</td>
+                    <td className="text-gray-400">{r.club}</td>
+                    <td className="text-right">{r.totalEvents}</td>
+                    <td className="text-right">{r.totalRegistrations}</td>
+                    <td className="text-right">{r.horses.length}</td>
+                    <td className="text-right font-semibold">₹{r.totalSpent.toLocaleString()}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {riderStats.map(r => (
-                    <tr key={r.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{r.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{r.email}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{r.club}</td>
-                      <td className="px-4 py-3 text-sm text-right">{r.totalEvents}</td>
-                      <td className="px-4 py-3 text-sm text-right">{r.totalRegistrations}</td>
-                      <td className="px-4 py-3 text-sm text-right">{r.horses.length}</td>
-                      <td className="px-4 py-3 text-sm text-right font-semibold">₹{r.totalSpent.toLocaleString()}</td>
-                    </tr>
-                  ))}
-                  {riderStats.length === 0 && (
-                    <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-600">No rider data</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                ))}
+                {riderStats.length === 0 && (
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No rider data</td></tr>
+                )}
+              </tbody>
+            </table>
           </div>
         )}
 
         {/* Attendance Report */}
         {!loading && tab === 'attendance' && (
           <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow p-4 flex flex-wrap gap-4 items-end">
+            <div className="card p-4 flex flex-wrap gap-4 items-end">
               <div>
-                <label className="text-sm font-medium text-gray-700 block">Filter by Event</label>
-                <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)} className="px-3 py-2 border rounded-lg text-sm mt-1">
+                <label className="text-sm font-medium text-gray-300 block mb-1">Filter by Event</label>
+                <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)} className="form-input text-sm mt-1">
                   <option value="">All Events</option>
                   {eventSummaries.map(ev => (
                     <option key={ev.id} value={ev.id}>{ev.name}</option>
                   ))}
                 </select>
               </div>
-              <button onClick={loadReport} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Load</button>
+              <button onClick={loadReport} className="btn-primary text-sm">Load</button>
             </div>
 
             {attendanceReport.map((event: any) => (
-              <div key={event.eventId} className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="p-4 border-b">
-                  <h3 className="font-semibold text-gray-900">{event.eventName}</h3>
-                  <p className="text-sm text-gray-600">{event.eventType} | {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</p>
-                  <div className="flex gap-4 mt-2 text-sm">
-                    <span className="text-gray-700">Total: <strong>{event.totalRegistrations}</strong></span>
-                    <span className="text-green-700">Approved: <strong>{event.approved}</strong></span>
-                    <span className="text-yellow-700">Pending: <strong>{event.pending}</strong></span>
-                    <span className="text-blue-700">Paid: <strong>{event.paid}</strong></span>
+              <div key={event.eventId} className="card overflow-hidden">
+                <div className="pb-4 mb-4 border-b border-white/10">
+                  <h3 className="font-semibold text-white">{event.eventName}</h3>
+                  <p className="text-sm text-gray-400">{event.eventType} | {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</p>
+                  <div className="flex flex-wrap gap-4 mt-2 text-sm">
+                    <span className="text-gray-300">Total: <strong>{event.totalRegistrations}</strong></span>
+                    <span className="text-emerald-400">Approved: <strong>{event.approved}</strong></span>
+                    <span className="text-yellow-400">Pending: <strong>{event.pending}</strong></span>
+                    <span className="text-blue-400">Paid: <strong>{event.paid}</strong></span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">By Club</h4>
+                    <h4 className="text-sm font-medium text-gray-300 mb-2">By Club</h4>
                     {Object.entries(event.clubBreakdown || {}).map(([club, count]) => (
                       <div key={club} className="flex justify-between py-1 text-sm">
-                        <span className="text-gray-700">{club}</span>
-                        <span className="font-semibold">{count as number}</span>
+                        <span className="text-gray-400">{club}</span>
+                        <span className="font-semibold text-white">{count as number}</span>
                       </div>
                     ))}
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">By Category</h4>
+                    <h4 className="text-sm font-medium text-gray-300 mb-2">By Category</h4>
                     {Object.entries(event.categoryBreakdown || {}).map(([cat, count]) => (
                       <div key={cat} className="flex justify-between py-1 text-sm">
-                        <span className="text-gray-700">{cat}</span>
-                        <span className="font-semibold">{count as number}</span>
+                        <span className="text-gray-400">{cat}</span>
+                        <span className="font-semibold text-white">{count as number}</span>
                       </div>
                     ))}
                   </div>
@@ -331,7 +327,7 @@ export default function Reports() {
               </div>
             ))}
             {attendanceReport.length === 0 && (
-              <div className="bg-white rounded-lg shadow p-8 text-center text-gray-600">No attendance data</div>
+              <div className="card p-8 text-center text-gray-500">No attendance data</div>
             )}
           </div>
         )}

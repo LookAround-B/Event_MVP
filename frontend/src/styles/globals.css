@@ -263,18 +263,156 @@ body {
     text-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
   }
 
-  /* Override legacy light themes everywhere to use dark glassmorphism */
-  .bg-white, .bg-gray-50, .bg-gray-100 {
+  /* ══════════════════════════════════════════════════════════
+     GLOBAL DARK THEME OVERRIDES
+     Single source of truth — every light-themed Tailwind
+     utility is remapped to the dark glassmorphism palette.
+     ══════════════════════════════════════════════════════════ */
+
+  /* ── Backgrounds ── */
+  .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200 {
     background-color: rgba(255, 255, 255, 0.05) !important;
     backdrop-filter: blur(10px) !important;
   }
+  .bg-gray-300 { background-color: rgba(255, 255, 255, 0.10) !important; }
+  .bg-gray-700 { background-color: rgba(255, 255, 255, 0.08) !important; }
 
-  .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-black {
-    color: #e2e8f0 !important;
+  .bg-red-50    { background-color: rgba(239, 68, 68, 0.10) !important; }
+  .bg-green-50  { background-color: rgba(34, 197, 94, 0.10) !important; }
+  .bg-blue-50   { background-color: rgba(59, 130, 246, 0.10) !important; }
+  .bg-yellow-50 { background-color: rgba(234, 179, 8, 0.10) !important; }
+
+  /* Light-themed badges → dark */
+  .bg-purple-100 { background-color: rgba(139, 92, 246, 0.15) !important; }
+  .bg-green-100  { background-color: rgba(34, 197, 94, 0.15) !important; }
+  .bg-yellow-100 { background-color: rgba(234, 179, 8, 0.15) !important; }
+  .bg-red-100    { background-color: rgba(239, 68, 68, 0.15) !important; }
+  .bg-blue-100   { background-color: rgba(59, 130, 246, 0.15) !important; }
+  .bg-indigo-100 { background-color: rgba(129, 140, 248, 0.15) !important; }
+  .bg-orange-100 { background-color: rgba(251, 146, 60, 0.15) !important; }
+  .bg-cyan-100   { background-color: rgba(34, 211, 238, 0.15) !important; }
+  .bg-pink-100   { background-color: rgba(244, 114, 182, 0.15) !important; }
+
+  /* ── Badge text → light pastel ── */
+  .text-purple-800  { color: #c4b5fd !important; }
+  .text-green-800   { color: #86efac !important; }
+  .text-yellow-800  { color: #fde68a !important; }
+  .text-red-800     { color: #fca5a5 !important; }
+  .text-blue-800    { color: #93c5fd !important; }
+  .text-indigo-800  { color: #a5b4fc !important; }
+  .text-orange-800  { color: #fdba74 !important; }
+  .text-cyan-800    { color: #67e8f9 !important; }
+  .text-pink-800    { color: #f9a8d4 !important; }
+
+  /* ── Text colors — full gray scale ── */
+  .text-black        { color: #f8fafc !important; }
+  .text-gray-900     { color: #f1f5f9 !important; }
+  .text-gray-800     { color: #e2e8f0 !important; }
+  .text-gray-700     { color: #cbd5e1 !important; }
+  .text-gray-600     { color: #94a3b8 !important; }
+  .text-gray-500     { color: #64748b !important; }
+
+  /* Semantic text colors */
+  .text-green-700, .text-green-600  { color: #6ee7b7 !important; }
+  .text-red-700, .text-red-600      { color: #fca5a5 !important; }
+  .text-blue-700, .text-blue-600    { color: #93c5fd !important; }
+  .text-yellow-700, .text-yellow-600 { color: #fde68a !important; }
+  .text-indigo-700, .text-indigo-600 { color: #a5b4fc !important; }
+  .text-indigo-900                   { color: #c7d2fe !important; }
+  .text-blue-900                     { color: #bfdbfe !important; }
+
+  /* ── Borders ── */
+  .border-gray-300, .border-gray-200, .border-gray-100 {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  .border-gray-400 { border-color: rgba(255, 255, 255, 0.18) !important; }
+
+  .border-red-200    { border-color: rgba(239, 68, 68, 0.25) !important; }
+  .border-green-200  { border-color: rgba(34, 197, 94, 0.25) !important; }
+  .border-blue-200   { border-color: rgba(59, 130, 246, 0.25) !important; }
+  .border-yellow-200 { border-color: rgba(234, 179, 8, 0.25) !important; }
+
+  /* Dividers */
+  .divide-y > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+  .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+  .border-b { border-color: rgba(255, 255, 255, 0.08); }
+  .border-t { border-color: rgba(255, 255, 255, 0.08); }
+
+  /* ── Hover backgrounds ── */
+  .hover\:bg-gray-50:hover,
+  .hover\:bg-gray-100:hover,
+  .hover\:bg-gray-200:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+  }
+  .hover\:bg-blue-700:hover  { background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%) !important; }
+  .hover\:bg-green-700:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%) !important; }
+  .hover\:bg-red-700:hover   { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important; }
+
+  /* ── Hover text ── */
+  .hover\:text-gray-600:hover { color: #cbd5e1 !important; }
+  .hover\:text-gray-700:hover { color: #e2e8f0 !important; }
+  .hover\:text-gray-300:hover { color: #f1f5f9 !important; }
+  .hover\:text-blue-900:hover { color: #bfdbfe !important; }
+  .hover\:text-blue-800:hover { color: #93c5fd !important; }
+  .hover\:text-red-800:hover  { color: #fca5a5 !important; }
+
+  /* ── Focus states ── */
+  .focus\:border-blue-500:focus {
+    border-color: rgba(124, 58, 237, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1) !important;
+  }
+  .focus\:border-purple-500:focus,
+  .focus\:border-purple-500\/50:focus {
+    border-color: rgba(139, 92, 246, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+  }
+  .focus\:ring-blue-500:focus {
+    --tw-ring-color: rgba(124, 58, 237, 0.3) !important;
+  }
+  .focus\:ring-purple-500:focus {
+    --tw-ring-color: rgba(139, 92, 246, 0.3) !important;
   }
 
-  .border-gray-300, .border-gray-200 {
-    border-color: rgba(255, 255, 255, 0.15) !important;
+  /* ── Action button bg colors → purple/emerald/danger palette ── */
+  .bg-blue-600 {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3) !important;
+  }
+  .bg-blue-700 {
+    background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%) !important;
+  }
+  .bg-green-600 {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    box-shadow: 0 4px 16px rgba(5, 150, 105, 0.3) !important;
+  }
+  .bg-red-600 {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3) !important;
+  }
+
+  /* ── Shadows → subtle dark glow ── */
+  .shadow, .shadow-sm {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+  }
+  .shadow-md {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35) !important;
+  }
+  .shadow-lg, .shadow-xl {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* ── Ring overrides ── */
+  .ring-1, .ring-2 {
+    --tw-ring-color: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  /* ── Rounded-lg with bg-white combo → glassmorphic card treatment ── */
+  .rounded-lg, .rounded-xl {
+    border-color: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -416,7 +554,7 @@ body {
 
 @layer base {
   /* Catch raw inputs that don't explicitly use .form-input */
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]), select, textarea {
     background-color: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     color: white !important;
@@ -425,7 +563,7 @@ body {
     backdrop-filter: blur(10px);
   }
 
-  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus, select:focus, textarea:focus {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]):focus, select:focus, textarea:focus {
     outline: none !important;
     background-color: rgba(255, 255, 255, 0.12) !important;
     border-color: rgba(124, 58, 237, 0.5) !important;
@@ -433,7 +571,13 @@ body {
   }
 
   input::placeholder, textarea::placeholder {
-    color: rgba(255, 255, 255, 0.5) !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+  }
+
+  /* Select dropdown options – dark background */
+  option {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
   }
 
   /* Catch raw tables that don't explicitly use .table */
@@ -459,6 +603,92 @@ body {
   }
 
   tbody tr:hover {
-    background-color: rgba(124, 58, 237, 0.1) !important;
+    background-color: rgba(124, 58, 237, 0.08) !important;
+  }
+
+  tfoot {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+  }
+
+  tfoot td {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* ── Responsive table wrapper ── */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── Responsive page headers ── */
+  @media (max-width: 640px) {
+    .page-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 1rem !important;
+    }
+
+    .page-header .btn-primary,
+    .page-header .btn-secondary {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     GLOBAL RESPONSIVE OVERRIDES
+     Makes all pages responsive from one place — no need to
+     edit individual page files.
+     ══════════════════════════════════════════════════════════ */
+
+  /* ── Mobile: force flex rows to stack ── */
+  @media (max-width: 640px) {
+    /* Page header bars (title + action btn side-by-side) */
+    .flex.justify-between.items-center {
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    /* Stat grids: always 1 col on mobile */
+    .grid-cols-2,
+    .grid-cols-3,
+    .grid-cols-4 {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* Tables: horizontal scroll */
+    table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    thead, tbody, tr, th, td {
+      display: revert;
+    }
+
+    /* Buttons in flex rows: full-width */
+    .flex.gap-2 > button,
+    .flex.gap-3 > button,
+    .flex.gap-4 > button {
+      flex: 1 1 auto;
+    }
+
+    /* Cards: remove excess padding */
+    .card, .p-6, .p-8 {
+      padding: 1rem !important;
+    }
+
+    /* Text sizing */
+    h1, .text-3xl { font-size: 1.5rem !important; }
+    h2, .text-2xl { font-size: 1.25rem !important; }
+  }
+
+  /* ── Tablet: 2-col grids ── */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .grid-cols-3,
+    .grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
   }
 }
