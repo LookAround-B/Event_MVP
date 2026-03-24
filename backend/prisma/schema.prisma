@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // url      = env("DATABASE_URL")
 }
 
 // ==================== USER & AUTH ====================
@@ -80,10 +80,12 @@ model Event {
   eventType   String // KSEC, EPL, EIRS Show
   name        String
   description String?
-  startDate   DateTime
-  endDate     DateTime
-  startTime   String?
-  endTime     String?
+  startDate       DateTime
+  endDate         DateTime
+  startTime       String?
+  startEndTime    String?  // End time for the start date day
+  endStartTime    String?  // Start time for the end date day
+  endTime         String?
   fileUrl     String?
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())

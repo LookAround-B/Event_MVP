@@ -55,7 +55,7 @@ async function handler(
 
   if (req.method === 'PUT') {
     try {
-      const { name, startDate, startTime, endDate, endTime, venueName, venueAddress, venueLat, venueLng, description, eventType, isPublished, termsAndConditions, fileUrl, categoryIds } = req.body;
+      const { name, startDate, startTime, startEndTime, endDate, endStartTime, endTime, venueName, venueAddress, venueLat, venueLng, description, eventType, isPublished, termsAndConditions, fileUrl, categoryIds } = req.body;
 
       // Fetch existing event for audit comparison
       const existingEvent = await prisma.event.findUnique({
@@ -68,6 +68,26 @@ async function handler(
           message: 'Event not found',
           error: 'NOT_FOUND',
           statusCode: 404,
+        });
+      }
+
+      // Validate name length if provided
+      if (name && (name.trim().length < 3 || name.trim().length > 200)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Event name must be between 3 and 200 characters',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+        });
+      }
+
+      // Validate event type if provided
+      if (eventType && !['KSEC', 'EPL', 'EIRS Show'].includes(eventType)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid event type',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
         });
       }
 
@@ -94,6 +114,14 @@ async function handler(
       if (endTime && endTime !== existingEvent.endTime) {
         updateData.endTime = endTime;
         changedFields.push('endTime');
+      }
+      if (startEndTime !== undefined && startEndTime !== (existingEvent as any).startEndTime) {
+        updateData.startEndTime = startEndTime;
+        changedFields.push('startEndTime');
+      }
+      if (endStartTime !== undefined && endStartTime !== (existingEvent as any).endStartTime) {
+        updateData.endStartTime = endStartTime;
+        changedFields.push('endStartTime');
       }
       if (venueName !== undefined && venueName !== existingEvent.venueName) {
         updateData.venueName = venueName;

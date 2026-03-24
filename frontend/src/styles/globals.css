@@ -278,6 +278,142 @@ body {
   }
 }
 
+/* ===== TipTap Editor Dark Theme ===== */
+
+/* Placeholder */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Base editor content */
+.tiptap {
+  outline: none;
+  min-height: 200px;
+  padding: 12px 16px;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.tiptap > * + * {
+  margin-top: 0.75em;
+}
+
+/* Headings in editor */
+.tiptap h1 { font-size: 1.75em; font-weight: 700; margin-top: 1em; margin-bottom: 0.4em; color: #f1f5f9; }
+.tiptap h2 { font-size: 1.4em; font-weight: 600; margin-top: 0.8em; margin-bottom: 0.3em; color: #f1f5f9; }
+.tiptap h3 { font-size: 1.15em; font-weight: 600; margin-top: 0.6em; margin-bottom: 0.25em; color: #f1f5f9; }
+.tiptap h4 { font-size: 1em; font-weight: 600; margin-top: 0.5em; margin-bottom: 0.2em; color: #f1f5f9; }
+
+/* Lists */
+.tiptap ul { list-style-type: disc; padding-left: 1.5em; }
+.tiptap ol { list-style-type: decimal; padding-left: 1.5em; }
+.tiptap li { margin-bottom: 0.25em; }
+.tiptap li p { margin: 0; }
+
+/* Blockquote */
+.tiptap blockquote {
+  border-left: 3px solid rgba(124, 58, 237, 0.5);
+  padding-left: 1em;
+  margin-left: 0;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Code */
+.tiptap code {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.25rem;
+  padding: 0.15em 0.35em;
+  font-size: 0.875em;
+  font-family: 'Courier New', monospace;
+  color: #a5f3fc;
+}
+
+.tiptap pre {
+  background: #0f172a;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+
+.tiptap pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85em;
+  color: #a5f3fc;
+}
+
+/* Horizontal rule */
+.tiptap hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin: 1em 0;
+}
+
+/* Links */
+.tiptap a {
+  color: #a78bfa;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tiptap a:hover {
+  color: #c4b5fd;
+}
+
+/* Tables */
+.tiptap table {
+  border-collapse: collapse;
+  margin: 0.5em 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.tiptap table td,
+.tiptap table th {
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  padding: 6px 10px;
+  min-width: 80px;
+  vertical-align: top;
+  position: relative;
+}
+
+.tiptap table th {
+  background: rgba(124, 58, 237, 0.12) !important;
+  font-weight: 600;
+  color: #e2e8f0 !important;
+}
+
+.tiptap table td {
+  background: transparent !important;
+}
+
+/* Highlight */
+.tiptap mark {
+  background-color: rgba(250, 204, 21, 0.3);
+  border-radius: 0.15em;
+  padding: 0.05em 0.1em;
+}
+
+/* Selection */
+.tiptap ::selection {
+  background: rgba(124, 58, 237, 0.35);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .tiptap {
+    min-height: 150px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+}
+
 @layer base {
   /* Catch raw inputs that don't explicitly use .form-input */
   input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea {

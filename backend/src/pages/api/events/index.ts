@@ -107,11 +107,20 @@ async function handler(
           termsAndConditions, categoryIds 
         } = authReq.body;
 
-        // Validation - all fields mandatory per PRD Section 3.2
-        if (!eventType || !name || !startDate || !endDate) {
+        // Validation
+        if (!eventType || !name?.trim() || !startDate || !endDate) {
           return authRes.status(400).json({
             success: false,
             message: 'Event type, name, start date and end date are required',
+            error: 'VALIDATION_ERROR',
+            statusCode: 400,
+          });
+        }
+
+        if (name.trim().length < 3 || name.trim().length > 200) {
+          return authRes.status(400).json({
+            success: false,
+            message: 'Event name must be between 3 and 200 characters',
             error: 'VALIDATION_ERROR',
             statusCode: 400,
           });
@@ -126,14 +135,27 @@ async function handler(
           });
         }
 
+        if (new Date(endDate) < new Date(startDate)) {
+          return authRes.status(400).json({
+            success: false,
+            message: 'End date must be on or after the start date',
+            error: 'VALIDATION_ERROR',
+            statusCode: 400,
+          });
+        }
+
+        const { startEndTime, endStartTime } = authReq.body;
+
         const event = await prisma.event.create({
           data: {
             eventType,
-            name,
-            description,
+            name: name.trim(),
+            description: description || null,
             startDate: new Date(startDate),
             endDate: new Date(endDate),
             startTime: startTime || '06:00',
+            startEndTime: startEndTime || '18:00',
+            endStartTime: endStartTime || '06:00',
             endTime: endTime || '18:00',
             fileUrl: fileUrl || null,
             venueName: venueName || '',
