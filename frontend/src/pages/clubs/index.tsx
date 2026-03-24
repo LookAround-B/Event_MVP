@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { FiEdit2, FiTrash2, FiPlus, FiDownload, FiEye, FiFilter, FiX } from 'react-icons/fi';
+import ActionsDropdown from '@/components/ActionsDropdown';
 
 interface Club {
   id: string;
@@ -55,6 +57,7 @@ function exportToExcel(headers: string[], rows: (string | number)[][], filename:
 }
 
 export default function ClubsList() {
+  const router = useRouter();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -371,21 +374,11 @@ export default function ClubsList() {
                         </span>
                       </td>
                       <td>
-                        <div className="flex space-x-2">
-                          <Link href={`/clubs/${club.id}?mode=view`} className="text-green-400 hover:text-green-300" title="View">
-                            <FiEye size={18} />
-                          </Link>
-                          <Link href={`/clubs/${club.id}`} className="text-blue-400 hover:text-blue-300" title="Edit">
-                            <FiEdit2 size={18} />
-                          </Link>
-                          <button
-                            onClick={() => deleteClub(club.id)}
-                            className="text-red-400 hover:text-red-300"
-                            title="Delete"
-                          >
-                            <FiTrash2 size={18} />
-                          </button>
-                        </div>
+                        <ActionsDropdown actions={[
+                          { label: 'View', icon: <FiEye className="w-4 h-4" />, onClick: () => router.push(`/clubs/${club.id}?mode=view`) },
+                          { label: 'Edit', icon: <FiEdit2 className="w-4 h-4" />, onClick: () => router.push(`/clubs/${club.id}`), className: 'text-amber-400 hover:text-amber-300' },
+                          { label: 'Delete', icon: <FiTrash2 className="w-4 h-4" />, onClick: () => deleteClub(club.id), className: 'text-red-400 hover:text-red-300' },
+                        ]} />
                       </td>
                     </tr>
                   ))}

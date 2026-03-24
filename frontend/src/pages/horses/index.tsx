@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiDownload, FiFilter, FiX } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import ActionsDropdown from '@/components/ActionsDropdown';
 
 interface Horse {
   id: string;
@@ -64,6 +66,7 @@ function exportToExcel(headers: string[], rows: (string | number)[][], filename:
 }
 
 export default function Horses() {
+  const router = useRouter();
   const [horses, setHorses] = useState<Horse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -393,21 +396,11 @@ export default function Horses() {
                         </span>
                       </td>
                       <td>
-                        <div className="flex space-x-2">
-                          <Link href={`/horses/${horse.id}`} className="text-blue-400 hover:text-blue-300">
-                            <FiEye className="w-4 h-4" title="View" />
-                          </Link>
-                          <Link href={`/horses/create?id=${horse.id}`} className="text-green-400 hover:text-green-300">
-                            <FiEdit className="w-4 h-4" title="Edit" />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(horse.id)}
-                            className="text-red-400 hover:text-red-300"
-                            title="Delete"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <ActionsDropdown actions={[
+                          { label: 'View', icon: <FiEye className="w-4 h-4" />, onClick: () => router.push(`/horses/${horse.id}`) },
+                          { label: 'Edit', icon: <FiEdit className="w-4 h-4" />, onClick: () => router.push(`/horses/create?id=${horse.id}`), className: 'text-amber-400 hover:text-amber-300' },
+                          { label: 'Delete', icon: <FiTrash2 className="w-4 h-4" />, onClick: () => handleDelete(horse.id), className: 'text-red-400 hover:text-red-300' },
+                        ]} />
                       </td>
                     </tr>
                     );

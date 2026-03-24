@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiDownload, FiFilter, FiX } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import ActionsDropdown from '@/components/ActionsDropdown';
 
 interface Rider {
   id: string;
@@ -359,25 +360,11 @@ export default function Riders() {
                         </span>
                       </td>
                       <td>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => router.push(`/riders/${rider.id}`)}
-                            className="text-blue-400 hover:text-blue-300"
-                            title="View"
-                          >
-                            <FiEye className="w-4 h-4" />
-                          </button>
-                          <Link href={`/riders/create?id=${rider.id}`} className="text-green-400 hover:text-green-300">
-                            <FiEdit className="w-4 h-4" title="Edit" />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(rider.id)}
-                            className="text-red-400 hover:text-red-300"
-                            title="Delete"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <ActionsDropdown actions={[
+                          { label: 'View', icon: <FiEye className="w-4 h-4" />, onClick: () => router.push(`/riders/${rider.id}`) },
+                          { label: 'Edit', icon: <FiEdit className="w-4 h-4" />, onClick: () => router.push(`/riders/create?id=${rider.id}`), className: 'text-amber-400 hover:text-amber-300' },
+                          { label: 'Delete', icon: <FiTrash2 className="w-4 h-4" />, onClick: () => handleDelete(rider.id), className: 'text-red-400 hover:text-red-300' },
+                        ]} />
                       </td>
                     </tr>
                   ))}
