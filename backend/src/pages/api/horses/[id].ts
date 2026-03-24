@@ -53,7 +53,7 @@ async function handler(
 
   if (req.method === 'PUT') {
     try {
-      const { name, breed, color, height, gender, yearOfBirth, passportNumber, horseCode, riderId } = req.body;
+      const { name, breed, color, height, gender, yearOfBirth, passportNumber, horseCode, riderId, embassyId } = req.body;
 
       // Check if horse exists
       const existingHorse = await prisma.horse.findUnique({
@@ -69,6 +69,29 @@ async function handler(
         });
       }
 
+      // Validate embassyId format if provided
+      if (embassyId && typeof embassyId === 'string' && !/^EIRSHR\d{5}$/.test(embassyId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Embassy ID must be in format EIRSHR00000 (e.g., EIRSHR00076)',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+        });
+      }
+
+      // Check embassyId uniqueness if changed
+      if (embassyId && embassyId !== existingHorse.embassyId) {
+        const existingEmbassy = await prisma.horse.findUnique({ where: { embassyId } });
+        if (existingEmbassy) {
+          return res.status(400).json({
+            success: false,
+            message: 'Embassy ID already in use',
+            error: 'VALIDATION_ERROR',
+            statusCode: 400,
+          });
+        }
+      }
+
       const horse = await prisma.horse.update({
         where: { id: horseId },
         data: {
@@ -80,6 +103,7 @@ async function handler(
           ...(yearOfBirth !== undefined && { yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : null }),
           ...(passportNumber !== undefined && { passportNumber: passportNumber || null }),
           ...(horseCode !== undefined && { horseCode: horseCode || null }),
+          ...(embassyId !== undefined && { embassyId: embassyId || null }),
           ...(riderId !== undefined && { riderId: riderId || null }),
         },
       });

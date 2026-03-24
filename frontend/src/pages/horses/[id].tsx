@@ -15,6 +15,7 @@ interface Horse {
   yearOfBirth?: number;
   passportNumber?: string;
   horseCode?: string;
+  embassyId?: string;
   createdAt: string;
 }
 
@@ -170,6 +171,11 @@ export default function HorseDetail() {
                   <div>
                     <label className="text-sm font-semibold text-gray-400">Horse Code</label>
                     <p className="text-lg text-white mt-1 font-mono">{horse.horseCode || '-'}</p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-semibold text-gray-400">Embassy ID</label>
+                    <p className="text-lg text-white mt-1 font-mono">{horse.embassyId || '-'}</p>
                   </div>
                 </div>
               </div>

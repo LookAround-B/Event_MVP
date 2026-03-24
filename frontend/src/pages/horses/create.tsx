@@ -18,6 +18,7 @@ export default function CreateHorse() {
     yearOfBirth: new Date().getFullYear() - 5,
     passportNumber: '',
     horseCode: '',
+    embassyId: '',
   });
 
   const [useHorseCode, setUseHorseCode] = useState(false);
@@ -45,6 +46,7 @@ export default function CreateHorse() {
         yearOfBirth: horse.yearOfBirth || new Date().getFullYear() - 5,
         passportNumber: horse.passportNumber || '',
         horseCode: horse.horseCode || '',
+        embassyId: horse.embassyId || '',
       });
       setUseHorseCode(!!horse.horseCode);
     } catch (err) {
@@ -70,13 +72,19 @@ export default function CreateHorse() {
 
     // Validation
     if (!formData.name || !formData.gender || !formData.yearOfBirth) {
-      setError('Horse name, gender, and year of birth are required');
+      toast.error('Horse name, gender, and year of birth are required');
       setLoading(false);
       return;
     }
 
     if (!useHorseCode && !formData.passportNumber) {
-      setError('Passport number or horse code is required');
+      toast.error('Passport number or horse code is required');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.embassyId && !/^EIRSHR\d{5}$/.test(formData.embassyId)) {
+      toast.error('Embassy ID must be in format EIRSHR followed by 5 digits (e.g., EIRSHR00076)');
       setLoading(false);
       return;
     }
@@ -89,24 +97,29 @@ export default function CreateHorse() {
         height: formData.height ? parseFloat(formData.height) : null,
         gender: formData.gender,
         yearOfBirth: formData.yearOfBirth,
+        embassyId: formData.embassyId || null,
         ...(useHorseCode
           ? { horseCode: formData.horseCode }
           : { passportNumber: formData.passportNumber }
         ),
       };
 
+      let response;
       if (isEdit) {
-        await api.put(`/api/horses/${router.query.id}`, payload);
-        toast.success('Horse updated successfully!');
+        response = await api.put(`/api/horses/${router.query.id}`, payload);
       } else {
-        await api.post('/api/horses', payload);
-        toast.success('Horse registered successfully!');
+        response = await api.post('/api/horses', payload);
       }
+
+      if (!response.data.success) {
+        toast.error(response.data.message || 'Failed to save horse');
+        return;
+      }
+
+      toast.success(isEdit ? 'Horse updated successfully!' : 'Horse registered successfully!');
       router.push('/horses');
     } catch (err: any) {
-      console.error('Failed to save horse:', err);
       const message = err.response?.data?.message || 'Failed to save horse';
-      setError(message);
       toast.error(message);
     } finally {
       setLoading(false);
@@ -283,6 +296,22 @@ export default function CreateHorse() {
                   />
                   <span className="text-sm text-gray-300">Use Horse Code instead of Passport Number</span>
                 </label>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-white mb-2">
+                    Embassy ID
+                  </label>
+                  <input
+                    type="text"
+                    name="embassyId"
+                    value={formData.embassyId}
+                    onChange={handleChange}
+                    placeholder="e.g., EIRSHR00076"
+                    maxLength={11}
+                    className="form-input font-mono"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Format: EIRSHR followed by 5 digits (e.g., EIRSHR00076)</p>
+                </div>
               </div>
               </div>
 

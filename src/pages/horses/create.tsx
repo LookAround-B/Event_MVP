@@ -14,6 +14,7 @@ export default function CreateHorse() {
     passportNumber: '',
     horseCode: '',
     yearOfBirth: '',
+    embassyId: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -22,6 +23,10 @@ export default function CreateHorse() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.embassyId && !/^EIRSHR\d{5}$/.test(formData.embassyId)) {
+      alert('Embassy ID must be in format EIRSHR followed by 5 digits (e.g., EIRSHR00076)');
+      return;
+    }
     setLoading(true);
     try {
       const token = localStorage.getItem('authToken');
@@ -75,6 +80,11 @@ export default function CreateHorse() {
             <div className="form-group">
               <label className="form-label">Year of Birth</label>
               <input type="number" name="yearOfBirth" value={formData.yearOfBirth} onChange={handleChange} className="form-input" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Embassy ID</label>
+              <input type="text" name="embassyId" value={formData.embassyId} onChange={handleChange} className="form-input font-mono" placeholder="e.g., EIRSHR00076" maxLength={11} />
+              <p className="text-xs text-gray-500 mt-1">Format: EIRSHR followed by 5 digits</p>
             </div>
           </div>
 

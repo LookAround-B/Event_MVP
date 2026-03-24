@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiDownload } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiDownload, FiFilter, FiX } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -14,7 +14,24 @@ interface Horse {
   height: number | null;
   gender: string;
   yearOfBirth: number | null;
+  passportNumber: string | null;
+  embassyId: string | null;
+  isActive: boolean;
+  riderName: string | null;
+  clubName: string | null;
+  userType: string | null;
   registrationCount: number;
+}
+
+interface Club {
+  id: string;
+  name: string;
+}
+
+interface Rider {
+  id: string;
+  firstName: string;
+  lastName: string;
 }
 
 function escapeCSVField(field: string | number): string {
@@ -55,20 +72,54 @@ export default function Horses() {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+  // Filter state
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterGender, setFilterGender] = useState('');
+  const [filterClubId, setFilterClubId] = useState('');
+  const [filterRiderId, setFilterRiderId] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
+  // Dropdown data for filters
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [riders, setRiders] = useState<Rider[]>([]);
+
+  useEffect(() => {
+    fetchFilterOptions();
+  }, []);
+
   useEffect(() => {
     fetchHorses();
-  }, [page, searchTerm]);
+  }, [page, searchTerm, filterGender, filterClubId, filterRiderId, filterStatus]);
+
+  const fetchFilterOptions = async () => {
+    try {
+      const [clubsRes, ridersRes] = await Promise.all([
+        api.get('/api/clubs', { params: { limit: 100 } }).catch(() => null),
+        api.get('/api/riders', { params: { limit: 100 } }).catch(() => null),
+      ]);
+      if (clubsRes?.data?.data?.clubs) setClubs(clubsRes.data.data.clubs);
+      else if (clubsRes?.data?.data) setClubs(Array.isArray(clubsRes.data.data) ? clubsRes.data.data : []);
+      if (ridersRes?.data?.data?.riders) setRiders(ridersRes.data.data.riders);
+      else if (ridersRes?.data?.data) setRiders(Array.isArray(ridersRes.data.data) ? ridersRes.data.data : []);
+    } catch {
+      // Filters will just have no options - non-critical
+    }
+  };
 
   const fetchHorses = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/horses', {
-        params: {
-          page,
-          limit: 10,
-          search: searchTerm,
-        },
-      });
+      const params: any = {
+        page,
+        limit: 10,
+        search: searchTerm,
+      };
+      if (filterGender) params.gender = filterGender;
+      if (filterClubId) params.clubId = filterClubId;
+      if (filterRiderId) params.riderId = filterRiderId;
+      if (filterStatus !== '') params.isActive = filterStatus;
+
+      const response = await api.get('/api/horses', { params });
 
       setHorses(response.data.data.horses);
       setTotalPages(response.data.data.pagination.pages);
@@ -98,19 +149,35 @@ export default function Horses() {
   };
 
   const getExportData = () => {
-    const headers = ['Horse Name', 'Breed', 'Age', 'Color', 'Height', 'Registrations'];
-    const currentYear = new Date().getFullYear();
+    const headers = ['Horse Name', 'Breed', 'Sex', 'Birth Year', 'Color', 'Height', 'Passport #', 'Embassy ID', 'Rider', 'Club', 'User Type', 'Status', 'Registrations'];
     const source = selectedIds.size > 0 ? horses.filter(h => selectedIds.has(h.id)) : horses;
     const rows = source.map(h => [
       h.name,
       h.breed || '-',
-      h.yearOfBirth ? `${currentYear - h.yearOfBirth} years` : '-',
+      h.gender || '-',
+      h.yearOfBirth || '-',
       h.color || '-',
       h.height ? `${h.height}h` : '-',
+      h.passportNumber || '-',
+      h.embassyId || '-',
+      h.riderName || '-',
+      h.clubName || '-',
+      h.userType || '-',
+      h.isActive ? 'Active' : 'Inactive',
       h.registrationCount,
     ]);
     return { headers, rows };
   };
+
+  const clearFilters = () => {
+    setFilterGender('');
+    setFilterClubId('');
+    setFilterRiderId('');
+    setFilterStatus('');
+    setPage(1);
+  };
+
+  const activeFilterCount = [filterGender, filterClubId, filterRiderId, filterStatus].filter(Boolean).length;
 
   const handleExportCSV = () => {
     const { headers, rows } = getExportData();
@@ -169,19 +236,94 @@ export default function Horses() {
         )}
 
         <div className="mb-6 card">
-          <div className="relative">
-            <FiSearch className="absolute left-3 top-3 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search horses by name, breed, color..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1);
-              }}
-              className="form-input pl-10"
-            />
+          <div className="flex gap-3 items-center">
+            <div className="relative flex-1">
+              <FiSearch className="absolute left-3 top-3 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Search horses by name, passport, embassy ID..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+                className="form-input pl-10"
+              />
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`btn-secondary flex items-center gap-2 ${activeFilterCount > 0 ? 'ring-2 ring-purple-400' : ''}`}
+            >
+              <FiFilter className="w-4 h-4" />
+              Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
+            </button>
           </div>
+
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t border-white border-opacity-10">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Sex</label>
+                  <select
+                    value={filterGender}
+                    onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
+                    className="form-input text-sm"
+                  >
+                    <option value="">All</option>
+                    <option value="Stallion">Stallion</option>
+                    <option value="Mare">Mare</option>
+                    <option value="Gelding">Gelding</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Club</label>
+                  <select
+                    value={filterClubId}
+                    onChange={(e) => { setFilterClubId(e.target.value); setPage(1); }}
+                    className="form-input text-sm"
+                  >
+                    <option value="">All Clubs</option>
+                    {clubs.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Rider</label>
+                  <select
+                    value={filterRiderId}
+                    onChange={(e) => { setFilterRiderId(e.target.value); setPage(1); }}
+                    className="form-input text-sm"
+                  >
+                    <option value="">All Riders</option>
+                    {riders.map(r => (
+                      <option key={r.id} value={r.id}>{r.firstName} {r.lastName}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Status</label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
+                    className="form-input text-sm"
+                  >
+                    <option value="">All</option>
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="mt-3 text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                >
+                  <FiX className="w-3 h-3" /> Clear all filters
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="card table-container">
@@ -208,18 +350,20 @@ export default function Horses() {
                       />
                     </th>
                     <th>Horse Name</th>
-                    <th>Breed</th>
-                    <th>Age</th>
+                    <th>Sex</th>
+                    <th>Birth Year</th>
+                    <th>Passport #</th>
+                    <th>Embassy ID</th>
+                    <th>Rider</th>
+                    <th>Club</th>
+                    <th>User Type</th>
                     <th>Color</th>
-                    <th>Height</th>
-                    <th>Registrations</th>
+                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {horses.map((horse) => {
-                    const currentYear = new Date().getFullYear();
-                    const age = horse.yearOfBirth ? currentYear - horse.yearOfBirth : 0;
                     return (
                     <tr key={horse.id}>
                       <td>
@@ -231,11 +375,23 @@ export default function Horses() {
                         />
                       </td>
                       <td className="font-medium">{horse.name}</td>
-                      <td>{horse.breed || '-'}</td>
-                      <td>{age} years</td>
+                      <td>{horse.gender || '-'}</td>
+                      <td>{horse.yearOfBirth || '-'}</td>
+                      <td className="text-xs font-mono">{horse.passportNumber || '-'}</td>
+                      <td className="text-xs font-mono">{horse.embassyId || '-'}</td>
+                      <td>{horse.riderName || '-'}</td>
+                      <td>{horse.clubName || '-'}</td>
+                      <td>
+                        {horse.userType ? (
+                          <span className="badge badge-info text-xs">{horse.userType}</span>
+                        ) : '-'}
+                      </td>
                       <td>{horse.color || '-'}</td>
-                      <td>{horse.height ? `${horse.height}h` : '-'}</td>
-                      <td><span className="badge badge-info">{horse.registrationCount}</span></td>
+                      <td>
+                        <span className={`badge ${horse.isActive ? 'badge-success' : 'badge-danger'}`}>
+                          {horse.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
                       <td>
                         <div className="flex space-x-2">
                           <Link href={`/horses/${horse.id}`} className="text-blue-400 hover:text-blue-300">

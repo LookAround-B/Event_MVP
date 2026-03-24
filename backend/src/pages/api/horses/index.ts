@@ -13,20 +13,38 @@ async function handler(
   // GET is public for form dropdowns, POST requires auth
   if (method === 'GET') {
     try {
-      const { page = '1', limit = '10', search = '', format } = req.query;
+      const { page = '1', limit = '10', search = '', format, gender, clubId, riderId, isActive } = req.query;
       const pageNum = Math.max(1, parseInt(page as string) || 1);
       const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
       const skip = (pageNum - 1) * limitNum;
 
-      const where = search
-        ? {
-            OR: [
-              { name: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-              { color: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-              { gender: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-            ],
-          }
-        : {};
+      const where: any = {};
+
+      if (search) {
+        where.OR = [
+          { name: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+          { color: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+          { gender: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+          { passportNumber: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+          { embassyId: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+        ];
+      }
+
+      if (gender) {
+        where.gender = gender as string;
+      }
+
+      if (clubId) {
+        where.clubId = clubId as string;
+      }
+
+      if (riderId) {
+        where.riderId = riderId as string;
+      }
+
+      if (isActive !== undefined && isActive !== '') {
+        where.isActive = isActive === 'true';
+      }
 
       if (format === 'csv') {
         const allHorses = await prisma.horse.findMany({
@@ -59,7 +77,30 @@ async function handler(
             gender: true,
             yearOfBirth: true,
             passportNumber: true,
+            embassyId: true,
+            isActive: true,
             createdAt: true,
+            rider: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+            club: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            owner: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                roles: { select: { name: true } },
+              },
+            },
             _count: {
               select: { registrations: true },
             },
@@ -76,6 +117,10 @@ async function handler(
         data: {
           horses: horses.map(h => ({
             ...h,
+            riderName: h.rider ? `${h.rider.firstName} ${h.rider.lastName}` : null,
+            clubName: h.club?.name || null,
+            ownerName: h.owner ? `${h.owner.firstName} ${h.owner.lastName}` : null,
+            userType: h.owner?.roles?.[0]?.name || null,
             registrationCount: h._count.registrations,
             _count: undefined,
           })),
@@ -100,7 +145,7 @@ async function handler(
 
   if (method === 'POST') {
     try {
-      const { name, breed, color, height, gender, yearOfBirth, passportNumber, horseCode } = req.body;
+      const { name, breed, color, height, gender, yearOfBirth, passportNumber, horseCode, embassyId } = req.body;
 
       console.log('Horses POST request body:', req.body);
 
@@ -125,6 +170,31 @@ async function handler(
         });
       }
 
+      // Validate embassyId format if provided
+      if (embassyId && typeof embassyId === 'string' && !/^EIRSHR\d{5}$/.test(embassyId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          error: 'VALIDATION_ERROR',
+          statusCode: 400,
+          data: { embassyId: 'Embassy ID must be in format EIRSHR00000 (e.g., EIRSHR00076)' },
+        });
+      }
+
+      // Check embassyId uniqueness if provided
+      if (embassyId) {
+        const existingEmbassy = await prisma.horse.findUnique({ where: { embassyId } });
+        if (existingEmbassy) {
+          return res.status(400).json({
+            success: false,
+            message: 'Embassy ID already in use',
+            error: 'VALIDATION_ERROR',
+            statusCode: 400,
+            data: { embassyId: 'This Embassy ID is already assigned to another horse' },
+          });
+        }
+      }
+
       const horse = await prisma.horse.create({
         data: {
           name: name.trim(),
@@ -135,6 +205,7 @@ async function handler(
           yearOfBirth: yearOfBirth ? parseInt(yearOfBirth) : null,
           passportNumber: passportNumber || null,
           horseCode: horseCode || null,
+          embassyId: embassyId || null,
         },
       });
 

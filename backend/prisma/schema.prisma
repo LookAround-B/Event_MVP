@@ -219,6 +219,7 @@ model Horse {
   height         Float?
   passportNumber String?
   horseCode      String?
+  embassyId      String?  @unique // Format: EIRSHR00000
   gender         String // Stallion, Mare, Gelding
   yearOfBirth    Int?
   isActive       Boolean  @default(true)
