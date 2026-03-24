@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiCheck, FiClock, FiDownload, FiShield } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiCheck, FiClock, FiDownload, FiShield, FiFilter, FiX, FiChevronDown } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -11,10 +11,17 @@ interface User {
   email: string;
   name: string;
   phone?: string;
+  gender?: string;
   role?: string;
   isApproved?: boolean;
+  isActive?: boolean;
   profileComplete?: boolean;
   createdAt: string;
+}
+
+interface Role {
+  id: string;
+  name: string;
 }
 
 interface UsersResponse {
@@ -33,13 +40,20 @@ export default function Users() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [genderFilter, setGenderFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ total: 0, pages: 0, limit: 10, page: 1 });
   const [isAdmin, setIsAdmin] = useState(false);
   const [approving, setApproving] = useState<string | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [bulkAction, setBulkAction] = useState('');
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [bulkRoleId, setBulkRoleId] = useState('');
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   useEffect(() => {
-    // Check if user is admin
     const token = Cookies.get('authToken');
     if (token) {
       try {
@@ -58,7 +72,19 @@ export default function Users() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, search, roleFilter]);
+  }, [page, search, roleFilter, genderFilter, statusFilter]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await api.get('/api/settings/roles');
+        setRoles(res.data.data || []);
+      } catch (err) {
+        console.error('Failed to fetch roles:', err);
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -68,6 +94,8 @@ export default function Users() {
         limit: '10',
         ...(search && { search }),
         ...(roleFilter && { role: roleFilter }),
+        ...(genderFilter && { gender: genderFilter }),
+        ...(statusFilter && { status: statusFilter }),
       });
 
       const response = await api.get<UsersResponse>(`/api/users?${params}`);
@@ -88,6 +116,7 @@ export default function Users() {
     try {
       await api.delete(`/api/users/${id}`);
       setUsers(users.filter(u => u.id !== id));
+      setSelectedUsers(selectedUsers.filter(uid => uid !== id));
     } catch (err) {
       console.error('Failed to delete user:', err);
       alert('Failed to delete user');
@@ -100,7 +129,6 @@ export default function Users() {
     try {
       setApproving(userId);
       await api.post(`/api/admin/approve-user`, { userId });
-      // Update the user in the list
       setUsers(users.map(u => 
         u.id === userId ? { ...u, isApproved: true } : u
       ));
@@ -118,6 +146,8 @@ export default function Users() {
         format: 'csv',
         ...(roleFilter && { role: roleFilter }),
         ...(search && { search }),
+        ...(genderFilter && { gender: genderFilter }),
+        ...(statusFilter && { status: statusFilter }),
       });
       const response = await api.get(`/api/users?${params}`, { responseType: 'blob' });
       const blob = new Blob([response.data], { type: 'text/csv' });
@@ -133,16 +163,69 @@ export default function Users() {
     }
   };
 
+  const toggleSelectAll = () => {
+    if (selectedUsers.length === users.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(users.map(u => u.id));
+    }
+  };
+
+  const toggleSelectUser = (userId: string) => {
+    setSelectedUsers(prev =>
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
+  };
+
+  const handleBulkAction = async () => {
+    if (!bulkAction || selectedUsers.length === 0) return;
+
+    if (bulkAction === 'assignRole' && !bulkRoleId) {
+      alert('Please select a role to assign');
+      return;
+    }
+
+    if (!window.confirm(`Apply "${bulkAction}" to ${selectedUsers.length} selected user(s)?`)) return;
+
+    try {
+      setBulkLoading(true);
+      await api.put('/api/users/bulk-update', {
+        userIds: selectedUsers,
+        action: bulkAction,
+        ...(bulkAction === 'assignRole' && { roleId: bulkRoleId }),
+      });
+      setSelectedUsers([]);
+      setBulkAction('');
+      setBulkRoleId('');
+      fetchUsers();
+    } catch (err: any) {
+      console.error('Bulk action failed:', err);
+      alert(err.response?.data?.message || 'Bulk action failed');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const clearFilters = () => {
+    setSearch('');
+    setRoleFilter('');
+    setGenderFilter('');
+    setStatusFilter('');
+    setPage(1);
+  };
+
+  const hasActiveFilters = roleFilter || genderFilter || statusFilter;
+
   return (
     <ProtectedRoute>
       <Head><title>Users | Equestrian Events</title></Head>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white">Users Management</h1>
             <p className="text-gray-300 mt-2">Manage system users and permissions</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <button onClick={handleExportCSV} className="btn-secondary flex items-center gap-2">
               <FiDownload /> Export CSV
             </button>
@@ -159,33 +242,126 @@ export default function Users() {
         )}
 
         <div className="card">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex items-center gap-2 flex-1">
-              <FiSearch className="text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search users by email or name..."
-                className="form-input"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-              />
+          {/* Search and Filter Bar */}
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex items-center gap-2 flex-1">
+                <FiSearch className="text-gray-400 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search users by email or name..."
+                  className="form-input"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                />
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`btn-secondary flex items-center gap-2 ${hasActiveFilters ? 'border-primary-500 text-primary-400' : ''}`}
+              >
+                <FiFilter /> Filters {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary-500" />}
+              </button>
             </div>
-            <select
-              className="form-input w-48"
-              value={roleFilter}
-              onChange={(e) => {
-                setRoleFilter(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-            </select>
+
+            {/* Expandable Filters */}
+            {showFilters && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1">Role</label>
+                  <select
+                    className="form-input"
+                    value={roleFilter}
+                    onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
+                  >
+                    <option value="">All Roles</option>
+                    {roles.map(r => (
+                      <option key={r.id} value={r.name}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1">Gender</label>
+                  <select
+                    className="form-input"
+                    value={genderFilter}
+                    onChange={(e) => { setGenderFilter(e.target.value); setPage(1); }}
+                  >
+                    <option value="">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1">Status</label>
+                  <select
+                    className="form-input"
+                    value={statusFilter}
+                    onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+                  >
+                    <option value="">All Statuses</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                </div>
+                {hasActiveFilters && (
+                  <div className="sm:col-span-3">
+                    <button onClick={clearFilters} className="text-sm text-gray-400 hover:text-white flex items-center gap-1">
+                      <FiX className="w-3 h-3" /> Clear all filters
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+
+          {/* Bulk Actions Bar */}
+          {selectedUsers.length > 0 && isAdmin && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4 p-3 rounded-xl" style={{ background: 'rgba(124, 58, 237, 0.15)', border: '1px solid rgba(124, 58, 237, 0.3)' }}>
+              <span className="text-sm text-primary-300 font-semibold whitespace-nowrap">
+                {selectedUsers.length} selected
+              </span>
+              <select
+                className="form-input text-sm"
+                value={bulkAction}
+                onChange={(e) => setBulkAction(e.target.value)}
+              >
+                <option value="">Choose action...</option>
+                <option value="approve">Approve</option>
+                <option value="activate">Activate</option>
+                <option value="deactivate">Deactivate</option>
+                <option value="assignRole">Assign Role</option>
+              </select>
+              {bulkAction === 'assignRole' && (
+                <select
+                  className="form-input text-sm"
+                  value={bulkRoleId}
+                  onChange={(e) => setBulkRoleId(e.target.value)}
+                >
+                  <option value="">Select Role...</option>
+                  {roles.map(r => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </select>
+              )}
+              <button
+                onClick={handleBulkAction}
+                disabled={!bulkAction || bulkLoading}
+                className="btn-primary text-sm py-2 disabled:opacity-50"
+              >
+                {bulkLoading ? 'Applying...' : 'Apply'}
+              </button>
+              <button
+                onClick={() => { setSelectedUsers([]); setBulkAction(''); }}
+                className="text-sm text-gray-400 hover:text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
 
           {loading ? (
             <div className="flex items-center justify-center h-64">
@@ -207,21 +383,49 @@ export default function Users() {
                 <table className="table">
                   <thead>
                     <tr>
+                      {isAdmin && (
+                        <th className="w-10">
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.length === users.length && users.length > 0}
+                            onChange={toggleSelectAll}
+                            className="w-4 h-4 rounded accent-primary-500 cursor-pointer"
+                          />
+                        </th>
+                      )}
                       <th>Email</th>
                       <th>Name</th>
-                      <th>Phone</th>
+                      <th className="hidden md:table-cell">Phone</th>
+                      <th className="hidden md:table-cell">Gender</th>
                       <th>Role</th>
                       {isAdmin && <th>Status</th>}
-                      <th>Created</th>
+                      <th className="hidden lg:table-cell">Created</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.map((user) => (
-                      <tr key={user.id}>
+                      <tr key={user.id} className={selectedUsers.includes(user.id) ? 'ring-1 ring-primary-500 ring-inset' : ''}>
+                        {isAdmin && (
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={selectedUsers.includes(user.id)}
+                              onChange={() => toggleSelectUser(user.id)}
+                              className="w-4 h-4 rounded accent-primary-500 cursor-pointer"
+                            />
+                          </td>
+                        )}
                         <td className="font-medium">{user.email}</td>
                         <td>{user.name}</td>
-                        <td>{user.phone || '-'}</td>
+                        <td className="hidden md:table-cell">{user.phone || '-'}</td>
+                        <td className="hidden md:table-cell">
+                          {user.gender ? (
+                            <span className="badge badge-info">{user.gender}</span>
+                          ) : (
+                            <span className="text-gray-500">-</span>
+                          )}
+                        </td>
                         <td>
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             user.role?.includes('admin') ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
@@ -242,7 +446,7 @@ export default function Users() {
                             )}
                           </td>
                         )}
-                        <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                        <td className="hidden lg:table-cell">{new Date(user.createdAt).toLocaleDateString()}</td>
                         <td>
                           <div className="flex gap-2">
                             {isAdmin && !user.isApproved && (
@@ -252,12 +456,10 @@ export default function Users() {
                                 className="btn-primary p-2 flex items-center gap-1 text-sm disabled:opacity-50"
                               >
                                 {approving === user.id ? (
-                                  <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
-                                  </>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
                                 ) : (
                                   <>
-                                    <FiCheck className="w-4 h-4" /> Approve
+                                    <FiCheck className="w-4 h-4" /> <span className="hidden sm:inline">Approve</span>
                                   </>
                                 )}
                               </button>
@@ -292,7 +494,7 @@ export default function Users() {
               </div>
 
               {pagination.pages > 1 && (
-                <div className="flex justify-between items-center mt-6">
+                <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
                   <p className="text-sm text-gray-600">
                     Showing page {pagination.page} of {pagination.pages} ({pagination.total} total)
                   </p>

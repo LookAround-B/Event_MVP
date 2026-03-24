@@ -44,7 +44,7 @@ async function handler(
 
   if (method === 'GET') {
     try {
-      const { page = '1', limit = '10', search = '', role, format } = req.query;
+      const { page = '1', limit = '10', search = '', role, format, gender, status } = req.query;
       const pageNum = Math.max(1, parseInt(page as string) || 1);
       const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
       const skip = (pageNum - 1) * limitNum;
@@ -60,6 +60,14 @@ async function handler(
       if (role) {
         where.roles = { some: { name: role as string } };
       }
+      if (gender && typeof gender === 'string') {
+        where.gender = gender;
+      }
+      if (status === 'approved') {
+        where.isApproved = true;
+      } else if (status === 'pending') {
+        where.isApproved = false;
+      }
 
       const userSelect = {
         id: true,
@@ -67,10 +75,12 @@ async function handler(
         firstName: true,
         lastName: true,
         phone: true,
+        gender: true,
         isApproved: true,
+        isActive: true,
         profileComplete: true,
         createdAt: true,
-        roles: { select: { name: true } },
+        roles: { select: { id: true, name: true } },
       };
 
       // CSV export
@@ -139,13 +149,21 @@ async function handler(
 
   if (method === 'POST') {
     try {
-      const { email, password, firstName, lastName, designation } = req.body;
+      const { email, password, firstName, lastName, designation, roleId } = req.body;
 
       if (!email || !password || !firstName || !lastName) {
         return res.status(400).json({
           success: false,
           statusCode: 400,
           message: 'Email, password, firstName, and lastName are required',
+        });
+      }
+
+      if (typeof password !== 'string' || password.length < 8) {
+        return res.status(400).json({
+          success: false,
+          statusCode: 400,
+          message: 'Password must be at least 8 characters',
         });
       }
 
@@ -170,6 +188,7 @@ async function handler(
           firstName,
           lastName,
           designation: designation || '',
+          ...(roleId && typeof roleId === 'string' ? { roles: { connect: { id: roleId } } } : {}),
         },
         select: {
           id: true,
@@ -177,6 +196,7 @@ async function handler(
           firstName: true,
           lastName: true,
           createdAt: true,
+          roles: { select: { id: true, name: true } },
         },
       });
 

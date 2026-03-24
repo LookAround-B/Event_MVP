@@ -1,21 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { FiArrowLeft } from 'react-icons/fi';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
+interface Role {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 export default function CreateUser() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     firstName: '',
     lastName: '',
     designation: '',
+    roleId: '',
   });
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await api.get('/api/settings/roles');
+        setRoles(res.data.data || []);
+      } catch (err) {
+        console.error('Failed to fetch roles:', err);
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -114,6 +134,23 @@ export default function CreateUser() {
                 onChange={handleChange}
                 className="form-input"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+              <select
+                name="roleId"
+                value={formData.roleId}
+                onChange={handleChange}
+                className="form-input"
+              >
+                <option value="">Select Role (optional)</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="flex gap-4">
