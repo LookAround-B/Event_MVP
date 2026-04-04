@@ -114,6 +114,8 @@ model Event {
   @@index([startDate])
   @@index([isPublished])
   @@index([eventType])
+  @@index([startDate, endDate])
+  @@index([createdAt])
 }
 
 model EventCategory {
@@ -180,6 +182,8 @@ model Club {
 
   @@index([shortCode])
   @@index([email])
+  @@index([name])
+  @@index([createdAt])
 }
 
 // ==================== RIDERS ====================
@@ -386,6 +390,7 @@ model Transaction {
   @@index([registrationId])
   @@index([status])
   @@index([transactionDate])
+  @@index([paymentMethod])
 }
 
 // ==================== AUDIT LOGGING ====================
@@ -408,6 +413,7 @@ model AuditLog {
   @@index([entity])
   @@index([entityId])
   @@index([createdAt])
+  @@index([action])
 }
 
 // ==================== NOTIFICATIONS ====================

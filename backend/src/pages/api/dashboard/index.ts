@@ -122,9 +122,9 @@ async function handler(
           clubsRegistered: totalClubs,
           ridersRegistered: totalRiders,
           horseCount: totalHorses,
-          totalRevenue: revenueAgg._sum.totalAmount || 0,
-          collectibleAmount: collectibleAgg._sum.totalAmount || 0,
-          receivableAmount: receivableAgg._sum.totalAmount || 0,
+          totalRevenue: (revenueAgg._sum as any)?.totalAmount || 0,
+          collectibleAmount: (collectibleAgg._sum as any)?.totalAmount || 0,
+          receivableAmount: (receivableAgg._sum as any)?.totalAmount || 0,
         },
         charts: {
           eventBreakdown: eventStats,

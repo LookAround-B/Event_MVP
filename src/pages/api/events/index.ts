@@ -37,8 +37,9 @@ async function handleGetEvents(
   res: NextApiResponse
 ) {
   try {
+    res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
     const page = Math.max(1, parseInt((req.query.page as string) || '1'));
-    const pageSize = Math.min(100, Math.max(1, parseInt((req.query.pageSize as string) || '10')));
+    const pageSize = Math.min(50, Math.max(1, parseInt((req.query.pageSize as string) || '20')));
     const skip = (page - 1) * pageSize;
 
     const { search, status, eventType, startDate, endDate } = req.query;
@@ -68,17 +69,28 @@ async function handleGetEvents(
       where.endDate = { lte: new Date(endDate as string) };
     }
 
-    const [events, total] = await Promise.all([
+    const [events, total] = await prisma.$transaction([
       prisma.event.findMany({
         where,
         skip,
         take: pageSize,
-        include: {
-          venue: true,
-          categories: true,
-          _count: {
-            select: { registrations: true },
+        select: {
+          id: true,
+          eId: true,
+          name: true,
+          eventType: true,
+          startDate: true,
+          endDate: true,
+          startTime: true,
+          endTime: true,
+          venueName: true,
+          venueAddress: true,
+          isPublished: true,
+          createdAt: true,
+          categories: {
+            select: { id: true, eId: true, name: true, price: true, isActive: true },
           },
+          _count: { select: { registrations: true } },
         },
         orderBy: { startDate: 'desc' },
       }),

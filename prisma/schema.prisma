@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // ==================== USER & AUTH ====================
@@ -103,6 +102,8 @@ model Event {
   @@index([startDate])
   @@index([isPublished])
   @@index([eventType])
+  @@index([startDate, endDate])
+  @@index([createdAt])
 }
 
 model EventCategory {
@@ -167,6 +168,8 @@ model Club {
 
   @@index([shortCode])
   @@index([email])
+  @@index([name])
+  @@index([createdAt])
 }
 
 // ==================== RIDERS ====================
@@ -349,6 +352,7 @@ model Transaction {
   registration Registration @relation("RegistrationTransactions", fields: [registrationId], references: [id], onDelete: Cascade)
 
   @@index([registrationId])
+  @@index([paymentMethod])
   @@index([status])
   @@index([transactionDate])
 }
@@ -373,6 +377,7 @@ model AuditLog {
   @@index([entity])
   @@index([entityId])
   @@index([createdAt])
+  @@index([action])
 }
 
 // ==================== SETTINGS ====================

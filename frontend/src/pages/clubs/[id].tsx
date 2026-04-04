@@ -176,8 +176,7 @@ export default function ClubDetail() {
           other: data.socialLinks?.other || '',
         },
       });
-      fetchRiders();
-      fetchHorses();
+      await Promise.all([fetchRiders(), fetchHorses()]);
     } catch (error) {
       console.error('Failed to fetch club details:', error);
     } finally {

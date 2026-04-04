@@ -15,7 +15,7 @@ async function handler(
     try {
       const { page = '1', limit = '10', search = '', format } = req.query;
       const pageNum = Math.max(1, parseInt(page as string) || 1);
-      const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
+      const limitNum = Math.min(50, Math.max(1, parseInt(limit as string) || 20));
       const skip = (pageNum - 1) * limitNum;
 
       const where = search

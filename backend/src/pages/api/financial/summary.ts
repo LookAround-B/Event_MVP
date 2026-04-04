@@ -48,10 +48,10 @@ async function handler(
     ]);
 
     // Calculate totals by status
-    const totalsByStatus = statisticsByStatus.reduce((acc, stat) => ({
+    const totalsByStatus = statisticsByStatus.reduce((acc: Record<string, number>, stat: any) => ({
       ...acc,
       [stat.status]: stat._sum.totalAmount || 0,
-    }), {});
+    }), {} as Record<string, number>);
 
     // Calculate totals by payment method
     const totalsByMethod = transactionsByMethod.reduce((acc, trans) => {

@@ -1,29 +1,25 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
   swcMinify: true,
+  experimental: {
+    optimizePackageImports: ['react-icons', '@tanstack/react-table'],
+  },
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
+    domains: ['your-image-cdn.com'],
+    formats: ['image/avif', 'image/webp'],
   },
   async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: '/uploads/:path*',
-          destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/uploads/:path*`,
-        },
-        {
-          source: '/api/:path*',
-          destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/:path*`,
-        },
-      ],
-    };
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/:path*`,
+      },
+    ];
   },
-};
+}
 
-module.exports = nextConfig;
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
+module.exports = withBundleAnalyzer(nextConfig)

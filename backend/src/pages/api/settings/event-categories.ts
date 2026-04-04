@@ -19,8 +19,10 @@ async function handler(
 
   if (req.method === 'GET') {
     try {
+      res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
       const categories = await prisma.eventCategory.findMany({
         where: { isActive: true },
+        select: { id: true, name: true, description: true, price: true, cgst: true, sgst: true, igst: true },
         orderBy: { name: 'asc' },
       });
 

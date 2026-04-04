@@ -16,19 +16,33 @@ async function handleGetEvent(
       return sendErrorResponse(res, 400, 'Event ID is required', ErrorCode.BAD_REQUEST);
     }
 
+    res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=30');
+
     const event = await prisma.event.findUnique({
       where: { id },
-      include: {
-        venue: true,
-        categories: true,
+      select: {
+        id: true,
+        name: true,
+        eventType: true,
+        startDate: true,
+        endDate: true,
+        venueName: true,
+        createdAt: true,
+        updatedAt: true,
         registrations: {
-          include: {
-            rider: true,
+          take: 50,
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            paymentStatus: true,
+            fee: true,
+            gst: true,
+            rider: { select: { id: true, firstName: true, lastName: true } },
+            horse: { select: { id: true, name: true } },
+            category: { select: { id: true, name: true } },
           },
         },
-        _count: {
-          select: { registrations: true },
-        },
+        _count: { select: { registrations: true } },
       },
     });
 

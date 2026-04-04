@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client';
+import { withAccelerate } from '@prisma/extension-accelerate';
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' 
-      ? ['query', 'error', 'warn'] 
-      : ['error', 'warn'],
-  });
+    // log: process.env.NODE_ENV === 'development' 
+    //   ? ['query', 'error', 'warn'] 
+    //   : ['error', 'warn'],
+  }).$extends(withAccelerate());
 };
 
 declare global {

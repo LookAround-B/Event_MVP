@@ -76,8 +76,7 @@ export default function EventDetail() {
 
   useEffect(() => {
     if (id) {
-      fetchEventDetail();
-      fetchRegistrations();
+      Promise.all([fetchEventDetail(), fetchRegistrations()]);
     }
   }, [id]);
 

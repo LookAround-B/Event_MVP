@@ -50,8 +50,7 @@ export default function AdminApprovals() {
 
   useEffect(() => {
     if (isAdmin) {
-      fetchPendingUsers();
-      fetchPendingRegistrations();
+      Promise.all([fetchPendingUsers(), fetchPendingRegistrations()]);
     }
   }, [isAdmin]);
 

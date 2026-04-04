@@ -62,8 +62,10 @@ export default function CreateEventPage() {
   }, []);
 
   useEffect(() => {
-    fetchCategories();
-    if (isEdit && id) fetchEvent();
+    Promise.all([
+      fetchCategories(),
+      ...(isEdit && id ? [fetchEvent()] : []),
+    ]);
   }, [id, isEdit]);
 
   const fetchCategories = async () => {

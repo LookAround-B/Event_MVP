@@ -14,16 +14,33 @@ async function handler(
 
   if (req.method === 'GET') {
     try {
+      res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=30');
+
       const event = await prisma.event.findUnique({
         where: { id: eventId },
-        include: {
-          categories: true,
+        select: {
+          id: true,
+          name: true,
+          eventType: true,
+          startDate: true,
+          endDate: true,
+          venueName: true,
+          createdAt: true,
+          updatedAt: true,
+          categories: {
+            select: { id: true, name: true },
+          },
           registrations: {
-            include: {
-              rider: true,
-              horse: true,
+            take: 50,
+            orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              paymentStatus: true,
+              rider: { select: { id: true, firstName: true, lastName: true } },
+              horse: { select: { id: true, name: true } },
             },
           },
+          _count: { select: { registrations: true } },
         },
       });
 
