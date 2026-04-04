@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { FiArrowLeft, FiEdit2, FiSave, FiX, FiPlus, FiTrash2, FiImage } from 'react-icons/fi';
 import api from '@/lib/api';
@@ -214,8 +215,10 @@ export default function RiderDetail() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
+        <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} style={{ height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+          ))}
         </div>
       </ProtectedRoute>
     );
@@ -284,7 +287,7 @@ export default function RiderDetail() {
               {editing ? (
                 <div className="space-y-2">
                   {editForm.imageUrl ? (
-                    <img src={editForm.imageUrl} alt="Rider" className="w-32 h-32 rounded-lg object-cover" />
+                    <Image src={editForm.imageUrl} alt="Rider" width={128} height={128} className="w-32 h-32 rounded-lg object-cover" />
                   ) : (
                     <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
                       <FiImage className="w-12 h-12 text-gray-500" />
@@ -300,7 +303,7 @@ export default function RiderDetail() {
                 </div>
               ) : (
                 rider.imageUrl ? (
-                  <img src={rider.imageUrl} alt="Rider" className="w-32 h-32 rounded-lg object-cover" />
+                  <Image src={rider.imageUrl} alt="Rider" width={128} height={128} className="w-32 h-32 rounded-lg object-cover" />
                 ) : (
                   <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
                     <FiImage className="w-12 h-12 text-gray-500" />

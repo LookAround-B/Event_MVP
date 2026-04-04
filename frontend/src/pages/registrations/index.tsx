@@ -214,9 +214,10 @@ export default function Registrations() {
 
           <div className="card table-container">
             {loading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-                <p className="text-gray-300 mt-2">Loading registrations...</p>
+              <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} style={{ height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                ))}
               </div>
             ) : registrations.length === 0 ? (
               <div className="text-center py-8 text-gray-300">

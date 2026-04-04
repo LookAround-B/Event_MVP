@@ -27,7 +27,10 @@ async function handleGetHorse(
           },
         },
         registrations: {
-          include: {
+          select: {
+            id: true,
+            paymentStatus: true,
+            fee: true,
             event: {
               select: {
                 id: true,
@@ -35,6 +38,9 @@ async function handleGetHorse(
                 startDate: true,
                 endDate: true,
               },
+            },
+            category: {
+              select: { id: true, name: true },
             },
           },
         },

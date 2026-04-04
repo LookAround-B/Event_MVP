@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
@@ -334,11 +335,10 @@ export default function ClubDetail() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-            <p className="text-gray-300 mt-2">Loading...</p>
-          </div>
+        <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} style={{ height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+          ))}
         </div>
       </ProtectedRoute>
     );
@@ -371,9 +371,9 @@ export default function ClubDetail() {
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-4">
               {/* Club Logo/Image */}
-              <div className="w-20 h-20 rounded-lg bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-slate-600">
+              <div className="relative w-20 h-20 rounded-lg bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-slate-600">
                 {club.logoUrl ? (
-                  <img src={club.logoUrl} alt={club.name} className="w-full h-full object-cover" />
+                  <Image src={club.logoUrl} alt={club.name} fill className="object-cover" />
                 ) : (
                   <FiImage className="text-gray-400" size={32} />
                 )}

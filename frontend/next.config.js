@@ -1,12 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  swcMinify: true,
-  experimental: {
-    optimizePackageImports: ['react-icons', '@tanstack/react-table'],
-  },
+  reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
   images: {
-    domains: ['your-image-cdn.com'],
     formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
+  },
+  experimental: {
+    optimizePackageImports: ['@tanstack/react-table', 'react-icons', 'axios'],
   },
   async rewrites() {
     return [
@@ -18,8 +20,4 @@ const nextConfig = {
   },
 }
 
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-})
-
-module.exports = withBundleAnalyzer(nextConfig)
+module.exports = nextConfig

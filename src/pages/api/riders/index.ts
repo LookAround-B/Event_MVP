@@ -68,15 +68,16 @@ async function handleGetRiders(
         where,
         skip,
         take: pageSize,
-        include: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+          competitionLevel: true,
+          clubId: true,
           club: {
             select: { id: true, name: true },
-          },
-          horses: {
-            select: { id: true, name: true },
-          },
-          registrations: {
-            select: { id: true, event: { select: { id: true, name: true } } },
           },
           _count: {
             select: {

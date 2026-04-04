@@ -62,13 +62,10 @@ export default function HorseDetail() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-gray-300 mt-4">Loading horse details...</p>
-            </div>
-          </div>
+        <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} style={{ height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+          ))}
         </div>
       </ProtectedRoute>
     );

@@ -31,7 +31,11 @@ async function handleGetRider(
           },
         },
         registrations: {
-          include: {
+          select: {
+            id: true,
+            paymentStatus: true,
+            fee: true,
+            gst: true,
             event: {
               select: {
                 id: true,
@@ -39,6 +43,9 @@ async function handleGetRider(
                 startDate: true,
                 endDate: true,
               },
+            },
+            category: {
+              select: { id: true, name: true },
             },
           },
         },

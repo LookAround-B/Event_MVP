@@ -60,16 +60,18 @@ async function handleGetHorses(
         where,
         skip,
         take: pageSize,
-        include: {
+        select: {
+          id: true,
+          name: true,
+          breed: true,
+          color: true,
+          registrationNumber: true,
           rider: {
             select: {
               id: true,
               firstName: true,
               lastName: true,
             },
-          },
-          registrations: {
-            select: { id: true, event: { select: { id: true, name: true } } },
           },
           _count: {
             select: {

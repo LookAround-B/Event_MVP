@@ -58,7 +58,15 @@ async function handleGetRegistrations(
         where,
         skip,
         take: pageSize,
-        include: {
+        select: {
+          id: true,
+          eventId: true,
+          riderId: true,
+          horseId: true,
+          categoryId: true,
+          fee: true,
+          gst: true,
+          paymentStatus: true,
           event: {
             select: {
               id: true,

@@ -61,9 +61,17 @@ async function handleGetTransactions(
         where,
         skip,
         take: pageSize,
-        include: {
+        select: {
+          id: true,
+          registrationId: true,
+          amount: true,
+          paymentMethod: true,
+          referenceNumber: true,
+          transactionDate: true,
+          createdAt: true,
           registration: {
-            include: {
+            select: {
+              id: true,
               event: {
                 select: { id: true, name: true },
               },

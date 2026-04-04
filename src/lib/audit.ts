@@ -15,51 +15,45 @@ export interface AuditLogInput {
 }
 
 /**
- * Creates an audit log entry for tracking system changes
- * This function should be called after all create, update, delete operations
+ * Creates an audit log entry for tracking system changes.
+ * Fire-and-forget: never blocks the response.
  */
-export async function createAuditLog(input: AuditLogInput): Promise<void> {
-  try {
-    const {
+export function createAuditLog(input: AuditLogInput): void {
+  const {
+    userId,
+    entityType,
+    entityId,
+    action,
+    oldValues = {},
+    newValues = {},
+    changes = [],
+    ipAddress,
+    userAgent,
+    description,
+  } = input;
+
+  // Calculate changes if not provided
+  let detectedChanges = changes;
+  if (detectedChanges.length === 0 && oldValues && newValues) {
+    detectedChanges = Object.keys(newValues).filter(
+      (key) => JSON.stringify(oldValues[key]) !== JSON.stringify(newValues[key])
+    );
+  }
+
+  prisma.auditLog.create({
+    data: {
       userId,
       entityType,
       entityId,
       action,
-      oldValues = {},
-      newValues = {},
-      changes = [],
+      oldValues: Object.keys(oldValues).length > 0 ? oldValues : null,
+      newValues: Object.keys(newValues).length > 0 ? newValues : null,
+      changes: detectedChanges.length > 0 ? detectedChanges : null,
       ipAddress,
       userAgent,
       description,
-    } = input;
-
-    // Calculate changes if not provided
-    let detectedChanges = changes;
-    if (detectedChanges.length === 0 && oldValues && newValues) {
-      detectedChanges = Object.keys(newValues).filter(
-        (key) => JSON.stringify(oldValues[key]) !== JSON.stringify(newValues[key])
-      );
-    }
-
-    await prisma.auditLog.create({
-      data: {
-        userId,
-        entityType,
-        entityId,
-        action,
-        oldValues: Object.keys(oldValues).length > 0 ? oldValues : null,
-        newValues: Object.keys(newValues).length > 0 ? newValues : null,
-        changes: detectedChanges.length > 0 ? detectedChanges : null,
-        ipAddress,
-        userAgent,
-        description,
-      },
-    });
-  } catch (error) {
-    logError(error, 'createAuditLog');
-    // Don't throw - audit logging failures shouldn't break the main operation
-    console.warn('Failed to create audit log:', error);
-  }
+    },
+  }).catch((err) => console.error('Audit log failed:', err));
 }
 
 /**
@@ -93,15 +87,15 @@ export function getUserAgent(req: any): string | undefined {
  * Audit logging patterns for common operations
  */
 
-export async function auditCreate(
+export function auditCreate(
   userId: string,
   entityType: string,
   entityId: string,
   newValues: Record<string, any>,
   ipAddress?: string,
   userAgent?: string
-): Promise<void> {
-  return createAuditLog({
+): void {
+  createAuditLog({
     userId,
     entityType,
     entityId,
@@ -113,7 +107,7 @@ export async function auditCreate(
   });
 }
 
-export async function auditUpdate(
+export function auditUpdate(
   userId: string,
   entityType: string,
   entityId: string,
@@ -121,7 +115,7 @@ export async function auditUpdate(
   newValues: Record<string, any>,
   ipAddress?: string,
   userAgent?: string
-): Promise<void> {
+): void {
   const changes = Object.keys(newValues).filter(
     (key) => JSON.stringify(oldValues[key]) !== JSON.stringify(newValues[key])
   );
@@ -130,7 +124,7 @@ export async function auditUpdate(
     return; // No changes, don't log
   }
 
-  return createAuditLog({
+  createAuditLog({
     userId,
     entityType,
     entityId,
@@ -144,15 +138,15 @@ export async function auditUpdate(
   });
 }
 
-export async function auditDelete(
+export function auditDelete(
   userId: string,
   entityType: string,
   entityId: string,
   oldValues: Record<string, any>,
   ipAddress?: string,
   userAgent?: string
-): Promise<void> {
-  return createAuditLog({
+): void {
+  createAuditLog({
     userId,
     entityType,
     entityId,
@@ -164,14 +158,14 @@ export async function auditDelete(
   });
 }
 
-export async function auditView(
+export function auditView(
   userId: string,
   entityType: string,
   entityId: string,
   ipAddress?: string,
   userAgent?: string
-): Promise<void> {
-  return createAuditLog({
+): void {
+  createAuditLog({
     userId,
     entityType,
     entityId,
@@ -182,15 +176,15 @@ export async function auditView(
   });
 }
 
-export async function auditExport(
+export function auditExport(
   userId: string,
   entityType: string,
   exportFormat: string,
   recordCount: number,
   ipAddress?: string,
   userAgent?: string
-): Promise<void> {
-  return createAuditLog({
+): void {
+  createAuditLog({
     userId,
     entityType,
     entityId: `export-${Date.now()}`,

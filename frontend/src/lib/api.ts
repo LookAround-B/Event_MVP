@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 // locally → proxied to localhost:4000, on Vercel → proxied to NEXT_PUBLIC_API_URL
 const apiClient = axios.create({
   baseURL: '',
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },

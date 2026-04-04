@@ -44,7 +44,13 @@ async function handleGetAuditLogs(
         where,
         skip,
         take: pageSize,
-        include: {
+        select: {
+          id: true,
+          entityType: true,
+          entityId: true,
+          action: true,
+          description: true,
+          createdAt: true,
           user: {
             select: {
               id: true,

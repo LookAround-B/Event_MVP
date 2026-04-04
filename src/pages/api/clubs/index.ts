@@ -74,12 +74,24 @@ async function handleGetClubs(
         where,
         skip,
         take: pageSize,
-        include: {
+        select: {
+          id: true,
+          eId: true,
+          name: true,
+          shortCode: true,
+          address: true,
+          city: true,
+          state: true,
+          contactNumber: true,
+          email: true,
+          isActive: true,
+          createdAt: true,
           primaryContact: {
             select: {
               id: true,
               email: true,
-              phone: true,
+              firstName: true,
+              lastName: true,
             },
           },
           _count: {
