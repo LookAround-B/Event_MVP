@@ -58,7 +58,7 @@ export default function CompleteProfile() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-2">
               Complete Your Profile
             </h1>
-            <p className="text-gray-300 text-sm">
+            <p className="text-muted-foreground text-sm">
               Provide your details to get started
             </p>
           </div>

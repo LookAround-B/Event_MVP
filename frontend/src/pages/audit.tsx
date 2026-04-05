@@ -75,12 +75,12 @@ export default function AuditLogs() {
     <ProtectedRoute>
       <Head><title>Audit Logs | Equestrian Events</title></Head>
       <div>
-        <h2 className="text-2xl font-bold mb-8">Audit Logs</h2>
+        <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl mb-8">Audit <span className="gradient-text">Trail</span></h1>
 
         {/* Filters */}
         <div className="bento-card mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-white mb-2">Entity</label>
+            <label className="form-label">Entity</label>
             <input
               type="text"
               value={entity}
@@ -93,7 +93,7 @@ export default function AuditLogs() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-white mb-2">Action</label>
+            <label className="form-label">Action</label>
             <input
               type="text"
               value={action}
@@ -124,10 +124,10 @@ export default function AuditLogs() {
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="text-gray-300 mt-2">Loading audit logs...</p>
+              <p className="text-muted-foreground mt-2">Loading audit logs...</p>
             </div>
           ) : logs.length === 0 ? (
-            <div className="text-center py-8 text-gray-300">No audit logs found.</div>
+            <div className="text-center py-8 text-muted-foreground">No audit logs found.</div>
           ) : (
             <>
               <table className="table">
@@ -146,7 +146,7 @@ export default function AuditLogs() {
                       <td className="text-sm">{formatDate(log.createdAt)}</td>
                       <td className="text-sm">
                         <div className="font-medium">{log.user.firstName} {log.user.lastName}</div>
-                        <div className="text-gray-400 text-xs">{log.user.email}</div>
+                        <div className="text-muted-foreground text-xs">{log.user.email}</div>
                       </td>
                       <td className="text-sm">
                         <span className="badge badge-info">{log.entity}</span>
@@ -159,14 +159,14 @@ export default function AuditLogs() {
                               : log.action.includes('UPDATED') || log.action.includes('UPDATE')
                               ? 'bg-yellow-500/20 text-yellow-300'
                               : log.action.includes('DELETED') || log.action.includes('DELETE')
-                              ? 'bg-red-500/20 text-red-300'
-                              : 'bg-gray-500/20 text-gray-300'
+                              ? 'bg-red-500/20 text-destructive'
+                              : 'bg-surface-lowest0/20 text-muted-foreground'
                           }`}
                         >
                           {log.action}
                         </span>
                       </td>
-                      <td className="text-sm text-gray-400 max-w-xs truncate">
+                      <td className="text-sm text-muted-foreground max-w-xs truncate">
                         {getChangesSummary(log)}
                       </td>
                     </tr>
@@ -183,7 +183,7 @@ export default function AuditLogs() {
                 >
                   Previous
                 </button>
-                <span className="px-4 py-2 text-gray-300">Page {page} of {totalPages}</span>
+                <span className="px-4 py-2 text-muted-foreground">Page {page} of {totalPages}</span>
                 <button
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}

@@ -115,7 +115,7 @@ export default function AddressMapPicker({ address, city, state, country, pincod
               type="button"
               onClick={handleSearch}
               disabled={searching}
-              className="px-3 py-2 rounded-lg bg-primary-500 text-white hover: transition disabled:opacity-50"
+              className="px-3 py-2 rounded-lg bg-primary-500 text-on-surface hover: transition disabled:opacity-50"
             >
               <Search className="w-4 h-4" />
             </button>
@@ -129,7 +129,7 @@ export default function AddressMapPicker({ address, city, state, country, pincod
               onMapClick={handleMapClick}
             />
           </div>
-          <p className="text-xs text-gray-400">Click on the map to auto-fill the address fields.</p>
+          <p className="text-xs text-muted-foreground">Click on the map to auto-fill the address fields.</p>
         </div>
       )}
     </div>

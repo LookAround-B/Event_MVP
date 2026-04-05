@@ -196,7 +196,7 @@ export default function EventDetail() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
-            <p className="text-gray-600 mt-2">Loading event...</p>
+            <p className="text-muted-foreground mt-2">Loading event...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -207,7 +207,7 @@ export default function EventDetail() {
     return (
       <ProtectedRoute>
         <div className="text-center py-8">
-          <p className="text-gray-600">Event not found</p>
+          <p className="text-muted-foreground">Event not found</p>
           <Link href="/events" className="text-blue-600 hover:underline mt-4 inline-block">Back to Events</Link>
         </div>
       </ProtectedRoute>
@@ -231,26 +231,26 @@ export default function EventDetail() {
             <div className="bg-white rounded-lg shadow p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Event Name</p>
-                  <p className="text-2xl font-bold text-gray-900">{event.name}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Event Name</p>
+                  <p className="text-2xl font-bold text-on-surface">{event.name}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Event Type</p>
-                  <p className="text-lg font-semibold text-gray-900">{event.eventType}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Event Type</p>
+                  <p className="text-lg font-semibold text-on-surface">{event.eventType}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Event Start Date</p>
-                  <p className="text-gray-900">{formatDate(event.startDate)}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Event Start Date</p>
+                  <p className="text-on-surface">{formatDate(event.startDate)}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Event End Date</p>
-                  <p className="text-gray-900">{formatDate(event.endDate)}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Event End Date</p>
+                  <p className="text-on-surface">{formatDate(event.endDate)}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Status</p>
+                  <p className="text-sm font-medium text-muted-foreground">Status</p>
                   <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${event.isPublished ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                     {event.isPublished ? 'Published' : 'Not Published'}
                   </span>
@@ -258,18 +258,18 @@ export default function EventDetail() {
               </div>
 
               <div>
-                <p className="text-sm font-medium text-gray-600">Description</p>
-                <p className="text-gray-700 mt-1">{event.description || 'No description'}</p>
+                <p className="text-sm font-medium text-muted-foreground">Description</p>
+                <p className="text-on-surface-variant mt-1">{event.description || 'No description'}</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Venue</p>
-                  <p className="text-gray-900">{event.venueName || 'N/A'}</p>
-                  <p className="text-sm text-gray-600">{event.venueAddress || 'No address'}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Venue</p>
+                  <p className="text-on-surface">{event.venueName || 'N/A'}</p>
+                  <p className="text-sm text-muted-foreground">{event.venueAddress || 'No address'}</p>
                 </div>
                 <div className="flex items-end">
-                  <Link href={`/events/${id}/stables`} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium">
+                  <Link href={`/events/${id}/stables`} className="px-4 py-2 bg-purple-600 text-on-surface rounded-lg hover:bg-purple-700 text-sm font-medium">
                     Manage Stables
                   </Link>
                 </div>
@@ -281,15 +281,15 @@ export default function EventDetail() {
         {/* Event Category Amount Summary */}
         {Object.keys(categoryAmounts).length > 0 && (
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Event Category Amounts</h2>
+            <h2 className="text-lg font-semibold text-on-surface mb-4">Event Category Amounts</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(categoryAmounts).map(([name, data]) => (
                 <div key={name} className="border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm font-medium text-gray-600">Category</p>
-                  <p className="text-lg font-semibold text-gray-900">{name}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Category</p>
+                  <p className="text-lg font-semibold text-on-surface">{name}</p>
                   <div className="mt-2 flex justify-between text-sm">
-                    <span className="text-gray-600">Registrations: <span className="font-medium text-gray-900">{data.count}</span></span>
-                    <span className="text-gray-600">Total: <span className="font-semibold text-blue-600">₹{data.total.toLocaleString('en-IN')}</span></span>
+                    <span className="text-muted-foreground">Registrations: <span className="font-medium text-on-surface">{data.count}</span></span>
+                    <span className="text-muted-foreground">Total: <span className="font-semibold text-blue-600">₹{data.total.toLocaleString('en-IN')}</span></span>
                   </div>
                 </div>
               ))}
@@ -301,14 +301,14 @@ export default function EventDetail() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Registered Members</h2>
-              <p className="text-sm text-gray-600 mt-1">{registeredCount} registrations</p>
+              <h2 className="text-lg font-semibold text-on-surface">Registered Members</h2>
+              <p className="text-sm text-muted-foreground mt-1">{registeredCount} registrations</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={exportToExcel} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+              <button onClick={exportToExcel} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-on-surface rounded-lg hover:bg-green-700 text-sm">
                 <Download /> Export Excel
               </button>
-              <button onClick={exportToCSV} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+              <button onClick={exportToCSV} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-on-surface rounded-lg hover:bg-blue-700 text-sm">
                 <Download /> Export CSV
               </button>
             </div>
@@ -349,40 +349,40 @@ export default function EventDetail() {
           {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-100 border-b">
+              <thead className="bg-surface-container border-b">
                 <tr>
                   <th className="px-3 py-3 text-left">
                     <input type="checkbox" checked={paginated.length > 0 && selectedIds.size === paginated.length} onChange={toggleAll} className="rounded border-gray-400" />
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Rider Name</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Club Name</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Horse Name</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Event Category</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Total Amount</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Payment Status</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Action</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Rider Name</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Club Name</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Horse Name</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Event Category</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Total Amount</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Payment Status</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {paginated.length === 0 ? (
-                  <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-600">No registrations found</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No registrations found</td></tr>
                 ) : (
                   paginated.map(reg => (
-                    <tr key={reg.id} className="hover:bg-gray-50">
+                    <tr key={reg.id} className="hover:bg-surface-lowest">
                       <td className="px-3 py-3">
                         <input type="checkbox" checked={selectedIds.has(reg.id)} onChange={() => toggleOne(reg.id)} className="rounded border-gray-400" />
                       </td>
                       <td className="px-4 py-3 text-sm">
-                        <p className="font-medium text-gray-900">{reg.rider.firstName} {reg.rider.lastName}</p>
-                        <p className="text-xs text-gray-500">{reg.rider.email}</p>
+                        <p className="font-medium text-on-surface">{reg.rider.firstName} {reg.rider.lastName}</p>
+                        <p className="text-xs text-muted-foreground">{reg.rider.email}</p>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{reg.club?.name || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-on-surface">{reg.club?.name || '-'}</td>
                       <td className="px-4 py-3 text-sm">
-                        <p className="text-gray-900">{reg.horse.name}</p>
-                        <p className="text-xs text-gray-500">{reg.horse.color}</p>
+                        <p className="text-on-surface">{reg.horse.name}</p>
+                        <p className="text-xs text-muted-foreground">{reg.horse.color}</p>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{reg.category?.name || '-'}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900">₹{reg.totalAmount.toLocaleString('en-IN')}</td>
+                      <td className="px-4 py-3 text-sm text-on-surface">{reg.category?.name || '-'}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-on-surface">₹{reg.totalAmount.toLocaleString('en-IN')}</td>
                       <td className="px-4 py-3 text-sm">
                         <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
                           reg.paymentStatus === 'PAID' ? 'bg-green-100 text-green-800' :
@@ -408,11 +408,11 @@ export default function EventDetail() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-4">
-              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition">
+              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="p-2 rounded-lg bg-surface-container hover:bg-surface-bright disabled:opacity-30 transition">
                 <ChevronLeft />
               </button>
-              <span className="text-sm text-gray-600 px-3">Page {page} of {totalPages}</span>
-              <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition">
+              <span className="text-sm text-muted-foreground px-3">Page {page} of {totalPages}</span>
+              <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="p-2 rounded-lg bg-surface-container hover:bg-surface-bright disabled:opacity-30 transition">
                 <ChevronRight />
               </button>
             </div>
@@ -421,18 +421,18 @@ export default function EventDetail() {
 
         {/* Prospectus Section */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Prospectus</h2>
-          <div className="prose prose-sm max-w-none text-gray-700">
+          <h2 className="text-lg font-semibold text-on-surface mb-4">Prospectus</h2>
+          <div className="prose prose-sm max-w-none text-on-surface-variant">
             {event.description ? (
               <p>{event.description}</p>
             ) : (
-              <p className="text-gray-500 italic">No prospectus available for this event.</p>
+              <p className="text-muted-foreground italic">No prospectus available for this event.</p>
             )}
           </div>
           {event.termsAndConditions && (
             <div className="mt-6 pt-4 border-t border-gray-200">
-              <h3 className="text-md font-semibold text-gray-900 mb-2">Terms & Conditions</h3>
-              <div className="prose prose-sm max-w-none text-gray-700">{event.termsAndConditions}</div>
+              <h3 className="text-md font-semibold text-on-surface mb-2">Terms & Conditions</h3>
+              <div className="prose prose-sm max-w-none text-on-surface-variant">{event.termsAndConditions}</div>
             </div>
           )}
         </div>
@@ -443,61 +443,61 @@ export default function EventDetail() {
             <div className="bento-card max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Participating Member Details</h3>
-                  <button onClick={() => setActionModal({ isOpen: false })} className="text-gray-500 hover:text-gray-700 text-lg">✕</button>
+                  <h3 className="text-lg font-semibold text-on-surface">Participating Member Details</h3>
+                  <button onClick={() => setActionModal({ isOpen: false })} className="text-muted-foreground hover:text-on-surface-variant text-lg">✕</button>
                 </div>
 
                 <div className="space-y-4 text-sm">
                   <div className="grid grid-cols-2 gap-4 border-b pb-4">
                     <div>
-                      <p className="text-gray-500">Event Name</p>
-                      <p className="font-semibold text-gray-900">{event.name}</p>
+                      <p className="text-muted-foreground">Event Name</p>
+                      <p className="font-semibold text-on-surface">{event.name}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Event Date</p>
-                      <p className="font-semibold text-gray-900">{formatDate(event.startDate)} - {formatDate(event.endDate)}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 border-b pb-4">
-                    <div>
-                      <p className="text-gray-500">Rider Name</p>
-                      <p className="font-semibold text-gray-900">{actionModal.registration.rider.firstName} {actionModal.registration.rider.lastName}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">Club Name</p>
-                      <p className="font-semibold text-gray-900">{actionModal.registration.club?.name || '-'}</p>
+                      <p className="text-muted-foreground">Event Date</p>
+                      <p className="font-semibold text-on-surface">{formatDate(event.startDate)} - {formatDate(event.endDate)}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 border-b pb-4">
                     <div>
-                      <p className="text-gray-500">Horse Name</p>
-                      <p className="font-semibold text-gray-900">{actionModal.registration.horse.name}</p>
+                      <p className="text-muted-foreground">Rider Name</p>
+                      <p className="font-semibold text-on-surface">{actionModal.registration.rider.firstName} {actionModal.registration.rider.lastName}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Event Category</p>
-                      <p className="font-semibold text-gray-900">{actionModal.registration.category?.name || '-'}</p>
+                      <p className="text-muted-foreground">Club Name</p>
+                      <p className="font-semibold text-on-surface">{actionModal.registration.club?.name || '-'}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 border-b pb-4">
+                    <div>
+                      <p className="text-muted-foreground">Horse Name</p>
+                      <p className="font-semibold text-on-surface">{actionModal.registration.horse.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Event Category</p>
+                      <p className="font-semibold text-on-surface">{actionModal.registration.category?.name || '-'}</p>
                     </div>
                   </div>
 
                   <div className="border-t pt-4 space-y-2">
-                    <div className="flex justify-between"><span className="text-gray-600">Event Amount:</span><span className="font-semibold">₹{actionModal.registration.eventAmount.toLocaleString('en-IN')}</span></div>
-                    <div className="flex justify-between"><span className="text-gray-600">Stable Amount:</span><span className="font-semibold">₹{actionModal.registration.stableAmount.toLocaleString('en-IN')}</span></div>
-                    <div className="flex justify-between"><span className="text-gray-600">GST Amount:</span><span className="font-semibold">₹{actionModal.registration.gstAmount.toLocaleString('en-IN')}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Event Amount:</span><span className="font-semibold">₹{actionModal.registration.eventAmount.toLocaleString('en-IN')}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Stable Amount:</span><span className="font-semibold">₹{actionModal.registration.stableAmount.toLocaleString('en-IN')}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">GST Amount:</span><span className="font-semibold">₹{actionModal.registration.gstAmount.toLocaleString('en-IN')}</span></div>
                     <div className="flex justify-between border-t pt-2 mt-2">
-                      <span className="font-semibold text-gray-900">Total:</span>
+                      <span className="font-semibold text-on-surface">Total:</span>
                       <span className="font-bold text-lg text-blue-600">₹{actionModal.registration.totalAmount.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 pt-2">
                     <div>
-                      <p className="text-gray-500">Payment Method</p>
-                      <p className="font-medium text-gray-900">{actionModal.registration.paymentMethod || 'N/A'}</p>
+                      <p className="text-muted-foreground">Payment Method</p>
+                      <p className="font-medium text-on-surface">{actionModal.registration.paymentMethod || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Payment Status</p>
+                      <p className="text-muted-foreground">Payment Status</p>
                       <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
                         actionModal.registration.paymentStatus === 'PAID' ? 'bg-green-100 text-green-800' :
                         actionModal.registration.paymentStatus === 'PARTIAL' ? 'bg-blue-100 text-blue-800' :
@@ -509,7 +509,7 @@ export default function EventDetail() {
                   </div>
                 </div>
 
-                <button onClick={() => setActionModal({ isOpen: false })} className="w-full mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button onClick={() => setActionModal({ isOpen: false })} className="w-full mt-6 px-4 py-2 bg-blue-600 text-on-surface rounded-lg hover:bg-blue-700">
                   Close
                 </button>
               </div>

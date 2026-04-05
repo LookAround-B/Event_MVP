@@ -184,68 +184,58 @@ export default function Riders() {
   return (
     <ProtectedRoute>
       <Head><title>Riders | Equestrian Events</title></Head>
-      <div>
+      <div className="animate-fade-in max-w-[1600px] mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-2xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>Rider List</h2>
-          <div className="flex flex-wrap gap-3">
-            {selectedIds.size > 0 && (
-              <button onClick={handleBulkDelete} className="btn btn-destructive text-sm">
-                <Trash2 size={16} /> Delete ({selectedIds.size})
-              </button>
-            )}
-            <button onClick={handleExportCSV} className="btn btn-ghost text-sm">
-              <Download size={16} /> CSV
-            </button>
-            <button onClick={handleExportExcel} className="btn btn-secondary text-sm">
-              <Download size={16} /> Excel
-            </button>
-            <Link href="/riders/create" className="btn btn-primary text-sm">
-              <Plus size={16} /> New Rider
-            </Link>
-          </div>
+        <div className="mb-6 lg:mb-8">
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">Rider <span className="gradient-text">Directory</span></h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">Master registry of certified equestrians across all clubs.</p>
         </div>
 
         {error && (
-          <div
-            className="px-4 py-3 rounded-xl mb-6 text-sm"
-            style={{
-              background: 'hsl(var(--error) / 0.1)',
-              border: '1px solid hsl(var(--error) / 0.3)',
-              color: 'hsl(var(--error))',
-            }}
-          >
+          <div className="px-4 py-3 rounded-xl mb-6 text-sm bg-destructive/10 border border-destructive/30 text-destructive">
             {error}
           </div>
         )}
 
-        {/* Search & Filter */}
-        <div className="bento-card mb-6">
-          <div className="flex gap-3 items-center">
-            <div className="relative flex-1">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2"
-                style={{ color: 'hsl(var(--muted-foreground))' }}
-              />
+        {/* Search & Actions */}
+        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-1 border-beam">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
+            <div className="relative flex-1 sm:flex-initial">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search riders by name, email, EFI ID..."
+                placeholder="Find rider by name, email, EFI ID..."
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                className="input pl-10"
+                className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-80 border border-border/30 transition-all"
               />
             </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`btn ${hasActiveFilters ? 'btn-secondary' : 'btn-ghost'} text-sm`}
-            >
-              <Filter size={16} /> Filters {hasActiveFilters && '(active)'}
-            </button>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              {selectedIds.size > 0 && (
+                <button onClick={handleBulkDelete} className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm bg-destructive/10 text-destructive border border-destructive/30 hover:bg-destructive/15 transition-colors">
+                  <Trash2 className="w-4 h-4" /> Delete ({selectedIds.size})
+                </button>
+              )}
+              <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">CSV</span>
+              </button>
+              <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Excel</span>
+              </button>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm border transition-colors ${hasActiveFilters ? 'border-primary/50 text-primary bg-primary/5' : 'text-on-surface-variant bg-surface-container hover:bg-surface-bright border-border/50'}`}
+              >
+                <Filter className="w-4 h-4" /> <span className="hidden sm:inline">Filters</span> {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary"></span>}
+              </button>
+              <Link href="/riders/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center">
+                <Plus className="w-4 h-4" /> Add Rider
+              </Link>
+            </div>
           </div>
 
           {showFilters && (
-            <div className="mt-4 pt-4" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)' }}>
+            <div className="mt-4 pt-4 border-t border-border/30">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="form-label">Gender</label>
@@ -290,7 +280,7 @@ export default function Riders() {
                 <button
                   onClick={clearFilters}
                   className="mt-3 text-sm flex items-center gap-1 transition-colors"
-                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  
                 >
                   <X size={12} /> Clear all filters
                 </button>
@@ -312,7 +302,7 @@ export default function Riders() {
               ))}
             </div>
           ) : riders.length === 0 ? (
-            <div className="text-center py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <div className="text-center py-8" >
               {searchTerm || hasActiveFilters ? 'No riders match your search/filters' : 'No riders registered yet. Add one to get started!'}
             </div>
           ) : (
@@ -350,7 +340,7 @@ export default function Riders() {
                           style={{ accentColor: 'hsl(var(--primary))' }}
                         />
                       </td>
-                      <td className="font-medium" style={{ color: 'hsl(var(--on-surface))' }}>{rider.firstName}</td>
+                      <td className="font-medium" >{rider.firstName}</td>
                       <td>{rider.lastName || '-'}</td>
                       <td>{rider.efiRiderId || '-'}</td>
                       <td className="font-mono text-sm">{rider.eId}</td>
@@ -366,7 +356,7 @@ export default function Riders() {
                         <ActionsDropdown actions={[
                           { label: 'View', icon: <Eye size={16} />, onClick: () => router.push(`/riders/${rider.id}`) },
                           { label: 'Edit', icon: <Edit size={16} />, onClick: () => router.push(`/riders/create?id=${rider.id}`), className: 'text-amber-400 hover:text-amber-300' },
-                          { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(rider.id), className: 'text-red-400 hover:text-red-300' },
+                          { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(rider.id), className: 'text-destructive hover:text-destructive' },
                         ]} />
                       </td>
                     </tr>
@@ -383,7 +373,7 @@ export default function Riders() {
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2 text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                  <span className="px-4 py-2 text-sm" >
                     Page {page} of {totalPages}
                   </span>
                   <button

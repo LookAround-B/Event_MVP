@@ -218,7 +218,7 @@ export default function Horses() {
       <Head><title>Horses | Equestrian Events</title></Head>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold">Horses</h2>
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Horse <span className="gradient-text">Registry</span></h1>
           <div className="flex gap-3">
             <button onClick={handleExportCSV} className="btn-secondary">
               <Download className="inline mr-2" /> Export CSV
@@ -238,10 +238,10 @@ export default function Horses() {
           </div>
         )}
 
-        <div className="mb-6 card">
+        <div className="mb-6 bento-card">
           <div className="flex gap-3 items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 text-gray-500" />
+              <Search className="absolute left-3 top-3 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search horses by name, passport, embassy ID..."
@@ -266,7 +266,7 @@ export default function Horses() {
             <div className="mt-4 pt-4 pt-0">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1">Sex</label>
+                  <label className="form-label">Sex</label>
                   <select
                     value={filterGender}
                     onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
@@ -279,7 +279,7 @@ export default function Horses() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1">Club</label>
+                  <label className="form-label">Club</label>
                   <select
                     value={filterClubId}
                     onChange={(e) => { setFilterClubId(e.target.value); setPage(1); }}
@@ -292,7 +292,7 @@ export default function Horses() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1">Rider</label>
+                  <label className="form-label">Rider</label>
                   <select
                     value={filterRiderId}
                     onChange={(e) => { setFilterRiderId(e.target.value); setPage(1); }}
@@ -305,7 +305,7 @@ export default function Horses() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1">Status</label>
+                  <label className="form-label">Status</label>
                   <select
                     value={filterStatus}
                     onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
@@ -333,10 +333,10 @@ export default function Horses() {
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="text-gray-300 mt-2">Loading horses...</p>
+              <p className="text-muted-foreground mt-2">Loading horses...</p>
             </div>
           ) : horses.length === 0 ? (
-            <div className="text-center py-8 text-gray-300">
+            <div className="text-center py-8 text-muted-foreground">
               {searchTerm ? 'No horses match your search' : 'No horses in inventory yet. Add one to get started!'}
             </div>
           ) : (
@@ -349,7 +349,7 @@ export default function Horses() {
                         type="checkbox"
                         checked={selectedIds.size === horses.length && horses.length > 0}
                         onChange={toggleSelectAll}
-                        className="rounded border-gray-600"
+                        className="rounded border-border"
                       />
                     </th>
                     <th>Horse Name</th>
@@ -374,7 +374,7 @@ export default function Horses() {
                           type="checkbox"
                           checked={selectedIds.has(horse.id)}
                           onChange={() => toggleSelect(horse.id)}
-                          className="rounded border-gray-600"
+                          className="rounded border-border"
                         />
                       </td>
                       <td className="font-medium">{horse.name}</td>
@@ -399,7 +399,7 @@ export default function Horses() {
                         <ActionsDropdown actions={[
                           { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: () => router.push(`/horses/${horse.id}`) },
                           { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: () => router.push(`/horses/create?id=${horse.id}`), className: 'text-amber-400 hover:text-amber-300' },
-                          { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: () => handleDelete(horse.id), className: 'text-red-400 hover:text-red-300' },
+                          { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: () => handleDelete(horse.id), className: 'text-destructive hover:text-destructive' },
                         ]} />
                       </td>
                     </tr>

@@ -144,12 +144,12 @@ export default function UserPermissions() {
     <ProtectedRoute>
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Link href="/users" className="text-gray-400 hover:text-white">
+          <Link href="/users" className="text-muted-foreground hover:text-on-surface">
             <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
             <h1 className="text-2xl font-bold">Permissions & Roles</h1>
-            <p className="text-gray-300 mt-1">
+            <p className="text-muted-foreground mt-1">
               {user?.name} ({user?.email})
             </p>
           </div>
@@ -158,7 +158,7 @@ export default function UserPermissions() {
         {/* Role Assignment */}
         <div className="bento-card">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-white">Assigned Roles</h2>
+            <h2 className="text-xl font-bold text-on-surface">Assigned Roles</h2>
             <button
               onClick={saveRoles}
               disabled={savingRoles}
@@ -175,7 +175,7 @@ export default function UserPermissions() {
                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   userRoleIds.includes(role.id)
                     ? 'border-primary bg-primary-500 bg-opacity-20 text-primary-300'
-                    : 'border-gray-600 text-gray-400 hover:border-gray-400'
+                    : 'border-border text-muted-foreground hover:border-gray-400'
                 }`}
               >
                 {userRoleIds.includes(role.id) && <Check className="inline w-4 h-4 mr-1" />}
@@ -183,7 +183,7 @@ export default function UserPermissions() {
               </button>
             ))}
             {allRoles.length === 0 && (
-              <p className="text-gray-500 text-sm">No roles defined. Create roles in Settings.</p>
+              <p className="text-muted-foreground text-sm">No roles defined. Create roles in Settings.</p>
             )}
           </div>
         </div>
@@ -191,7 +191,7 @@ export default function UserPermissions() {
         {/* Permissions Matrix */}
         <div className="bento-card">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-white">Permission Matrix</h2>
+            <h2 className="text-xl font-bold text-on-surface">Permission Matrix</h2>
             <button
               onClick={savePermissions}
               disabled={saving}
@@ -200,7 +200,7 @@ export default function UserPermissions() {
               <Save /> {saving ? 'Saving...' : 'Save Permissions'}
             </button>
           </div>
-          <p className="text-gray-400 text-sm mb-4">
+          <p className="text-muted-foreground text-sm mb-4">
             Admin users bypass all permission checks. These permissions apply to non-admin users.
           </p>
 
@@ -208,25 +208,25 @@ export default function UserPermissions() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="px-3 py-2 text-left text-gray-300 font-semibold">Resource</th>
+                  <th className="px-3 py-2 text-left text-muted-foreground font-semibold">Resource</th>
                   {ACTIONS.map(action => (
                     <th key={action} className="px-3 py-2 text-center">
                       <button
                         onClick={() => toggleAllForAction(action)}
-                        className="text-gray-300 font-semibold hover:text-primary transition-colors"
+                        className="text-muted-foreground font-semibold hover:text-primary transition-colors"
                         title={`Toggle all ${action}`}
                       >
                         {action}
                       </button>
                     </th>
                   ))}
-                  <th className="px-3 py-2 text-center text-gray-400 text-xs">Toggle All</th>
+                  <th className="px-3 py-2 text-center text-muted-foreground text-xs">Toggle All</th>
                 </tr>
               </thead>
               <tbody>
                 {RESOURCES.map(resource => (
                   <tr key={resource} className="border-b border-gray-700 hover:bg-white hover:bg-opacity-5">
-                    <td className="px-3 py-3 font-medium text-white">{resource}</td>
+                    <td className="px-3 py-3 font-medium text-on-surface">{resource}</td>
                     {ACTIONS.map(action => {
                       const key = `${action}:${resource}`;
                       const granted = !!permissions[key];
@@ -236,8 +236,8 @@ export default function UserPermissions() {
                             onClick={() => togglePermission(action, resource)}
                             className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
                               granted
-                                ? 'bg-green-600 text-white hover:bg-green-700'
-                                : 'bg-gray-700 text-gray-500 hover:bg-gray-600'
+                                ? 'bg-green-600 text-on-surface hover:bg-green-700'
+                                : 'bg-gray-700 text-muted-foreground hover:bg-gray-600'
                             }`}
                           >
                             {granted ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
@@ -248,7 +248,7 @@ export default function UserPermissions() {
                     <td className="px-3 py-3 text-center">
                       <button
                         onClick={() => toggleAllForResource(resource)}
-                        className="text-xs text-gray-400 hover:text-primary underline"
+                        className="text-xs text-muted-foreground hover:text-primary underline"
                       >
                         toggle
                       </button>

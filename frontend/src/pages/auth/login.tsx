@@ -56,7 +56,7 @@ export default function Login() {
             <div className="text-4xl font-black mb-2" style={{ color: 'hsl(var(--primary))' }}>
               Equestrian
             </div>
-            <p className="font-medium" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <p className="font-medium" >
               Event Management Platform
             </p>
           </div>
@@ -105,7 +105,7 @@ export default function Login() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -185,10 +185,10 @@ export default function Login() {
           </form>
 
           {/* Footer link */}
-          <div className="mt-8 pt-6 text-center" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)' }}>
-            <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
+          <div className="mt-8 pt-6 text-center border-t border-border/30">
+            <p className="text-sm text-muted-foreground">
               Don't have an account?{' '}
-              <Link href="/auth/signup" className="font-bold transition-colors" style={{ color: 'hsl(var(--primary))' }}>
+              <Link href="/auth/signup" className="font-bold text-primary hover:text-primary/80 transition-colors">
                 Sign up
               </Link>
             </p>

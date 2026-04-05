@@ -347,7 +347,7 @@ export default function ClubDetail() {
   if (!club) {
     return (
       <ProtectedRoute>
-        <div className="text-center py-8 text-gray-400">Club not found</div>
+        <div className="text-center py-8 text-muted-foreground">Club not found</div>
       </ProtectedRoute>
     );
   }
@@ -375,12 +375,12 @@ export default function ClubDetail() {
                 {club.logoUrl ? (
                   <Image src={club.logoUrl} alt={club.name} fill className="object-cover" />
                 ) : (
-                  <ImageIcon className="text-gray-400" size={32} />
+                  <ImageIcon className="text-muted-foreground" size={32} />
                 )}
               </div>
               <div>
                 <h1 className="text-2xl font-bold">{club.name}</h1>
-                <p className="text-gray-400 text-sm mt-1">Embassy ID: {club.eId || '—'}</p>
+                <p className="text-muted-foreground text-sm mt-1">Embassy ID: {club.eId || '—'}</p>
               </div>
             </div>
             {!isViewMode && !editClub && (
@@ -394,81 +394,81 @@ export default function ClubDetail() {
             <div className="space-y-4 mt-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">Club Name</label>
+                  <label className="form-label">Club Name</label>
                   <input type="text" value={clubEditForm.name} onChange={e => setClubEditForm({ ...clubEditForm, name: e.target.value })} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">Club Code</label>
+                  <label className="form-label">Club Code</label>
                   <input type="text" value={clubEditForm.shortCode} onChange={e => setClubEditForm({ ...clubEditForm, shortCode: e.target.value })} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">Embassy ID</label>
+                  <label className="form-label">Embassy ID</label>
                   <input type="text" value={clubEditForm.eId} onChange={e => setClubEditForm({ ...clubEditForm, eId: e.target.value })} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">Office Email</label>
+                  <label className="form-label">Office Email</label>
                   <input type="email" value={clubEditForm.email} onChange={e => setClubEditForm({ ...clubEditForm, email: e.target.value })} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">Contact Number</label>
+                  <label className="form-label">Contact Number</label>
                   <input type="tel" value={clubEditForm.contactNumber} onChange={e => setClubEditForm({ ...clubEditForm, contactNumber: e.target.value })} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">Optional Phone</label>
+                  <label className="form-label">Optional Phone</label>
                   <input type="tel" value={clubEditForm.optionalPhone} onChange={e => setClubEditForm({ ...clubEditForm, optionalPhone: e.target.value })} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">Logo URL</label>
+                  <label className="form-label">Logo URL</label>
                   <input type="url" value={clubEditForm.logoUrl} onChange={e => setClubEditForm({ ...clubEditForm, logoUrl: e.target.value })} className="input" placeholder="https://..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">City</label>
+                  <label className="form-label">City</label>
                   <input type="text" value={clubEditForm.city} onChange={e => setClubEditForm({ ...clubEditForm, city: e.target.value })} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">State</label>
+                  <label className="form-label">State</label>
                   <input type="text" value={clubEditForm.state} onChange={e => setClubEditForm({ ...clubEditForm, state: e.target.value })} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">Country</label>
+                  <label className="form-label">Country</label>
                   <input type="text" value={clubEditForm.country} onChange={e => setClubEditForm({ ...clubEditForm, country: e.target.value })} className="input" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Address</label>
+                <label className="form-label">Address</label>
                 <input type="text" value={clubEditForm.address} onChange={e => setClubEditForm({ ...clubEditForm, address: e.target.value })} className="input" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-1">Description</label>
+                <label className="form-label">Description</label>
                 <textarea value={clubEditForm.description} onChange={e => setClubEditForm({ ...clubEditForm, description: e.target.value })} className="input" rows={2} />
               </div>
 
               {/* Social Links */}
               <div className="pt-0 pt-4">
-                <h3 className="text-lg font-semibold text-white mb-3">Social Links</h3>
+                <h3 className="text-lg font-semibold text-on-surface mb-3">Social Links</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-1">Instagram</label>
+                    <label className="form-label">Instagram</label>
                     <input type="url" value={clubEditForm.socialLinks.instagram || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, instagram: e.target.value } })} className="input" placeholder="https://instagram.com/..." />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-1">Twitter / X</label>
+                    <label className="form-label">Twitter / X</label>
                     <input type="url" value={clubEditForm.socialLinks.twitter || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, twitter: e.target.value } })} className="input" placeholder="https://twitter.com/..." />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-1">Facebook</label>
+                    <label className="form-label">Facebook</label>
                     <input type="url" value={clubEditForm.socialLinks.facebook || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, facebook: e.target.value } })} className="input" placeholder="https://facebook.com/..." />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-1">YouTube</label>
+                    <label className="form-label">YouTube</label>
                     <input type="url" value={clubEditForm.socialLinks.youtube || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, youtube: e.target.value } })} className="input" placeholder="https://youtube.com/..." />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-1">Website</label>
+                    <label className="form-label">Website</label>
                     <input type="url" value={clubEditForm.socialLinks.website || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, website: e.target.value } })} className="input" placeholder="https://..." />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-1">Other</label>
+                    <label className="form-label">Other</label>
                     <input type="url" value={clubEditForm.socialLinks.other || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, other: e.target.value } })} className="input" placeholder="https://..." />
                   </div>
                 </div>
@@ -481,41 +481,41 @@ export default function ClubDetail() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-4 text-gray-300 mt-4">
+              <div className="grid grid-cols-2 gap-4 text-muted-foreground mt-4">
                 <div>
-                  <span className="text-gray-400">Club Code:</span>
-                  <p className="text-white">{club.shortCode}</p>
+                  <span className="text-muted-foreground">Club Code:</span>
+                  <p className="text-on-surface">{club.shortCode}</p>
                 </div>
                 <div>
-                  <span className="text-gray-400">Office Email:</span>
-                  <p className="text-white">{club.email || '—'}</p>
+                  <span className="text-muted-foreground">Office Email:</span>
+                  <p className="text-on-surface">{club.email || '—'}</p>
                 </div>
                 <div>
-                  <span className="text-gray-400">Contact Number:</span>
-                  <p className="text-white">{club.contactNumber || '—'}</p>
+                  <span className="text-muted-foreground">Contact Number:</span>
+                  <p className="text-on-surface">{club.contactNumber || '—'}</p>
                 </div>
                 <div>
-                  <span className="text-gray-400">Optional Phone:</span>
-                  <p className="text-white">{club.optionalPhone || '—'}</p>
+                  <span className="text-muted-foreground">Optional Phone:</span>
+                  <p className="text-on-surface">{club.optionalPhone || '—'}</p>
                 </div>
                 <div>
-                  <span className="text-gray-400">City:</span>
-                  <p className="text-white">{club.city || '—'}</p>
+                  <span className="text-muted-foreground">City:</span>
+                  <p className="text-on-surface">{club.city || '—'}</p>
                 </div>
                 <div>
-                  <span className="text-gray-400">Address:</span>
-                  <p className="text-white">{club.address || '—'}</p>
+                  <span className="text-muted-foreground">Address:</span>
+                  <p className="text-on-surface">{club.address || '—'}</p>
                 </div>
                 <div className="col-span-2">
-                  <span className="text-gray-400">Description:</span>
-                  <p className="text-white">{club.description || '—'}</p>
+                  <span className="text-muted-foreground">Description:</span>
+                  <p className="text-on-surface">{club.description || '—'}</p>
                 </div>
               </div>
 
               {/* Social Links Display */}
               {club.socialLinks && Object.values(club.socialLinks).some(v => v) && (
                 <div className="mt-4 pt-4 pt-0">
-                  <h3 className="text-sm font-semibold text-gray-400 mb-2">Social Links</h3>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-2">Social Links</h3>
                   <div className="flex flex-wrap gap-3">
                     {club.socialLinks.instagram && (
                       <a href={club.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="transition-colors text-sm">Instagram</a>
@@ -544,31 +544,31 @@ export default function ClubDetail() {
 
         {/* Contact Person Card */}
         <div className="bento-card">
-          <h2 className="text-xl font-bold text-white mb-4">Contact Person</h2>
-          <div className="grid grid-cols-2 gap-4 text-gray-300">
+          <h2 className="text-xl font-bold text-on-surface mb-4">Contact Person</h2>
+          <div className="grid grid-cols-2 gap-4 text-muted-foreground">
             <div>
-              <span className="text-gray-400">First Name:</span>
-              <p className="text-white">{club.primaryContact?.firstName || '—'}</p>
+              <span className="text-muted-foreground">First Name:</span>
+              <p className="text-on-surface">{club.primaryContact?.firstName || '—'}</p>
             </div>
             <div>
-              <span className="text-gray-400">Last Name:</span>
-              <p className="text-white">{club.primaryContact?.lastName || '—'}</p>
+              <span className="text-muted-foreground">Last Name:</span>
+              <p className="text-on-surface">{club.primaryContact?.lastName || '—'}</p>
             </div>
             <div>
-              <span className="text-gray-400">Gender:</span>
-              <p className="text-white">{club.primaryContact?.gender || '—'}</p>
+              <span className="text-muted-foreground">Gender:</span>
+              <p className="text-on-surface">{club.primaryContact?.gender || '—'}</p>
             </div>
             <div>
-              <span className="text-gray-400">Date of Birth:</span>
-              <p className="text-white">{club.primaryContact?.dob ? new Date(club.primaryContact.dob).toLocaleDateString() : '—'}</p>
+              <span className="text-muted-foreground">Date of Birth:</span>
+              <p className="text-on-surface">{club.primaryContact?.dob ? new Date(club.primaryContact.dob).toLocaleDateString() : '—'}</p>
             </div>
             <div>
-              <span className="text-gray-400">Personal Email:</span>
-              <p className="text-white">{club.primaryContact?.email || '—'}</p>
+              <span className="text-muted-foreground">Personal Email:</span>
+              <p className="text-on-surface">{club.primaryContact?.email || '—'}</p>
             </div>
             <div>
-              <span className="text-gray-400">Phone:</span>
-              <p className="text-white">{club.primaryContact?.phone || '—'}</p>
+              <span className="text-muted-foreground">Phone:</span>
+              <p className="text-on-surface">{club.primaryContact?.phone || '—'}</p>
             </div>
           </div>
         </div>
@@ -581,7 +581,7 @@ export default function ClubDetail() {
               className={`px-6 py-3 font-semibold transition-colors ${
                 activeTab === 'riders'
                   ? 'text-purple-400 border-b-2 border-purple-400'
-                  : 'text-gray-400 hover:text-gray-300'
+                  : 'text-muted-foreground hover:text-muted-foreground'
               }`}
             >
               Riders ({riders.length})
@@ -591,7 +591,7 @@ export default function ClubDetail() {
               className={`px-6 py-3 font-semibold transition-colors ${
                 activeTab === 'horses'
                   ? 'text-purple-400 border-b-2 border-purple-400'
-                  : 'text-gray-400 hover:text-gray-300'
+                  : 'text-muted-foreground hover:text-muted-foreground'
               }`}
             >
               Horses ({horses.length})
@@ -611,7 +611,7 @@ export default function ClubDetail() {
 
               {showAddRider && !isViewMode && (
                 <form onSubmit={addRider} className="space-y-4 mb-6 pb-6 ">
-                  <h3 className="text-lg font-semibold text-white">Add New Rider</h3>
+                  <h3 className="text-lg font-semibold text-on-surface">Add New Rider</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
@@ -652,7 +652,7 @@ export default function ClubDetail() {
                       className="input"
                     />
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">Date of Birth</label>
+                      <label className="block text-xs text-muted-foreground mb-1">Date of Birth</label>
                       <input
                         type="date"
                         value={riderForm.dob}
@@ -665,9 +665,9 @@ export default function ClubDetail() {
                       onChange={e => setRiderForm({ ...riderForm, gender: e.target.value })}
                       className="input"
                     >
-                      <option value="Male" className="bg-slate-800 text-white">Male</option>
-                      <option value="Female" className="bg-slate-800 text-white">Female</option>
-                      <option value="Other" className="bg-slate-800 text-white">Other</option>
+                      <option value="Male" className="bg-slate-800 text-on-surface">Male</option>
+                      <option value="Female" className="bg-slate-800 text-on-surface">Female</option>
+                      <option value="Other" className="bg-slate-800 text-on-surface">Other</option>
                     </select>
                     <input
                       type="text"
@@ -685,7 +685,7 @@ export default function ClubDetail() {
               )}
 
               {riders.length === 0 ? (
-                <p className="text-gray-400">No riders yet</p>
+                <p className="text-muted-foreground">No riders yet</p>
               ) : (
                 <div className="table-container">
                   <table className="table">
@@ -726,8 +726,8 @@ export default function ClubDetail() {
                               <td><input type="text" value={editRiderForm.address} onChange={e => setEditRiderForm({ ...editRiderForm, address: e.target.value })} className="input text-xs py-1 px-2 w-32" /></td>
                               <td>
                                 <div className="flex gap-1">
-                                  <button onClick={() => updateRider(rider.id)} className="text-green-400 hover:text-green-300"><Save size={16} /></button>
-                                  <button onClick={() => setEditingRiderId(null)} className="text-gray-400 hover:text-gray-300"><X size={16} /></button>
+                                  <button onClick={() => updateRider(rider.id)} className="text-emerald-400 hover:text-green-300"><Save size={16} /></button>
+                                  <button onClick={() => setEditingRiderId(null)} className="text-muted-foreground hover:text-muted-foreground"><X size={16} /></button>
                                 </div>
                               </td>
                             </>
@@ -745,7 +745,7 @@ export default function ClubDetail() {
                                   {!isViewMode && (
                                     <>
                                       <button onClick={() => startEditRider(rider)} className="text-blue-400 hover:text-blue-300"><Pencil size={16} /></button>
-                                      <button onClick={() => deleteRider(rider.id)} className="text-red-400 hover:text-red-300"><Trash2 size={16} /></button>
+                                      <button onClick={() => deleteRider(rider.id)} className="text-destructive hover:text-destructive"><Trash2 size={16} /></button>
                                     </>
                                   )}
                                 </div>
@@ -774,7 +774,7 @@ export default function ClubDetail() {
 
               {showAddHorse && !isViewMode && (
                 <form onSubmit={addHorse} className="space-y-4 mb-6 pb-6 ">
-                  <h3 className="text-lg font-semibold text-white">Add New Horse</h3>
+                  <h3 className="text-lg font-semibold text-on-surface">Add New Horse</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <input
                       type="text"
@@ -803,12 +803,12 @@ export default function ClubDetail() {
                       onChange={e => setHorseForm({ ...horseForm, gender: e.target.value })}
                       className="input"
                     >
-                      <option value="Stallion" className="bg-slate-800 text-white">Stallion</option>
-                      <option value="Mare" className="bg-slate-800 text-white">Mare</option>
-                      <option value="Gelding" className="bg-slate-800 text-white">Gelding</option>
+                      <option value="Stallion" className="bg-slate-800 text-on-surface">Stallion</option>
+                      <option value="Mare" className="bg-slate-800 text-on-surface">Mare</option>
+                      <option value="Gelding" className="bg-slate-800 text-on-surface">Gelding</option>
                     </select>
                     <div>
-                      <label className="block text-xs text-gray-400 mb-1">Year of Birth</label>
+                      <label className="block text-xs text-muted-foreground mb-1">Year of Birth</label>
                       <input
                         type="number"
                         placeholder="Year of Birth"
@@ -849,7 +849,7 @@ export default function ClubDetail() {
               )}
 
               {horses.length === 0 ? (
-                <p className="text-gray-400">No horses yet</p>
+                <p className="text-muted-foreground">No horses yet</p>
               ) : (
                 <div className="table-container">
                   <table className="table">
@@ -885,8 +885,8 @@ export default function ClubDetail() {
                               <td><input type="text" value={editHorseForm.horseCode} onChange={e => setEditHorseForm({ ...editHorseForm, horseCode: e.target.value })} className="input text-xs py-1 px-2 w-24" /></td>
                               <td>
                                 <div className="flex gap-1">
-                                  <button onClick={() => updateHorse(horse.id)} className="text-green-400 hover:text-green-300"><Save size={16} /></button>
-                                  <button onClick={() => setEditingHorseId(null)} className="text-gray-400 hover:text-gray-300"><X size={16} /></button>
+                                  <button onClick={() => updateHorse(horse.id)} className="text-emerald-400 hover:text-green-300"><Save size={16} /></button>
+                                  <button onClick={() => setEditingHorseId(null)} className="text-muted-foreground hover:text-muted-foreground"><X size={16} /></button>
                                 </div>
                               </td>
                             </>
@@ -904,7 +904,7 @@ export default function ClubDetail() {
                                   {!isViewMode && (
                                     <>
                                       <button onClick={() => startEditHorse(horse)} className="text-blue-400 hover:text-blue-300"><Pencil size={16} /></button>
-                                      <button onClick={() => deleteHorse(horse.id)} className="text-red-400 hover:text-red-300"><Trash2 size={16} /></button>
+                                      <button onClick={() => deleteHorse(horse.id)} className="text-destructive hover:text-destructive"><Trash2 size={16} /></button>
                                     </>
                                   )}
                                 </div>

@@ -140,7 +140,7 @@ export default function CreateRegistration() {
           <div className="max-w-2xl mx-auto">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-gray-300 mt-4">Loading...</p>
+              <p className="text-muted-foreground mt-4">Loading...</p>
             </div>
           </div>
         </div>
@@ -162,21 +162,21 @@ export default function CreateRegistration() {
             {/* Title Section */}
             <div className="px-8 py-6 ">
               <h1 className="text-2xl font-bold">Register for Event</h1>
-              <p className="text-gray-300 mt-2">Create a new event registration</p>
+              <p className="text-muted-foreground mt-2">Create a new event registration</p>
             </div>
 
             {/* Form Section */}
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
               {error && (
                 <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-4">
-                  <p className="text-red-300 font-medium">{error}</p>
+                  <p className="text-destructive font-medium">{error}</p>
                 </div>
               )}
 
               {/* Event - Mandatory */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Event <span className="text-red-400">*</span>
+                <label className="block text-sm font-semibold text-on-surface mb-2">
+                  Event <span className="text-destructive">*</span>
                 </label>
                 <select
                   name="eventId"
@@ -187,7 +187,7 @@ export default function CreateRegistration() {
                 >
                   <option value="">Select an event</option>
                   {events.map(event => (
-                    <option key={event.id} value={event.id} className="bg-slate-800 text-white">
+                    <option key={event.id} value={event.id} className="bg-slate-800 text-on-surface">
                       {event.name}
                     </option>
                   ))}
@@ -196,8 +196,8 @@ export default function CreateRegistration() {
 
               {/* Rider - Mandatory */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Rider <span className="text-red-400">*</span>
+                <label className="block text-sm font-semibold text-on-surface mb-2">
+                  Rider <span className="text-destructive">*</span>
                 </label>
                 <select
                   name="riderId"
@@ -208,7 +208,7 @@ export default function CreateRegistration() {
                 >
                   <option value="">Select a rider</option>
                   {riders.map(rider => (
-                    <option key={rider.id} value={rider.id} className="bg-slate-800 text-white">
+                    <option key={rider.id} value={rider.id} className="bg-slate-800 text-on-surface">
                       {rider.firstName} {rider.lastName}
                     </option>
                   ))}
@@ -217,8 +217,8 @@ export default function CreateRegistration() {
 
               {/* Horse - Mandatory */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Horse <span className="text-red-400">*</span>
+                <label className="block text-sm font-semibold text-on-surface mb-2">
+                  Horse <span className="text-destructive">*</span>
                 </label>
                 <select
                   name="horseId"
@@ -229,7 +229,7 @@ export default function CreateRegistration() {
                 >
                   <option value="">Select a horse</option>
                   {horses.map(horse => (
-                    <option key={horse.id} value={horse.id} className="bg-slate-800 text-white">
+                    <option key={horse.id} value={horse.id} className="bg-slate-800 text-on-surface">
                       {horse.name}
                     </option>
                   ))}
@@ -238,8 +238,8 @@ export default function CreateRegistration() {
 
               {/* Category - Mandatory */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Category <span className="text-red-400">*</span>
+                <label className="block text-sm font-semibold text-on-surface mb-2">
+                  Category <span className="text-destructive">*</span>
                 </label>
                 <select
                   name="categoryId"
@@ -253,7 +253,7 @@ export default function CreateRegistration() {
                     {formData.eventId ? 'Select a category' : 'Select an event first'}
                   </option>
                   {categories.map(category => (
-                    <option key={category.id} value={category.id} className="bg-slate-800 text-white">
+                    <option key={category.id} value={category.id} className="bg-slate-800 text-on-surface">
                       {category.name} - ₹{category.price}
                     </option>
                   ))}

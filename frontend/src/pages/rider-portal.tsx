@@ -154,11 +154,11 @@ export default function RiderPortal() {
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-600 text-sm font-medium">{title}</p>
-          <p className="text-4xl font-bold text-gray-900 mt-2">{value}</p>
+          <p className="text-muted-foreground text-sm font-medium">{title}</p>
+          <p className="text-4xl font-bold text-on-surface mt-2">{value}</p>
         </div>
         <div className={`p-4 rounded-lg ${color}`}>
-          <Icon className="w-8 h-8 text-white" />
+          <Icon className="w-8 h-8 text-on-surface" />
         </div>
       </div>
     </div>
@@ -169,8 +169,8 @@ export default function RiderPortal() {
       onClick={() => setActiveTab(name)}
       className={`px-4 py-2 font-medium rounded-lg transition ${
         activeTab === name
-          ? 'bg-blue-600 text-white'
-          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          ? 'bg-blue-600 text-on-surface'
+          : 'bg-surface-container text-on-surface-variant hover:bg-surface-bright'
       }`}
     >
       {label}
@@ -181,8 +181,8 @@ export default function RiderPortal() {
     <ProtectedRoute>
       <div className="space-y-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Rider Portal</h1>
-          <p className="text-gray-600 mt-1">Manage your events and horses</p>
+          <h1 className="text-3xl font-bold text-on-surface">Rider Portal</h1>
+          <p className="text-muted-foreground mt-1">Manage your events and horses</p>
         </div>
 
         {/* Tab Navigation */}
@@ -225,34 +225,34 @@ export default function RiderPortal() {
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+              <h2 className="text-lg font-semibold text-on-surface mb-4">Quick Actions</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Link
                   href="/horses/create"
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-surface-lowest transition"
                 >
                   <div className="flex items-center gap-3">
                     <Plus className="text-blue-600 text-xl" />
                     <div>
-                      <p className="font-semibold text-gray-900">Add New Horse</p>
-                      <p className="text-sm text-gray-600">Register your horse</p>
+                      <p className="font-semibold text-on-surface">Add New Horse</p>
+                      <p className="text-sm text-muted-foreground">Register your horse</p>
                     </div>
                   </div>
-                  <ChevronRight className="text-gray-400" />
+                  <ChevronRight className="text-muted-foreground" />
                 </Link>
 
                 <Link
                   href="/events"
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-surface-lowest transition"
                 >
                   <div className="flex items-center gap-3">
                     <Calendar className="text-green-600 text-xl" />
                     <div>
-                      <p className="font-semibold text-gray-900">Browse Events</p>
-                      <p className="text-sm text-gray-600">Find upcoming events</p>
+                      <p className="font-semibold text-on-surface">Browse Events</p>
+                      <p className="text-sm text-muted-foreground">Find upcoming events</p>
                     </div>
                   </div>
-                  <ChevronRight className="text-gray-400" />
+                  <ChevronRight className="text-muted-foreground" />
                 </Link>
               </div>
             </div>
@@ -262,7 +262,7 @@ export default function RiderPortal() {
         {/* My Events Tab */}
         {activeTab === 'myEvents' && (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">My Event Registrations</h2>
+            <h2 className="text-xl font-semibold text-on-surface">My Event Registrations</h2>
             {loading ? (
               <div className="text-center py-8">Loading...</div>
             ) : myEvents.length === 0 ? (
@@ -274,8 +274,8 @@ export default function RiderPortal() {
                 {myEvents.map(reg => (
                   <div key={reg.id} className="bg-white rounded-lg shadow p-4 flex justify-between items-center">
                     <div>
-                      <p className="font-semibold text-gray-900">{reg.event?.name}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-semibold text-on-surface">{reg.event?.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         {reg.event?.startDate && new Date(reg.event.startDate).toLocaleDateString()}
                       </p>
                     </div>
@@ -287,7 +287,7 @@ export default function RiderPortal() {
                       }`}>
                         {reg.paymentStatus}
                       </span>
-                      <p className="font-semibold text-gray-900">₹{reg.totalAmount}</p>
+                      <p className="font-semibold text-on-surface">₹{reg.totalAmount}</p>
                     </div>
                   </div>
                 ))}
@@ -300,10 +300,10 @@ export default function RiderPortal() {
         {activeTab === 'myHorses' && (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">My Horses</h2>
+              <h2 className="text-xl font-semibold text-on-surface">My Horses</h2>
               <Link
                 href="/horses/create"
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-on-surface rounded-lg hover:bg-blue-700"
               >
                 <Plus /> Add Horse
               </Link>
@@ -320,9 +320,9 @@ export default function RiderPortal() {
                   <Link key={horse.id} href={`/horses/${horse.id}`} className="block bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-semibold text-gray-900 text-lg">{horse.name}</p>
-                        <p className="text-sm text-gray-600">Color: {horse.color}</p>
-                        <p className="text-sm text-gray-600">Gender: {horse.gender}</p>
+                        <p className="font-semibold text-on-surface text-lg">{horse.name}</p>
+                        <p className="text-sm text-muted-foreground">Color: {horse.color}</p>
+                        <p className="text-sm text-muted-foreground">Gender: {horse.gender}</p>
                       </div>
                       <Box className="text-amber-600 text-3xl" />
                     </div>
@@ -336,11 +336,11 @@ export default function RiderPortal() {
         {/* Browse All Events Tab */}
         {activeTab === 'events' && (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">All Available Events</h2>
+            <h2 className="text-xl font-semibold text-on-surface">All Available Events</h2>
             {loading ? (
               <div className="text-center py-8">Loading...</div>
             ) : allEvents.length === 0 ? (
-              <div className="bg-gray-50 border border-gray-200 text-gray-800 px-4 py-3 rounded">
+              <div className="bg-surface-lowest border border-gray-200 text-gray-800 px-4 py-3 rounded">
                 No events available at this time.
               </div>
             ) : (
@@ -353,12 +353,12 @@ export default function RiderPortal() {
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-semibold text-gray-900 text-lg">{event.name}</p>
-                        <p className="text-sm text-gray-600">
+                        <p className="font-semibold text-on-surface text-lg">{event.name}</p>
+                        <p className="text-sm text-muted-foreground">
                           {event.startDate && new Date(event.startDate).toLocaleDateString()} - {event.endDate && new Date(event.endDate).toLocaleDateString()}
                         </p>
                       </div>
-                      <span className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                      <span className="px-4 py-2 bg-blue-600 text-on-surface rounded hover:bg-blue-700">
                         View Details
                       </span>
                     </div>
@@ -372,11 +372,11 @@ export default function RiderPortal() {
         {/* Featured Events Tab */}
         {activeTab === 'featured' && (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">Featured Events</h2>
+            <h2 className="text-xl font-semibold text-on-surface">Featured Events</h2>
             {loading ? (
               <div className="text-center py-8">Loading...</div>
             ) : featuredEvents.length === 0 ? (
-              <div className="bg-gray-50 border border-gray-200 text-gray-800 px-4 py-6 rounded text-center">
+              <div className="bg-surface-lowest border border-gray-200 text-gray-800 px-4 py-6 rounded text-center">
                 <p>No featured events at this time.</p>
               </div>
             ) : (
@@ -384,7 +384,7 @@ export default function RiderPortal() {
                 {featuredEvents.map(event => (
                   <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
                     <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
-                      <h3 className="text-xl font-bold text-white">{event.name}</h3>
+                      <h3 className="text-xl font-bold text-on-surface">{event.name}</h3>
                       <p className="text-blue-100 text-sm mt-1">
                         {new Date(event.startDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         {event.endDate && ` — ${new Date(event.endDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`}
@@ -392,7 +392,7 @@ export default function RiderPortal() {
                     </div>
                     <div className="p-6">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           {event.registrationCount !== undefined && (
                             <span className="flex items-center gap-1">
                               <TrendingUp className="text-green-500" /> {event.registrationCount} registrations
@@ -401,7 +401,7 @@ export default function RiderPortal() {
                         </div>
                         <Link
                           href={`/events/${event.id}`}
-                          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition"
+                          className="px-6 py-2 bg-blue-600 text-on-surface rounded-lg hover:bg-blue-700 font-medium transition"
                         >
                           View & Register
                         </Link>
@@ -414,8 +414,8 @@ export default function RiderPortal() {
 
             {termsConditions && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Terms & Conditions</h3>
-                <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                <h3 className="text-lg font-semibold text-on-surface mb-3">Terms & Conditions</h3>
+                <div className="prose prose-sm max-w-none text-on-surface-variant whitespace-pre-wrap">
                   {termsConditions}
                 </div>
               </div>

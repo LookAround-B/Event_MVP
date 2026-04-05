@@ -206,10 +206,10 @@ export default function ClubsList() {
       <Head><title>Clubs | Equestrian Events</title></Head>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold">Club Co-ordinator List</h2>
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Club <span className="gradient-text">Network</span></h1>
           <div className="flex gap-3">
             {selectedIds.size > 0 && (
-              <button onClick={handleBulkDelete} className="btn-secondary text-red-400 border-red-400">
+              <button onClick={handleBulkDelete} className="btn-secondary text-destructive border-red-400">
                 <Trash2 className="inline mr-2" /> Delete ({selectedIds.size})
               </button>
             )}
@@ -226,7 +226,7 @@ export default function ClubsList() {
         </div>
 
         {/* Search & Filters */}
-        <div className="mb-6 card">
+        <div className="mb-6 bento-card">
           <div className="flex gap-4 items-center">
             <input
               type="text"
@@ -241,7 +241,7 @@ export default function ClubsList() {
             >
               <Filter /> Filters
               {(filterCity || filterStatus) && (
-                <span className="bg-purple-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                <span className="bg-purple-500 text-on-surface rounded-full w-5 h-5 text-xs flex items-center justify-center">
                   {(filterCity ? 1 : 0) + (filterStatus ? 1 : 0)}
                 </span>
               )}
@@ -252,32 +252,32 @@ export default function ClubsList() {
             <div className="mt-4 pt-4 pt-0">
               <div className="flex gap-4 items-end">
                 <div className="flex-1">
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">City</label>
+                  <label className="form-label">City</label>
                   <select
                     value={filterCity}
                     onChange={e => setFilterCity(e.target.value)}
                     className="input"
                   >
-                    <option value="" className="bg-slate-800 text-white">All Cities</option>
+                    <option value="" className="bg-slate-800 text-on-surface">All Cities</option>
                     {uniqueCities.map(city => (
-                      <option key={city} value={city} className="bg-slate-800 text-white">{city}</option>
+                      <option key={city} value={city} className="bg-slate-800 text-on-surface">{city}</option>
                     ))}
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-semibold text-gray-300 mb-1">Status</label>
+                  <label className="form-label">Status</label>
                   <select
                     value={filterStatus}
                     onChange={e => setFilterStatus(e.target.value as '' | 'active' | 'inactive')}
                     className="input"
                   >
-                    <option value="" className="bg-slate-800 text-white">All Status</option>
-                    <option value="active" className="bg-slate-800 text-white">Active</option>
-                    <option value="inactive" className="bg-slate-800 text-white">Inactive</option>
+                    <option value="" className="bg-slate-800 text-on-surface">All Status</option>
+                    <option value="active" className="bg-slate-800 text-on-surface">Active</option>
+                    <option value="inactive" className="bg-slate-800 text-on-surface">Inactive</option>
                   </select>
                 </div>
                 {(filterCity || filterStatus) && (
-                  <button onClick={clearFilters} className="btn-secondary flex items-center gap-1 text-red-400">
+                  <button onClick={clearFilters} className="btn-secondary flex items-center gap-1 text-destructive">
                     <X /> Clear
                   </button>
                 )}
@@ -295,7 +295,7 @@ export default function ClubsList() {
               ))}
             </div>
           ) : filteredClubs.length === 0 ? (
-            <div className="text-center py-8 text-gray-300">No clubs found</div>
+            <div className="text-center py-8 text-muted-foreground">No clubs found</div>
           ) : (
             <>
               <table className="table">
@@ -306,7 +306,7 @@ export default function ClubsList() {
                         type="checkbox"
                         checked={selectedIds.size === filteredClubs.length && filteredClubs.length > 0}
                         onChange={toggleSelectAll}
-                        className="rounded border-gray-600"
+                        className="rounded border-border"
                       />
                     </th>
                     <th>Club Name</th>
@@ -328,7 +328,7 @@ export default function ClubsList() {
                           type="checkbox"
                           checked={selectedIds.has(club.id)}
                           onChange={() => toggleSelect(club.id)}
-                          className="rounded border-gray-600"
+                          className="rounded border-border"
                         />
                       </td>
                       <td className="font-medium">{club.name}</td>
@@ -347,8 +347,8 @@ export default function ClubsList() {
                               }}
                               autoFocus
                             />
-                            <button onClick={() => saveEmbassyId(club.id)} className="text-green-400 text-xs">Save</button>
-                            <button onClick={() => setEditingEmbassyId(null)} className="text-gray-400 text-xs">Cancel</button>
+                            <button onClick={() => saveEmbassyId(club.id)} className="text-emerald-400 text-xs">Save</button>
+                            <button onClick={() => setEditingEmbassyId(null)} className="text-muted-foreground text-xs">Cancel</button>
                           </div>
                         ) : (
                           <span
@@ -378,7 +378,7 @@ export default function ClubsList() {
                         <ActionsDropdown actions={[
                           { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: () => router.push(`/clubs/${club.id}?mode=view`) },
                           { label: 'Edit', icon: <Pencil className="w-4 h-4" />, onClick: () => router.push(`/clubs/${club.id}`), className: 'text-amber-400 hover:text-amber-300' },
-                          { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: () => deleteClub(club.id), className: 'text-red-400 hover:text-red-300' },
+                          { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: () => deleteClub(club.id), className: 'text-destructive hover:text-destructive' },
                         ]} />
                       </td>
                     </tr>
@@ -395,7 +395,7 @@ export default function ClubsList() {
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2 text-gray-300">
+                  <span className="px-4 py-2 text-muted-foreground">
                     Page {page} of {pages}
                   </span>
                   <button

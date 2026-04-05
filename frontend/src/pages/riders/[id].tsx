@@ -228,7 +228,7 @@ export default function RiderDetail() {
     return (
       <ProtectedRoute>
         <div className="text-center py-12">
-          <p className="text-gray-300 text-lg">Rider not found</p>
+          <p className="text-muted-foreground text-lg">Rider not found</p>
           <Link href="/riders" className="text-primary hover:text-primary-300 mt-4 inline-block">
             Back to Riders
           </Link>
@@ -290,7 +290,7 @@ export default function RiderDetail() {
                     <Image src={editForm.imageUrl} alt="Rider" width={128} height={128} className="w-32 h-32 rounded-lg object-cover" />
                   ) : (
                     <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
-                      <ImageIcon className="w-12 h-12 text-gray-500" />
+                      <ImageIcon className="w-12 h-12 text-muted-foreground" />
                     </div>
                   )}
                   <input
@@ -306,7 +306,7 @@ export default function RiderDetail() {
                   <Image src={rider.imageUrl} alt="Rider" width={128} height={128} className="w-32 h-32 rounded-lg object-cover" />
                 ) : (
                   <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
-                    <ImageIcon className="w-12 h-12 text-gray-500" />
+                    <ImageIcon className="w-12 h-12 text-muted-foreground" />
                   </div>
                 )
               )}
@@ -315,7 +315,7 @@ export default function RiderDetail() {
             {/* Info */}
             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-400">Embassy ID</p>
+                <p className="text-sm text-muted-foreground">Embassy ID</p>
                 {editing ? (
                   <input
                     type="text"
@@ -324,11 +324,11 @@ export default function RiderDetail() {
                     className="input font-mono"
                   />
                 ) : (
-                  <p className="text-white font-mono">{rider.eId}</p>
+                  <p className="text-on-surface font-mono">{rider.eId}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-400">EFI Rider ID <span className="text-red-400">*</span></p>
+                <p className="text-sm text-muted-foreground">EFI Rider ID <span className="text-destructive">*</span></p>
                 {editing ? (
                   <input
                     type="text"
@@ -338,11 +338,11 @@ export default function RiderDetail() {
                     required
                   />
                 ) : (
-                  <p className="text-white">{rider.efiRiderId || '-'}</p>
+                  <p className="text-on-surface">{rider.efiRiderId || '-'}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-400">First Name <span className="text-red-400">*</span></p>
+                <p className="text-sm text-muted-foreground">First Name <span className="text-destructive">*</span></p>
                 {editing ? (
                   <input
                     type="text"
@@ -352,11 +352,11 @@ export default function RiderDetail() {
                     required
                   />
                 ) : (
-                  <p className="text-white font-semibold">{rider.firstName}</p>
+                  <p className="text-on-surface font-semibold">{rider.firstName}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-400">Last Name</p>
+                <p className="text-sm text-muted-foreground">Last Name</p>
                 {editing ? (
                   <input
                     type="text"
@@ -365,11 +365,11 @@ export default function RiderDetail() {
                     className="input"
                   />
                 ) : (
-                  <p className="text-white">{rider.lastName || '-'}</p>
+                  <p className="text-on-surface">{rider.lastName || '-'}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-400">Email</p>
+                <p className="text-sm text-muted-foreground">Email</p>
                 {editing ? (
                   <input
                     type="email"
@@ -379,11 +379,11 @@ export default function RiderDetail() {
                     required
                   />
                 ) : (
-                  <p className="text-white">{rider.email}</p>
+                  <p className="text-on-surface">{rider.email}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-400">Gender</p>
+                <p className="text-sm text-muted-foreground">Gender</p>
                 {editing ? (
                   <select
                     value={editForm.gender}
@@ -396,11 +396,11 @@ export default function RiderDetail() {
                     <option value="Other">Other</option>
                   </select>
                 ) : (
-                  <p className="text-white">{rider.gender || '-'}</p>
+                  <p className="text-on-surface">{rider.gender || '-'}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-400">Date of Birth</p>
+                <p className="text-sm text-muted-foreground">Date of Birth</p>
                 {editing ? (
                   <input
                     type="date"
@@ -409,11 +409,11 @@ export default function RiderDetail() {
                     className="input"
                   />
                 ) : (
-                  <p className="text-white">{rider.dob ? new Date(rider.dob).toLocaleDateString() : '-'}</p>
+                  <p className="text-on-surface">{rider.dob ? new Date(rider.dob).toLocaleDateString() : '-'}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-400">Mobile</p>
+                <p className="text-sm text-muted-foreground">Mobile</p>
                 {editing ? (
                   <input
                     type="tel"
@@ -422,11 +422,11 @@ export default function RiderDetail() {
                     className="input"
                   />
                 ) : (
-                  <p className="text-white">{rider.mobile || '-'}</p>
+                  <p className="text-on-surface">{rider.mobile || '-'}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-400">Optional Phone</p>
+                <p className="text-sm text-muted-foreground">Optional Phone</p>
                 {editing ? (
                   <input
                     type="tel"
@@ -435,15 +435,15 @@ export default function RiderDetail() {
                     className="input"
                   />
                 ) : (
-                  <p className="text-white">{rider.optionalPhone || '-'}</p>
+                  <p className="text-on-surface">{rider.optionalPhone || '-'}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-gray-400">Club</p>
-                <p className="text-white">{rider.club?.name || '-'}</p>
+                <p className="text-sm text-muted-foreground">Club</p>
+                <p className="text-on-surface">{rider.club?.name || '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-400">Status</p>
+                <p className="text-sm text-muted-foreground">Status</p>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   rider.isActive
                     ? 'badge-emerald'
@@ -458,7 +458,7 @@ export default function RiderDetail() {
 
         {/* Address Section */}
         <div className="bento-card p-6">
-          <h3 className="text-xl font-bold text-white mb-4">Address</h3>
+          <h3 className="text-xl font-bold text-on-surface mb-4">Address</h3>
           {editing ? (
             <div className="space-y-3">
               <textarea
@@ -477,18 +477,18 @@ export default function RiderDetail() {
               />
             </div>
           ) : (
-            <p className="text-gray-300">{rider.address || 'No address provided'}</p>
+            <p className="text-muted-foreground">{rider.address || 'No address provided'}</p>
           )}
         </div>
 
         {/* Social Links Section */}
         <div className="bento-card p-6">
-          <h3 className="text-xl font-bold text-white mb-4">Social Links</h3>
+          <h3 className="text-xl font-bold text-on-surface mb-4">Social Links</h3>
           {editing ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {(['instagram', 'twitter', 'facebook', 'youtube', 'website', 'other'] as const).map(platform => (
                 <div key={platform}>
-                  <label className="block text-sm text-gray-400 mb-1 capitalize">{platform}</label>
+                  <label className="block text-sm text-muted-foreground mb-1 capitalize">{platform}</label>
                   <input
                     type="text"
                     value={editForm.socialLinks[platform] || ''}
@@ -509,7 +509,7 @@ export default function RiderDetail() {
                   .filter(([_, v]) => v)
                   .map(([platform, url]) => (
                     <div key={platform} className="flex items-center gap-2">
-                      <span className="text-gray-400 capitalize text-sm">{platform}:</span>
+                      <span className="text-muted-foreground capitalize text-sm">{platform}:</span>
                       <a
                         href={url!.startsWith('http') ? url! : `https://${url}`}
                         target="_blank"
@@ -521,7 +521,7 @@ export default function RiderDetail() {
                     </div>
                   ))
               ) : (
-                <p className="text-gray-500">No social links added</p>
+                <p className="text-muted-foreground">No social links added</p>
               )}
             </div>
           )}
@@ -530,7 +530,7 @@ export default function RiderDetail() {
         {/* Horses Section */}
         <div className="bento-card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-white">Horses ({rider.horses.length})</h3>
+            <h3 className="text-xl font-bold text-on-surface">Horses ({rider.horses.length})</h3>
             {!isViewMode && (
               <button
                 onClick={() => { setShowHorseSelector(!showHorseSelector); if (!showHorseSelector) fetchAvailableHorses(); }}
@@ -544,7 +544,7 @@ export default function RiderDetail() {
           {/* Horse Selector */}
           {showHorseSelector && (
             <div className="mb-4 p-4 rounded-lg  border border-white border-opacity-10">
-              <p className="text-sm text-gray-300 mb-2">Select a horse to link to this rider:</p>
+              <p className="text-sm text-muted-foreground mb-2">Select a horse to link to this rider:</p>
               <div className="flex gap-3">
                 <select
                   value={selectedHorseId}
@@ -571,7 +571,7 @@ export default function RiderDetail() {
                 </button>
               </div>
               {availableHorses.length === 0 && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-muted-foreground mt-2">
                   No available horses. <Link href="/horses/create" className="text-primary">Create one</Link>.
                 </p>
               )}
@@ -580,7 +580,7 @@ export default function RiderDetail() {
 
           {/* Horses Table */}
           {rider.horses.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No horses linked to this rider</p>
+            <p className="text-muted-foreground text-center py-4">No horses linked to this rider</p>
           ) : (
             <table className="table">
               <thead>
@@ -607,7 +607,7 @@ export default function RiderDetail() {
                       <td>
                         <button
                           onClick={() => handleUnlinkHorse(horse.id)}
-                          className="text-red-400 hover:text-red-300"
+                          className="text-destructive hover:text-destructive"
                           title="Remove horse"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -624,7 +624,7 @@ export default function RiderDetail() {
         {/* Registrations Summary */}
         {rider.registrations.length > 0 && (
           <div className="bento-card p-6">
-            <h3 className="text-xl font-bold text-white mb-4">Event Registrations ({rider.registrations.length})</h3>
+            <h3 className="text-xl font-bold text-on-surface mb-4">Event Registrations ({rider.registrations.length})</h3>
             <table className="table">
               <thead>
                 <tr>

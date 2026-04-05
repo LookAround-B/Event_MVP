@@ -110,7 +110,7 @@ function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="chart-tooltip">
-      <p className="font-semibold text-sm mb-1" style={{ color: 'hsl(var(--on-surface))' }}>{label}</p>
+      <p className="font-semibold text-sm mb-1" >{label}</p>
       {payload.map((entry: any, i: number) => (
         <p key={i} className="text-xs" style={{ color: entry.color }}>
           {entry.name}: {entry.value}
@@ -146,11 +146,11 @@ function StatCard({
         <div>
           <p
             className="text-[10px] font-bold uppercase tracking-widest"
-            style={{ color: 'hsl(var(--muted-foreground))' }}
+            
           >
             {title}
           </p>
-          <p className="text-2xl font-bold mt-1" style={{ color: 'hsl(var(--on-surface))' }}>
+          <p className="text-2xl font-bold mt-1" >
             {value}
           </p>
         </div>
@@ -187,7 +187,7 @@ function Pagination({ page, totalPages, onPageChange }: { page: number; totalPag
       >
         <ChevronLeft size={16} />
       </button>
-      <span className="text-sm px-3" style={{ color: 'hsl(var(--muted-foreground))' }}>
+      <span className="text-sm px-3" >
         Page {page} of {totalPages}
       </span>
       <button
@@ -217,7 +217,7 @@ function MultiSelect({ label, options, selected, onChange }: { label: string; op
         className="input w-full text-left flex justify-between items-center cursor-pointer"
       >
         <span className="text-sm">{selected.length > 0 ? `${label} (${selected.length})` : label}</span>
-        <Filter size={14} style={{ color: 'hsl(var(--muted-foreground))' }} />
+        <Filter size={14}  />
       </button>
       {open && (
         <div
@@ -228,13 +228,13 @@ function MultiSelect({ label, options, selected, onChange }: { label: string; op
           }}
         >
           {options.length === 0 ? (
-            <div className="px-3 py-2 text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>No options</div>
+            <div className="px-3 py-2 text-xs" >No options</div>
           ) : (
             options.map(opt => (
               <label
                 key={opt.value}
                 className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm transition-colors"
-                style={{ color: 'hsl(var(--on-surface))' }}
+                
                 onMouseOver={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-bright))')}
                 onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
               >
@@ -250,14 +250,13 @@ function MultiSelect({ label, options, selected, onChange }: { label: string; op
             ))
           )}
           <div
-            className="p-2 flex gap-2"
-            style={{ borderTop: '1px solid hsl(var(--border) / 0.3)' }}
+            className="p-2 flex gap-2 border-t border-border/30"
           >
             <button
               type="button"
               onClick={() => { onChange([]); setOpen(false); }}
               className="text-xs transition-colors"
-              style={{ color: 'hsl(var(--muted-foreground))' }}
+              
             >
               Clear
             </button>
@@ -286,7 +285,7 @@ function SectionSpinner({ label }: { label?: string }) {
           className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 mx-auto mb-3"
           style={{ borderColor: 'hsl(var(--primary))' }}
         />
-        {label && <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>{label}</p>}
+        {label && <p className="text-sm" >{label}</p>}
       </div>
     </div>
   );
@@ -479,10 +478,15 @@ function DashboardContent() {
   return (
     <ProtectedRoute>
       <Head><title>Dashboard | Equestrian Events</title></Head>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-[1600px] mx-auto animate-fade-in">
         {/* Header + Main Event Filter */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <h2 className="text-2xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>Dashboard</h2>
+          <div>
+            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+              Command <span className="gradient-text">Center</span>
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2">Real-time platform analytics and event intelligence.</p>
+          </div>
           <div className="w-full md:w-72">
             <select
               value={mainEventFilter}
@@ -534,7 +538,7 @@ function DashboardContent() {
         ) : (
           <div className="bento-card">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-              <h3 className="text-lg font-semibold" style={{ color: 'hsl(var(--on-surface))' }}>Event Stats</h3>
+              <h3 className="text-lg font-semibold" >Event Stats</h3>
               <select
                 value={selectedChartEvent}
                 onChange={e => setSelectedChartEvent(e.target.value)}
@@ -567,7 +571,7 @@ function DashboardContent() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-center py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>No event data</p>
+              <p className="text-center py-8" >No event data</p>
             )}
           </div>
         )}
@@ -626,7 +630,7 @@ function DashboardContent() {
                   <tbody>
                     {events.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="text-center py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                        <td colSpan={4} className="text-center py-8" >
                           No events found
                         </td>
                       </tr>
@@ -637,10 +641,10 @@ function DashboardContent() {
                           onClick={() => router.push(`/events/${ev.id}`)}
                           className="cursor-pointer"
                         >
-                          <td className="font-medium" style={{ color: 'hsl(var(--on-surface))' }}>{ev.name}</td>
+                          <td className="font-medium" >{ev.name}</td>
                           <td>{formatDate(ev.startDate)}</td>
                           <td>{formatDate(ev.endDate)}</td>
-                          <td className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                          <td className="text-xs" >
                             {ev.venueAddress || ev.venueName || 'N/A'}
                           </td>
                         </tr>
@@ -657,9 +661,9 @@ function DashboardContent() {
         {/* ═══════ SECTION 4: PARTICIPANTS LIST ═══════ */}
         <div className="bento-card">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
-            <h3 className="text-lg font-semibold" style={{ color: 'hsl(var(--on-surface))' }}>
+            <h3 className="text-lg font-semibold" >
               Participants List{' '}
-              <span className="text-sm font-normal" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              <span className="text-sm font-normal" >
                 ({participantCount} total)
               </span>
             </h3>
@@ -736,7 +740,7 @@ function DashboardContent() {
                   <tbody>
                     {participants.length === 0 ? (
                       <tr>
-                        <td colSpan={10} className="text-center py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                        <td colSpan={10} className="text-center py-8" >
                           No participants found
                         </td>
                       </tr>
@@ -751,16 +755,16 @@ function DashboardContent() {
                               style={{ accentColor: 'hsl(var(--primary))' }}
                             />
                           </td>
-                          <td className="font-medium" style={{ color: 'hsl(var(--on-surface))' }}>{p.eventName}</td>
+                          <td className="font-medium" >{p.eventName}</td>
                           <td>{formatDate(p.eventDate)}</td>
                           <td>{p.riderName}</td>
                           <td>{p.clubName}</td>
                           <td>{p.horseName}</td>
                           <td>{p.eventCategory}</td>
-                          <td className="font-medium" style={{ color: 'hsl(var(--on-surface))' }}>
+                          <td className="font-medium" >
                             ₹{p.price.toLocaleString('en-IN')}
                           </td>
-                          <td className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>{p.paymentMethod}</td>
+                          <td className="text-xs" >{p.paymentMethod}</td>
                           <td>
                             <span className={`badge ${paymentBadge(p.paymentStatus)}`}>
                               {p.paymentStatus}

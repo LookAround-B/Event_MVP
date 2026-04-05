@@ -65,12 +65,12 @@ export default function Notifications() {
   const typeIcon = (type: string) => {
     const colors: Record<string, string> = {
       REGISTRATION_APPROVED: 'bg-emerald-500/15 text-emerald-400',
-      REGISTRATION_REJECTED: 'bg-red-500/15 text-red-400',
+      REGISTRATION_REJECTED: 'bg-red-500/15 text-destructive',
       PAYMENT_RECEIVED: 'bg-blue-500/15 text-blue-400',
       EVENT_UPDATE: 'bg-purple-500/15 text-purple-400',
-      SYSTEM: 'bg-gray-500/15 text-gray-400',
+      SYSTEM: 'bg-surface-lowest0/15 text-muted-foreground',
     };
-    return colors[type] || 'bg-gray-500/15 text-gray-400';
+    return colors[type] || 'bg-surface-lowest0/15 text-muted-foreground';
   };
 
   const timeAgo = (dateStr: string) => {
@@ -91,20 +91,20 @@ export default function Notifications() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-white">Notifications</h1>
+            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Alert <span className="gradient-text">Center</span></h1>
             {unreadCount > 0 && (
-              <p className="text-sm text-gray-300 mt-1">{unreadCount} unread</p>
+              <p className="text-sm text-muted-foreground mt-1">{unreadCount} unread</p>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setShowUnreadOnly(!showUnreadOnly)}
-              className={`px-3 py-2 rounded-lg text-sm transition ${showUnreadOnly ? 'bg-purple-600 text-white' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
+              className={`px-3 py-2 rounded-lg text-sm transition ${showUnreadOnly ? 'bg-purple-600 text-on-surface' : 'bg-white/10 text-muted-foreground hover:bg-white/20'}`}
             >
               {showUnreadOnly ? 'Show All' : 'Unread Only'}
             </button>
             {unreadCount > 0 && (
-              <button onClick={markAllAsRead} className="px-3 py-2 bg-white/10 text-gray-300 rounded-lg text-sm hover:bg-white/20 flex items-center gap-1 transition">
+              <button onClick={markAllAsRead} className="px-3 py-2 bg-white/10 text-muted-foreground rounded-lg text-sm hover:bg-white/20 flex items-center gap-1 transition">
                 <CheckCircle size={14} /> Mark All Read
               </button>
             )}
@@ -112,11 +112,11 @@ export default function Notifications() {
         </div>
 
         {loading ? (
-          <div className="text-center py-8 text-gray-400">Loading notifications...</div>
+          <div className="text-center py-8 text-muted-foreground">Loading notifications...</div>
         ) : notifications.length === 0 ? (
           <div className="bento-card p-8 text-center">
-            <Bell className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-            <p className="text-gray-400">No notifications</p>
+            <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No notifications</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -127,12 +127,12 @@ export default function Notifications() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start">
-                    <h3 className={`text-sm ${!n.isRead ? 'font-semibold text-white' : 'font-medium text-gray-300'}`}>
+                    <h3 className={`text-sm ${!n.isRead ? 'font-semibold text-on-surface' : 'font-medium text-muted-foreground'}`}>
                       {n.title}
                     </h3>
-                    <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{timeAgo(n.createdAt)}</span>
+                    <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">{timeAgo(n.createdAt)}</span>
                   </div>
-                  <p className="text-sm text-gray-400 mt-1">{n.message}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{n.message}</p>
                   <div className="flex gap-2 mt-2">
                     {n.link && (
                       <Link href={n.link} className="text-xs transition-colors hover:underline">
@@ -140,7 +140,7 @@ export default function Notifications() {
                       </Link>
                     )}
                     {!n.isRead && (
-                      <button onClick={() => markAsRead(n.id)} className="text-xs text-gray-500 hover:text-gray-300 flex items-center gap-1">
+                      <button onClick={() => markAsRead(n.id)} className="text-xs text-muted-foreground hover:text-muted-foreground flex items-center gap-1">
                         <Check size={12} /> Mark read
                       </button>
                     )}

@@ -295,7 +295,7 @@ export default function Financial() {
     return (
       <div className="flex justify-center gap-2 mt-4">
         <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="btn-secondary disabled:opacity-50">Previous</button>
-        <span className="px-4 py-2 text-gray-300">Page {page} of {total}</span>
+        <span className="px-4 py-2 text-muted-foreground">Page {page} of {total}</span>
         <button onClick={() => setPage(Math.min(total, page + 1))} disabled={page === total} className="btn-secondary disabled:opacity-50">Next</button>
       </div>
     );
@@ -317,7 +317,7 @@ export default function Financial() {
       <div>
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h2 className="text-2xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>Financial Management</h2>
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Financial <span className="gradient-text">Overview</span></h1>
           {activeTab === 'transactions' && (
             <div className="flex flex-wrap gap-3">
               <button onClick={handleExportCSV} className="btn-secondary">
@@ -340,12 +340,12 @@ export default function Financial() {
             <div className="hero-value">₹{summary.totalRevenue.toFixed(2)}</div>
           </div>
           <div className="stat-card animate-slide-up-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'hsl(var(--muted-foreground))' }}>Total Transactions</p>
-            <p className="text-2xl font-bold mt-1" style={{ color: 'hsl(var(--on-surface))' }}>{summary.totalTransactions}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest" >Total Transactions</p>
+            <p className="text-2xl font-bold mt-1" >{summary.totalTransactions}</p>
           </div>
           <div className="stat-card animate-slide-up-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'hsl(var(--muted-foreground))' }}>Average Transaction</p>
-            <p className="text-2xl font-bold mt-1" style={{ color: 'hsl(var(--on-surface))' }}>₹{summary.averageTransaction.toFixed(2)}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest" >Average Transaction</p>
+            <p className="text-2xl font-bold mt-1" >₹{summary.averageTransaction.toFixed(2)}</p>
           </div>
         </div>
 
@@ -367,7 +367,7 @@ export default function Financial() {
             {/* Filters */}
             <div className="bento-card mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Select Event</label>
+                <label className="form-label">Select Event</label>
                 <select
                   value={eventFilter}
                   onChange={(e) => { setEventFilter(e.target.value); setFinancePage(1); }}
@@ -380,7 +380,7 @@ export default function Financial() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Select Event Category</label>
+                <label className="form-label">Select Event Category</label>
                 <select
                   value={categoryFilter}
                   onChange={(e) => { setCategoryFilter(e.target.value); setFinancePage(1); }}
@@ -393,7 +393,7 @@ export default function Financial() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Payment Status</label>
+                <label className="form-label">Payment Status</label>
                 <select
                   value={paymentFilter}
                   onChange={(e) => { setPaymentFilter(e.target.value); setFinancePage(1); }}
@@ -413,10 +413,10 @@ export default function Financial() {
               {financeLoading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
-                  <p className="text-gray-300 mt-2">Loading...</p>
+                  <p className="text-muted-foreground mt-2">Loading...</p>
                 </div>
               ) : registrations.length === 0 ? (
-                <div className="text-center py-8 text-gray-300">No registrations found matching your filters.</div>
+                <div className="text-center py-8 text-muted-foreground">No registrations found matching your filters.</div>
               ) : (
                 <>
                   <table className="table">
@@ -464,7 +464,7 @@ export default function Financial() {
             {/* Status Filter */}
             <div className="bento-card mb-6">
               <div className="max-w-xs">
-                <label className="block text-sm font-medium text-white mb-2">Filter by Status</label>
+                <label className="form-label">Filter by Status</label>
                 <select
                   value={statusFilter}
                   onChange={(e) => { setStatusFilter(e.target.value); setTransPage(1); }}
@@ -484,10 +484,10 @@ export default function Financial() {
               {transLoading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
-                  <p className="text-gray-300 mt-2">Loading transactions...</p>
+                  <p className="text-muted-foreground mt-2">Loading transactions...</p>
                 </div>
               ) : transactions.length === 0 ? (
-                <div className="text-center py-8 text-gray-300">No transactions found. Record one to get started!</div>
+                <div className="text-center py-8 text-muted-foreground">No transactions found. Record one to get started!</div>
               ) : (
                 <>
                   <table className="table">
@@ -498,7 +498,7 @@ export default function Financial() {
                             type="checkbox"
                             checked={selectedIds.size === transactions.length && transactions.length > 0}
                             onChange={toggleSelectAll}
-                            className="rounded border-gray-600"
+                            className="rounded border-border"
                           />
                         </th>
                         <th>Ref #</th>
@@ -521,7 +521,7 @@ export default function Financial() {
                               type="checkbox"
                               checked={selectedIds.has(trans.id)}
                               onChange={() => toggleSelect(trans.id)}
-                              className="rounded border-gray-600"
+                              className="rounded border-border"
                             />
                           </td>
                           <td className="font-medium text-sm">{trans.referenceNumber || trans.id.slice(0, 8)}</td>
@@ -529,7 +529,7 @@ export default function Financial() {
                           <td className="text-sm">₹{trans.cgstAmount.toFixed(2)}</td>
                           <td className="text-sm">₹{trans.sgstAmount.toFixed(2)}</td>
                           <td className="text-sm">₹{trans.igstAmount.toFixed(2)}</td>
-                          <td className="font-bold text-green-400">₹{trans.totalAmount.toFixed(2)}</td>
+                          <td className="font-bold text-emerald-400">₹{trans.totalAmount.toFixed(2)}</td>
                           <td className="capitalize">{trans.paymentMethod?.replace('_', ' ') || '-'}</td>
                           <td>
                             <span className={`badge ${getStatusColor(trans.status)}`}>
@@ -565,40 +565,40 @@ export default function Financial() {
             className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl"
             style={{ background: 'hsl(var(--surface-card))', border: '1px solid hsl(var(--border) / 0.5)' }}
           >
-            <div className="flex justify-between items-center px-6 py-4" style={{ borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
-              <h3 className="text-xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>Edit Transaction</h3>
-              <button onClick={() => setEditingTransaction(null)} className="text-gray-400 hover:text-white transition-colors">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-border/30">
+              <h3 className="text-xl font-bold" >Edit Transaction</h3>
+              <button onClick={() => setEditingTransaction(null)} className="text-muted-foreground hover:text-on-surface transition-colors">
                 <X size={20} />
               </button>
             </div>
             <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white mb-1">Amount</label>
+                  <label className="form-label">Amount</label>
                   <input type="number" name="amount" step="0.01" value={editForm.amount} onChange={handleEditChange} className="input" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white mb-1">Ref #</label>
+                  <label className="form-label">Ref #</label>
                   <input type="text" name="referenceNumber" value={editForm.referenceNumber} onChange={handleEditChange} className="input" />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white mb-1">CGST</label>
+                  <label className="form-label">CGST</label>
                   <input type="number" name="cgstAmount" step="0.01" value={editForm.cgstAmount} onChange={handleEditChange} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white mb-1">SGST</label>
+                  <label className="form-label">SGST</label>
                   <input type="number" name="sgstAmount" step="0.01" value={editForm.sgstAmount} onChange={handleEditChange} className="input" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white mb-1">IGST</label>
+                  <label className="form-label">IGST</label>
                   <input type="number" name="igstAmount" step="0.01" value={editForm.igstAmount} onChange={handleEditChange} className="input" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white mb-1">Payment Method</label>
+                  <label className="form-label">Payment Method</label>
                   <select name="paymentMethod" value={editForm.paymentMethod} onChange={handleEditChange} className="input">
                     <option value="">Select</option>
                     <option value="Credit Card">Credit Card</option>
@@ -610,7 +610,7 @@ export default function Financial() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white mb-1">Status</label>
+                  <label className="form-label">Status</label>
                   <select name="status" value={editForm.status} onChange={handleEditChange} className="input">
                     <option value="UNPAID">Unpaid</option>
                     <option value="PAID">Paid</option>
@@ -620,7 +620,7 @@ export default function Financial() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-white mb-1">Notes</label>
+                <label className="form-label">Notes</label>
                 <textarea name="notes" value={editForm.notes} onChange={handleEditChange} rows={3} className="input" />
               </div>
               <div className="flex gap-3 pt-2">

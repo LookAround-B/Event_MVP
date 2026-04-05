@@ -13,7 +13,7 @@ import { ArrowLeft, MapPin, Upload, Plus, Trash2, Calendar, Clock, FileText, Tag
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
   ssr: false,
   loading: () => (
-    <div className="rounded-lg border border-white/[0.12] min-h-[260px] flex items-center justify-center text-gray-400 text-sm bg-white/[0.02]">
+    <div className="rounded-lg border border-white/[0.12] min-h-[260px] flex items-center justify-center text-muted-foreground text-sm bg-white/[0.02]">
       <div className="flex flex-col items-center gap-2">
         <div className="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
         Loading editor...
@@ -254,7 +254,7 @@ export default function CreateEventPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-            <p className="text-gray-300 mt-2">Loading...</p>
+            <p className="text-muted-foreground mt-2">Loading...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -277,15 +277,15 @@ export default function CreateEventPage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* SECTION 1: Event Information */}
           <div className="bento-card">
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-on-surface mb-6 flex items-center gap-2">
               <FileText className="text-purple-400" /> Event Information
             </h3>
 
             <div className="space-y-5">
               {/* Event Type */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Event Type <span className="text-red-400">*</span>
+                <label className="form-label">
+                  Event Type <span className="text-destructive">*</span>
                 </label>
                 <select
                   name="eventType"
@@ -294,16 +294,16 @@ export default function CreateEventPage() {
                   required
                   className="input"
                 >
-                  <option value="KSEC" className="bg-slate-800 text-white">KSEC</option>
-                  <option value="EPL" className="bg-slate-800 text-white">EPL</option>
-                  <option value="EIRS Show" className="bg-slate-800 text-white">EIRS Show</option>
+                  <option value="KSEC" className="bg-slate-800 text-on-surface">KSEC</option>
+                  <option value="EPL" className="bg-slate-800 text-on-surface">EPL</option>
+                  <option value="EIRS Show" className="bg-slate-800 text-on-surface">EIRS Show</option>
                 </select>
               </div>
 
               {/* Event Name */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Event Name <span className="text-red-400">*</span>
+                <label className="form-label">
+                  Event Name <span className="text-destructive">*</span>
                 </label>
                 <input
                   type="text"
@@ -320,8 +320,8 @@ export default function CreateEventPage() {
 
               {/* Description (Optional) */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Description <span className="text-gray-500 text-xs">(optional)</span>
+                <label className="form-label">
+                  Description <span className="text-muted-foreground text-xs">(optional)</span>
                 </label>
                 <textarea
                   name="description"
@@ -336,11 +336,11 @@ export default function CreateEventPage() {
 
               {/* File Upload */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Event File / Banner <span className="text-gray-500 text-xs">(optional)</span>
+                <label className="form-label">
+                  Event File / Banner <span className="text-muted-foreground text-xs">(optional)</span>
                 </label>
                 <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 cursor-pointer transition text-sm">
+                  <label className="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-10 text-on-surface rounded-lg hover:bg-opacity-20 cursor-pointer transition text-sm">
                     <Upload />
                     {uploading ? 'Uploading...' : 'Choose File'}
                     <input
@@ -357,26 +357,26 @@ export default function CreateEventPage() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Accepted: Images (JPG, PNG, GIF) and PDF. Max 10MB.</p>
+                <p className="text-xs text-muted-foreground mt-1">Accepted: Images (JPG, PNG, GIF) and PDF. Max 10MB.</p>
               </div>
             </div>
           </div>
 
           {/* SECTION 2: Schedule */}
           <div className="bento-card">
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-on-surface mb-6 flex items-center gap-2">
               <Calendar className="text-purple-400" /> Schedule
             </h3>
 
             <div className="space-y-6">
               {/* Start Date Row */}
               <div>
-                <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                  <Clock className="text-green-400 w-4 h-4" /> Start Date <span className="text-red-400">*</span>
+                <label className="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2">
+                  <Clock className="text-emerald-400 w-4 h-4" /> Start Date <span className="text-destructive">*</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Date</label>
+                    <label className="block text-xs text-muted-foreground mb-1">Date</label>
                     <input
                       type="date"
                       name="startDate"
@@ -387,7 +387,7 @@ export default function CreateEventPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Start Time</label>
+                    <label className="block text-xs text-muted-foreground mb-1">Start Time</label>
                     <input
                       type="time"
                       name="startTime"
@@ -398,7 +398,7 @@ export default function CreateEventPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">End Time</label>
+                    <label className="block text-xs text-muted-foreground mb-1">End Time</label>
                     <input
                       type="time"
                       name="startEndTime"
@@ -413,12 +413,12 @@ export default function CreateEventPage() {
 
               {/* End Date Row */}
               <div>
-                <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                  <Clock className="text-red-400 w-4 h-4" /> End Date <span className="text-red-400">*</span>
+                <label className="text-sm font-semibold text-on-surface mb-3 flex items-center gap-2">
+                  <Clock className="text-destructive w-4 h-4" /> End Date <span className="text-destructive">*</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Date</label>
+                    <label className="block text-xs text-muted-foreground mb-1">Date</label>
                     <input
                       type="date"
                       name="endDate"
@@ -430,7 +430,7 @@ export default function CreateEventPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Start Time</label>
+                    <label className="block text-xs text-muted-foreground mb-1">Start Time</label>
                     <input
                       type="time"
                       name="endStartTime"
@@ -441,7 +441,7 @@ export default function CreateEventPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">End Time</label>
+                    <label className="block text-xs text-muted-foreground mb-1">End Time</label>
                     <input
                       type="time"
                       name="endTime"
@@ -458,13 +458,13 @@ export default function CreateEventPage() {
 
           {/* SECTION 3: Venue */}
           <div className="bento-card">
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-on-surface mb-6 flex items-center gap-2">
               <MapPin className="text-purple-400" /> Event Venue
             </h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Venue Name</label>
+                <label className="form-label">Venue Name</label>
                 <input
                   type="text"
                   name="venueName"
@@ -477,7 +477,7 @@ export default function CreateEventPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+                <label className="text-sm font-medium text-on-surface mb-2 flex items-center gap-2">
                   Venue Address
                 </label>
                 <input
@@ -492,7 +492,7 @@ export default function CreateEventPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
+                <label className="text-sm font-medium text-on-surface mb-2 flex items-center gap-2">
                   <MapPin /> Venue Location
                 </label>
                 <VenueMapPicker
@@ -508,7 +508,7 @@ export default function CreateEventPage() {
 
           {/* SECTION 4: Terms & Conditions (Rich Text Editor) */}
           <div className="bento-card">
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-on-surface mb-6 flex items-center gap-2">
               <FileText className="text-purple-400" /> Terms & Conditions
             </h3>
             <RichTextEditor
@@ -516,13 +516,13 @@ export default function CreateEventPage() {
               onChange={handleEditorChange}
               placeholder="Enter event terms and conditions..."
             />
-            <p className="text-xs text-gray-400 mt-2">Use the toolbar above to format your terms & conditions.</p>
+            <p className="text-xs text-muted-foreground mt-2">Use the toolbar above to format your terms & conditions.</p>
           </div>
 
           {/* SECTION 5: Event Categories (Dropdown + Date) */}
           <div className="bento-card">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-bold text-on-surface flex items-center gap-2">
                 <Tag className="text-purple-400" /> Event Categories
               </h3>
               <button
@@ -536,15 +536,15 @@ export default function CreateEventPage() {
             </div>
 
             {categories.length === 0 ? (
-              <p className="text-gray-400 text-sm">No categories available. Create categories in Settings first.</p>
+              <p className="text-muted-foreground text-sm">No categories available. Create categories in Settings first.</p>
             ) : selectedCategories.length === 0 ? (
-              <p className="text-gray-400 text-sm">No categories added. Click &quot;Add Category&quot; to add one.</p>
+              <p className="text-muted-foreground text-sm">No categories added. Click &quot;Add Category&quot; to add one.</p>
             ) : (
               <div className="space-y-3">
                 {selectedCategories.map((sel, idx) => (
                   <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-end gap-3 p-3  rounded-lg">
                     <div className="flex-1 w-full sm:w-auto">
-                      <label className="block text-xs text-gray-400 mb-1">Category</label>
+                      <label className="block text-xs text-muted-foreground mb-1">Category</label>
                       <select
                         value={sel.categoryId}
                         onChange={(e) => handleCategoryChange(idx, 'categoryId', e.target.value)}
@@ -565,7 +565,7 @@ export default function CreateEventPage() {
                       </select>
                     </div>
                     <div className="w-full sm:w-44">
-                      <label className="block text-xs text-gray-400 mb-1">Date</label>
+                      <label className="block text-xs text-muted-foreground mb-1">Date</label>
                       <input
                         type="date"
                         value={sel.date}
@@ -578,7 +578,7 @@ export default function CreateEventPage() {
                     <button
                       type="button"
                       onClick={() => handleRemoveCategory(idx)}
-                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500 hover:bg-opacity-10 rounded-lg transition"
+                      className="p-2 text-destructive hover:text-destructive hover:bg-red-500 hover:bg-opacity-10 rounded-lg transition"
                       title="Remove"
                     >
                       <Trash2 className="w-4 h-4" />

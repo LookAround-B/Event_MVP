@@ -65,18 +65,18 @@ export default function VenueMapPicker({ lat, lng, onLocationChange }: VenueMapP
             placeholder="Search location (e.g., Mumbai, India)"
             className="input pl-9"
           />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
         </div>
         <button
           type="button"
           onClick={handleSearch}
           disabled={searching}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+          className="px-4 py-2 bg-blue-600 text-on-surface rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
         >
           {searching ? 'Searching...' : 'Search'}
         </button>
       </div>
-      {searchError && <p className="text-xs text-red-400">{searchError}</p>}
+      {searchError && <p className="text-xs text-destructive">{searchError}</p>}
 
       {/* Map */}
       <div className="rounded-lg overflow-hidden border border-white border-opacity-10" style={{ height: 300 }}>
@@ -94,7 +94,7 @@ export default function VenueMapPicker({ lat, lng, onLocationChange }: VenueMapP
       {/* Coordinates display */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-white mb-2">Latitude</label>
+          <label className="form-label">Latitude</label>
           <input
             type="number"
             value={lat}
@@ -105,7 +105,7 @@ export default function VenueMapPicker({ lat, lng, onLocationChange }: VenueMapP
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-white mb-2">Longitude</label>
+          <label className="form-label">Longitude</label>
           <input
             type="number"
             value={lng}
@@ -116,7 +116,7 @@ export default function VenueMapPicker({ lat, lng, onLocationChange }: VenueMapP
           />
         </div>
       </div>
-      <p className="text-xs text-gray-400">Click on the map to set the venue location, or search by name above.</p>
+      <p className="text-xs text-muted-foreground">Click on the map to set the venue location, or search by name above.</p>
     </div>
   );
 }

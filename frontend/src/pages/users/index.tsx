@@ -222,8 +222,8 @@ export default function Users() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Users Management</h1>
-            <p className="text-gray-300 mt-2">Manage system users and permissions</p>
+            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">User <span className="gradient-text">Directory</span></h1>
+            <p className="text-muted-foreground mt-2">Manage system users and permissions</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <button onClick={handleExportCSV} className="btn-secondary flex items-center gap-2">
@@ -246,7 +246,7 @@ export default function Users() {
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="flex items-center gap-2 flex-1">
-                <Search className="text-gray-400 shrink-0" />
+                <Search className="text-muted-foreground shrink-0" />
                 <input
                   type="text"
                   placeholder="Search users by email or name..."
@@ -270,7 +270,7 @@ export default function Users() {
             {showFilters && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)' }}>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1">Role</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">Role</label>
                   <select
                     className="input"
                     value={roleFilter}
@@ -283,7 +283,7 @@ export default function Users() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1">Gender</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">Gender</label>
                   <select
                     className="input"
                     value={genderFilter}
@@ -296,7 +296,7 @@ export default function Users() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1">Status</label>
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">Status</label>
                   <select
                     className="input"
                     value={statusFilter}
@@ -309,7 +309,7 @@ export default function Users() {
                 </div>
                 {hasActiveFilters && (
                   <div className="sm:col-span-3">
-                    <button onClick={clearFilters} className="text-sm text-gray-400 hover:text-white flex items-center gap-1">
+                    <button onClick={clearFilters} className="text-sm text-muted-foreground hover:text-on-surface flex items-center gap-1">
                       <X className="w-3 h-3" /> Clear all filters
                     </button>
                   </div>
@@ -356,7 +356,7 @@ export default function Users() {
               </button>
               <button
                 onClick={() => { setSelectedUsers([]); setBulkAction(''); }}
-                className="text-sm text-gray-400 hover:text-white"
+                className="text-sm text-muted-foreground hover:text-on-surface"
               >
                 Cancel
               </button>
@@ -367,12 +367,12 @@ export default function Users() {
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-gray-300">Loading users...</p>
+                <p className="text-muted-foreground">Loading users...</p>
               </div>
             </div>
           ) : users.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">No users found</p>
+              <p className="text-muted-foreground">No users found</p>
               <Link href="/users/create" className="btn-primary inline-block mt-4">
                 Create First User
               </Link>
@@ -423,12 +423,12 @@ export default function Users() {
                           {user.gender ? (
                             <span className="badge badge-info">{user.gender}</span>
                           ) : (
-                            <span className="text-gray-500">-</span>
+                            <span className="text-muted-foreground">-</span>
                           )}
                         </td>
                         <td>
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            user.role?.includes('admin') ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+                            user.role?.includes('admin') ? 'bg-purple-100 text-purple-800' : 'bg-surface-container text-gray-800'
                           }`}>
                             {user.role || 'user'}
                           </span>
@@ -495,7 +495,7 @@ export default function Users() {
 
               {pagination.pages > 1 && (
                 <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Showing page {pagination.page} of {pagination.pages} ({pagination.total} total)
                   </p>
                   <div className="flex gap-2">

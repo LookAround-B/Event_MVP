@@ -58,11 +58,11 @@ function InlineField({
   return (
     <div className="group flex items-center justify-between py-3 px-4 rounded-xl transition-colors transition-all duration-200">
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 flex-shrink-0">
+        <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-muted-foreground flex-shrink-0">
           <Icon className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+          <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
           {isEditing ? (
             <div className="flex items-center gap-2">
               {type === 'select' && options ? (
@@ -71,7 +71,7 @@ function InlineField({
                   onChange={(e) => setEditValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   autoFocus
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-primary w-full max-w-xs"
+                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-on-surface text-sm focus:outline-none focus:border-primary w-full max-w-xs"
                 >
                   <option value="" className="bg-gray-800">Select</option>
                   {options.map((o) => (
@@ -85,7 +85,7 @@ function InlineField({
                   onKeyDown={handleKeyDown}
                   autoFocus
                   rows={2}
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-primary w-full max-w-md resize-none"
+                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-on-surface text-sm focus:outline-none focus:border-primary w-full max-w-md resize-none"
                 />
               ) : (
                 <input
@@ -94,26 +94,26 @@ function InlineField({
                   onChange={(e) => setEditValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   autoFocus
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-primary w-full max-w-xs"
+                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-on-surface text-sm focus:outline-none focus:border-primary w-full max-w-xs"
                 />
               )}
               <button
                 onClick={() => onSave(field, editValue)}
                 disabled={saving}
-                className="p-1.5 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition disabled:opacity-50"
+                className="p-1.5 rounded-lg bg-green-500/20 text-emerald-400 hover:bg-green-500/30 transition disabled:opacity-50"
               >
                 <Check className="w-4 h-4" />
               </button>
               <button
                 onClick={onCancel}
-                className="p-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
+                className="p-1.5 rounded-lg bg-red-500/20 text-destructive hover:bg-red-500/30 transition"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <p className="text-white text-sm truncate">{displayValue || <span className="text-gray-600 italic">Not set</span>}</p>
+              <p className="text-on-surface text-sm truncate">{displayValue || <span className="text-muted-foreground italic">Not set</span>}</p>
               {badge}
             </div>
           )}
@@ -122,7 +122,7 @@ function InlineField({
       {!isEditing && !readOnly && (
         <button
           onClick={() => onStartEdit(field, (value || ''))}
-          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/10 text-gray-500 hover:text-gray-300 transition-all"
+          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-muted-foreground transition-all"
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
@@ -338,7 +338,7 @@ export default function AccountPage() {
     return (
       <ProtectedRoute>
         <div className="text-center py-8">
-          <p className="text-gray-400">Profile not found</p>
+          <p className="text-muted-foreground">Profile not found</p>
         </div>
       </ProtectedRoute>
     );
@@ -354,12 +354,12 @@ export default function AccountPage() {
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Notifications */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl text-sm">
+          <div className="bg-red-500/10 border border-red-500/30 text-destructive px-4 py-3 rounded-xl text-sm">
             {error}
           </div>
         )}
         {success && (
-          <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-xl text-sm">
+          <div className="bg-green-500/10 border border-green-500/30 text-emerald-400 px-4 py-3 rounded-xl text-sm">
             {success}
           </div>
         )}
@@ -384,7 +384,7 @@ export default function AccountPage() {
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
               >
-                <Camera className="w-6 h-6 text-white" />
+                <Camera className="w-6 h-6 text-on-surface" />
               </button>
               <input
                 ref={fileInputRef}
@@ -406,30 +406,30 @@ export default function AccountPage() {
                       onChange={(e) => setEditValue(e.target.value)}
                       onKeyDown={(e) => handleKeyDown(e, 'name')}
                       autoFocus
-                      className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-xl font-bold focus:outline-none focus:border-primary"
+                      className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-on-surface text-xl font-bold focus:outline-none focus:border-primary"
                     />
                     <button
                       onClick={() => saveField('name', editValue)}
                       disabled={saving}
-                      className="p-1.5 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition disabled:opacity-50"
+                      className="p-1.5 rounded-lg bg-green-500/20 text-emerald-400 hover:bg-green-500/30 transition disabled:opacity-50"
                     >
                       <Check className="w-4 h-4" />
                     </button>
                     <button
                       onClick={cancelEdit}
-                      className="p-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
+                      className="p-1.5 rounded-lg bg-red-500/20 text-destructive hover:bg-red-500/30 transition"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
                   <>
-                    <h1 className="text-2xl font-bold text-white truncate">
+                    <h1 className="text-2xl font-bold text-on-surface truncate">
                       {profile.firstName} {profile.lastName}
                     </h1>
                     <button
                       onClick={() => startEdit('name', `${profile.firstName} ${profile.lastName}`)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/10 text-gray-500 hover:text-gray-300 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-muted-foreground transition-all"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
@@ -441,7 +441,7 @@ export default function AccountPage() {
                   <Shield className="w-3 h-3" />
                   {profile.role || 'Rider'}
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 text-gray-300 text-xs font-mono">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 text-muted-foreground text-xs font-mono">
                   <Hash className="w-3 h-3" />
                   {profile.eId}
                 </span>
@@ -453,7 +453,7 @@ export default function AccountPage() {
         {/* Personal Information */}
         <div className="bento-card rounded-2xl border border-white/10 overflow-hidden">
           <div className="px-6 py-4 border-b border-white/10">
-            <h2 className="text-lg font-semibold text-white">Personal Information</h2>
+            <h2 className="text-lg font-semibold text-on-surface">Personal Information</h2>
           </div>
           <div className="p-2 divide-y divide-white/5">
             <InlineField
@@ -519,7 +519,7 @@ export default function AccountPage() {
                 <span
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                     profile.isGoogleAuth
-                      ? 'bg-green-500/20 text-green-400'
+                      ? 'bg-green-500/20 text-emerald-400'
                       : 'bg-yellow-500/20 text-yellow-400'
                   }`}
                 >
@@ -539,10 +539,10 @@ export default function AccountPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
             <div className="bento-card rounded-2xl border border-white/20 w-full max-w-lg mx-4 overflow-hidden">
               <div className="px-6 py-4 border-b border-white/10 flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-white">Crop Profile Picture</h3>
+                <h3 className="text-lg font-semibold text-on-surface">Crop Profile Picture</h3>
                 <button
                   onClick={() => { setShowCropModal(false); setImageSrc(null); }}
-                  className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 transition"
+                  className="p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -561,7 +561,7 @@ export default function AccountPage() {
                 />
               </div>
               <div className="px-6 py-3 border-t border-white/10">
-                <label className="text-xs text-gray-400 mb-1 block">Zoom</label>
+                <label className="text-xs text-muted-foreground mb-1 block">Zoom</label>
                 <input
                   type="range"
                   min={1}
@@ -575,14 +575,14 @@ export default function AccountPage() {
               <div className="px-6 py-4 border-t border-white/10 flex gap-3 justify-end">
                 <button
                   onClick={() => { setShowCropModal(false); setImageSrc(null); }}
-                  className="px-4 py-2 rounded-xl border border-white/20 text-gray-300 hover:bg-white/10 transition text-sm"
+                  className="px-4 py-2 rounded-xl border border-white/20 text-muted-foreground hover:bg-white/10 transition text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCropSave}
                   disabled={uploadingImage}
-                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-500 text-white font-medium hover:opacity-90 transition text-sm disabled:opacity-50"
+                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-500 text-on-surface font-medium hover:opacity-90 transition text-sm disabled:opacity-50"
                 >
                   {uploadingImage ? 'Uploading...' : 'Save'}
                 </button>

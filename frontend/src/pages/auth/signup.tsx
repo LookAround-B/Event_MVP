@@ -58,7 +58,7 @@ export default function Signup() {
             <h1 className="text-4xl font-black" style={{ color: 'hsl(var(--primary))' }}>
               Equestrian
             </h1>
-            <p className="mt-2 font-medium" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <p className="mt-2 font-medium" >
               Create Your Account
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function Signup() {
                   <User
                     size={18}
                     className="absolute left-3 top-1/2 -translate-y-1/2"
-                    style={{ color: 'hsl(var(--muted-foreground))' }}
+                    
                   />
                   <input
                     type="text"
@@ -90,7 +90,7 @@ export default function Signup() {
                   <User
                     size={18}
                     className="absolute left-3 top-1/2 -translate-y-1/2"
-                    style={{ color: 'hsl(var(--muted-foreground))' }}
+                    
                   />
                   <input
                     type="text"
@@ -111,7 +111,7 @@ export default function Signup() {
                 <Mail
                   size={18}
                   className="absolute left-3 top-1/2 -translate-y-1/2"
-                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  
                 />
                 <input
                   type="email"
@@ -131,7 +131,7 @@ export default function Signup() {
                 <Lock
                   size={18}
                   className="absolute left-3 top-1/2 -translate-y-1/2"
-                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  
                 />
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -146,7 +146,7 @@ export default function Signup() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -160,7 +160,7 @@ export default function Signup() {
                 <Lock
                   size={18}
                   className="absolute left-3 top-1/2 -translate-y-1/2"
-                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  
                 />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
@@ -175,7 +175,7 @@ export default function Signup() {
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  
                   aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                 >
                   {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -251,7 +251,7 @@ export default function Signup() {
           </form>
 
           <div className="mt-6 text-center" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', paddingTop: '1.5rem' }}>
-            <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <p className="text-sm" >
               Already have an account?{' '}
               <Link href="/auth/login" className="font-bold transition-colors" style={{ color: 'hsl(var(--primary))' }}>
                 Log in

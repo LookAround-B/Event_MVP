@@ -35,7 +35,7 @@ export default function ActionsDropdown({ actions }: ActionsDropdownProps) {
         type="button"
         onClick={() => setOpen(v => !v)}
         className="p-1.5 rounded-lg transition-colors"
-        style={{ color: 'hsl(var(--muted-foreground))' }}
+        
         onMouseOver={(e) => {
           e.currentTarget.style.background = 'hsl(var(--surface-bright))';
           e.currentTarget.style.color = 'hsl(var(--on-surface))';

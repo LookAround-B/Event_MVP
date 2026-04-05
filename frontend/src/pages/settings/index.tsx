@@ -299,11 +299,11 @@ export default function Settings() {
   return (
     <div className="p-4 sm:p-6">
       <Head><title>Settings | Equestrian Events</title></Head>
-      <h1 className="text-2xl font-bold mb-6" style={{ color: 'hsl(var(--on-surface))' }}>Settings</h1>
+      <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl mb-6">System <span className="gradient-text">Settings</span></h1>
 
       {/* Tabs */}
       <div className="bento-card">
-        <div className="flex overflow-x-auto" style={{ borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
+        <div className="flex overflow-x-auto border-b border-border/30">
           {tabs.map(tab => (
             <button
               key={tab.key}
@@ -410,7 +410,7 @@ export default function Settings() {
           ) : activeTab === 'timings' ? (
             /* ───── TIMINGS TAB ───── */
             <div>
-              <h2 className="text-xl font-bold mb-4 text-white">Timing Settings</h2>
+              <h2 className="text-xl font-bold mb-4 text-on-surface">Timing Settings</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="form-label">Event Start Time</label>
@@ -439,7 +439,7 @@ export default function Settings() {
                     onChange={e => setTimingsSettings({ ...timingsSettings, cutoff_time_hours: e.target.value })}
                     className="input"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Hours before event when changes are locked</p>
+                  <p className="text-xs text-muted-foreground mt-1">Hours before event when changes are locked</p>
                 </div>
                 <div>
                   <label className="form-label">Registration Close (hours before event)</label>
@@ -450,7 +450,7 @@ export default function Settings() {
                     onChange={e => setTimingsSettings({ ...timingsSettings, registration_close_hours: e.target.value })}
                     className="input"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Hours before event when registration closes</p>
+                  <p className="text-xs text-muted-foreground mt-1">Hours before event when registration closes</p>
                 </div>
               </div>
               <button
@@ -465,9 +465,9 @@ export default function Settings() {
           ) : activeTab === 'eventTypes' ? (
             /* ───── EVENT TYPES TAB ───── */
             <div>
-              <h2 className="text-xl font-bold mb-4 text-white">Event Types</h2>
+              <h2 className="text-xl font-bold mb-4 text-on-surface">Event Types</h2>
               <div className="bento-card mb-4 p-4">
-                <h3 className="text-sm font-bold text-gray-300 mb-3">Add Event Type</h3>
+                <h3 className="text-sm font-bold text-muted-foreground mb-3">Add Event Type</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                   <input
                     type="text"
@@ -502,15 +502,15 @@ export default function Settings() {
                   </thead>
                   <tbody>
                     {eventTypes.length === 0 ? (
-                      <tr><td colSpan={3} className="text-center text-gray-500 py-8">No event types yet</td></tr>
+                      <tr><td colSpan={3} className="text-center text-muted-foreground py-8">No event types yet</td></tr>
                     ) : eventTypes.map(et => (
                       <tr key={et.id}>
-                        <td className="text-sm text-gray-300">{et.name}</td>
+                        <td className="text-sm text-muted-foreground">{et.name}</td>
                         <td><span className="badge badge-info">{et.shortCode}</span></td>
                         <td>
                           <button
                             onClick={() => deleteEventType(et.id)}
-                            className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg transition-colors"
+                            className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-lg transition-colors"
                             title="Delete"
                           >
                             <Trash2 />
@@ -526,9 +526,9 @@ export default function Settings() {
           ) : activeTab === 'roles' ? (
             /* ───── USER ROLES TAB ───── */
             <div>
-              <h2 className="text-xl font-bold mb-4 text-white">User Roles</h2>
+              <h2 className="text-xl font-bold mb-4 text-on-surface">User Roles</h2>
               <div className="bento-card mb-4 p-4">
-                <h3 className="text-sm font-bold text-gray-300 mb-3">Add User Role</h3>
+                <h3 className="text-sm font-bold text-muted-foreground mb-3">Add User Role</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                   <input
                     type="text"
@@ -563,15 +563,15 @@ export default function Settings() {
                   </thead>
                   <tbody>
                     {roles.length === 0 ? (
-                      <tr><td colSpan={3} className="text-center text-gray-500 py-8">No roles yet</td></tr>
+                      <tr><td colSpan={3} className="text-center text-muted-foreground py-8">No roles yet</td></tr>
                     ) : roles.map(role => (
                       <tr key={role.id}>
-                        <td className="font-medium text-gray-200">{role.name}</td>
-                        <td className="hidden sm:table-cell text-gray-400">{role.description || '-'}</td>
+                        <td className="font-medium text-on-surface">{role.name}</td>
+                        <td className="hidden sm:table-cell text-muted-foreground">{role.description || '-'}</td>
                         <td>
                           <button
                             onClick={() => deleteRole(role.id)}
-                            className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg transition-colors"
+                            className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-lg transition-colors"
                             title="Delete"
                           >
                             <Trash2 />
@@ -587,9 +587,9 @@ export default function Settings() {
           ) : activeTab === 'eventCategories' ? (
             /* ───── EVENT CATEGORIES TAB ───── */
             <div>
-              <h2 className="text-xl font-bold mb-4 text-white">Event Categories</h2>
+              <h2 className="text-xl font-bold mb-4 text-on-surface">Event Categories</h2>
               <div className="bento-card mb-4 p-4">
-                <h3 className="text-sm font-bold text-gray-300 mb-3">Add Event Category</h3>
+                <h3 className="text-sm font-bold text-muted-foreground mb-3">Add Event Category</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-3">
                   <input
                     type="text"
@@ -658,7 +658,7 @@ export default function Settings() {
                   </thead>
                   <tbody>
                     {eventCategories.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center text-gray-500 py-8">No categories yet</td></tr>
+                      <tr><td colSpan={6} className="text-center text-muted-foreground py-8">No categories yet</td></tr>
                     ) : eventCategories.map(cat => (
                       editingCategory === cat.id ? (
                         <tr key={cat.id}>
@@ -718,14 +718,14 @@ export default function Settings() {
                             <div className="flex gap-1">
                               <button
                                 onClick={saveEditCategory}
-                                className="p-2 text-green-400 transition-colors rounded-lg transition-colors"
+                                className="p-2 text-emerald-400 transition-colors rounded-lg transition-colors"
                                 title="Save"
                               >
                                 <Save />
                               </button>
                               <button
                                 onClick={() => setEditingCategory(null)}
-                                className="p-2 text-gray-400 transition-colors rounded-lg transition-colors"
+                                className="p-2 text-muted-foreground transition-colors rounded-lg transition-colors"
                                 title="Cancel"
                               >
                                 <X />
@@ -735,23 +735,23 @@ export default function Settings() {
                         </tr>
                       ) : (
                         <tr key={cat.id}>
-                          <td className="font-medium text-gray-200">{cat.name}</td>
-                          <td className="text-gray-300">₹{cat.price.toFixed(2)}</td>
-                          <td className="hidden sm:table-cell text-gray-400">{cat.cgst}%</td>
-                          <td className="hidden sm:table-cell text-gray-400">{cat.sgst}%</td>
-                          <td className="hidden sm:table-cell text-gray-400">{cat.igst}%</td>
+                          <td className="font-medium text-on-surface">{cat.name}</td>
+                          <td className="text-muted-foreground">₹{cat.price.toFixed(2)}</td>
+                          <td className="hidden sm:table-cell text-muted-foreground">{cat.cgst}%</td>
+                          <td className="hidden sm:table-cell text-muted-foreground">{cat.sgst}%</td>
+                          <td className="hidden sm:table-cell text-muted-foreground">{cat.igst}%</td>
                           <td>
                             <div className="flex gap-1">
                               <button
                                 onClick={() => startEditCategory(cat)}
-                                className="p-2 text-gray-400 hover:text-blue-400 transition-colors rounded-lg transition-colors"
+                                className="p-2 text-muted-foreground hover:text-blue-400 transition-colors rounded-lg transition-colors"
                                 title="Edit"
                               >
                                 <Pencil />
                               </button>
                               <button
                                 onClick={() => deleteCategory(cat.id)}
-                                className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg transition-colors"
+                                className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-lg transition-colors"
                                 title="Delete"
                               >
                                 <Trash2 />
@@ -769,8 +769,8 @@ export default function Settings() {
           ) : activeTab === 'termsConditions' ? (
             /* ───── TERMS & CONDITIONS TAB ───── */
             <div>
-              <h2 className="text-xl font-bold mb-4 text-white">Terms & Conditions</h2>
-              <p className="text-gray-400 text-sm mb-4">
+              <h2 className="text-xl font-bold mb-4 text-on-surface">Terms & Conditions</h2>
+              <p className="text-muted-foreground text-sm mb-4">
                 Default terms & conditions applied to new events. Supports rich text formatting.
               </p>
               <div className="mb-4">

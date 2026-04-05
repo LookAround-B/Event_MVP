@@ -80,7 +80,7 @@ export default function HorseDetail() {
               <ArrowLeft /> Back to Horses
             </Link>
             <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-6">
-              <p className="text-red-300">{error || 'Horse not found'}</p>
+              <p className="text-destructive">{error || 'Horse not found'}</p>
             </div>
           </div>
         </div>
@@ -102,13 +102,13 @@ export default function HorseDetail() {
             <div className="flex gap-2">
               <Link 
                 href={`/horses/create?id=${horse.id}`}
-                className="text-green-400 hover:text-green-300 flex items-center gap-2 px-4 py-2 bg-green-900 bg-opacity-20 rounded border border-green-400 border-opacity-30"
+                className="text-emerald-400 hover:text-green-300 flex items-center gap-2 px-4 py-2 bg-green-900 bg-opacity-20 rounded border border-green-400 border-opacity-30"
               >
                 <Edit className="w-4 h-4" /> Edit
               </Link>
               <button
                 onClick={handleDelete}
-                className="text-red-400 hover:text-red-300 flex items-center gap-2 px-4 py-2 bg-red-900 bg-opacity-20 rounded border border-red-400 border-opacity-30"
+                className="text-destructive hover:text-destructive flex items-center gap-2 px-4 py-2 bg-red-900 bg-opacity-20 rounded border border-red-400 border-opacity-30"
               >
                 <Trash2 className="w-4 h-4" /> Delete
               </button>
@@ -119,7 +119,7 @@ export default function HorseDetail() {
             {/* Header */}
             <div className="px-8 py-6  bg-gradient-to-r from-purple-900 to-slate-900">
               <h1 className="text-2xl font-bold">{horse.name}</h1>
-              <p className="text-gray-300 mt-2">Horse Profile</p>
+              <p className="text-muted-foreground mt-2">Horse Profile</p>
             </div>
 
             {/* Content */}
@@ -128,58 +128,58 @@ export default function HorseDetail() {
                 {/* Left Column */}
                 <div className="space-y-6">
                   <div>
-                    <label className="text-sm font-semibold text-gray-400">Gender</label>
-                    <p className="text-lg text-white mt-1">{horse.gender}</p>
+                    <label className="text-sm font-semibold text-muted-foreground">Gender</label>
+                    <p className="text-lg text-on-surface mt-1">{horse.gender}</p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-gray-400">Year of Birth</label>
-                    <p className="text-lg text-white mt-1">{horse.yearOfBirth || 'Not specified'}</p>
+                    <label className="text-sm font-semibold text-muted-foreground">Year of Birth</label>
+                    <p className="text-lg text-on-surface mt-1">{horse.yearOfBirth || 'Not specified'}</p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-gray-400">Age</label>
-                    <p className="text-lg text-white mt-1">{age} years</p>
+                    <label className="text-sm font-semibold text-muted-foreground">Age</label>
+                    <p className="text-lg text-on-surface mt-1">{age} years</p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-gray-400">Color</label>
-                    <p className="text-lg text-white mt-1">{horse.color || 'Not specified'}</p>
+                    <label className="text-sm font-semibold text-muted-foreground">Color</label>
+                    <p className="text-lg text-on-surface mt-1">{horse.color || 'Not specified'}</p>
                   </div>
                 </div>
 
                 {/* Right Column */}
                 <div className="space-y-6">
                   <div>
-                    <label className="text-sm font-semibold text-gray-400">Breed</label>
-                    <p className="text-lg text-white mt-1">{horse.breed || 'Not specified'}</p>
+                    <label className="text-sm font-semibold text-muted-foreground">Breed</label>
+                    <p className="text-lg text-on-surface mt-1">{horse.breed || 'Not specified'}</p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-gray-400">Height (hands)</label>
-                    <p className="text-lg text-white mt-1">{horse.height ? `${horse.height}h` : 'Not specified'}</p>
+                    <label className="text-sm font-semibold text-muted-foreground">Height (hands)</label>
+                    <p className="text-lg text-on-surface mt-1">{horse.height ? `${horse.height}h` : 'Not specified'}</p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-gray-400">Passport Number</label>
-                    <p className="text-lg text-white mt-1 font-mono">{horse.passportNumber || '-'}</p>
+                    <label className="text-sm font-semibold text-muted-foreground">Passport Number</label>
+                    <p className="text-lg text-on-surface mt-1 font-mono">{horse.passportNumber || '-'}</p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-gray-400">Horse Code</label>
-                    <p className="text-lg text-white mt-1 font-mono">{horse.horseCode || '-'}</p>
+                    <label className="text-sm font-semibold text-muted-foreground">Horse Code</label>
+                    <p className="text-lg text-on-surface mt-1 font-mono">{horse.horseCode || '-'}</p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-semibold text-gray-400">Embassy ID</label>
-                    <p className="text-lg text-white mt-1 font-mono">{horse.embassyId || '-'}</p>
+                    <label className="text-sm font-semibold text-muted-foreground">Embassy ID</label>
+                    <p className="text-lg text-on-surface mt-1 font-mono">{horse.embassyId || '-'}</p>
                   </div>
                 </div>
               </div>
 
               {/* Metadata */}
               <div className="mt-8 pt-8 pt-0">
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   Created on {new Date(horse.createdAt).toLocaleDateString()}
                 </p>
               </div>

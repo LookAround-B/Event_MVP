@@ -179,11 +179,11 @@ export default function CreateRider() {
           <div className="bento-card p-12 text-center max-w-md">
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-green-600 bg-opacity-20 rounded-full flex items-center justify-center">
-                <Check className="w-8 h-8 text-green-400" />
+                <Check className="w-8 h-8 text-emerald-400" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Success!</h2>
-            <p className="text-gray-300">
+            <h2 className="text-2xl font-bold text-on-surface mb-2">Success!</h2>
+            <p className="text-muted-foreground">
               Rider {isEdit ? 'updated' : 'created'} successfully. Redirecting...
             </p>
           </div>
@@ -207,7 +207,7 @@ export default function CreateRider() {
               <h1 className="text-2xl font-bold">
                 {isEdit ? 'Edit Rider' : 'Register New Rider'}
               </h1>
-              <p className="text-gray-300 mt-2">
+              <p className="text-muted-foreground mt-2">
                 {isEdit ? 'Update rider profile' : 'Create a new rider profile'}
               </p>
             </div>
@@ -215,20 +215,20 @@ export default function CreateRider() {
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
               {error && (
                 <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-4">
-                  <p className="text-red-300 font-medium">{error}</p>
+                  <p className="text-destructive font-medium">{error}</p>
                 </div>
               )}
 
               {/* Personal Information */}
               <div>
-                <h2 className="text-xl font-bold text-white mb-6 pb-3 ">
+                <h2 className="text-xl font-bold text-on-surface mb-6 pb-3 ">
                   Personal Information
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      First Name <span className="text-red-400">*</span>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                      First Name <span className="text-destructive">*</span>
                     </label>
                     <input
                       type="text"
@@ -241,7 +241,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
                       Last Name
                     </label>
                     <input
@@ -254,8 +254,8 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Email <span className="text-red-400">*</span>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                      Email <span className="text-destructive">*</span>
                     </label>
                     <input
                       type="email"
@@ -268,8 +268,8 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Gender <span className="text-red-400">*</span>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                      Gender <span className="text-destructive">*</span>
                     </label>
                     <select
                       name="gender"
@@ -278,15 +278,15 @@ export default function CreateRider() {
                       className="input"
                       required
                     >
-                      <option value="" className="bg-slate-800 text-white">Select Gender</option>
-                      <option value="Male" className="bg-slate-800 text-white">Male</option>
-                      <option value="Female" className="bg-slate-800 text-white">Female</option>
-                      <option value="Other" className="bg-slate-800 text-white">Other</option>
+                      <option value="" className="bg-slate-800 text-on-surface">Select Gender</option>
+                      <option value="Male" className="bg-slate-800 text-on-surface">Male</option>
+                      <option value="Female" className="bg-slate-800 text-on-surface">Female</option>
+                      <option value="Other" className="bg-slate-800 text-on-surface">Other</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Date of Birth <span className="text-red-400">*</span>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                      Date of Birth <span className="text-destructive">*</span>
                     </label>
                     <input
                       type="date"
@@ -298,7 +298,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
                       Mobile
                     </label>
                     <input
@@ -311,7 +311,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
                       Optional Phone
                     </label>
                     <input
@@ -324,7 +324,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
                       Image URL
                     </label>
                     <input
@@ -340,7 +340,7 @@ export default function CreateRider() {
 
                 {/* Address with Map */}
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
+                  <label className="block text-sm font-semibold text-on-surface mb-2">
                     Address
                   </label>
                   <textarea
@@ -363,13 +363,13 @@ export default function CreateRider() {
 
               {/* Professional Information */}
               <div>
-                <h2 className="text-xl font-bold text-white mb-6 pb-3 ">
+                <h2 className="text-xl font-bold text-on-surface mb-6 pb-3 ">
                   Professional Information
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      EFI Rider ID <span className="text-red-400">*</span>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                      EFI Rider ID <span className="text-destructive">*</span>
                     </label>
                     <input
                       type="text"
@@ -382,7 +382,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
                       Designation
                     </label>
                     <input
@@ -399,12 +399,12 @@ export default function CreateRider() {
 
               {/* Social Links */}
               <div>
-                <h2 className="text-xl font-bold text-white mb-6 pb-3 ">
+                <h2 className="text-xl font-bold text-on-surface mb-6 pb-3 ">
                   Social Links
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">Instagram</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">Instagram</label>
                     <input
                       type="text"
                       value={socialLinks.instagram}
@@ -414,7 +414,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">Twitter</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">Twitter</label>
                     <input
                       type="text"
                       value={socialLinks.twitter}
@@ -424,7 +424,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">Facebook</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">Facebook</label>
                     <input
                       type="text"
                       value={socialLinks.facebook}
@@ -434,7 +434,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">YouTube</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">YouTube</label>
                     <input
                       type="text"
                       value={socialLinks.youtube}
@@ -444,7 +444,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">Website</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">Website</label>
                     <input
                       type="text"
                       value={socialLinks.website}
@@ -454,7 +454,7 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">Other</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">Other</label>
                     <input
                       type="text"
                       value={socialLinks.other}

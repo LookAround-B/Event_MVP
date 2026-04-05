@@ -124,7 +124,7 @@ export default function CreateTransaction() {
           <div className="max-w-2xl mx-auto">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-gray-300 mt-4">Loading...</p>
+              <p className="text-muted-foreground mt-4">Loading...</p>
             </div>
           </div>
         </div>
@@ -146,21 +146,21 @@ export default function CreateTransaction() {
             {/* Title Section */}
             <div className="px-8 py-6 ">
               <h1 className="text-2xl font-bold">Record Payment</h1>
-              <p className="text-gray-300 mt-2">Create a new transaction record</p>
+              <p className="text-muted-foreground mt-2">Create a new transaction record</p>
             </div>
 
             {/* Form Section */}
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
               {error && (
                 <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-4">
-                  <p className="text-red-300 font-medium">{error}</p>
+                  <p className="text-destructive font-medium">{error}</p>
                 </div>
               )}
 
               {/* Registration - Mandatory */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Registration <span className="text-red-400">*</span>
+                <label className="block text-sm font-semibold text-on-surface mb-2">
+                  Registration <span className="text-destructive">*</span>
                 </label>
                 <select
                   name="registrationId"
@@ -171,7 +171,7 @@ export default function CreateTransaction() {
                 >
                   <option value="">Select a registration</option>
                   {registrations.map(reg => (
-                    <option key={reg.id} value={reg.id} className="bg-slate-800 text-white">
+                    <option key={reg.id} value={reg.id} className="bg-slate-800 text-on-surface">
                       {reg.rider.firstName} {reg.rider.lastName} - {reg.event.name} (₹{reg.totalAmount})
                     </option>
                   ))}
@@ -180,12 +180,12 @@ export default function CreateTransaction() {
 
               {/* Amount Section */}
               <div className="pt-0 pt-6">
-                <h3 className="text-sm font-semibold text-white mb-4">Payment Amount</h3>
+                <h3 className="text-sm font-semibold text-on-surface mb-4">Payment Amount</h3>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Amount <span className="text-red-400">*</span>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                      Amount <span className="text-destructive">*</span>
                     </label>
                     <input
                       type="number"
@@ -201,19 +201,19 @@ export default function CreateTransaction() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">Payment Method</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">Payment Method</label>
                     <select
                       name="paymentMethod"
                       value={formData.paymentMethod}
                       onChange={handleChange}
                       className="input"
                     >
-                      <option value="Credit Card" className="bg-slate-800 text-white">Credit Card</option>
-                      <option value="Debit Card" className="bg-slate-800 text-white">Debit Card</option>
-                      <option value="UPI" className="bg-slate-800 text-white">UPI</option>
-                      <option value="Bank Transfer" className="bg-slate-800 text-white">Bank Transfer</option>
-                      <option value="Cheque" className="bg-slate-800 text-white">Cheque</option>
-                      <option value="Cash" className="bg-slate-800 text-white">Cash</option>
+                      <option value="Credit Card" className="bg-slate-800 text-on-surface">Credit Card</option>
+                      <option value="Debit Card" className="bg-slate-800 text-on-surface">Debit Card</option>
+                      <option value="UPI" className="bg-slate-800 text-on-surface">UPI</option>
+                      <option value="Bank Transfer" className="bg-slate-800 text-on-surface">Bank Transfer</option>
+                      <option value="Cheque" className="bg-slate-800 text-on-surface">Cheque</option>
+                      <option value="Cash" className="bg-slate-800 text-on-surface">Cash</option>
                     </select>
                   </div>
                 </div>
@@ -221,7 +221,7 @@ export default function CreateTransaction() {
                 {/* GST Breakdown */}
                 <div className="grid grid-cols-3 gap-4 mt-6">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">CGST (9%)</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">CGST (9%)</label>
                     <input
                       type="number"
                       name="cgstAmount"
@@ -235,7 +235,7 @@ export default function CreateTransaction() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">SGST (9%)</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">SGST (9%)</label>
                     <input
                       type="number"
                       name="sgstAmount"
@@ -249,7 +249,7 @@ export default function CreateTransaction() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">IGST (18%)</label>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">IGST (18%)</label>
                     <input
                       type="number"
                       name="igstAmount"
@@ -267,7 +267,7 @@ export default function CreateTransaction() {
               {/* Reference Section */}
               <div className="pt-0 pt-6">
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Reference Number</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Reference Number</label>
                   <input
                     type="text"
                     name="referenceNumber"
@@ -279,7 +279,7 @@ export default function CreateTransaction() {
                 </div>
 
                 <div className="mt-6">
-                  <label className="block text-sm font-semibold text-white mb-2">Notes</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Notes</label>
                   <textarea
                     name="notes"
                     value={formData.notes}

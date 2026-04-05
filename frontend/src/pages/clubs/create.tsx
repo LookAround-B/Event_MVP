@@ -93,10 +93,10 @@ export default function CreateClub() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Club Information */}
             <div>
-              <h2 className="text-xl font-bold text-white mb-4">Club Information</h2>
+              <h2 className="text-xl font-bold text-on-surface mb-4">Club Information</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Club Name <span className="text-red-400">*</span></label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Club Name <span className="text-destructive">*</span></label>
                   <input
                     type="text"
                     name="name"
@@ -108,7 +108,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Club Code <span className="text-red-400">*</span></label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Club Code <span className="text-destructive">*</span></label>
                   <input
                     type="text"
                     name="shortCode"
@@ -120,7 +120,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Club Contact Number</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Club Contact Number</label>
                   <input
                     type="tel"
                     name="contactNumber"
@@ -131,7 +131,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Optional Phone Number</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Optional Phone Number</label>
                   <input
                     type="tel"
                     name="optionalPhone"
@@ -142,7 +142,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Club Email</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Club Email</label>
                   <input
                     type="email"
                     name="email"
@@ -153,7 +153,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Registration Number</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Registration Number</label>
                   <input
                     type="text"
                     name="registrationNumber"
@@ -164,7 +164,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">GST Number</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">GST Number</label>
                   <input
                     type="text"
                     name="gstNumber"
@@ -179,9 +179,9 @@ export default function CreateClub() {
 
             {/* Club Address */}
             <div className="pt-0 pt-6">
-              <h2 className="text-xl font-bold text-white mb-4">Club Address</h2>
+              <h2 className="text-xl font-bold text-on-surface mb-4">Club Address</h2>
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">Address</label>
+                <label className="block text-sm font-semibold text-on-surface mb-2">Address</label>
                 <input
                   type="text"
                   name="address"
@@ -214,7 +214,7 @@ export default function CreateClub() {
 
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">City</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">City</label>
                   <input
                     type="text"
                     name="city"
@@ -225,7 +225,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">State</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">State</label>
                   <input
                     type="text"
                     name="state"
@@ -236,7 +236,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Country</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Country</label>
                   <input
                     type="text"
                     name="country"
@@ -247,7 +247,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Pincode</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Pincode</label>
                   <input
                     type="text"
                     name="pincode"
@@ -261,7 +261,7 @@ export default function CreateClub() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">Description</label>
+              <label className="block text-sm font-semibold text-on-surface mb-2">Description</label>
               <textarea
                 name="description"
                 placeholder="Club description"
@@ -274,10 +274,10 @@ export default function CreateClub() {
 
             {/* Person Details */}
             <div className="pt-0 pt-6">
-              <h2 className="text-xl font-bold text-white mb-4">Person Details (Contact Person) <span className="text-red-400">*</span></h2>
+              <h2 className="text-xl font-bold text-on-surface mb-4">Person Details (Contact Person) <span className="text-destructive">*</span></h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">First Name <span className="text-red-400">*</span></label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">First Name <span className="text-destructive">*</span></label>
                   <input
                     type="text"
                     name="primaryContactFirstName"
@@ -289,7 +289,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Last Name <span className="text-red-400">*</span></label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Last Name <span className="text-destructive">*</span></label>
                   <input
                     type="text"
                     name="primaryContactLastName"
@@ -301,7 +301,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Date of Birth</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Date of Birth</label>
                   <input
                     type="date"
                     name="primaryContactDob"
@@ -311,20 +311,20 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Gender</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Gender</label>
                   <select
                     name="primaryContactGender"
                     value={formData.primaryContactGender}
                     onChange={handleChange}
                     className="input"
                   >
-                    <option value="Male" className="bg-slate-800 text-white">Male</option>
-                    <option value="Female" className="bg-slate-800 text-white">Female</option>
-                    <option value="Other" className="bg-slate-800 text-white">Other</option>
+                    <option value="Male" className="bg-slate-800 text-on-surface">Male</option>
+                    <option value="Female" className="bg-slate-800 text-on-surface">Female</option>
+                    <option value="Other" className="bg-slate-800 text-on-surface">Other</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Mobile Number</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Mobile Number</label>
                   <input
                     type="tel"
                     name="primaryContactMobile"
@@ -335,7 +335,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Email <span className="text-red-400">*</span></label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Email <span className="text-destructive">*</span></label>
                   <input
                     type="email"
                     name="primaryContactEmail"
@@ -351,10 +351,10 @@ export default function CreateClub() {
 
             {/* Social Links */}
             <div className="pt-0 pt-6">
-              <h2 className="text-xl font-bold text-white mb-4">Social Links</h2>
+              <h2 className="text-xl font-bold text-on-surface mb-4">Social Links</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Instagram</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Instagram</label>
                   <input
                     type="url"
                     placeholder="https://instagram.com/..."
@@ -364,7 +364,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Twitter / X</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Twitter / X</label>
                   <input
                     type="url"
                     placeholder="https://twitter.com/..."
@@ -374,7 +374,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Facebook</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Facebook</label>
                   <input
                     type="url"
                     placeholder="https://facebook.com/..."
@@ -384,7 +384,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">YouTube</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">YouTube</label>
                   <input
                     type="url"
                     placeholder="https://youtube.com/..."
@@ -394,7 +394,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Website</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Website</label>
                   <input
                     type="url"
                     placeholder="https://..."
@@ -404,7 +404,7 @@ export default function CreateClub() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-white mb-2">Other Link</label>
+                  <label className="block text-sm font-semibold text-on-surface mb-2">Other Link</label>
                   <input
                     type="url"
                     placeholder="https://..."

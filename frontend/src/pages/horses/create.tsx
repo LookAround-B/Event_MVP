@@ -140,20 +140,20 @@ export default function CreateHorse() {
             {/* Title Section */}
             <div className="px-8 py-6 ">
               <h1 className="text-2xl font-bold">{isEdit ? 'Edit Horse' : 'Register New Horse'}</h1>
-              <p className="text-gray-300 mt-2">{isEdit ? 'Update horse profile' : 'Create a new horse profile'}</p>
+              <p className="text-muted-foreground mt-2">{isEdit ? 'Update horse profile' : 'Create a new horse profile'}</p>
             </div>
 
             {/* Form Section */}
             <form onSubmit={handleSubmit} className="p-8 space-y-8">
               {error && (
                 <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-4">
-                  <p className="text-red-300 font-medium">{error}</p>
+                  <p className="text-destructive font-medium">{error}</p>
                 </div>
               )}
               {/* Horse Name - Mandatory */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Horse Name <span className="text-red-400">*</span>
+                <label className="block text-sm font-semibold text-on-surface mb-2">
+                  Horse Name <span className="text-destructive">*</span>
                 </label>
                 <input
                   type="text"
@@ -168,7 +168,7 @@ export default function CreateHorse() {
 
               {/* Color */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">Color</label>
+                <label className="block text-sm font-semibold text-on-surface mb-2">Color</label>
                 <input
                   type="text"
                   name="color"
@@ -181,7 +181,7 @@ export default function CreateHorse() {
 
               {/* Breed */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">Breed</label>
+                <label className="block text-sm font-semibold text-on-surface mb-2">Breed</label>
                 <input
                   type="text"
                   name="breed"
@@ -194,7 +194,7 @@ export default function CreateHorse() {
 
               {/* Height */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">Height (hands)</label>
+                <label className="block text-sm font-semibold text-on-surface mb-2">Height (hands)</label>
                 <input
                   type="number"
                   name="height"
@@ -209,8 +209,8 @@ export default function CreateHorse() {
 
               {/* Year of Birth - Mandatory */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Year of Birth <span className="text-red-400">*</span>
+                <label className="block text-sm font-semibold text-on-surface mb-2">
+                  Year of Birth <span className="text-destructive">*</span>
                 </label>
                 <input
                   type="number"
@@ -226,8 +226,8 @@ export default function CreateHorse() {
 
               {/* Gender - Mandatory */}
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">
-                  Gender <span className="text-red-400">*</span>
+                <label className="block text-sm font-semibold text-on-surface mb-2">
+                  Gender <span className="text-destructive">*</span>
                 </label>
                 <select
                   name="gender"
@@ -236,22 +236,22 @@ export default function CreateHorse() {
                   required
                   className="input"
                 >
-                  <option value="Mare" className="bg-slate-800 text-white">Mare (Female)</option>
-                  <option value="Stallion" className="bg-slate-800 text-white">Stallion (Male)</option>
-                  <option value="Gelding" className="bg-slate-800 text-white">Gelding (Castrated Male)</option>
+                  <option value="Mare" className="bg-slate-800 text-on-surface">Mare (Female)</option>
+                  <option value="Stallion" className="bg-slate-800 text-on-surface">Stallion (Male)</option>
+                  <option value="Gelding" className="bg-slate-800 text-on-surface">Gelding (Castrated Male)</option>
                 </select>
               </div>
 
               {/* Passport/Horse Code */}
               <div className="pt-0 pt-6">
-              <h3 className="text-sm font-semibold text-white mb-4">Identification</h3>
-              <p className="text-xs text-gray-300 mb-4">Choose one: Passport Number or Horse Code</p>
+              <h3 className="text-sm font-semibold text-on-surface mb-4">Identification</h3>
+              <p className="text-xs text-muted-foreground mb-4">Choose one: Passport Number or Horse Code</p>
 
               <div className="space-y-4">
                 {!useHorseCode && (
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Passport Number <span className="text-red-400">*</span>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                      Passport Number <span className="text-destructive">*</span>
                     </label>
                     <input
                       type="text"
@@ -266,8 +266,8 @@ export default function CreateHorse() {
 
                 {useHorseCode && (
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Horse Code <span className="text-red-400">*</span>
+                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                      Horse Code <span className="text-destructive">*</span>
                     </label>
                     <input
                       type="text"
@@ -294,11 +294,11 @@ export default function CreateHorse() {
                     }}
                     className="w-4 h-4 border border-gray-300 rounded"
                   />
-                  <span className="text-sm text-gray-300">Use Horse Code instead of Passport Number</span>
+                  <span className="text-sm text-muted-foreground">Use Horse Code instead of Passport Number</span>
                 </label>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-semibold text-white mb-2">
+                  <label className="block text-sm font-semibold text-on-surface mb-2">
                     Embassy ID
                   </label>
                   <input
@@ -310,7 +310,7 @@ export default function CreateHorse() {
                     maxLength={11}
                     className="input font-mono"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Format: EIRSHR followed by 5 digits (e.g., EIRSHR00076)</p>
+                  <p className="text-xs text-muted-foreground mt-1">Format: EIRSHR followed by 5 digits (e.g., EIRSHR00076)</p>
                 </div>
               </div>
               </div>

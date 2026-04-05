@@ -115,12 +115,12 @@ export default function EventStables() {
     <ProtectedRoute>
       <div>
         <div className="flex items-center gap-4 mb-8">
-          <Link href={`/events/${eventId}`} className="text-gray-400 hover:text-white">
+          <Link href={`/events/${eventId}`} className="text-muted-foreground hover:text-on-surface">
             <ArrowLeft size={24} />
           </Link>
           <div>
             <h2 className="text-2xl font-bold">Stable Management</h2>
-            {eventInfo && <p className="text-gray-400 mt-1">{eventInfo.name}</p>}
+            {eventInfo && <p className="text-muted-foreground mt-1">{eventInfo.name}</p>}
           </div>
           <div className="ml-auto">
             <button
@@ -141,12 +141,12 @@ export default function EventStables() {
         {/* Add/Edit Form */}
         {showForm && (
           <div className="bento-card mb-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
+            <h3 className="text-lg font-semibold text-on-surface mb-4">
               {editingId ? 'Edit Stable' : 'Add New Stable'}
             </h3>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Stable Name/Number</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Stable Name/Number</label>
                 <input
                   type="text"
                   value={form.number}
@@ -157,7 +157,7 @@ export default function EventStables() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Capacity</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Capacity</label>
                 <input
                   type="number"
                   value={form.capacity}
@@ -167,7 +167,7 @@ export default function EventStables() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Price per Stable (₹)</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Price per Stable (₹)</label>
                 <input
                   type="number"
                   value={form.pricePerStable}
@@ -178,12 +178,12 @@ export default function EventStables() {
                 />
               </div>
               <div className="flex items-end gap-3">
-                <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
+                <label className="flex items-center gap-2 text-muted-foreground cursor-pointer">
                   <input
                     type="checkbox"
                     checked={form.isAvailable}
                     onChange={(e) => setForm({ ...form, isAvailable: e.target.checked })}
-                    className="rounded border-gray-600 bg-gray-700 text-primary-500"
+                    className="rounded border-border bg-gray-700 text-primary-500"
                   />
                   Available
                 </label>
@@ -203,10 +203,10 @@ export default function EventStables() {
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="text-gray-300 mt-2">Loading stables...</p>
+              <p className="text-muted-foreground mt-2">Loading stables...</p>
             </div>
           ) : stables.length === 0 ? (
-            <div className="text-center py-8 text-gray-300">
+            <div className="text-center py-8 text-muted-foreground">
               No stables configured for this event. Click &quot;Add Stable&quot; to get started.
             </div>
           ) : (
@@ -224,7 +224,7 @@ export default function EventStables() {
               <tbody>
                 {stables.map((stable) => (
                   <tr key={stable.id}>
-                    <td className="font-medium text-white">{stable.number}</td>
+                    <td className="font-medium text-on-surface">{stable.number}</td>
                     <td>{stable.capacity}</td>
                     <td>₹{stable.pricePerStable.toLocaleString('en-IN')}</td>
                     <td>
@@ -233,7 +233,7 @@ export default function EventStables() {
                         className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium cursor-pointer ${
                           stable.isAvailable
                             ? 'badge-emerald'
-                            : 'bg-red-500 bg-opacity-20 text-red-300'
+                            : 'bg-red-500 bg-opacity-20 text-destructive'
                         }`}
                       >
                         {stable.isAvailable ? <><Check size={12} /> Yes</> : <><X size={12} /> No</>}
@@ -252,7 +252,7 @@ export default function EventStables() {
                         {stable.bookingCount === 0 && (
                           <button
                             onClick={() => handleDelete(stable.id)}
-                            className="text-red-400 hover:text-red-300"
+                            className="text-destructive hover:text-destructive"
                             title="Delete"
                           >
                             <Trash2 size={16} />
@@ -271,15 +271,15 @@ export default function EventStables() {
         {stables.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
             <div className="bento-card text-center">
-              <p className="text-gray-400 text-sm">Total Stables</p>
-              <p className="text-2xl font-bold text-white">{stables.length}</p>
+              <p className="text-muted-foreground text-sm">Total Stables</p>
+              <p className="text-2xl font-bold text-on-surface">{stables.length}</p>
             </div>
             <div className="bento-card text-center">
-              <p className="text-gray-400 text-sm">Available</p>
-              <p className="text-2xl font-bold text-green-400">{stables.filter(s => s.isAvailable).length}</p>
+              <p className="text-muted-foreground text-sm">Available</p>
+              <p className="text-2xl font-bold text-emerald-400">{stables.filter(s => s.isAvailable).length}</p>
             </div>
             <div className="bento-card text-center">
-              <p className="text-gray-400 text-sm">Total Bookings</p>
+              <p className="text-muted-foreground text-sm">Total Bookings</p>
               <p className="text-2xl font-bold text-blue-400">{stables.reduce((sum, s) => sum + s.bookingCount, 0)}</p>
             </div>
           </div>

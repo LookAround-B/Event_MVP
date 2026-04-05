@@ -29,7 +29,7 @@ export default function PendingApproval() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-2">
             Approval Pending
           </h1>
-          <p className="text-gray-300 mb-8">
+          <p className="text-muted-foreground mb-8">
             Your account has been successfully created and is awaiting administrator approval.
           </p>
 
@@ -38,7 +38,7 @@ export default function PendingApproval() {
               <CheckCircle className="w-5 h-5 text-blue-300 flex-shrink-0 mt-0.5" />
               <div className="text-left">
                 <p className="text-sm font-semibold text-blue-200 mb-1">What's next?</p>
-                <p className="text-xs text-gray-300">
+                <p className="text-xs text-muted-foreground">
                   Our team will review your account and you'll receive an email notification once you're approved.
                 </p>
               </div>
@@ -47,7 +47,7 @@ export default function PendingApproval() {
 
           <div className="glass-dark w-full rounded-xl p-5 mb-6 border border-cyan-400 border-opacity-20">
             <p className="text-sm font-semibold text-cyan-200 mb-2">Typical approval time</p>
-            <p className="text-base text-gray-200 font-bold">24-48 hours</p>
+            <p className="text-base text-on-surface font-bold">24-48 hours</p>
           </div>
 
           <button
@@ -58,7 +58,7 @@ export default function PendingApproval() {
             Logout
           </button>
 
-          <p className="text-xs text-gray-400 mt-6">
+          <p className="text-xs text-muted-foreground mt-6">
             If you have any questions, please contact support.
           </p>
         </div>

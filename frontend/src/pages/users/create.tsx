@@ -67,7 +67,7 @@ export default function CreateUser() {
         </Link>
 
         <div className="bento-card">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Create New User</h1>
+          <h1 className="text-3xl font-bold text-on-surface mb-6">Create New User</h1>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-6">
@@ -77,7 +77,7 @@ export default function CreateUser() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">Email</label>
               <input
                 type="email"
                 name="email"
@@ -89,7 +89,7 @@ export default function CreateUser() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">Password</label>
               <input
                 type="password"
                 name="password"
@@ -102,7 +102,7 @@ export default function CreateUser() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">First Name</label>
               <input
                 type="text"
                 name="firstName"
@@ -114,7 +114,7 @@ export default function CreateUser() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">Last Name</label>
               <input
                 type="text"
                 name="lastName"
@@ -126,7 +126,7 @@ export default function CreateUser() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Designation</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">Designation</label>
               <input
                 type="text"
                 name="designation"
@@ -137,7 +137,7 @@ export default function CreateUser() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">Role</label>
               <select
                 name="roleId"
                 value={formData.roleId}

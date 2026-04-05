@@ -72,7 +72,7 @@ export default function EditUser() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading user...</p>
+            <p className="text-muted-foreground">Loading user...</p>
           </div>
         </div>
       </ProtectedRoute>
@@ -87,7 +87,7 @@ export default function EditUser() {
         </Link>
 
         <div className="bento-card">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Edit User</h1>
+          <h1 className="text-3xl font-bold text-on-surface mb-6">Edit User</h1>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-6">
@@ -97,18 +97,18 @@ export default function EditUser() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">Email</label>
               <input
                 type="email"
                 value={formData.email || ''}
                 disabled
                 className="input opacity-50"
               />
-              <p className="text-sm text-gray-500 mt-1">Email cannot be changed</p>
+              <p className="text-sm text-muted-foreground mt-1">Email cannot be changed</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">First Name</label>
               <input
                 type="text"
                 name="firstName"
@@ -120,7 +120,7 @@ export default function EditUser() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">Last Name</label>
               <input
                 type="text"
                 name="lastName"
@@ -132,7 +132,7 @@ export default function EditUser() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Designation</label>
+              <label className="block text-sm font-medium text-on-surface-variant mb-2">Designation</label>
               <input
                 type="text"
                 name="designation"

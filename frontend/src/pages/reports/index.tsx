@@ -110,7 +110,7 @@ export default function Reports() {
     <ProtectedRoute>
       <Head><title>Reports | Equestrian</title></Head>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-white">Reports</h1>
+        <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Data <span className="gradient-text">Reports</span></h1>
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-2">
@@ -120,13 +120,13 @@ export default function Reports() {
             { key: 'riders', label: 'Rider Statistics', icon: Users },
             { key: 'attendance', label: 'Attendance', icon: BarChart2 },
           ].map(t => (
-            <button key={t.key} onClick={() => setTab(t.key as any)} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition ${tab === t.key ? 'btn-primary' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}>
+            <button key={t.key} onClick={() => setTab(t.key as any)} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition ${tab === t.key ? 'btn-primary' : 'bg-white/10 text-muted-foreground hover:bg-white/20'}`}>
               <t.icon size={16} /> {t.label}
             </button>
           ))}
         </div>
 
-        {loading && <div className="text-center py-8 text-gray-400">Loading report...</div>}
+        {loading && <div className="text-center py-8 text-muted-foreground">Loading report...</div>}
 
         {/* Event Summary Report */}
         {!loading && tab === 'events' && (
@@ -147,8 +147,8 @@ export default function Reports() {
                 {eventSummaries.map(ev => (
                   <tr key={ev.id}>
                     <td className="font-medium">{ev.name}</td>
-                    <td className="text-gray-400">{ev.eventType}</td>
-                    <td className="text-gray-400">{new Date(ev.startDate).toLocaleDateString()}</td>
+                    <td className="text-muted-foreground">{ev.eventType}</td>
+                    <td className="text-muted-foreground">{new Date(ev.startDate).toLocaleDateString()}</td>
                     <td className="text-right">{ev.totalRegistrations}</td>
                     <td className="text-right text-emerald-400">{ev.approved}</td>
                     <td className="text-right text-blue-400">{ev.paid}</td>
@@ -156,7 +156,7 @@ export default function Reports() {
                   </tr>
                 ))}
                 {eventSummaries.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No events found</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No events found</td></tr>
                 )}
               </tbody>
               {eventSummaries.length > 0 && (
@@ -179,11 +179,11 @@ export default function Reports() {
           <div className="space-y-4">
             <div className="bento-card p-4 flex flex-wrap gap-4 items-end">
               <div>
-                <label className="text-sm font-medium text-gray-300 block mb-1">Start Date</label>
+                <label className="text-sm font-medium text-muted-foreground block mb-1">Start Date</label>
                 <input type="date" value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} className="input text-sm" />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-300 block mb-1">End Date</label>
+                <label className="text-sm font-medium text-muted-foreground block mb-1">End Date</label>
                 <input type="date" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} className="input text-sm" />
               </div>
               <button onClick={loadReport} className="btn-primary text-sm">Apply</button>
@@ -196,43 +196,43 @@ export default function Reports() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bento-card">
-                    <p className="text-sm text-gray-400">Expected Revenue</p>
-                    <p className="text-xl font-bold text-white mt-1">₹{financialReport.totalExpectedRevenue.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Expected Revenue</p>
+                    <p className="text-xl font-bold text-on-surface mt-1">₹{financialReport.totalExpectedRevenue.toLocaleString()}</p>
                   </div>
                   <div className="bento-card">
-                    <p className="text-sm text-gray-400">Collected</p>
+                    <p className="text-sm text-muted-foreground">Collected</p>
                     <p className="text-xl font-bold text-emerald-400 mt-1">₹{financialReport.totalCollected.toLocaleString()}</p>
                   </div>
                   <div className="bento-card">
-                    <p className="text-sm text-gray-400">Outstanding</p>
-                    <p className="text-xl font-bold text-red-400 mt-1">₹{financialReport.totalOutstanding.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Outstanding</p>
+                    <p className="text-xl font-bold text-destructive mt-1">₹{financialReport.totalOutstanding.toLocaleString()}</p>
                   </div>
                   <div className="bento-card">
-                    <p className="text-sm text-gray-400">Transactions</p>
-                    <p className="text-xl font-bold text-white mt-1">{financialReport.transactionCount}</p>
+                    <p className="text-sm text-muted-foreground">Transactions</p>
+                    <p className="text-xl font-bold text-on-surface mt-1">{financialReport.transactionCount}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bento-card">
-                    <h3 className="text-sm font-semibold text-white mb-3">By Payment Method</h3>
+                    <h3 className="text-sm font-semibold text-on-surface mb-3">By Payment Method</h3>
                     {Object.entries(financialReport.byMethod).map(([method, data]) => (
                       <div key={method} className="flex justify-between py-1.5 border-b border-white/5 last:border-0">
-                        <span className="text-sm text-gray-300">{method}</span>
-                        <span className="text-sm font-semibold text-white">₹{data.total.toLocaleString()} ({data.count})</span>
+                        <span className="text-sm text-muted-foreground">{method}</span>
+                        <span className="text-sm font-semibold text-on-surface">₹{data.total.toLocaleString()} ({data.count})</span>
                       </div>
                     ))}
-                    {Object.keys(financialReport.byMethod).length === 0 && <p className="text-sm text-gray-500">No data</p>}
+                    {Object.keys(financialReport.byMethod).length === 0 && <p className="text-sm text-muted-foreground">No data</p>}
                   </div>
                   <div className="bento-card">
-                    <h3 className="text-sm font-semibold text-white mb-3">By Status</h3>
+                    <h3 className="text-sm font-semibold text-on-surface mb-3">By Status</h3>
                     {Object.entries(financialReport.byStatus).map(([status, data]) => (
                       <div key={status} className="flex justify-between py-1.5 border-b border-white/5 last:border-0">
-                        <span className="text-sm text-gray-300">{status}</span>
-                        <span className="text-sm font-semibold text-white">₹{data.total.toLocaleString()} ({data.count})</span>
+                        <span className="text-sm text-muted-foreground">{status}</span>
+                        <span className="text-sm font-semibold text-on-surface">₹{data.total.toLocaleString()} ({data.count})</span>
                       </div>
                     ))}
-                    {Object.keys(financialReport.byStatus).length === 0 && <p className="text-sm text-gray-500">No data</p>}
+                    {Object.keys(financialReport.byStatus).length === 0 && <p className="text-sm text-muted-foreground">No data</p>}
                   </div>
                 </div>
               </>
@@ -259,8 +259,8 @@ export default function Reports() {
                 {riderStats.map(r => (
                   <tr key={r.id}>
                     <td className="font-medium">{r.name}</td>
-                    <td className="text-gray-400">{r.email}</td>
-                    <td className="text-gray-400">{r.club}</td>
+                    <td className="text-muted-foreground">{r.email}</td>
+                    <td className="text-muted-foreground">{r.club}</td>
                     <td className="text-right">{r.totalEvents}</td>
                     <td className="text-right">{r.totalRegistrations}</td>
                     <td className="text-right">{r.horses.length}</td>
@@ -268,7 +268,7 @@ export default function Reports() {
                   </tr>
                 ))}
                 {riderStats.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No rider data</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No rider data</td></tr>
                 )}
               </tbody>
             </table>
@@ -280,7 +280,7 @@ export default function Reports() {
           <div className="space-y-4">
             <div className="bento-card p-4 flex flex-wrap gap-4 items-end">
               <div>
-                <label className="text-sm font-medium text-gray-300 block mb-1">Filter by Event</label>
+                <label className="text-sm font-medium text-muted-foreground block mb-1">Filter by Event</label>
                 <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)} className="input text-sm mt-1">
                   <option value="">All Events</option>
                   {eventSummaries.map(ev => (
@@ -294,10 +294,10 @@ export default function Reports() {
             {attendanceReport.map((event: any) => (
               <div key={event.eventId} className="bento-card overflow-hidden">
                 <div className="pb-4 mb-4 border-b border-white/10">
-                  <h3 className="font-semibold text-white">{event.eventName}</h3>
-                  <p className="text-sm text-gray-400">{event.eventType} | {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</p>
+                  <h3 className="font-semibold text-on-surface">{event.eventName}</h3>
+                  <p className="text-sm text-muted-foreground">{event.eventType} | {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</p>
                   <div className="flex flex-wrap gap-4 mt-2 text-sm">
-                    <span className="text-gray-300">Total: <strong>{event.totalRegistrations}</strong></span>
+                    <span className="text-muted-foreground">Total: <strong>{event.totalRegistrations}</strong></span>
                     <span className="text-emerald-400">Approved: <strong>{event.approved}</strong></span>
                     <span className="text-yellow-400">Pending: <strong>{event.pending}</strong></span>
                     <span className="text-blue-400">Paid: <strong>{event.paid}</strong></span>
@@ -306,20 +306,20 @@ export default function Reports() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-2">By Club</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">By Club</h4>
                     {Object.entries(event.clubBreakdown || {}).map(([club, count]) => (
                       <div key={club} className="flex justify-between py-1 text-sm">
-                        <span className="text-gray-400">{club}</span>
-                        <span className="font-semibold text-white">{count as number}</span>
+                        <span className="text-muted-foreground">{club}</span>
+                        <span className="font-semibold text-on-surface">{count as number}</span>
                       </div>
                     ))}
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-2">By Category</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">By Category</h4>
                     {Object.entries(event.categoryBreakdown || {}).map(([cat, count]) => (
                       <div key={cat} className="flex justify-between py-1 text-sm">
-                        <span className="text-gray-400">{cat}</span>
-                        <span className="font-semibold text-white">{count as number}</span>
+                        <span className="text-muted-foreground">{cat}</span>
+                        <span className="font-semibold text-on-surface">{count as number}</span>
                       </div>
                     ))}
                   </div>
@@ -327,7 +327,7 @@ export default function Reports() {
               </div>
             ))}
             {attendanceReport.length === 0 && (
-              <div className="bento-card p-8 text-center text-gray-500">No attendance data</div>
+              <div className="bento-card p-8 text-center text-muted-foreground">No attendance data</div>
             )}
           </div>
         )}

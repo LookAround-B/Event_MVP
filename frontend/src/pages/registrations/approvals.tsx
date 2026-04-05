@@ -124,7 +124,7 @@ export default function RegistrationApprovals() {
       PARTIAL: 'bg-orange-100 text-orange-800',
     };
     return (
-      <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${colors[status] || 'bg-gray-100 text-gray-800'}`}>
+      <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${colors[status] || 'bg-surface-container text-gray-800'}`}>
         {status}
       </span>
     );
@@ -134,7 +134,7 @@ export default function RegistrationApprovals() {
     <ProtectedRoute>
       <Head><title>Registration Approvals | Equestrian</title></Head>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-white">Registration Approvals</h1>
+        <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Registration <span className="gradient-text">Approvals</span></h1>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
@@ -154,7 +154,7 @@ export default function RegistrationApprovals() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-4 flex flex-wrap gap-4 items-center">
-          <Filter className="text-gray-600" />
+          <Filter className="text-muted-foreground" />
           <select value={filter} onChange={e => setFilter(e.target.value)} className="px-3 py-2 border rounded-lg text-sm">
             <option value="PENDING">Pending</option>
             <option value="APPROVED">Approved</option>
@@ -173,34 +173,34 @@ export default function RegistrationApprovals() {
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-100 border-b">
+              <thead className="bg-surface-container border-b">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Rider</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Event</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Horse</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Category</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Amount</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Payment</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Approval</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Rider</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Event</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Horse</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Category</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Amount</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Payment</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Approval</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {loading ? (
-                  <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-600">Loading...</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Loading...</td></tr>
                 ) : registrations.length === 0 ? (
-                  <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-600">No registrations found</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No registrations found</td></tr>
                 ) : (
                   registrations.map(reg => (
-                    <tr key={reg.id} className="hover:bg-gray-50">
+                    <tr key={reg.id} className="hover:bg-surface-lowest">
                       <td className="px-4 py-3 text-sm">
-                        <p className="font-medium text-gray-900">{reg.rider.firstName} {reg.rider.lastName}</p>
-                        <p className="text-xs text-gray-500">{reg.rider.email}</p>
+                        <p className="font-medium text-on-surface">{reg.rider.firstName} {reg.rider.lastName}</p>
+                        <p className="text-xs text-muted-foreground">{reg.rider.email}</p>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{reg.event.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{reg.horse.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{reg.category?.name || '-'}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-gray-900">₹{reg.totalAmount}</td>
+                      <td className="px-4 py-3 text-sm text-on-surface">{reg.event.name}</td>
+                      <td className="px-4 py-3 text-sm text-on-surface">{reg.horse.name}</td>
+                      <td className="px-4 py-3 text-sm text-on-surface">{reg.category?.name || '-'}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-on-surface">₹{reg.totalAmount}</td>
                       <td className="px-4 py-3 text-sm">{statusBadge(reg.paymentStatus)}</td>
                       <td className="px-4 py-3 text-sm">{statusBadge(reg.approvalStatus)}</td>
                       <td className="px-4 py-3 text-sm">
@@ -234,7 +234,7 @@ export default function RegistrationApprovals() {
         {rejectionModal.isOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bento-card max-w-md w-full p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Reject Registration</h3>
+              <h3 className="text-lg font-semibold text-on-surface mb-4">Reject Registration</h3>
               <textarea
                 value={rejectionNotes}
                 onChange={e => setRejectionNotes(e.target.value)}
@@ -242,8 +242,8 @@ export default function RegistrationApprovals() {
                 className="w-full px-3 py-2 border rounded-lg text-sm h-24 mb-4"
               />
               <div className="flex gap-2 justify-end">
-                <button onClick={() => { setRejectionModal({ isOpen: false }); setRejectionNotes(''); }} className="px-4 py-2 bg-gray-200 rounded-lg text-sm">Cancel</button>
-                <button onClick={handleReject} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">Reject</button>
+                <button onClick={() => { setRejectionModal({ isOpen: false }); setRejectionNotes(''); }} className="px-4 py-2 bg-surface-bright rounded-lg text-sm">Cancel</button>
+                <button onClick={handleReject} className="px-4 py-2 bg-red-600 text-on-surface rounded-lg text-sm hover:bg-red-700">Reject</button>
               </div>
             </div>
           </div>
@@ -253,14 +253,14 @@ export default function RegistrationApprovals() {
         {paymentModal.isOpen && paymentModal.reg && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bento-card max-w-md w-full p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Record Payment</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <h3 className="text-lg font-semibold text-on-surface mb-4">Record Payment</h3>
+              <p className="text-sm text-muted-foreground mb-4">
                 {paymentModal.reg.rider.firstName} {paymentModal.reg.rider.lastName} - {paymentModal.reg.event.name}
                 <br />Total: ₹{paymentModal.reg.totalAmount}
               </p>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Payment Method</label>
+                  <label className="text-sm font-medium text-on-surface-variant">Payment Method</label>
                   <select value={paymentForm.method} onChange={e => setPaymentForm({ ...paymentForm, method: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm mt-1">
                     <option value="CARD">Card</option>
                     <option value="BANK_TRANSFER">Bank Transfer</option>
@@ -270,21 +270,21 @@ export default function RegistrationApprovals() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Amount (₹)</label>
+                  <label className="text-sm font-medium text-on-surface-variant">Amount (₹)</label>
                   <input type="number" value={paymentForm.amount} onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm mt-1" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Reference Number</label>
+                  <label className="text-sm font-medium text-on-surface-variant">Reference Number</label>
                   <input type="text" value={paymentForm.ref} onChange={e => setPaymentForm({ ...paymentForm, ref: e.target.value })} placeholder="Transaction/cheque ref" className="w-full px-3 py-2 border rounded-lg text-sm mt-1" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Notes</label>
+                  <label className="text-sm font-medium text-on-surface-variant">Notes</label>
                   <textarea value={paymentForm.notes} onChange={e => setPaymentForm({ ...paymentForm, notes: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm mt-1 h-16" />
                 </div>
               </div>
               <div className="flex gap-2 justify-end mt-4">
-                <button onClick={() => setPaymentModal({ isOpen: false })} className="px-4 py-2 bg-gray-200 rounded-lg text-sm">Cancel</button>
-                <button onClick={handleRecordPayment} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">Record Payment</button>
+                <button onClick={() => setPaymentModal({ isOpen: false })} className="px-4 py-2 bg-surface-bright rounded-lg text-sm">Cancel</button>
+                <button onClick={handleRecordPayment} className="px-4 py-2 bg-blue-600 text-on-surface rounded-lg text-sm hover:bg-blue-700">Record Payment</button>
               </div>
             </div>
           </div>

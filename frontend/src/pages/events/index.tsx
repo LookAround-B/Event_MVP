@@ -3,11 +3,14 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, Search, Eye, Copy, ToggleLeft, ToggleRight, Download } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, Copy, ToggleLeft, ToggleRight, Download, Calendar, Check, Layers, Activity } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
 import type { ActionItem } from '@/components/ActionsDropdown';
+import Pagination from '@/components/Pagination';
+import { KPICard } from '@/components/dashboard/KPICard';
+import { KPIGrid } from '@/components/dashboard/KPIGrid';
 
 interface Event {
   id: string;
@@ -176,51 +179,64 @@ export default function Events() {
       label: event.isPublished ? 'Unpublish' : 'Publish',
       icon: event.isPublished ? <ToggleLeft size={16} /> : <ToggleRight size={16} />,
       onClick: () => handleTogglePublish(event.id, event.isPublished),
-      className: event.isPublished ? 'text-yellow-400 hover:text-yellow-300' : 'text-green-400 hover:text-green-300',
+      className: event.isPublished ? 'text-yellow-400 hover:text-yellow-300' : 'text-emerald-400 hover:text-green-300',
     },
-    { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(event.id), className: 'text-red-400 hover:text-red-300' },
+    { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(event.id), className: 'text-destructive hover:text-destructive' },
   ];
 
   return (
     <ProtectedRoute>
       <Head><title>Events | Equestrian Events</title></Head>
-      <div>
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-2xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>Events</h2>
-          <div className="flex flex-wrap gap-3">
-            <button onClick={handleExportCSV} className="btn btn-ghost text-sm">
-              <Download size={16} /> CSV
-            </button>
-            <button onClick={handleExportExcel} className="btn btn-secondary text-sm">
-              <Download size={16} /> Excel
-            </button>
-            <Link href="/events/create" className="btn btn-primary text-sm">
-              <Plus size={16} /> New Event
-            </Link>
-          </div>
+      <div className="animate-fade-in max-w-[1600px] mx-auto">
+
+        {/* Page heading */}
+        <div className="mb-6 lg:mb-8">
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+            Event <span className="gradient-text">Registry</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">
+            Master list of all equestrian championships and regional qualifiers.
+          </p>
         </div>
 
-        {/* Search */}
-        <div className="bento-card mb-6">
-          <div className="relative">
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2"
-              style={{ color: 'hsl(var(--muted-foreground))' }}
-            />
-            <input
-              type="text"
-              placeholder="Search events by name, location..."
-              value={searchTerm}
-              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-              className="input pl-10"
-            />
+        {/* KPI Stats */}
+        <KPIGrid>
+          <KPICard title="Scheduled" value={events.length} icon={Calendar} variant="primary" trend={{ value: 'Season', isUp: true }} subText="Current season" className="animate-slide-up-1" />
+          <KPICard title="Published" value={events.filter(e => e.isPublished).length} icon={Check} variant="outline" subText="Live on portal" className="animate-slide-up-2" />
+          <KPICard title="Registrations" value={events.reduce((a, e) => a + (e.registrationCount || 0), 0)} icon={Layers} variant="outline" subText="Total athletes" className="animate-slide-up-3" />
+          <KPICard title="Platform" value="Normal" icon={Activity} variant="secondary" subText="Latency: 14ms" className="animate-slide-up-4" />
+        </KPIGrid>
+
+        {/* Action bar */}
+        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-2 border-beam">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10 w-full">
+            <div className="relative flex-1 sm:flex-initial">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Find championship..."
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+              />
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">CSV</span>
+              </button>
+              <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Excel</span>
+              </button>
+              <Link href="/events/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center transition-all active:scale-95">
+                <Plus className="w-4 h-4" /> Define Event
+              </Link>
+            </div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="bento-card overflow-x-auto">
+        <div className="bento-card overflow-hidden animate-slide-up-3">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary/40 via-primary/40 to-secondary/40" />
           {loading ? (
             <div className="py-8">
               <div className="flex flex-col gap-3">
@@ -234,82 +250,79 @@ export default function Events() {
               </div>
             </div>
           ) : events.length === 0 ? (
-            <div className="text-center py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <div className="text-center py-8" >
               {searchTerm ? 'No events match your search' : 'No events yet. Create one to get started!'}
             </div>
           ) : (
             <>
-              <table className="w-full min-w-[800px]">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px] text-sm">
                 <thead>
-                  <tr>
-                    <th className="w-10">
+                  <tr className="label-tech text-left bg-surface-container/40">
+                    <th className="p-3 sm:p-4 w-12">
                       <input
                         type="checkbox"
                         checked={selectedIds.size === events.length && events.length > 0}
                         onChange={toggleSelectAll}
-                        style={{ accentColor: 'hsl(var(--primary))' }}
+                        className="accent-primary rounded"
                       />
                     </th>
-                    <th>Event Name</th>
-                    <th>Venue</th>
-                    <th>Start Date</th>
-                    <th>Status</th>
-                    <th>Registrations</th>
-                    <th className="w-16 text-center">Actions</th>
+                    <th className="p-3 sm:p-4">Championship Manifest</th>
+                    <th className="p-3 sm:p-4">Operational Node</th>
+                    <th className="p-3 sm:p-4">Timeline</th>
+                    <th className="p-3 sm:p-4">Status</th>
+                    <th className="p-3 sm:p-4 text-center">Registrations</th>
+                    <th className="p-3 sm:p-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border/10">
                   {events.map((event) => (
-                    <tr key={event.id}>
-                      <td>
+                    <tr key={event.id} className="group hover:bg-surface-container/20 transition-all duration-300">
+                      <td className="p-3 sm:p-4">
                         <input
                           type="checkbox"
                           checked={selectedIds.has(event.id)}
                           onChange={() => toggleSelect(event.id)}
-                          style={{ accentColor: 'hsl(var(--primary))' }}
+                          className="accent-primary rounded"
                         />
                       </td>
-                      <td className="font-medium" style={{ color: 'hsl(var(--on-surface))' }}>{event.name}</td>
-                      <td>{event.venueName || 'N/A'}</td>
-                      <td>{new Date(event.startDate).toLocaleDateString()}</td>
-                      <td>
-                        <span className={`badge ${event.isPublished ? 'badge-emerald' : 'badge-muted'}`}>
-                          {event.isPublished ? <ToggleRight size={12} className="mr-1" /> : <ToggleLeft size={12} className="mr-1" />}
+                      <td className="p-3 sm:p-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-border/30 shadow-inner group-hover:scale-110 transition-transform ${event.isPublished ? 'bg-primary/10 text-primary' : 'bg-surface-container text-muted-foreground'}`}>
+                            <Calendar className="w-5 h-5" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-on-surface font-bold tracking-tight">{event.name}</span>
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border w-fit mt-0.5 ${event.isPublished ? 'bg-primary/10 text-primary border-primary/20' : 'bg-surface-container text-muted-foreground border-border/30'}`}>
+                              {event.isPublished ? 'PUBLISHED' : 'DRAFT'}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-3 sm:p-4 text-on-surface-variant font-medium">{event.venueName || 'TBD'}</td>
+                      <td className="p-3 sm:p-4 text-xs font-mono text-on-surface-variant">{new Date(event.startDate).toLocaleDateString()}</td>
+                      <td className="p-3 sm:p-4">
+                        <span className={`badge ${event.isPublished ? 'badge-success' : 'badge-muted'}`}>
                           {event.isPublished ? 'Published' : 'Draft'}
                         </span>
                       </td>
-                      <td>
-                        <span className="badge badge-success">{event.registrationCount}</span>
+                      <td className="p-3 sm:p-4 text-center">
+                        <span className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">{event.registrationCount}</span>
                       </td>
-                      <td className="text-center">
-                        <ActionsDropdown actions={getEventActions(event)} />
+                      <td className="p-3 sm:p-4 text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <ActionsDropdown actions={getEventActions(event)} />
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              </div>
 
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-4">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="btn btn-ghost disabled:opacity-30"
-                  >
-                    Previous
-                  </button>
-                  <span className="px-4 py-2 text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="btn btn-ghost disabled:opacity-30"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
+              <div className="bg-surface-container/20 p-2 border-t border-border/10">
+                <Pagination total={events.length * totalPages} page={page} perPage={10} onChange={setPage} />
+              </div>
             </>
           )}
         </div>

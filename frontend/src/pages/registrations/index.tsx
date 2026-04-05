@@ -172,7 +172,7 @@ export default function Registrations() {
       <Head><title>Registrations | Equestrian Events</title></Head>
       <div>
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold">Registrations</h2>
+            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Registration <span className="gradient-text">Ledger</span></h1>
             <div className="flex gap-3">
               <button onClick={handleExportCSV} className="btn-secondary">
                 <Download className="inline mr-2" /> Export CSV
@@ -187,14 +187,14 @@ export default function Registrations() {
           </div>
 
           {error && (
-            <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
+            <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 text-destructive backdrop-blur-sm px-4 py-3 rounded mb-6">
               {error}
             </div>
           )}
 
-          <div className="mb-6 card">
+          <div className="mb-6 bento-card">
             <div className="relative">
-              <Search className="absolute left-3 top-3 text-gray-500" />
+              <Search className="absolute left-3 top-3 text-muted-foreground" />
               <select
                 value={statusFilter}
                 onChange={(e) => {
@@ -220,7 +220,7 @@ export default function Registrations() {
                 ))}
               </div>
             ) : registrations.length === 0 ? (
-              <div className="text-center py-8 text-gray-300">
+              <div className="text-center py-8 text-muted-foreground">
                 {statusFilter ? 'No registrations with this status' : 'No registrations yet. Create one to get started!'}
               </div>
             ) : (
@@ -233,7 +233,7 @@ export default function Registrations() {
                           type="checkbox"
                           checked={selectedIds.size === registrations.length && registrations.length > 0}
                           onChange={toggleSelectAll}
-                          className="rounded border-gray-600"
+                          className="rounded border-border"
                         />
                       </th>
                       <th>Rider Name</th>
@@ -252,7 +252,7 @@ export default function Registrations() {
                             type="checkbox"
                             checked={selectedIds.has(reg.id)}
                             onChange={() => toggleSelect(reg.id)}
-                            className="rounded border-gray-600"
+                            className="rounded border-border"
                           />
                         </td>
                         <td className="font-medium">{reg.rider.firstName} {reg.rider.lastName}</td>
@@ -267,7 +267,7 @@ export default function Registrations() {
                         <td>
                           <button
                             onClick={() => handleDelete(reg.id)}
-                            className="text-red-400 hover:text-red-300"
+                            className="text-destructive hover:text-destructive"
                             title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -287,7 +287,7 @@ export default function Registrations() {
                     >
                       Previous
                     </button>
-                    <span className="px-4 py-2 text-gray-300">
+                    <span className="px-4 py-2 text-muted-foreground">
                       Page {page} of {totalPages}
                     </span>
                     <button
