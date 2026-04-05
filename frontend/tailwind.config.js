@@ -85,6 +85,10 @@ module.exports = {
           dark: 'hsl(var(--purple-dark))',
           foreground: 'hsl(var(--purple-foreground))',
         },
+        lime: {
+          DEFAULT: 'hsl(82, 99%, 67%)',
+          dark: 'hsl(82, 90%, 55%)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -94,6 +98,14 @@ module.exports = {
         '2xl': '1.25rem',
       },
       keyframes: {
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
         'fade-in': {
           from: { opacity: '0', transform: 'translateY(8px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
@@ -116,6 +128,8 @@ module.exports = {
         },
       },
       animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.4s ease-out',
         'slide-in': 'slide-in 0.3s ease-out',
         'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
@@ -124,5 +138,5 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animate')],
 };
