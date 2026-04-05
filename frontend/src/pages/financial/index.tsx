@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { FiPlus, FiEdit2, FiDownload, FiX, FiCheck } from 'react-icons/fi';
+import { Plus, Pencil, Download, X, Check } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -305,11 +305,7 @@ export default function Financial() {
   const TabButton = ({ tab, label }: { tab: Tab; label: string }) => (
     <button
       onClick={() => setActiveTab(tab)}
-      className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
-        activeTab === tab
-          ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
-          : 'bg-white bg-opacity-10 text-gray-300 hover:bg-opacity-20'
-      }`}
+      className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all ${activeTab === tab ? 'btn-primary' : 'btn-ghost'}`}
     >
       {label}
     </button>
@@ -321,17 +317,17 @@ export default function Financial() {
       <div>
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h2 className="text-3xl font-bold text-white">Financial Management</h2>
+          <h2 className="text-2xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>Financial Management</h2>
           {activeTab === 'transactions' && (
             <div className="flex flex-wrap gap-3">
               <button onClick={handleExportCSV} className="btn-secondary">
-                <FiDownload className="inline mr-2" /> Export CSV
+                <Download className="inline mr-2" /> Export CSV
               </button>
               <button onClick={handleExportExcel} className="btn-secondary">
-                <FiDownload className="inline mr-2" /> Export Excel
+                <Download className="inline mr-2" /> Export Excel
               </button>
               <Link href="/financial/transactions/create" className="btn-primary">
-                <FiPlus className="inline mr-2" /> Record Transaction
+                <Plus className="inline mr-2" /> Record Transaction
               </Link>
             </div>
           )}
@@ -339,22 +335,22 @@ export default function Financial() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
-          <div className="card">
-            <p className="text-gray-300 text-sm font-medium">Total Revenue</p>
-            <p className="text-2xl sm:text-3xl font-bold text-white mt-2">₹{summary.totalRevenue.toFixed(2)}</p>
+          <div className="hero-kpi primary-card-glow animate-slide-up-1">
+            <div className="hero-label">Total Revenue</div>
+            <div className="hero-value">₹{summary.totalRevenue.toFixed(2)}</div>
           </div>
-          <div className="card">
-            <p className="text-gray-300 text-sm font-medium">Total Transactions</p>
-            <p className="text-2xl sm:text-3xl font-bold text-white mt-2">{summary.totalTransactions}</p>
+          <div className="stat-card animate-slide-up-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'hsl(var(--muted-foreground))' }}>Total Transactions</p>
+            <p className="text-2xl font-bold mt-1" style={{ color: 'hsl(var(--on-surface))' }}>{summary.totalTransactions}</p>
           </div>
-          <div className="card">
-            <p className="text-gray-300 text-sm font-medium">Average Transaction</p>
-            <p className="text-2xl sm:text-3xl font-bold text-white mt-2">₹{summary.averageTransaction.toFixed(2)}</p>
+          <div className="stat-card animate-slide-up-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'hsl(var(--muted-foreground))' }}>Average Transaction</p>
+            <p className="text-2xl font-bold mt-1" style={{ color: 'hsl(var(--on-surface))' }}>₹{summary.averageTransaction.toFixed(2)}</p>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
+          <div className="rounded-xl px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
@@ -369,13 +365,13 @@ export default function Financial() {
         {activeTab === 'finance' && (
           <>
             {/* Filters */}
-            <div className="card mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bento-card mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-white mb-2">Select Event</label>
                 <select
                   value={eventFilter}
                   onChange={(e) => { setEventFilter(e.target.value); setFinancePage(1); }}
-                  className="form-input"
+                  className="input"
                 >
                   <option value="">All Events</option>
                   {events.map(ev => (
@@ -388,7 +384,7 @@ export default function Financial() {
                 <select
                   value={categoryFilter}
                   onChange={(e) => { setCategoryFilter(e.target.value); setFinancePage(1); }}
-                  className="form-input"
+                  className="input"
                 >
                   <option value="">All Categories</option>
                   {categories.map(cat => (
@@ -401,7 +397,7 @@ export default function Financial() {
                 <select
                   value={paymentFilter}
                   onChange={(e) => { setPaymentFilter(e.target.value); setFinancePage(1); }}
-                  className="form-input"
+                  className="input"
                 >
                   <option value="">All Statuses</option>
                   <option value="PAID">Paid</option>
@@ -413,10 +409,10 @@ export default function Financial() {
             </div>
 
             {/* Finance Table */}
-            <div className="card table-container">
+            <div className="bento-card table-container">
               {financeLoading ? (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
                   <p className="text-gray-300 mt-2">Loading...</p>
                 </div>
               ) : registrations.length === 0 ? (
@@ -466,13 +462,13 @@ export default function Financial() {
         {activeTab === 'transactions' && (
           <>
             {/* Status Filter */}
-            <div className="card mb-6">
+            <div className="bento-card mb-6">
               <div className="max-w-xs">
                 <label className="block text-sm font-medium text-white mb-2">Filter by Status</label>
                 <select
                   value={statusFilter}
                   onChange={(e) => { setStatusFilter(e.target.value); setTransPage(1); }}
-                  className="form-input"
+                  className="input"
                 >
                   <option value="">All Statuses</option>
                   <option value="PAID">Paid</option>
@@ -484,10 +480,10 @@ export default function Financial() {
             </div>
 
             {/* Transactions Table */}
-            <div className="card table-container">
+            <div className="bento-card table-container">
               {transLoading ? (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
                   <p className="text-gray-300 mt-2">Loading transactions...</p>
                 </div>
               ) : transactions.length === 0 ? (
@@ -544,10 +540,10 @@ export default function Financial() {
                           <td>
                             <button
                               onClick={() => openEditModal(trans)}
-                              className="text-purple-400 hover:text-purple-300 transition-colors p-1"
+                              className="transition-colors transition-colors p-1"
                               title="Edit Transaction"
                             >
-                              <FiEdit2 size={16} />
+                              <Pencil size={16} />
                             </button>
                           </td>
                         </tr>
@@ -564,43 +560,46 @@ export default function Financial() {
 
       {/* ═══════════════════ EDIT MODAL ═══════════════════ */}
       {editingTransaction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm">
-          <div className="bg-slate-800 rounded-2xl border border-white border-opacity-20 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center px-6 py-4 border-b border-white border-opacity-10">
-              <h3 className="text-xl font-bold text-white">Edit Transaction</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div
+            className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl"
+            style={{ background: 'hsl(var(--surface-card))', border: '1px solid hsl(var(--border) / 0.5)' }}
+          >
+            <div className="flex justify-between items-center px-6 py-4" style={{ borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
+              <h3 className="text-xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>Edit Transaction</h3>
               <button onClick={() => setEditingTransaction(null)} className="text-gray-400 hover:text-white transition-colors">
-                <FiX size={20} />
+                <X size={20} />
               </button>
             </div>
             <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">Amount</label>
-                  <input type="number" name="amount" step="0.01" value={editForm.amount} onChange={handleEditChange} className="form-input" required />
+                  <input type="number" name="amount" step="0.01" value={editForm.amount} onChange={handleEditChange} className="input" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">Ref #</label>
-                  <input type="text" name="referenceNumber" value={editForm.referenceNumber} onChange={handleEditChange} className="form-input" />
+                  <input type="text" name="referenceNumber" value={editForm.referenceNumber} onChange={handleEditChange} className="input" />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">CGST</label>
-                  <input type="number" name="cgstAmount" step="0.01" value={editForm.cgstAmount} onChange={handleEditChange} className="form-input" />
+                  <input type="number" name="cgstAmount" step="0.01" value={editForm.cgstAmount} onChange={handleEditChange} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">SGST</label>
-                  <input type="number" name="sgstAmount" step="0.01" value={editForm.sgstAmount} onChange={handleEditChange} className="form-input" />
+                  <input type="number" name="sgstAmount" step="0.01" value={editForm.sgstAmount} onChange={handleEditChange} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">IGST</label>
-                  <input type="number" name="igstAmount" step="0.01" value={editForm.igstAmount} onChange={handleEditChange} className="form-input" />
+                  <input type="number" name="igstAmount" step="0.01" value={editForm.igstAmount} onChange={handleEditChange} className="input" />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">Payment Method</label>
-                  <select name="paymentMethod" value={editForm.paymentMethod} onChange={handleEditChange} className="form-input">
+                  <select name="paymentMethod" value={editForm.paymentMethod} onChange={handleEditChange} className="input">
                     <option value="">Select</option>
                     <option value="Credit Card">Credit Card</option>
                     <option value="Debit Card">Debit Card</option>
@@ -612,7 +611,7 @@ export default function Financial() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-1">Status</label>
-                  <select name="status" value={editForm.status} onChange={handleEditChange} className="form-input">
+                  <select name="status" value={editForm.status} onChange={handleEditChange} className="input">
                     <option value="UNPAID">Unpaid</option>
                     <option value="PAID">Paid</option>
                     <option value="PARTIAL">Partial</option>
@@ -622,11 +621,11 @@ export default function Financial() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-white mb-1">Notes</label>
-                <textarea name="notes" value={editForm.notes} onChange={handleEditChange} rows={3} className="form-input" />
+                <textarea name="notes" value={editForm.notes} onChange={handleEditChange} rows={3} className="input" />
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={editLoading} className="flex-1 btn-primary">
-                  <FiCheck className="inline mr-2" /> {editLoading ? 'Saving...' : 'Save Changes'}
+                  <Check className="inline mr-2" /> {editLoading ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button type="button" onClick={() => setEditingTransaction(null)} className="flex-1 btn-secondary">
                   Cancel

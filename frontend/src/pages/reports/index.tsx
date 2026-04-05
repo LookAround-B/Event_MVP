@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import toast from 'react-hot-toast';
-import { FiDownload, FiBarChart2, FiDollarSign, FiUsers, FiCalendar } from 'react-icons/fi';
+import { Download, BarChart2, DollarSign, Users, Calendar } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -115,12 +115,12 @@ export default function Reports() {
         {/* Tabs */}
         <div className="flex flex-wrap gap-2">
           {[
-            { key: 'events', label: 'Event Summary', icon: FiCalendar },
-            { key: 'financial', label: 'Financial Reconciliation', icon: FiDollarSign },
-            { key: 'riders', label: 'Rider Statistics', icon: FiUsers },
-            { key: 'attendance', label: 'Attendance', icon: FiBarChart2 },
+            { key: 'events', label: 'Event Summary', icon: Calendar },
+            { key: 'financial', label: 'Financial Reconciliation', icon: DollarSign },
+            { key: 'riders', label: 'Rider Statistics', icon: Users },
+            { key: 'attendance', label: 'Attendance', icon: BarChart2 },
           ].map(t => (
-            <button key={t.key} onClick={() => setTab(t.key as any)} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition ${tab === t.key ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}>
+            <button key={t.key} onClick={() => setTab(t.key as any)} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition ${tab === t.key ? 'btn-primary' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}>
               <t.icon size={16} /> {t.label}
             </button>
           ))}
@@ -130,7 +130,7 @@ export default function Reports() {
 
         {/* Event Summary Report */}
         {!loading && tab === 'events' && (
-          <div className="card table-container">
+          <div className="bento-card table-container">
             <table className="table">
               <thead>
                 <tr>
@@ -177,44 +177,44 @@ export default function Reports() {
         {/* Financial Reconciliation Report */}
         {!loading && tab === 'financial' && (
           <div className="space-y-4">
-            <div className="card p-4 flex flex-wrap gap-4 items-end">
+            <div className="bento-card p-4 flex flex-wrap gap-4 items-end">
               <div>
                 <label className="text-sm font-medium text-gray-300 block mb-1">Start Date</label>
-                <input type="date" value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} className="form-input text-sm" />
+                <input type="date" value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} className="input text-sm" />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-300 block mb-1">End Date</label>
-                <input type="date" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} className="form-input text-sm" />
+                <input type="date" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} className="input text-sm" />
               </div>
               <button onClick={loadReport} className="btn-primary text-sm">Apply</button>
               <button onClick={downloadFinancialCSV} className="btn-secondary text-sm flex items-center gap-1">
-                <FiDownload size={14} /> Export CSV
+                <Download size={14} /> Export CSV
               </button>
             </div>
 
             {financialReport && (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="card">
+                  <div className="bento-card">
                     <p className="text-sm text-gray-400">Expected Revenue</p>
                     <p className="text-xl font-bold text-white mt-1">₹{financialReport.totalExpectedRevenue.toLocaleString()}</p>
                   </div>
-                  <div className="card">
+                  <div className="bento-card">
                     <p className="text-sm text-gray-400">Collected</p>
                     <p className="text-xl font-bold text-emerald-400 mt-1">₹{financialReport.totalCollected.toLocaleString()}</p>
                   </div>
-                  <div className="card">
+                  <div className="bento-card">
                     <p className="text-sm text-gray-400">Outstanding</p>
                     <p className="text-xl font-bold text-red-400 mt-1">₹{financialReport.totalOutstanding.toLocaleString()}</p>
                   </div>
-                  <div className="card">
+                  <div className="bento-card">
                     <p className="text-sm text-gray-400">Transactions</p>
                     <p className="text-xl font-bold text-white mt-1">{financialReport.transactionCount}</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="card">
+                  <div className="bento-card">
                     <h3 className="text-sm font-semibold text-white mb-3">By Payment Method</h3>
                     {Object.entries(financialReport.byMethod).map(([method, data]) => (
                       <div key={method} className="flex justify-between py-1.5 border-b border-white/5 last:border-0">
@@ -224,7 +224,7 @@ export default function Reports() {
                     ))}
                     {Object.keys(financialReport.byMethod).length === 0 && <p className="text-sm text-gray-500">No data</p>}
                   </div>
-                  <div className="card">
+                  <div className="bento-card">
                     <h3 className="text-sm font-semibold text-white mb-3">By Status</h3>
                     {Object.entries(financialReport.byStatus).map(([status, data]) => (
                       <div key={status} className="flex justify-between py-1.5 border-b border-white/5 last:border-0">
@@ -242,7 +242,7 @@ export default function Reports() {
 
         {/* Rider Statistics Report */}
         {!loading && tab === 'riders' && (
-          <div className="card table-container">
+          <div className="bento-card table-container">
             <table className="table">
               <thead>
                 <tr>
@@ -278,10 +278,10 @@ export default function Reports() {
         {/* Attendance Report */}
         {!loading && tab === 'attendance' && (
           <div className="space-y-4">
-            <div className="card p-4 flex flex-wrap gap-4 items-end">
+            <div className="bento-card p-4 flex flex-wrap gap-4 items-end">
               <div>
                 <label className="text-sm font-medium text-gray-300 block mb-1">Filter by Event</label>
-                <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)} className="form-input text-sm mt-1">
+                <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)} className="input text-sm mt-1">
                   <option value="">All Events</option>
                   {eventSummaries.map(ev => (
                     <option key={ev.id} value={ev.id}>{ev.name}</option>
@@ -292,7 +292,7 @@ export default function Reports() {
             </div>
 
             {attendanceReport.map((event: any) => (
-              <div key={event.eventId} className="card overflow-hidden">
+              <div key={event.eventId} className="bento-card overflow-hidden">
                 <div className="pb-4 mb-4 border-b border-white/10">
                   <h3 className="font-semibold text-white">{event.eventName}</h3>
                   <p className="text-sm text-gray-400">{event.eventType} | {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</p>
@@ -327,7 +327,7 @@ export default function Reports() {
               </div>
             ))}
             {attendanceReport.length === 0 && (
-              <div className="card p-8 text-center text-gray-500">No attendance data</div>
+              <div className="bento-card p-8 text-center text-gray-500">No attendance data</div>
             )}
           </div>
         )}

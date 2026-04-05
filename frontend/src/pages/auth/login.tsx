@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import apiClient from '@/lib/api';
 import Cookies from 'js-cookie';
-import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 
 export default function Login() {
@@ -39,82 +39,122 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated floating blobs */}
-      <div className="absolute top-0 -left-40 w-80 h-80 bg-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-      <div className="absolute top-0 -right-40 w-80 h-80 bg-secondary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute -bottom-8 left-20 w-80 h-80 bg-accent-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
-
-      <div className="glass w-full max-w-md backdrop-blur-xl border-white border-opacity-20 shadow-glass-lg">
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-dot-grid"
+      style={{ background: 'hsl(var(--surface-background))' }}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl animate-fade-in primary-card-glow"
+        style={{
+          background: 'hsl(var(--surface-card))',
+          border: '1px solid hsl(var(--border) / 0.5)',
+        }}
+      >
         <div className="p-8">
+          {/* Brand */}
           <div className="text-center mb-8">
-            <div className="text-4xl font-black bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-2">Equestrian</div>
-            <p className="text-gray-300 font-medium">Event Management Platform</p>
+            <div className="text-4xl font-black mb-2" style={{ color: 'hsl(var(--primary))' }}>
+              Equestrian
+            </div>
+            <p className="font-medium" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              Event Management Platform
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
             <div className="form-group">
               <label className="form-label">Email Address</label>
               <div className="relative">
-                <FiMail className="absolute left-3 top-3.5 text-secondary-400" />
+                <Mail
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'hsl(var(--secondary))' }}
+                />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="form-input pl-10"
+                  className="input pl-10"
                   placeholder="your@email.com"
                   required
                 />
               </div>
             </div>
 
+            {/* Password */}
             <div className="form-group">
               <label className="form-label">Password</label>
               <div className="relative">
-                <FiLock className="absolute left-3 top-3.5 text-secondary-400" />
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'hsl(var(--secondary))' }}
+                />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="form-input pl-10 pr-10"
+                  className="input pl-10 pr-10"
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-200 transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
+            {/* Error */}
             {error && (
-              <div className="p-4 rounded-xl bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 backdrop-blur-sm">
-                <p className="text-red-200 text-sm font-medium">{error}</p>
+              <div
+                className="p-4 rounded-xl text-sm font-medium"
+                style={{
+                  background: 'hsl(var(--error) / 0.1)',
+                  border: '1px solid hsl(var(--error) / 0.3)',
+                  color: 'hsl(var(--error))',
+                }}
+              >
+                {error}
               </div>
             )}
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full mt-8"
+              className="btn btn-primary w-full mt-8 py-3 text-base disabled:opacity-50"
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
 
+            {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white border-opacity-20"></div>
+                <div className="w-full" style={{ borderTop: '1px solid hsl(var(--border) / 0.5)' }}></div>
               </div>
               <div className="relative flex justify-center">
-                <span className="px-3 text-sm text-gray-300 font-medium bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">Or continue with</span>
+                <span
+                  className="px-3 text-sm font-medium"
+                  style={{
+                    background: 'hsl(var(--surface-card))',
+                    color: 'hsl(var(--muted-foreground))',
+                  }}
+                >
+                  Or continue with
+                </span>
               </div>
             </div>
 
+            {/* Google Login */}
             <div className="flex justify-center">
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
@@ -144,10 +184,11 @@ export default function Login() {
             </div>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-white border-opacity-10 text-center">
-            <p className="text-gray-300 text-sm">
+          {/* Footer link */}
+          <div className="mt-8 pt-6 text-center" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)' }}>
+            <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
               Don't have an account?{' '}
-              <Link href="/auth/signup" className="bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent font-bold hover:from-primary-300 hover:to-secondary-300 transition">
+              <Link href="/auth/signup" className="font-bold transition-colors" style={{ color: 'hsl(var(--primary))' }}>
                 Sign up
               </Link>
             </p>

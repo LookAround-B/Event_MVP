@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiSearch, FiMapPin } from 'react-icons/fi';
+import { Search, MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 interface VenueMapPickerProps {
@@ -63,9 +63,9 @@ export default function VenueMapPicker({ lat, lng, onLocationChange }: VenueMapP
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search location (e.g., Mumbai, India)"
-            className="form-input pl-9"
+            className="input pl-9"
           />
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
         </div>
         <button
           type="button"
@@ -101,7 +101,7 @@ export default function VenueMapPicker({ lat, lng, onLocationChange }: VenueMapP
             onChange={(e) => onLocationChange(e.target.value, lng)}
             placeholder="e.g., 20.5937"
             step="0.000001"
-            className="form-input"
+            className="input"
           />
         </div>
         <div>
@@ -112,7 +112,7 @@ export default function VenueMapPicker({ lat, lng, onLocationChange }: VenueMapP
             onChange={(e) => onLocationChange(lat, e.target.value)}
             placeholder="e.g., 78.9629"
             step="0.000001"
-            className="form-input"
+            className="input"
           />
         </div>
       </div>

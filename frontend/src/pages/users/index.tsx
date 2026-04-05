@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { FiEdit2, FiTrash2, FiPlus, FiSearch, FiCheck, FiClock, FiDownload, FiShield, FiFilter, FiX, FiChevronDown } from 'react-icons/fi';
+import { Pencil, Trash2, Plus, Search, Check, Clock, Download, Shield, Filter, X, ChevronDown } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -222,35 +222,35 @@ export default function Users() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white">Users Management</h1>
+            <h1 className="text-2xl font-bold">Users Management</h1>
             <p className="text-gray-300 mt-2">Manage system users and permissions</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <button onClick={handleExportCSV} className="btn-secondary flex items-center gap-2">
-              <FiDownload /> Export CSV
+              <Download /> Export CSV
             </button>
             <Link href="/users/create" className="btn-primary flex items-center gap-2">
-              <FiPlus /> Add User
+              <Plus /> Add User
             </Link>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded">
+          <div className="rounded-xl px-4 py-3 rounded">
             {error}
           </div>
         )}
 
-        <div className="card">
+        <div className="bento-card">
           {/* Search and Filter Bar */}
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="flex items-center gap-2 flex-1">
-                <FiSearch className="text-gray-400 shrink-0" />
+                <Search className="text-gray-400 shrink-0" />
                 <input
                   type="text"
                   placeholder="Search users by email or name..."
-                  className="form-input"
+                  className="input"
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);
@@ -260,9 +260,9 @@ export default function Users() {
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`btn-secondary flex items-center gap-2 ${hasActiveFilters ? 'border-primary-500 text-primary-400' : ''}`}
+                className={`btn-secondary flex items-center gap-2 ${hasActiveFilters ? 'border-primary text-primary' : ''}`}
               >
-                <FiFilter /> Filters {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary-500" />}
+                <Filter /> Filters {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary-500" />}
               </button>
             </div>
 
@@ -272,7 +272,7 @@ export default function Users() {
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Role</label>
                   <select
-                    className="form-input"
+                    className="input"
                     value={roleFilter}
                     onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
                   >
@@ -285,7 +285,7 @@ export default function Users() {
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Gender</label>
                   <select
-                    className="form-input"
+                    className="input"
                     value={genderFilter}
                     onChange={(e) => { setGenderFilter(e.target.value); setPage(1); }}
                   >
@@ -298,7 +298,7 @@ export default function Users() {
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1">Status</label>
                   <select
-                    className="form-input"
+                    className="input"
                     value={statusFilter}
                     onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
                   >
@@ -310,7 +310,7 @@ export default function Users() {
                 {hasActiveFilters && (
                   <div className="sm:col-span-3">
                     <button onClick={clearFilters} className="text-sm text-gray-400 hover:text-white flex items-center gap-1">
-                      <FiX className="w-3 h-3" /> Clear all filters
+                      <X className="w-3 h-3" /> Clear all filters
                     </button>
                   </div>
                 )}
@@ -325,7 +325,7 @@ export default function Users() {
                 {selectedUsers.length} selected
               </span>
               <select
-                className="form-input text-sm"
+                className="input text-sm"
                 value={bulkAction}
                 onChange={(e) => setBulkAction(e.target.value)}
               >
@@ -337,7 +337,7 @@ export default function Users() {
               </select>
               {bulkAction === 'assignRole' && (
                 <select
-                  className="form-input text-sm"
+                  className="input text-sm"
                   value={bulkRoleId}
                   onChange={(e) => setBulkRoleId(e.target.value)}
                 >
@@ -366,7 +366,7 @@ export default function Users() {
           {loading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
                 <p className="text-gray-300">Loading users...</p>
               </div>
             </div>
@@ -437,11 +437,11 @@ export default function Users() {
                           <td>
                             {!user.isApproved ? (
                               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                <FiClock className="w-4 h-4" /> Pending
+                                <Clock className="w-4 h-4" /> Pending
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                <FiCheck className="w-4 h-4" /> Approved
+                                <Check className="w-4 h-4" /> Approved
                               </span>
                             )}
                           </td>
@@ -459,7 +459,7 @@ export default function Users() {
                                   <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white"></div>
                                 ) : (
                                   <>
-                                    <FiCheck className="w-4 h-4" /> <span className="hidden sm:inline">Approve</span>
+                                    <Check className="w-4 h-4" /> <span className="hidden sm:inline">Approve</span>
                                   </>
                                 )}
                               </button>
@@ -470,20 +470,20 @@ export default function Users() {
                                 className="btn-secondary p-2 flex items-center gap-1 text-sm"
                                 title="Manage Permissions"
                               >
-                                <FiShield className="w-4 h-4" />
+                                <Shield className="w-4 h-4" />
                               </Link>
                             )}
                             <Link 
                               href={`/users/${user.id}/edit`}
                               className="btn-secondary p-2 flex items-center gap-1 text-sm"
                             >
-                              <FiEdit2 className="w-4 h-4" />
+                              <Pencil className="w-4 h-4" />
                             </Link>
                             <button 
                               onClick={() => handleDelete(user.id)}
                               className="btn-danger p-2 flex items-center gap-1 text-sm"
                             >
-                              <FiTrash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </td>

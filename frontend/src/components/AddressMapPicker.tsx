@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { FiSearch, FiMapPin } from 'react-icons/fi';
+import { Search, MapPin } from 'lucide-react';
 
 const MapInner = dynamic(() => import('./MapInner'), { ssr: false });
 
@@ -94,14 +94,14 @@ export default function AddressMapPicker({ address, city, state, country, pincod
       <button
         type="button"
         onClick={() => setShowMap(!showMap)}
-        className="flex items-center gap-2 text-sm text-primary-400 hover:text-primary-300 transition"
+        className="flex items-center gap-2 text-sm text-primary hover:text-primary-300 transition"
       >
-        <FiMapPin className="w-4 h-4" />
+        <MapPin className="w-4 h-4" />
         {showMap ? 'Hide Map' : 'Pick from Map'}
       </button>
 
       {showMap && (
-        <div className="glass p-4 rounded-xl space-y-3">
+        <div className="bento-card p-4 rounded-xl space-y-3">
           <div className="flex gap-2">
             <input
               type="text"
@@ -115,9 +115,9 @@ export default function AddressMapPicker({ address, city, state, country, pincod
               type="button"
               onClick={handleSearch}
               disabled={searching}
-              className="px-3 py-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition disabled:opacity-50"
+              className="px-3 py-2 rounded-lg bg-primary-500 text-white hover: transition disabled:opacity-50"
             >
-              <FiSearch className="w-4 h-4" />
+              <Search className="w-4 h-4" />
             </button>
           </div>
           <div className="h-64 rounded-lg overflow-hidden">

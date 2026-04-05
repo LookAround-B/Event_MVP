@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { FiBell, FiCheck, FiCheckCircle } from 'react-icons/fi';
+import { Bell, Check, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -105,7 +105,7 @@ export default function Notifications() {
             </button>
             {unreadCount > 0 && (
               <button onClick={markAllAsRead} className="px-3 py-2 bg-white/10 text-gray-300 rounded-lg text-sm hover:bg-white/20 flex items-center gap-1 transition">
-                <FiCheckCircle size={14} /> Mark All Read
+                <CheckCircle size={14} /> Mark All Read
               </button>
             )}
           </div>
@@ -114,8 +114,8 @@ export default function Notifications() {
         {loading ? (
           <div className="text-center py-8 text-gray-400">Loading notifications...</div>
         ) : notifications.length === 0 ? (
-          <div className="card p-8 text-center">
-            <FiBell className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+          <div className="bento-card p-8 text-center">
+            <Bell className="w-12 h-12 text-gray-500 mx-auto mb-4" />
             <p className="text-gray-400">No notifications</p>
           </div>
         ) : (
@@ -123,7 +123,7 @@ export default function Notifications() {
             {notifications.map(n => (
               <div key={n.id} className={`card p-4 flex items-start gap-3 ${!n.isRead ? 'border-l-4 border-purple-500' : ''}`}>
                 <div className={`p-2 rounded-full ${typeIcon(n.type)} flex-shrink-0 mt-0.5`}>
-                  <FiBell size={14} />
+                  <Bell size={14} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start">
@@ -135,13 +135,13 @@ export default function Notifications() {
                   <p className="text-sm text-gray-400 mt-1">{n.message}</p>
                   <div className="flex gap-2 mt-2">
                     {n.link && (
-                      <Link href={n.link} className="text-xs text-purple-400 hover:text-purple-300 hover:underline">
+                      <Link href={n.link} className="text-xs transition-colors hover:underline">
                         View Details
                       </Link>
                     )}
                     {!n.isRead && (
                       <button onClick={() => markAsRead(n.id)} className="text-xs text-gray-500 hover:text-gray-300 flex items-center gap-1">
-                        <FiCheck size={12} /> Mark read
+                        <Check size={12} /> Mark read
                       </button>
                     )}
                   </div>

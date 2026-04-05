@@ -46,13 +46,13 @@ export default function CompleteProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center py-12 px-4 relative overflow-hidden">
+    <div className="min-h-screen  flex items-center justify-center py-12 px-4 relative overflow-hidden">
       {/* Animated floating blobs */}
-      <div className="absolute top-0 -left-40 w-80 h-80 bg-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-      <div className="absolute top-0 -right-40 w-80 h-80 bg-secondary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute -bottom-8 left-20 w-80 h-80 bg-accent-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
+      <div className="absolute top-0 -left-40 w-80 h-80  rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+      <div className="absolute top-0 -right-40 w-80 h-80  rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute -bottom-8 left-20 w-80 h-80  rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
 
-      <div className="glass w-full max-w-md backdrop-blur-xl border-white border-opacity-20 shadow-glass-lg">
+      <div className="bento-card w-full max-w-md  ">
         <div className="p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-2">
@@ -81,7 +81,7 @@ export default function CompleteProfile() {
                 value={formData.firstName}
                 onChange={handleInputChange}
                 required
-                className="form-input"
+                className="input"
                 placeholder="Enter your first name"
               />
             </div>
@@ -97,7 +97,7 @@ export default function CompleteProfile() {
                 value={formData.lastName}
                 onChange={handleInputChange}
                 required
-                className="form-input"
+                className="input"
                 placeholder="Enter your last name"
               />
             </div>
@@ -112,7 +112,7 @@ export default function CompleteProfile() {
                 value={formData.gender}
                 onChange={handleInputChange}
                 required
-                className="form-input"
+                className="input"
               >
                 <option value="">Select your gender</option>
                 <option value="Male">Male</option>
@@ -133,7 +133,7 @@ export default function CompleteProfile() {
                 value={formData.phone}
                 onChange={handleInputChange}
                 required
-                className="form-input"
+                className="input"
                 placeholder="Enter your phone number"
               />
             </div>

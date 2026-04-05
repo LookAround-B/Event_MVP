@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft, FiSave, FiCheck, FiX } from 'react-icons/fi';
+import { ArrowLeft, Save, Check, X } from 'lucide-react';
 
 interface Permission {
   action: string;
@@ -134,7 +134,7 @@ export default function UserPermissions() {
     return (
       <ProtectedRoute>
         <div className="p-6 flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
       </ProtectedRoute>
     );
@@ -145,10 +145,10 @@ export default function UserPermissions() {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Link href="/users" className="text-gray-400 hover:text-white">
-            <FiArrowLeft className="w-6 h-6" />
+            <ArrowLeft className="w-6 h-6" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-white">Permissions & Roles</h1>
+            <h1 className="text-2xl font-bold">Permissions & Roles</h1>
             <p className="text-gray-300 mt-1">
               {user?.name} ({user?.email})
             </p>
@@ -156,7 +156,7 @@ export default function UserPermissions() {
         </div>
 
         {/* Role Assignment */}
-        <div className="card">
+        <div className="bento-card">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-white">Assigned Roles</h2>
             <button
@@ -164,7 +164,7 @@ export default function UserPermissions() {
               disabled={savingRoles}
               className="btn-primary flex items-center gap-2"
             >
-              <FiSave /> {savingRoles ? 'Saving...' : 'Save Roles'}
+              <Save /> {savingRoles ? 'Saving...' : 'Save Roles'}
             </button>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -174,11 +174,11 @@ export default function UserPermissions() {
                 onClick={() => toggleRole(role.id)}
                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   userRoleIds.includes(role.id)
-                    ? 'border-primary-500 bg-primary-500 bg-opacity-20 text-primary-300'
+                    ? 'border-primary bg-primary-500 bg-opacity-20 text-primary-300'
                     : 'border-gray-600 text-gray-400 hover:border-gray-400'
                 }`}
               >
-                {userRoleIds.includes(role.id) && <FiCheck className="inline w-4 h-4 mr-1" />}
+                {userRoleIds.includes(role.id) && <Check className="inline w-4 h-4 mr-1" />}
                 {role.name}
               </button>
             ))}
@@ -189,7 +189,7 @@ export default function UserPermissions() {
         </div>
 
         {/* Permissions Matrix */}
-        <div className="card">
+        <div className="bento-card">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-white">Permission Matrix</h2>
             <button
@@ -197,7 +197,7 @@ export default function UserPermissions() {
               disabled={saving}
               className="btn-primary flex items-center gap-2"
             >
-              <FiSave /> {saving ? 'Saving...' : 'Save Permissions'}
+              <Save /> {saving ? 'Saving...' : 'Save Permissions'}
             </button>
           </div>
           <p className="text-gray-400 text-sm mb-4">
@@ -213,7 +213,7 @@ export default function UserPermissions() {
                     <th key={action} className="px-3 py-2 text-center">
                       <button
                         onClick={() => toggleAllForAction(action)}
-                        className="text-gray-300 font-semibold hover:text-primary-400 transition-colors"
+                        className="text-gray-300 font-semibold hover:text-primary transition-colors"
                         title={`Toggle all ${action}`}
                       >
                         {action}
@@ -240,7 +240,7 @@ export default function UserPermissions() {
                                 : 'bg-gray-700 text-gray-500 hover:bg-gray-600'
                             }`}
                           >
-                            {granted ? <FiCheck className="w-4 h-4" /> : <FiX className="w-4 h-4" />}
+                            {granted ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
                           </button>
                         </td>
                       );
@@ -248,7 +248,7 @@ export default function UserPermissions() {
                     <td className="px-3 py-3 text-center">
                       <button
                         onClick={() => toggleAllForResource(resource)}
-                        className="text-xs text-gray-400 hover:text-primary-400 underline"
+                        className="text-xs text-gray-400 hover:text-primary underline"
                       >
                         toggle
                       </button>

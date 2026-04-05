@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiDownload, FiFilter, FiX } from 'react-icons/fi';
+import { Plus, Edit, Trash2, Search, Eye, Download, Filter, X } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
@@ -218,22 +218,22 @@ export default function Horses() {
       <Head><title>Horses | Equestrian Events</title></Head>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-white">Horses</h2>
+          <h2 className="text-2xl font-bold">Horses</h2>
           <div className="flex gap-3">
             <button onClick={handleExportCSV} className="btn-secondary">
-              <FiDownload className="inline mr-2" /> Export CSV
+              <Download className="inline mr-2" /> Export CSV
             </button>
             <button onClick={handleExportExcel} className="btn-secondary">
-              <FiDownload className="inline mr-2" /> Export Excel
+              <Download className="inline mr-2" /> Export Excel
             </button>
             <Link href="/horses/create" className="btn-primary">
-              <FiPlus className="inline mr-2" /> New Horse
+              <Plus className="inline mr-2" /> New Horse
             </Link>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
+          <div className="rounded-xl px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
@@ -241,7 +241,7 @@ export default function Horses() {
         <div className="mb-6 card">
           <div className="flex gap-3 items-center">
             <div className="relative flex-1">
-              <FiSearch className="absolute left-3 top-3 text-gray-500" />
+              <Search className="absolute left-3 top-3 text-gray-500" />
               <input
                 type="text"
                 placeholder="Search horses by name, passport, embassy ID..."
@@ -250,27 +250,27 @@ export default function Horses() {
                   setSearchTerm(e.target.value);
                   setPage(1);
                 }}
-                className="form-input pl-10"
+                className="input pl-10"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`btn-secondary flex items-center gap-2 ${activeFilterCount > 0 ? 'ring-2 ring-purple-400' : ''}`}
+              className={`btn-secondary flex items-center gap-2 ${activeFilterCount > 0 ? '' : ''}`}
             >
-              <FiFilter className="w-4 h-4" />
+              <Filter className="w-4 h-4" />
               Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
             </button>
           </div>
 
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-white border-opacity-10">
+            <div className="mt-4 pt-4 pt-0">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-400 mb-1">Sex</label>
                   <select
                     value={filterGender}
                     onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
-                    className="form-input text-sm"
+                    className="input text-sm"
                   >
                     <option value="">All</option>
                     <option value="Stallion">Stallion</option>
@@ -283,7 +283,7 @@ export default function Horses() {
                   <select
                     value={filterClubId}
                     onChange={(e) => { setFilterClubId(e.target.value); setPage(1); }}
-                    className="form-input text-sm"
+                    className="input text-sm"
                   >
                     <option value="">All Clubs</option>
                     {clubs.map(c => (
@@ -296,7 +296,7 @@ export default function Horses() {
                   <select
                     value={filterRiderId}
                     onChange={(e) => { setFilterRiderId(e.target.value); setPage(1); }}
-                    className="form-input text-sm"
+                    className="input text-sm"
                   >
                     <option value="">All Riders</option>
                     {riders.map(r => (
@@ -309,7 +309,7 @@ export default function Horses() {
                   <select
                     value={filterStatus}
                     onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-                    className="form-input text-sm"
+                    className="input text-sm"
                   >
                     <option value="">All</option>
                     <option value="true">Active</option>
@@ -320,19 +320,19 @@ export default function Horses() {
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="mt-3 text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                  className="mt-3 text-sm transition-colors flex items-center gap-1"
                 >
-                  <FiX className="w-3 h-3" /> Clear all filters
+                  <X className="w-3 h-3" /> Clear all filters
                 </button>
               )}
             </div>
           )}
         </div>
 
-        <div className="card table-container">
+        <div className="bento-card table-container">
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
               <p className="text-gray-300 mt-2">Loading horses...</p>
             </div>
           ) : horses.length === 0 ? (
@@ -397,9 +397,9 @@ export default function Horses() {
                       </td>
                       <td>
                         <ActionsDropdown actions={[
-                          { label: 'View', icon: <FiEye className="w-4 h-4" />, onClick: () => router.push(`/horses/${horse.id}`) },
-                          { label: 'Edit', icon: <FiEdit className="w-4 h-4" />, onClick: () => router.push(`/horses/create?id=${horse.id}`), className: 'text-amber-400 hover:text-amber-300' },
-                          { label: 'Delete', icon: <FiTrash2 className="w-4 h-4" />, onClick: () => handleDelete(horse.id), className: 'text-red-400 hover:text-red-300' },
+                          { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: () => router.push(`/horses/${horse.id}`) },
+                          { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: () => router.push(`/horses/create?id=${horse.id}`), className: 'text-amber-400 hover:text-amber-300' },
+                          { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: () => handleDelete(horse.id), className: 'text-red-400 hover:text-red-300' },
                         ]} />
                       </td>
                     </tr>

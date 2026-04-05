@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import apiClient from '@/lib/api';
 import Cookies from 'js-cookie';
-import { FiMail, FiLock, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 
 export default function Signup() {
@@ -41,12 +41,26 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-indigo-700 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+    <div
+      className="min-h-screen flex items-center justify-center p-4 bg-dot-grid"
+      style={{ background: 'hsl(var(--surface-background))' }}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl animate-fade-in"
+        style={{
+          background: 'hsl(var(--surface-card))',
+          border: '1px solid hsl(var(--border) / 0.5)',
+        }}
+      >
         <div className="p-8">
+          {/* Brand */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-indigo-900">Equestrian</h1>
-            <p className="text-gray-600 mt-2">Create Your Account</p>
+            <h1 className="text-4xl font-black" style={{ color: 'hsl(var(--primary))' }}>
+              Equestrian
+            </h1>
+            <p className="mt-2 font-medium" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              Create Your Account
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,29 +68,36 @@ export default function Signup() {
               <div className="form-group">
                 <label className="form-label">First Name</label>
                 <div className="relative">
-                  <FiUser className="absolute left-3 top-3 text-gray-400" />
+                  <User
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2"
+                    style={{ color: 'hsl(var(--muted-foreground))' }}
+                  />
                   <input
                     type="text"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="form-input pl-10"
+                    className="input pl-10"
                     placeholder="First name"
                     required
                   />
                 </div>
               </div>
-
               <div className="form-group">
                 <label className="form-label">Last Name</label>
                 <div className="relative">
-                  <FiUser className="absolute left-3 top-3 text-gray-400" />
+                  <User
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2"
+                    style={{ color: 'hsl(var(--muted-foreground))' }}
+                  />
                   <input
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="form-input pl-10"
+                    className="input pl-10"
                     placeholder="Last name"
                     required
                   />
@@ -87,13 +108,17 @@ export default function Signup() {
             <div className="form-group">
               <label className="form-label">Email Address</label>
               <div className="relative">
-                <FiMail className="absolute left-3 top-3 text-gray-400" />
+                <Mail
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="form-input pl-10"
+                  className="input pl-10"
                   placeholder="your@email.com"
                   required
                 />
@@ -103,22 +128,28 @@ export default function Signup() {
             <div className="form-group">
               <label className="form-label">Password</label>
               <div className="relative">
-                <FiLock className="absolute left-3 top-3 text-gray-400" />
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="form-input pl-10 pr-10"
+                  className="input pl-10 pr-10"
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
@@ -126,42 +157,68 @@ export default function Signup() {
             <div className="form-group">
               <label className="form-label">Confirm Password</label>
               <div className="relative">
-                <FiLock className="absolute left-3 top-3 text-gray-400" />
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="form-input pl-10 pr-10"
+                  className="input pl-10 pr-10"
                   placeholder="••••••••"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
-            {error && <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm">{error}</div>}
+            {error && (
+              <div
+                className="p-4 rounded-xl text-sm font-medium"
+                style={{
+                  background: 'hsl(var(--error) / 0.1)',
+                  border: '1px solid hsl(var(--error) / 0.3)',
+                  color: 'hsl(var(--error))',
+                }}
+              >
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full mt-6"
+              className="btn btn-primary w-full mt-6 py-3 text-base disabled:opacity-50"
             >
               {loading ? 'Creating account...' : 'Sign Up'}
             </button>
 
+            {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full" style={{ borderTop: '1px solid hsl(var(--border) / 0.5)' }}></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or</span>
+                <span
+                  className="px-2 font-medium"
+                  style={{
+                    background: 'hsl(var(--surface-card))',
+                    color: 'hsl(var(--muted-foreground))',
+                  }}
+                >
+                  Or
+                </span>
               </div>
             </div>
 
@@ -175,8 +232,6 @@ export default function Signup() {
                       token: credentialResponse.credential,
                     });
                     Cookies.set('authToken', response.data.data.token, { expires: 7 });
-                    
-                    // Check if user is approved
                     if (response.data.data.user?.isApproved === false) {
                       router.push('/pending-approval');
                     } else {
@@ -195,10 +250,10 @@ export default function Signup() {
             </div>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+          <div className="mt-6 text-center" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', paddingTop: '1.5rem' }}>
+            <p className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
               Already have an account?{' '}
-              <Link href="/auth/login" className="text-indigo-600 hover:text-indigo-700 font-medium">
+              <Link href="/auth/login" className="font-bold transition-colors" style={{ color: 'hsl(var(--primary))' }}>
                 Log in
               </Link>
             </p>

@@ -6,8 +6,14 @@ export default function Document() {
       <Head>
         <meta charSet="utf-8" />
         <meta name="description" content="Equestrian Event Management Platform" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;900&display=swap"
+          rel="stylesheet"
+        />
       </Head>
-      <body className="bg-gray-50">
+      <body>
         <Main />
         <NextScript />
       </body>

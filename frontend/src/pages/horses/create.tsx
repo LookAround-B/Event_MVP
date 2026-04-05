@@ -4,7 +4,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft } from 'react-icons/fi';
+import { ArrowLeft } from 'lucide-react';
 
 export default function CreateHorse() {
   const router = useRouter();
@@ -131,15 +131,15 @@ export default function CreateHorse() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center mb-8">
-            <Link href="/horses" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
-              <FiArrowLeft /> Back to Horses
+            <Link href="/horses" className="transition-colors flex items-center gap-2">
+              <ArrowLeft /> Back to Horses
             </Link>
           </div>
 
-          <div className="card overflow-hidden">
+          <div className="bento-card overflow-hidden">
             {/* Title Section */}
-            <div className="px-8 py-6 border-b border-white border-opacity-10">
-              <h1 className="text-3xl font-bold text-white">{isEdit ? 'Edit Horse' : 'Register New Horse'}</h1>
+            <div className="px-8 py-6 ">
+              <h1 className="text-2xl font-bold">{isEdit ? 'Edit Horse' : 'Register New Horse'}</h1>
               <p className="text-gray-300 mt-2">{isEdit ? 'Update horse profile' : 'Create a new horse profile'}</p>
             </div>
 
@@ -162,7 +162,7 @@ export default function CreateHorse() {
                   onChange={handleChange}
                   required
                   placeholder="e.g., Thunder"
-                  className="form-input"
+                  className="input"
                 />
               </div>
 
@@ -175,7 +175,7 @@ export default function CreateHorse() {
                   value={formData.color}
                   onChange={handleChange}
                   placeholder="e.g., Bay, Chestnut, Gray"
-                  className="form-input"
+                  className="input"
                 />
               </div>
 
@@ -188,7 +188,7 @@ export default function CreateHorse() {
                   value={formData.breed}
                   onChange={handleChange}
                   placeholder="e.g., Thoroughbred, Arabian, Quarter Horse"
-                  className="form-input"
+                  className="input"
                 />
               </div>
 
@@ -203,7 +203,7 @@ export default function CreateHorse() {
                   placeholder="e.g., 15.2"
                   step="0.1"
                   min="0"
-                  className="form-input"
+                  className="input"
                 />
               </div>
 
@@ -220,7 +220,7 @@ export default function CreateHorse() {
                   required
                   min="1900"
                   max={new Date().getFullYear()}
-                  className="form-input"
+                  className="input"
                 />
               </div>
 
@@ -234,7 +234,7 @@ export default function CreateHorse() {
                   value={formData.gender}
                   onChange={handleChange}
                   required
-                  className="form-input"
+                  className="input"
                 >
                   <option value="Mare" className="bg-slate-800 text-white">Mare (Female)</option>
                   <option value="Stallion" className="bg-slate-800 text-white">Stallion (Male)</option>
@@ -243,7 +243,7 @@ export default function CreateHorse() {
               </div>
 
               {/* Passport/Horse Code */}
-              <div className="border-t border-white border-opacity-10 pt-6">
+              <div className="pt-0 pt-6">
               <h3 className="text-sm font-semibold text-white mb-4">Identification</h3>
               <p className="text-xs text-gray-300 mb-4">Choose one: Passport Number or Horse Code</p>
 
@@ -259,7 +259,7 @@ export default function CreateHorse() {
                       value={formData.passportNumber}
                       onChange={handleChange}
                       placeholder="e.g., FRA040500000123"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                 )}
@@ -275,7 +275,7 @@ export default function CreateHorse() {
                       value={formData.horseCode}
                       onChange={handleChange}
                       placeholder="e.g., HC-2024-001"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                 )}
@@ -308,7 +308,7 @@ export default function CreateHorse() {
                     onChange={handleChange}
                     placeholder="e.g., EIRSHR00076"
                     maxLength={11}
-                    className="form-input font-mono"
+                    className="input font-mono"
                   />
                   <p className="text-xs text-gray-400 mt-1">Format: EIRSHR followed by 5 digits (e.g., EIRSHR00076)</p>
                 </div>
@@ -316,7 +316,7 @@ export default function CreateHorse() {
               </div>
 
               {/* Submit */}
-              <div className="flex gap-4 pt-6 border-t border-white border-opacity-10">
+              <div className="flex gap-4 pt-6 pt-0">
               <button
                 type="submit"
                 disabled={loading}

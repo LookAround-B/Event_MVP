@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { FiArrowLeft } from 'react-icons/fi';
+import { ArrowLeft } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -63,10 +63,10 @@ export default function CreateUser() {
     <ProtectedRoute>
       <div className="max-w-2xl mx-auto">
         <Link href="/users" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6">
-          <FiArrowLeft /> Back to Users
+          <ArrowLeft /> Back to Users
         </Link>
 
-        <div className="card">
+        <div className="bento-card">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Create New User</h1>
 
           {error && (
@@ -83,7 +83,7 @@ export default function CreateUser() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="form-input"
+                className="input"
                 required
               />
             </div>
@@ -95,7 +95,7 @@ export default function CreateUser() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="form-input"
+                className="input"
                 required
                 minLength={8}
               />
@@ -108,7 +108,7 @@ export default function CreateUser() {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className="form-input"
+                className="input"
                 required
               />
             </div>
@@ -120,7 +120,7 @@ export default function CreateUser() {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="form-input"
+                className="input"
                 required
               />
             </div>
@@ -132,7 +132,7 @@ export default function CreateUser() {
                 name="designation"
                 value={formData.designation}
                 onChange={handleChange}
-                className="form-input"
+                className="input"
               />
             </div>
 
@@ -142,7 +142,7 @@ export default function CreateUser() {
                 name="roleId"
                 value={formData.roleId}
                 onChange={handleChange}
-                className="form-input"
+                className="input"
               >
                 <option value="">Select Role (optional)</option>
                 {roles.map((role) => (

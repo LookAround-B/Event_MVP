@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FiPlus, FiCalendar, FiTrendingUp, FiAward, FiChevronRight, FiBox } from 'react-icons/fi';
+import { Plus, Calendar, TrendingUp, Award, ChevronRight, Box } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -199,25 +199,25 @@ export default function RiderPortal() {
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Widget
-                icon={FiBox}
+                icon={Box}
                 title="Total Horses"
                 value={widgets.horseCount}
                 color="bg-amber-500"
               />
               <Widget
-                icon={FiCalendar}
+                icon={Calendar}
                 title="Events on Platform"
                 value={widgets.eventsCount}
                 color="bg-blue-500"
               />
               <Widget
-                icon={FiTrendingUp}
+                icon={TrendingUp}
                 title="Events Participated"
                 value={widgets.eventsParticipated}
                 color="bg-green-500"
               />
               <Widget
-                icon={FiAward}
+                icon={Award}
                 title="Registered Events"
                 value={widgets.registeredEvents}
                 color="bg-purple-500"
@@ -232,13 +232,13 @@ export default function RiderPortal() {
                   className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
                 >
                   <div className="flex items-center gap-3">
-                    <FiPlus className="text-blue-600 text-xl" />
+                    <Plus className="text-blue-600 text-xl" />
                     <div>
                       <p className="font-semibold text-gray-900">Add New Horse</p>
                       <p className="text-sm text-gray-600">Register your horse</p>
                     </div>
                   </div>
-                  <FiChevronRight className="text-gray-400" />
+                  <ChevronRight className="text-gray-400" />
                 </Link>
 
                 <Link
@@ -246,13 +246,13 @@ export default function RiderPortal() {
                   className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
                 >
                   <div className="flex items-center gap-3">
-                    <FiCalendar className="text-green-600 text-xl" />
+                    <Calendar className="text-green-600 text-xl" />
                     <div>
                       <p className="font-semibold text-gray-900">Browse Events</p>
                       <p className="text-sm text-gray-600">Find upcoming events</p>
                     </div>
                   </div>
-                  <FiChevronRight className="text-gray-400" />
+                  <ChevronRight className="text-gray-400" />
                 </Link>
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function RiderPortal() {
                 href="/horses/create"
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                <FiPlus /> Add Horse
+                <Plus /> Add Horse
               </Link>
             </div>
             {loading ? (
@@ -324,7 +324,7 @@ export default function RiderPortal() {
                         <p className="text-sm text-gray-600">Color: {horse.color}</p>
                         <p className="text-sm text-gray-600">Gender: {horse.gender}</p>
                       </div>
-                      <FiBox className="text-amber-600 text-3xl" />
+                      <Box className="text-amber-600 text-3xl" />
                     </div>
                   </Link>
                 ))}
@@ -395,7 +395,7 @@ export default function RiderPortal() {
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           {event.registrationCount !== undefined && (
                             <span className="flex items-center gap-1">
-                              <FiTrendingUp className="text-green-500" /> {event.registrationCount} registrations
+                              <TrendingUp className="text-green-500" /> {event.registrationCount} registrations
                             </span>
                           )}
                         </div>

@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiDownload, FiFilter, FiX } from 'react-icons/fi';
+import { Plus, Edit, Trash2, Search, Eye, Download, Filter, X } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
@@ -72,13 +72,8 @@ export default function Riders() {
   const [filterClubId, setFilterClubId] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
 
-  useEffect(() => {
-    fetchClubs();
-  }, []);
-
-  useEffect(() => {
-    fetchRiders();
-  }, [page, searchTerm, filterGender, filterClubId, filterStatus]);
+  useEffect(() => { fetchClubs(); }, []);
+  useEffect(() => { fetchRiders(); }, [page, searchTerm, filterGender, filterClubId, filterStatus]);
 
   const fetchClubs = async () => {
     try {
@@ -96,7 +91,6 @@ export default function Riders() {
       if (filterGender) params.gender = filterGender;
       if (filterClubId) params.clubId = filterClubId;
       if (filterStatus) params.status = filterStatus;
-
       const response = await api.get('/api/riders', { params });
       setRiders(response.data.data.riders);
       setTotalPages(response.data.data.pagination.pages);
@@ -142,15 +136,8 @@ export default function Riders() {
     const headers = ['First Name', 'Last Name', 'Email', 'Phone', 'Gender', 'EFI Rider ID', 'Embassy ID', 'Club', 'Registrations'];
     const source = selectedIds.size > 0 ? riders.filter(r => selectedIds.has(r.id)) : riders;
     const rows = source.map(r => [
-      r.firstName,
-      r.lastName,
-      r.email,
-      r.mobile || '-',
-      r.gender || '-',
-      r.efiRiderId || '-',
-      r.eId || '-',
-      r.clubName || '-',
-      r.registrationCount,
+      r.firstName, r.lastName, r.email, r.mobile || '-', r.gender || '-',
+      r.efiRiderId || '-', r.eId || '-', r.clubName || '-', r.registrationCount,
     ]);
     return { headers, rows };
   };
@@ -198,63 +185,74 @@ export default function Riders() {
     <ProtectedRoute>
       <Head><title>Riders | Equestrian Events</title></Head>
       <div>
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-white">Rider List</h2>
-          <div className="flex gap-3">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h2 className="text-2xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>Rider List</h2>
+          <div className="flex flex-wrap gap-3">
             {selectedIds.size > 0 && (
-              <button onClick={handleBulkDelete} className="btn-secondary text-red-400 border-red-400">
-                <FiTrash2 className="inline mr-2" /> Delete ({selectedIds.size})
+              <button onClick={handleBulkDelete} className="btn btn-destructive text-sm">
+                <Trash2 size={16} /> Delete ({selectedIds.size})
               </button>
             )}
-            <button onClick={handleExportCSV} className="btn-secondary">
-              <FiDownload className="inline mr-2" /> CSV
+            <button onClick={handleExportCSV} className="btn btn-ghost text-sm">
+              <Download size={16} /> CSV
             </button>
-            <button onClick={handleExportExcel} className="btn-secondary">
-              <FiDownload className="inline mr-2" /> Excel
+            <button onClick={handleExportExcel} className="btn btn-secondary text-sm">
+              <Download size={16} /> Excel
             </button>
-            <Link href="/riders/create" className="btn-primary">
-              <FiPlus className="inline mr-2" /> New Rider
+            <Link href="/riders/create" className="btn btn-primary text-sm">
+              <Plus size={16} /> New Rider
             </Link>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
+          <div
+            className="px-4 py-3 rounded-xl mb-6 text-sm"
+            style={{
+              background: 'hsl(var(--error) / 0.1)',
+              border: '1px solid hsl(var(--error) / 0.3)',
+              color: 'hsl(var(--error))',
+            }}
+          >
             {error}
           </div>
         )}
 
-        {/* Search & Filter Bar */}
-        <div className="mb-6 card">
+        {/* Search & Filter */}
+        <div className="bento-card mb-6">
           <div className="flex gap-3 items-center">
             <div className="relative flex-1">
-              <FiSearch className="absolute left-3 top-3 text-gray-500" />
+              <Search
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2"
+                style={{ color: 'hsl(var(--muted-foreground))' }}
+              />
               <input
                 type="text"
                 placeholder="Search riders by name, email, EFI ID..."
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                className="form-input pl-10"
+                className="input pl-10"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`btn-secondary flex items-center gap-2 ${hasActiveFilters ? 'border-primary-400 text-primary-400' : ''}`}
+              className={`btn ${hasActiveFilters ? 'btn-secondary' : 'btn-ghost'} text-sm`}
             >
-              <FiFilter /> Filters {hasActiveFilters && '(active)'}
+              <Filter size={16} /> Filters {hasActiveFilters && '(active)'}
             </button>
           </div>
 
-          {/* Filter Panel */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-white border-opacity-10">
+            <div className="mt-4 pt-4" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)' }}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Gender</label>
+                  <label className="form-label">Gender</label>
                   <select
                     value={filterGender}
                     onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
-                    className="form-input"
+                    className="input"
                   >
                     <option value="">All Genders</option>
                     <option value="Male">Male</option>
@@ -263,11 +261,11 @@ export default function Riders() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Club</label>
+                  <label className="form-label">Club</label>
                   <select
                     value={filterClubId}
                     onChange={(e) => { setFilterClubId(e.target.value); setPage(1); }}
-                    className="form-input"
+                    className="input"
                   >
                     <option value="">All Clubs</option>
                     {clubs.map(c => (
@@ -276,11 +274,11 @@ export default function Riders() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Status</label>
+                  <label className="form-label">Status</label>
                   <select
                     value={filterStatus}
                     onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-                    className="form-input"
+                    className="input"
                   >
                     <option value="">All Status</option>
                     <option value="active">Active</option>
@@ -289,8 +287,12 @@ export default function Riders() {
                 </div>
               </div>
               {hasActiveFilters && (
-                <button onClick={clearFilters} className="mt-3 text-sm text-gray-400 hover:text-white flex items-center gap-1">
-                  <FiX className="w-3 h-3" /> Clear all filters
+                <button
+                  onClick={clearFilters}
+                  className="mt-3 text-sm flex items-center gap-1 transition-colors"
+                  style={{ color: 'hsl(var(--muted-foreground))' }}
+                >
+                  <X size={12} /> Clear all filters
                 </button>
               )}
             </div>
@@ -298,28 +300,32 @@ export default function Riders() {
         </div>
 
         {/* Table */}
-        <div className="card table-container">
+        <div className="bento-card overflow-x-auto">
           {loading ? (
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="py-6 flex flex-col gap-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} style={{ height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                <div
+                  key={i}
+                  className="h-12 rounded-lg animate-pulse"
+                  style={{ background: 'hsl(var(--surface-container))' }}
+                />
               ))}
             </div>
           ) : riders.length === 0 ? (
-            <div className="text-center py-8 text-gray-300">
+            <div className="text-center py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>
               {searchTerm || hasActiveFilters ? 'No riders match your search/filters' : 'No riders registered yet. Add one to get started!'}
             </div>
           ) : (
             <>
-              <table className="table">
+              <table className="w-full">
                 <thead>
                   <tr>
-                    <th>
+                    <th className="w-10">
                       <input
                         type="checkbox"
                         checked={selectedIds.size === riders.length && riders.length > 0}
                         onChange={toggleSelectAll}
-                        className="rounded border-gray-600"
+                        style={{ accentColor: 'hsl(var(--primary))' }}
                       />
                     </th>
                     <th>First Name</th>
@@ -341,10 +347,10 @@ export default function Riders() {
                           type="checkbox"
                           checked={selectedIds.has(rider.id)}
                           onChange={() => toggleSelect(rider.id)}
-                          className="rounded border-gray-600"
+                          style={{ accentColor: 'hsl(var(--primary))' }}
                         />
                       </td>
-                      <td className="font-medium">{rider.firstName}</td>
+                      <td className="font-medium" style={{ color: 'hsl(var(--on-surface))' }}>{rider.firstName}</td>
                       <td>{rider.lastName || '-'}</td>
                       <td>{rider.efiRiderId || '-'}</td>
                       <td className="font-mono text-sm">{rider.eId}</td>
@@ -352,19 +358,15 @@ export default function Riders() {
                       <td>{rider.email}</td>
                       <td>{rider.gender || '-'}</td>
                       <td>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          rider.isActive
-                            ? 'bg-green-500 bg-opacity-20 text-green-400'
-                            : 'bg-red-500 bg-opacity-20 text-red-400'
-                        }`}>
+                        <span className={`badge ${rider.isActive ? 'badge-emerald' : 'badge-danger'}`}>
                           {rider.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
                       <td>
                         <ActionsDropdown actions={[
-                          { label: 'View', icon: <FiEye className="w-4 h-4" />, onClick: () => router.push(`/riders/${rider.id}`) },
-                          { label: 'Edit', icon: <FiEdit className="w-4 h-4" />, onClick: () => router.push(`/riders/create?id=${rider.id}`), className: 'text-amber-400 hover:text-amber-300' },
-                          { label: 'Delete', icon: <FiTrash2 className="w-4 h-4" />, onClick: () => handleDelete(rider.id), className: 'text-red-400 hover:text-red-300' },
+                          { label: 'View', icon: <Eye size={16} />, onClick: () => router.push(`/riders/${rider.id}`) },
+                          { label: 'Edit', icon: <Edit size={16} />, onClick: () => router.push(`/riders/create?id=${rider.id}`), className: 'text-amber-400 hover:text-amber-300' },
+                          { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(rider.id), className: 'text-red-400 hover:text-red-300' },
                         ]} />
                       </td>
                     </tr>
@@ -373,21 +375,21 @@ export default function Riders() {
               </table>
 
               {totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-4">
+                <div className="flex justify-center items-center gap-2 mt-4">
                   <button
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="btn-secondary disabled:opacity-50"
+                    className="btn btn-ghost disabled:opacity-30"
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2 text-gray-300">
+                  <span className="px-4 py-2 text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
                     Page {page} of {totalPages}
                   </span>
                   <button
                     onClick={() => setPage(Math.min(totalPages, page + 1))}
                     disabled={page === totalPages}
-                    className="btn-secondary disabled:opacity-50"
+                    className="btn btn-ghost disabled:opacity-30"
                   >
                     Next
                   </button>

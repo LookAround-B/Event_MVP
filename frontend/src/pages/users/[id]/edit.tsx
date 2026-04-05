@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { FiArrowLeft } from 'react-icons/fi';
+import { ArrowLeft } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -83,10 +83,10 @@ export default function EditUser() {
     <ProtectedRoute>
       <div className="max-w-2xl mx-auto">
         <Link href="/users" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6">
-          <FiArrowLeft /> Back to Users
+          <ArrowLeft /> Back to Users
         </Link>
 
-        <div className="card">
+        <div className="bento-card">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Edit User</h1>
 
           {error && (
@@ -102,7 +102,7 @@ export default function EditUser() {
                 type="email"
                 value={formData.email || ''}
                 disabled
-                className="form-input opacity-50"
+                className="input opacity-50"
               />
               <p className="text-sm text-gray-500 mt-1">Email cannot be changed</p>
             </div>
@@ -114,7 +114,7 @@ export default function EditUser() {
                 name="firstName"
                 value={formData.firstName || ''}
                 onChange={handleChange}
-                className="form-input"
+                className="input"
                 required
               />
             </div>
@@ -126,7 +126,7 @@ export default function EditUser() {
                 name="lastName"
                 value={formData.lastName || ''}
                 onChange={handleChange}
-                className="form-input"
+                className="input"
                 required
               />
             </div>
@@ -138,7 +138,7 @@ export default function EditUser() {
                 name="designation"
                 value={formData.designation || ''}
                 onChange={handleChange}
-                className="form-input"
+                className="input"
               />
             </div>
 

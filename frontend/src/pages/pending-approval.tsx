@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
-import { FiClock, FiLogOut, FiCheckCircle } from 'react-icons/fi';
+import { Clock, LogOut, CheckCircle } from 'lucide-react';
 
 export default function PendingApproval() {
   const router = useRouter();
@@ -12,17 +12,17 @@ export default function PendingApproval() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen  flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated floating blobs */}
-      <div className="absolute top-0 -left-40 w-80 h-80 bg-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-      <div className="absolute top-0 -right-40 w-80 h-80 bg-secondary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute -bottom-8 left-20 w-80 h-80 bg-accent-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
+      <div className="absolute top-0 -left-40 w-80 h-80  rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+      <div className="absolute top-0 -right-40 w-80 h-80  rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute -bottom-8 left-20 w-80 h-80  rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
 
-      <div className="glass w-full max-w-md backdrop-blur-xl border-white border-opacity-20 shadow-glass-lg">
+      <div className="bento-card w-full max-w-md  ">
         <div className="p-8 text-center">
           <div className="mb-6">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 bg-opacity-10 border border-amber-400 border-opacity-30">
-              <FiClock className="w-8 h-8 text-amber-300 animate-pulse" />
+              <Clock className="w-8 h-8 text-amber-300 animate-pulse" />
             </div>
           </div>
 
@@ -35,7 +35,7 @@ export default function PendingApproval() {
 
           <div className="glass-dark w-full rounded-xl p-5 mb-6 border border-blue-400 border-opacity-20">
             <div className="flex items-start gap-3">
-              <FiCheckCircle className="w-5 h-5 text-blue-300 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-blue-300 flex-shrink-0 mt-0.5" />
               <div className="text-left">
                 <p className="text-sm font-semibold text-blue-200 mb-1">What's next?</p>
                 <p className="text-xs text-gray-300">
@@ -54,7 +54,7 @@ export default function PendingApproval() {
             onClick={handleLogout}
             className="flex items-center justify-center gap-2 w-full px-6 py-3 btn-primary"
           >
-            <FiLogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4" />
             Logout
           </button>
 

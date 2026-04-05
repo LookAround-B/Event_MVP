@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import VenueMapPicker from '@/components/VenueMapPicker';
-import { FiArrowLeft, FiMapPin, FiUpload, FiPlus, FiTrash2, FiCalendar, FiClock, FiFileText, FiTag, FiSave } from 'react-icons/fi';
+import { ArrowLeft, MapPin, Upload, Plus, Trash2, Calendar, Clock, FileText, Tag, Save } from 'lucide-react';
 
 // Dynamic import — TipTap uses browser APIs (document/window) for editor DOM
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
@@ -266,19 +266,19 @@ export default function CreateEventPage() {
       <Head><title>{isEdit ? 'Edit Event' : 'Create Event'} | Equestrian Events</title></Head>
       <div className="space-y-6 max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
-          <Link href="/events" className="text-purple-400 hover:text-purple-300 flex items-center gap-2 text-sm">
-            <FiArrowLeft /> Back to Events
+          <Link href="/events" className="transition-colors flex items-center gap-2 text-sm">
+            <ArrowLeft /> Back to Events
           </Link>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">
+          <h2 className="text-2xl sm:text-2xl font-bold">
             {isEdit ? 'Edit Event' : 'Create New Event'}
           </h2>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* SECTION 1: Event Information */}
-          <div className="card">
+          <div className="bento-card">
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-              <FiFileText className="text-purple-400" /> Event Information
+              <FileText className="text-purple-400" /> Event Information
             </h3>
 
             <div className="space-y-5">
@@ -292,7 +292,7 @@ export default function CreateEventPage() {
                   value={formData.eventType}
                   onChange={handleChange}
                   required
-                  className="form-input"
+                  className="input"
                 >
                   <option value="KSEC" className="bg-slate-800 text-white">KSEC</option>
                   <option value="EPL" className="bg-slate-800 text-white">EPL</option>
@@ -314,7 +314,7 @@ export default function CreateEventPage() {
                   minLength={3}
                   maxLength={200}
                   placeholder="e.g., Spring Championship 2026"
-                  className="form-input"
+                  className="input"
                 />
               </div>
 
@@ -330,7 +330,7 @@ export default function CreateEventPage() {
                   placeholder="Event details and requirements..."
                   rows={3}
                   maxLength={2000}
-                  className="form-input"
+                  className="input"
                 />
               </div>
 
@@ -341,7 +341,7 @@ export default function CreateEventPage() {
                 </label>
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-10 text-white rounded-lg hover:bg-opacity-20 cursor-pointer transition text-sm">
-                    <FiUpload />
+                    <Upload />
                     {uploading ? 'Uploading...' : 'Choose File'}
                     <input
                       type="file"
@@ -363,16 +363,16 @@ export default function CreateEventPage() {
           </div>
 
           {/* SECTION 2: Schedule */}
-          <div className="card">
+          <div className="bento-card">
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-              <FiCalendar className="text-purple-400" /> Schedule
+              <Calendar className="text-purple-400" /> Schedule
             </h3>
 
             <div className="space-y-6">
               {/* Start Date Row */}
               <div>
                 <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                  <FiClock className="text-green-400 w-4 h-4" /> Start Date <span className="text-red-400">*</span>
+                  <Clock className="text-green-400 w-4 h-4" /> Start Date <span className="text-red-400">*</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
@@ -383,7 +383,7 @@ export default function CreateEventPage() {
                       value={formData.startDate}
                       onChange={handleChange}
                       required
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -394,7 +394,7 @@ export default function CreateEventPage() {
                       value={formData.startTime}
                       onChange={handleChange}
                       required
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -405,7 +405,7 @@ export default function CreateEventPage() {
                       value={formData.startEndTime}
                       onChange={handleChange}
                       required
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                 </div>
@@ -414,7 +414,7 @@ export default function CreateEventPage() {
               {/* End Date Row */}
               <div>
                 <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                  <FiClock className="text-red-400 w-4 h-4" /> End Date <span className="text-red-400">*</span>
+                  <Clock className="text-red-400 w-4 h-4" /> End Date <span className="text-red-400">*</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
@@ -426,7 +426,7 @@ export default function CreateEventPage() {
                       onChange={handleChange}
                       required
                       min={formData.startDate || undefined}
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -437,7 +437,7 @@ export default function CreateEventPage() {
                       value={formData.endStartTime}
                       onChange={handleChange}
                       required
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -448,7 +448,7 @@ export default function CreateEventPage() {
                       value={formData.endTime}
                       onChange={handleChange}
                       required
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                 </div>
@@ -457,9 +457,9 @@ export default function CreateEventPage() {
           </div>
 
           {/* SECTION 3: Venue */}
-          <div className="card">
+          <div className="bento-card">
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-              <FiMapPin className="text-purple-400" /> Event Venue
+              <MapPin className="text-purple-400" /> Event Venue
             </h3>
 
             <div className="space-y-4">
@@ -472,7 +472,7 @@ export default function CreateEventPage() {
                   onChange={handleChange}
                   placeholder="e.g., County Fairgrounds"
                   maxLength={200}
-                  className="form-input"
+                  className="input"
                 />
               </div>
 
@@ -487,13 +487,13 @@ export default function CreateEventPage() {
                   onChange={handleChange}
                   placeholder="Full address for venue"
                   maxLength={500}
-                  className="form-input"
+                  className="input"
                 />
               </div>
 
               <div>
                 <label className="text-sm font-medium text-white mb-2 flex items-center gap-2">
-                  <FiMapPin /> Venue Location
+                  <MapPin /> Venue Location
                 </label>
                 <VenueMapPicker
                   lat={formData.venueLat}
@@ -507,9 +507,9 @@ export default function CreateEventPage() {
           </div>
 
           {/* SECTION 4: Terms & Conditions (Rich Text Editor) */}
-          <div className="card">
+          <div className="bento-card">
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-              <FiFileText className="text-purple-400" /> Terms & Conditions
+              <FileText className="text-purple-400" /> Terms & Conditions
             </h3>
             <RichTextEditor
               value={formData.termsAndConditions}
@@ -520,10 +520,10 @@ export default function CreateEventPage() {
           </div>
 
           {/* SECTION 5: Event Categories (Dropdown + Date) */}
-          <div className="card">
+          <div className="bento-card">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <FiTag className="text-purple-400" /> Event Categories
+                <Tag className="text-purple-400" /> Event Categories
               </h3>
               <button
                 type="button"
@@ -531,7 +531,7 @@ export default function CreateEventPage() {
                 disabled={categories.length === 0 || selectedCategories.length >= categories.length}
                 className="btn-secondary text-sm flex items-center gap-1.5 disabled:opacity-40"
               >
-                <FiPlus className="w-4 h-4" /> Add Category
+                <Plus className="w-4 h-4" /> Add Category
               </button>
             </div>
 
@@ -542,13 +542,13 @@ export default function CreateEventPage() {
             ) : (
               <div className="space-y-3">
                 {selectedCategories.map((sel, idx) => (
-                  <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-end gap-3 p-3 bg-white bg-opacity-5 rounded-lg">
+                  <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-end gap-3 p-3  rounded-lg">
                     <div className="flex-1 w-full sm:w-auto">
                       <label className="block text-xs text-gray-400 mb-1">Category</label>
                       <select
                         value={sel.categoryId}
                         onChange={(e) => handleCategoryChange(idx, 'categoryId', e.target.value)}
-                        className="form-input text-sm"
+                        className="input text-sm"
                       >
                         <option value="" className="bg-slate-800">Select category...</option>
                         {categories.map((cat) => (
@@ -572,7 +572,7 @@ export default function CreateEventPage() {
                         onChange={(e) => handleCategoryChange(idx, 'date', e.target.value)}
                         min={formData.startDate || undefined}
                         max={formData.endDate || undefined}
-                        className="form-input text-sm"
+                        className="input text-sm"
                       />
                     </div>
                     <button
@@ -581,7 +581,7 @@ export default function CreateEventPage() {
                       className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500 hover:bg-opacity-10 rounded-lg transition"
                       title="Remove"
                     >
-                      <FiTrash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
@@ -596,7 +596,7 @@ export default function CreateEventPage() {
               disabled={submitting}
               className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <FiSave className="w-4 h-4" />
+              <Save className="w-4 h-4" />
               {submitting ? 'Saving...' : isEdit ? 'Update Event' : 'Create Event'}
             </button>
             <Link href="/events" className="btn-secondary text-center">

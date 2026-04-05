@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiEye, FiCopy, FiToggleLeft, FiToggleRight, FiDownload } from 'react-icons/fi';
+import { Plus, Edit, Trash2, Search, Eye, Copy, ToggleLeft, ToggleRight, Download } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
@@ -64,12 +64,10 @@ export default function Events() {
       const response = await api.get('/api/events', {
         params: { page, limit: 10, search: searchTerm },
       });
-
       if (!response.data.success) {
         toast.error(response.data.message || 'Failed to load events');
         return;
       }
-
       setEvents(response.data.data.events);
       setTotalPages(response.data.data.pagination.pages);
     } catch (err: any) {
@@ -79,9 +77,7 @@ export default function Events() {
     }
   }, [page, searchTerm]);
 
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
@@ -103,12 +99,10 @@ export default function Events() {
     const headers = ['Event Name', 'Venue Name', 'Event Start Date', 'Event End Date', 'Published', 'Registrations'];
     const source = selectedIds.size > 0 ? events.filter(e => selectedIds.has(e.id)) : events;
     const rows = source.map(e => [
-      e.name,
-      e.venueName || 'N/A',
+      e.name, e.venueName || 'N/A',
       new Date(e.startDate).toLocaleDateString(),
       new Date(e.endDate).toLocaleDateString(),
-      e.isPublished ? 'Yes' : 'No',
-      e.registrationCount,
+      e.isPublished ? 'Yes' : 'No', e.registrationCount,
     ]);
     return { headers, rows };
   };
@@ -175,85 +169,77 @@ export default function Events() {
   };
 
   const getEventActions = (event: Event): ActionItem[] => [
-    {
-      label: 'View',
-      icon: <FiEye className="w-4 h-4" />,
-      onClick: () => router.push(`/events/${event.id}`),
-    },
-    {
-      label: 'Edit',
-      icon: <FiEdit className="w-4 h-4" />,
-      onClick: () => router.push(`/events/create?id=${event.id}`),
-      className: 'text-amber-400 hover:text-amber-300',
-    },
-    {
-      label: 'Duplicate',
-      icon: <FiCopy className="w-4 h-4" />,
-      onClick: () => handleDuplicate(event.id),
-      className: 'text-blue-400 hover:text-blue-300',
-    },
+    { label: 'View', icon: <Eye size={16} />, onClick: () => router.push(`/events/${event.id}`) },
+    { label: 'Edit', icon: <Edit size={16} />, onClick: () => router.push(`/events/create?id=${event.id}`), className: 'text-amber-400 hover:text-amber-300' },
+    { label: 'Duplicate', icon: <Copy size={16} />, onClick: () => handleDuplicate(event.id), className: 'text-blue-400 hover:text-blue-300' },
     {
       label: event.isPublished ? 'Unpublish' : 'Publish',
-      icon: event.isPublished ? <FiToggleLeft className="w-4 h-4" /> : <FiToggleRight className="w-4 h-4" />,
+      icon: event.isPublished ? <ToggleLeft size={16} /> : <ToggleRight size={16} />,
       onClick: () => handleTogglePublish(event.id, event.isPublished),
       className: event.isPublished ? 'text-yellow-400 hover:text-yellow-300' : 'text-green-400 hover:text-green-300',
     },
-    {
-      label: 'Delete',
-      icon: <FiTrash2 className="w-4 h-4" />,
-      onClick: () => handleDelete(event.id),
-      className: 'text-red-400 hover:text-red-300',
-    },
+    { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(event.id), className: 'text-red-400 hover:text-red-300' },
   ];
 
   return (
     <ProtectedRoute>
       <Head><title>Events | Equestrian Events</title></Head>
       <div>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <h2 className="text-3xl font-bold text-white">Events</h2>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h2 className="text-2xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>Events</h2>
           <div className="flex flex-wrap gap-3">
-            <button onClick={handleExportCSV} className="btn-secondary text-sm">
-              <FiDownload className="inline mr-1.5" /> CSV
+            <button onClick={handleExportCSV} className="btn btn-ghost text-sm">
+              <Download size={16} /> CSV
             </button>
-            <button onClick={handleExportExcel} className="btn-secondary text-sm">
-              <FiDownload className="inline mr-1.5" /> Excel
+            <button onClick={handleExportExcel} className="btn btn-secondary text-sm">
+              <Download size={16} /> Excel
             </button>
-            <Link href="/events/create" className="btn-primary text-sm">
-              <FiPlus className="inline mr-1.5" /> New Event
+            <Link href="/events/create" className="btn btn-primary text-sm">
+              <Plus size={16} /> New Event
             </Link>
           </div>
         </div>
 
-        <div className="mb-6 card">
+        {/* Search */}
+        <div className="bento-card mb-6">
           <div className="relative">
-            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+            <Search
+              size={18}
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              style={{ color: 'hsl(var(--muted-foreground))' }}
+            />
             <input
               type="text"
               placeholder="Search events by name, location..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1);
-              }}
-              className="form-input pl-10"
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+              className="input pl-10"
             />
           </div>
         </div>
 
-        <div className="card overflow-x-auto">
+        {/* Table */}
+        <div className="bento-card overflow-x-auto">
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="text-gray-600 mt-2">Loading events...</p>
+            <div className="py-8">
+              <div className="flex flex-col gap-3">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-12 rounded-lg animate-pulse"
+                    style={{ background: 'hsl(var(--surface-container))' }}
+                  />
+                ))}
+              </div>
             </div>
           ) : events.length === 0 ? (
-            <div className="text-center py-8 text-gray-600">
+            <div className="text-center py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>
               {searchTerm ? 'No events match your search' : 'No events yet. Create one to get started!'}
             </div>
           ) : (
             <>
-              <table className="table min-w-[800px] w-full">
+              <table className="w-full min-w-[800px]">
                 <thead>
                   <tr>
                     <th className="w-10">
@@ -261,7 +247,7 @@ export default function Events() {
                         type="checkbox"
                         checked={selectedIds.size === events.length && events.length > 0}
                         onChange={toggleSelectAll}
-                        className="rounded border-gray-600"
+                        style={{ accentColor: 'hsl(var(--primary))' }}
                       />
                     </th>
                     <th>Event Name</th>
@@ -280,21 +266,15 @@ export default function Events() {
                           type="checkbox"
                           checked={selectedIds.has(event.id)}
                           onChange={() => toggleSelect(event.id)}
-                          className="rounded border-gray-600"
+                          style={{ accentColor: 'hsl(var(--primary))' }}
                         />
                       </td>
-                      <td className="font-medium">{event.name}</td>
+                      <td className="font-medium" style={{ color: 'hsl(var(--on-surface))' }}>{event.name}</td>
                       <td>{event.venueName || 'N/A'}</td>
                       <td>{new Date(event.startDate).toLocaleDateString()}</td>
                       <td>
-                        <span
-                          className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded ${
-                            event.isPublished
-                              ? 'bg-green-500 bg-opacity-20 text-green-300'
-                              : 'bg-gray-500 bg-opacity-20 text-gray-400'
-                          }`}
-                        >
-                          {event.isPublished ? <FiToggleRight className="w-3.5 h-3.5" /> : <FiToggleLeft className="w-3.5 h-3.5" />}
+                        <span className={`badge ${event.isPublished ? 'badge-emerald' : 'badge-muted'}`}>
+                          {event.isPublished ? <ToggleRight size={12} className="mr-1" /> : <ToggleLeft size={12} className="mr-1" />}
                           {event.isPublished ? 'Published' : 'Draft'}
                         </span>
                       </td>
@@ -310,21 +290,21 @@ export default function Events() {
               </table>
 
               {totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-4">
+                <div className="flex justify-center items-center gap-2 mt-4">
                   <button
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
-                    className="btn-secondary disabled:opacity-50"
+                    className="btn btn-ghost disabled:opacity-30"
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2 text-gray-300">
+                  <span className="px-4 py-2 text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>
                     Page {page} of {totalPages}
                   </span>
                   <button
                     onClick={() => setPage(Math.min(totalPages, page + 1))}
                     disabled={page === totalPages}
-                    className="btn-secondary disabled:opacity-50"
+                    className="btn btn-ghost disabled:opacity-30"
                   >
                     Next
                   </button>

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft } from 'react-icons/fi';
+import { ArrowLeft } from 'lucide-react';
 
 interface Registration {
   id: string;
@@ -137,15 +137,15 @@ export default function CreateTransaction() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center mb-8">
-            <Link href="/financial" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
-              <FiArrowLeft /> Back to Financial
+            <Link href="/financial" className="transition-colors flex items-center gap-2">
+              <ArrowLeft /> Back to Financial
             </Link>
           </div>
 
-          <div className="card overflow-hidden">
+          <div className="bento-card overflow-hidden">
             {/* Title Section */}
-            <div className="px-8 py-6 border-b border-white border-opacity-10">
-              <h1 className="text-3xl font-bold text-white">Record Payment</h1>
+            <div className="px-8 py-6 ">
+              <h1 className="text-2xl font-bold">Record Payment</h1>
               <p className="text-gray-300 mt-2">Create a new transaction record</p>
             </div>
 
@@ -167,7 +167,7 @@ export default function CreateTransaction() {
                   value={formData.registrationId}
                   onChange={handleRegistrationChange}
                   required
-                  className="form-input"
+                  className="input"
                 >
                   <option value="">Select a registration</option>
                   {registrations.map(reg => (
@@ -179,7 +179,7 @@ export default function CreateTransaction() {
               </div>
 
               {/* Amount Section */}
-              <div className="border-t border-white border-opacity-10 pt-6">
+              <div className="pt-0 pt-6">
                 <h3 className="text-sm font-semibold text-white mb-4">Payment Amount</h3>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -196,7 +196,7 @@ export default function CreateTransaction() {
                       step="0.01"
                       min="0.01"
                       placeholder="0.00"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
 
@@ -206,7 +206,7 @@ export default function CreateTransaction() {
                       name="paymentMethod"
                       value={formData.paymentMethod}
                       onChange={handleChange}
-                      className="form-input"
+                      className="input"
                     >
                       <option value="Credit Card" className="bg-slate-800 text-white">Credit Card</option>
                       <option value="Debit Card" className="bg-slate-800 text-white">Debit Card</option>
@@ -230,7 +230,7 @@ export default function CreateTransaction() {
                       step="0.01"
                       min="0"
                       placeholder="0.00"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
 
@@ -244,7 +244,7 @@ export default function CreateTransaction() {
                       step="0.01"
                       min="0"
                       placeholder="0.00"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
 
@@ -258,14 +258,14 @@ export default function CreateTransaction() {
                       step="0.01"
                       min="0"
                       placeholder="0.00"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Reference Section */}
-              <div className="border-t border-white border-opacity-10 pt-6">
+              <div className="pt-0 pt-6">
                 <div>
                   <label className="block text-sm font-semibold text-white mb-2">Reference Number</label>
                   <input
@@ -274,7 +274,7 @@ export default function CreateTransaction() {
                     value={formData.referenceNumber}
                     onChange={handleChange}
                     placeholder="e.g., CHQ-12345, TXN-67890"
-                    className="form-input"
+                    className="input"
                   />
                 </div>
 
@@ -286,13 +286,13 @@ export default function CreateTransaction() {
                     onChange={handleChange}
                     placeholder="Any additional details about this transaction..."
                     rows={4}
-                    className="form-input"
+                    className="input"
                   />
                 </div>
               </div>
 
               {/* Submit */}
-              <div className="flex gap-4 pt-6 border-t border-white border-opacity-10">
+              <div className="flex gap-4 pt-6 pt-0">
                 <button
                   type="submit"
                   disabled={loading}

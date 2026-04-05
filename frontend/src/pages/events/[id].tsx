@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft, FiDownload, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { ArrowLeft, Download, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface EventDetail {
   id: string;
@@ -195,7 +195,7 @@ export default function EventDetail() {
       <ProtectedRoute>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto" />
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
             <p className="text-gray-600 mt-2">Loading event...</p>
           </div>
         </div>
@@ -220,7 +220,7 @@ export default function EventDetail() {
         {/* Header */}
         <div className="flex items-center gap-4">
           <Link href="/events" className="text-blue-600 hover:text-blue-900 flex items-center gap-2">
-            <FiArrowLeft /> Back to Events
+            <ArrowLeft /> Back to Events
           </Link>
         </div>
 
@@ -306,10 +306,10 @@ export default function EventDetail() {
             </div>
             <div className="flex gap-2">
               <button onClick={exportToExcel} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
-                <FiDownload /> Export Excel
+                <Download /> Export Excel
               </button>
               <button onClick={exportToCSV} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
-                <FiDownload /> Export CSV
+                <Download /> Export CSV
               </button>
             </div>
           </div>
@@ -409,11 +409,11 @@ export default function EventDetail() {
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-4">
               <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition">
-                <FiChevronLeft />
+                <ChevronLeft />
               </button>
               <span className="text-sm text-gray-600 px-3">Page {page} of {totalPages}</span>
               <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition">
-                <FiChevronRight />
+                <ChevronRight />
               </button>
             </div>
           )}
@@ -440,7 +440,7 @@ export default function EventDetail() {
         {/* Action / Participating Members Details Modal */}
         {actionModal.isOpen && actionModal.registration && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setActionModal({ isOpen: false })}>
-            <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="bento-card max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Participating Member Details</h3>

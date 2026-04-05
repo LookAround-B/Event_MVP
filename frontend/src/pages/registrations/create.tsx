@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft } from 'react-icons/fi';
+import { ArrowLeft } from 'lucide-react';
 
 interface Event {
   id: string;
@@ -153,15 +153,15 @@ export default function CreateRegistration() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center mb-8">
-            <Link href="/registrations" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
-              <FiArrowLeft /> Back to Registrations
+            <Link href="/registrations" className="transition-colors flex items-center gap-2">
+              <ArrowLeft /> Back to Registrations
             </Link>
           </div>
 
-          <div className="card overflow-hidden">
+          <div className="bento-card overflow-hidden">
             {/* Title Section */}
-            <div className="px-8 py-6 border-b border-white border-opacity-10">
-              <h1 className="text-3xl font-bold text-white">Register for Event</h1>
+            <div className="px-8 py-6 ">
+              <h1 className="text-2xl font-bold">Register for Event</h1>
               <p className="text-gray-300 mt-2">Create a new event registration</p>
             </div>
 
@@ -183,7 +183,7 @@ export default function CreateRegistration() {
                   value={formData.eventId}
                   onChange={handleEventChange}
                   required
-                  className="form-input"
+                  className="input"
                 >
                   <option value="">Select an event</option>
                   {events.map(event => (
@@ -204,7 +204,7 @@ export default function CreateRegistration() {
                   value={formData.riderId}
                   onChange={handleChange}
                   required
-                  className="form-input"
+                  className="input"
                 >
                   <option value="">Select a rider</option>
                   {riders.map(rider => (
@@ -225,7 +225,7 @@ export default function CreateRegistration() {
                   value={formData.horseId}
                   onChange={handleChange}
                   required
-                  className="form-input"
+                  className="input"
                 >
                   <option value="">Select a horse</option>
                   {horses.map(horse => (
@@ -247,7 +247,7 @@ export default function CreateRegistration() {
                   onChange={handleChange}
                   required
                   disabled={!formData.eventId}
-                  className="form-input"
+                  className="input"
                 >
                   <option value="">
                     {formData.eventId ? 'Select a category' : 'Select an event first'}
@@ -261,7 +261,7 @@ export default function CreateRegistration() {
               </div>
 
               {/* Submit */}
-              <div className="flex gap-4 pt-6 border-t border-white border-opacity-10">
+              <div className="flex gap-4 pt-6 pt-0">
                 <button
                   type="submit"
                   disabled={loading}

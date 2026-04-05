@@ -4,7 +4,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { ArrowLeft, Check } from 'lucide-react';
 import AddressMapPicker from '@/components/AddressMapPicker';
 
 interface SocialLinks {
@@ -176,10 +176,10 @@ export default function CreateRider() {
     return (
       <ProtectedRoute>
         <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 to-purple-900">
-          <div className="card p-12 text-center max-w-md">
+          <div className="bento-card p-12 text-center max-w-md">
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-green-600 bg-opacity-20 rounded-full flex items-center justify-center">
-                <FiCheck className="w-8 h-8 text-green-400" />
+                <Check className="w-8 h-8 text-green-400" />
               </div>
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">Success!</h2>
@@ -197,14 +197,14 @@ export default function CreateRider() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <Link href="/riders" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
-              <FiArrowLeft /> Back to Riders
+            <Link href="/riders" className="transition-colors flex items-center gap-2">
+              <ArrowLeft /> Back to Riders
             </Link>
           </div>
 
-          <div className="card overflow-hidden">
-            <div className="px-8 py-6 border-b border-white border-opacity-10">
-              <h1 className="text-3xl font-bold text-white">
+          <div className="bento-card overflow-hidden">
+            <div className="px-8 py-6 ">
+              <h1 className="text-2xl font-bold">
                 {isEdit ? 'Edit Rider' : 'Register New Rider'}
               </h1>
               <p className="text-gray-300 mt-2">
@@ -221,7 +221,7 @@ export default function CreateRider() {
 
               {/* Personal Information */}
               <div>
-                <h2 className="text-xl font-bold text-white mb-6 pb-3 border-b border-white border-opacity-10">
+                <h2 className="text-xl font-bold text-white mb-6 pb-3 ">
                   Personal Information
                 </h2>
 
@@ -236,7 +236,7 @@ export default function CreateRider() {
                       value={formData.firstName}
                       onChange={handleInputChange}
                       placeholder="First name"
-                      className="form-input"
+                      className="input"
                       required
                     />
                   </div>
@@ -250,7 +250,7 @@ export default function CreateRider() {
                       value={formData.lastName}
                       onChange={handleInputChange}
                       placeholder="Last name (optional)"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -263,7 +263,7 @@ export default function CreateRider() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="rider@example.com"
-                      className="form-input"
+                      className="input"
                       required
                     />
                   </div>
@@ -275,7 +275,7 @@ export default function CreateRider() {
                       name="gender"
                       value={formData.gender}
                       onChange={handleInputChange}
-                      className="form-input"
+                      className="input"
                       required
                     >
                       <option value="" className="bg-slate-800 text-white">Select Gender</option>
@@ -293,7 +293,7 @@ export default function CreateRider() {
                       name="dob"
                       value={formData.dob}
                       onChange={handleInputChange}
-                      className="form-input"
+                      className="input"
                       required
                     />
                   </div>
@@ -307,7 +307,7 @@ export default function CreateRider() {
                       value={formData.mobile}
                       onChange={handleInputChange}
                       placeholder="+91 9876543210"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -320,7 +320,7 @@ export default function CreateRider() {
                       value={formData.optionalPhone}
                       onChange={handleInputChange}
                       placeholder="Alternative number"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -333,7 +333,7 @@ export default function CreateRider() {
                       value={formData.imageUrl}
                       onChange={handleInputChange}
                       placeholder="https://..."
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                 </div>
@@ -349,7 +349,7 @@ export default function CreateRider() {
                     onChange={handleInputChange}
                     placeholder="Enter address"
                     rows={3}
-                    className="form-input"
+                    className="input"
                   />
                   <AddressMapPicker
                     address={formData.address}
@@ -363,7 +363,7 @@ export default function CreateRider() {
 
               {/* Professional Information */}
               <div>
-                <h2 className="text-xl font-bold text-white mb-6 pb-3 border-b border-white border-opacity-10">
+                <h2 className="text-xl font-bold text-white mb-6 pb-3 ">
                   Professional Information
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -377,7 +377,7 @@ export default function CreateRider() {
                       value={formData.efiRiderId}
                       onChange={handleInputChange}
                       placeholder="EFI identifier (required)"
-                      className="form-input"
+                      className="input"
                       required
                     />
                   </div>
@@ -391,7 +391,7 @@ export default function CreateRider() {
                       value={formData.designation}
                       onChange={handleInputChange}
                       placeholder="e.g., Professional, Amateur, Youth"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                 </div>
@@ -399,7 +399,7 @@ export default function CreateRider() {
 
               {/* Social Links */}
               <div>
-                <h2 className="text-xl font-bold text-white mb-6 pb-3 border-b border-white border-opacity-10">
+                <h2 className="text-xl font-bold text-white mb-6 pb-3 ">
                   Social Links
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -410,7 +410,7 @@ export default function CreateRider() {
                       value={socialLinks.instagram}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, instagram: e.target.value }))}
                       placeholder="Instagram URL or handle"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -420,7 +420,7 @@ export default function CreateRider() {
                       value={socialLinks.twitter}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, twitter: e.target.value }))}
                       placeholder="Twitter URL or handle"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -430,7 +430,7 @@ export default function CreateRider() {
                       value={socialLinks.facebook}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, facebook: e.target.value }))}
                       placeholder="Facebook URL"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -440,7 +440,7 @@ export default function CreateRider() {
                       value={socialLinks.youtube}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, youtube: e.target.value }))}
                       placeholder="YouTube URL"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -450,7 +450,7 @@ export default function CreateRider() {
                       value={socialLinks.website}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, website: e.target.value }))}
                       placeholder="Website URL"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div>
@@ -460,14 +460,14 @@ export default function CreateRider() {
                       value={socialLinks.other}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, other: e.target.value }))}
                       placeholder="Other link"
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-4 pt-6 border-t border-white border-opacity-10">
+              <div className="flex gap-4 pt-6 pt-0">
                 <button
                   type="submit"
                   disabled={loading}

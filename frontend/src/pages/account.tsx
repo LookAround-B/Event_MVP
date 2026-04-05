@@ -3,7 +3,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
-import { FiEdit2, FiSave, FiX, FiCamera, FiCheck, FiMail, FiPhone, FiMapPin, FiUser, FiCalendar, FiShield, FiHash } from 'react-icons/fi';
+import { Pencil, Save, X, Camera, Check, Mail, Phone, MapPin, User, Calendar, Shield, Hash } from 'lucide-react';
 import Cropper, { Area } from 'react-easy-crop';
 
 interface UserProfile {
@@ -56,7 +56,7 @@ function InlineField({
   };
 
   return (
-    <div className="group flex items-center justify-between py-3 px-4 rounded-xl hover:bg-white/5 transition-all duration-200">
+    <div className="group flex items-center justify-between py-3 px-4 rounded-xl transition-colors transition-all duration-200">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 flex-shrink-0">
           <Icon className="w-4 h-4" />
@@ -71,7 +71,7 @@ function InlineField({
                   onChange={(e) => setEditValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   autoFocus
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 w-full max-w-xs"
+                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-primary w-full max-w-xs"
                 >
                   <option value="" className="bg-gray-800">Select</option>
                   {options.map((o) => (
@@ -85,7 +85,7 @@ function InlineField({
                   onKeyDown={handleKeyDown}
                   autoFocus
                   rows={2}
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 w-full max-w-md resize-none"
+                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-primary w-full max-w-md resize-none"
                 />
               ) : (
                 <input
@@ -94,7 +94,7 @@ function InlineField({
                   onChange={(e) => setEditValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   autoFocus
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 w-full max-w-xs"
+                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-primary w-full max-w-xs"
                 />
               )}
               <button
@@ -102,13 +102,13 @@ function InlineField({
                 disabled={saving}
                 className="p-1.5 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition disabled:opacity-50"
               >
-                <FiCheck className="w-4 h-4" />
+                <Check className="w-4 h-4" />
               </button>
               <button
                 onClick={onCancel}
                 className="p-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
               >
-                <FiX className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
@@ -124,7 +124,7 @@ function InlineField({
           onClick={() => onStartEdit(field, (value || ''))}
           className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/10 text-gray-500 hover:text-gray-300 transition-all"
         >
-          <FiEdit2 className="w-3.5 h-3.5" />
+          <Pencil className="w-3.5 h-3.5" />
         </button>
       )}
     </div>
@@ -328,7 +328,7 @@ export default function AccountPage() {
     return (
       <ProtectedRoute>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
         </div>
       </ProtectedRoute>
     );
@@ -365,7 +365,7 @@ export default function AccountPage() {
         )}
 
         {/* Profile Header Card */}
-        <div className="glass rounded-2xl p-6 border border-white/10">
+        <div className="bento-card rounded-2xl p-6 border border-white/10">
           <div className="flex items-center gap-6">
             {/* Profile Picture */}
             <div className="relative group">
@@ -377,14 +377,14 @@ export default function AccountPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-3xl font-bold text-white">{getInitials()}</span>
+                  <span className="text-2xl font-bold">{getInitials()}</span>
                 )}
               </div>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
               >
-                <FiCamera className="w-6 h-6 text-white" />
+                <Camera className="w-6 h-6 text-white" />
               </button>
               <input
                 ref={fileInputRef}
@@ -406,20 +406,20 @@ export default function AccountPage() {
                       onChange={(e) => setEditValue(e.target.value)}
                       onKeyDown={(e) => handleKeyDown(e, 'name')}
                       autoFocus
-                      className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-xl font-bold focus:outline-none focus:border-blue-500"
+                      className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-white text-xl font-bold focus:outline-none focus:border-primary"
                     />
                     <button
                       onClick={() => saveField('name', editValue)}
                       disabled={saving}
                       className="p-1.5 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition disabled:opacity-50"
                     >
-                      <FiCheck className="w-4 h-4" />
+                      <Check className="w-4 h-4" />
                     </button>
                     <button
                       onClick={cancelEdit}
                       className="p-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition"
                     >
-                      <FiX className="w-4 h-4" />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
@@ -431,18 +431,18 @@ export default function AccountPage() {
                       onClick={() => startEdit('name', `${profile.firstName} ${profile.lastName}`)}
                       className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/10 text-gray-500 hover:text-gray-300 transition-all"
                     >
-                      <FiEdit2 className="w-3.5 h-3.5" />
+                      <Pencil className="w-3.5 h-3.5" />
                     </button>
                   </>
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-3 mt-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary-500/20 text-primary-300 text-xs font-semibold">
-                  <FiShield className="w-3 h-3" />
+                  <Shield className="w-3 h-3" />
                   {profile.role || 'Rider'}
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 text-gray-300 text-xs font-mono">
-                  <FiHash className="w-3 h-3" />
+                  <Hash className="w-3 h-3" />
                   {profile.eId}
                 </span>
               </div>
@@ -451,7 +451,7 @@ export default function AccountPage() {
         </div>
 
         {/* Personal Information */}
-        <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+        <div className="bento-card rounded-2xl border border-white/10 overflow-hidden">
           <div className="px-6 py-4 border-b border-white/10">
             <h2 className="text-lg font-semibold text-white">Personal Information</h2>
           </div>
@@ -460,7 +460,7 @@ export default function AccountPage() {
               field="dob"
               label="Date of Birth"
               value={profile.dob ? profile.dob.split('T')[0] : ''}
-              icon={FiCalendar}
+              icon={Calendar}
               type="date"
               {...inlineProps}
             />
@@ -468,7 +468,7 @@ export default function AccountPage() {
               field="gender"
               label="Gender"
               value={profile.gender}
-              icon={FiUser}
+              icon={User}
               type="select"
               options={[
                 { value: 'Male', label: 'Male' },
@@ -481,14 +481,14 @@ export default function AccountPage() {
               field="efiRiderId"
               label="EFI Rider ID"
               value={profile.efiRiderId}
-              icon={FiHash}
+              icon={Hash}
               {...inlineProps}
             />
             <InlineField
               field="phone"
               label="Mobile Number"
               value={profile.phone}
-              icon={FiPhone}
+              icon={Phone}
               type="tel"
               {...inlineProps}
             />
@@ -496,7 +496,7 @@ export default function AccountPage() {
               field="optionalPhone"
               label="Optional Number"
               value={profile.optionalPhone}
-              icon={FiPhone}
+              icon={Phone}
               type="tel"
               {...inlineProps}
             />
@@ -504,7 +504,7 @@ export default function AccountPage() {
               field="address"
               label="Address"
               value={profile.address}
-              icon={FiMapPin}
+              icon={MapPin}
               type="textarea"
               {...inlineProps}
             />
@@ -512,7 +512,7 @@ export default function AccountPage() {
               field="email"
               label="Email"
               value={profile.email}
-              icon={FiMail}
+              icon={Mail}
               readOnly
               {...inlineProps}
               badge={
@@ -524,7 +524,7 @@ export default function AccountPage() {
                   }`}
                 >
                   {profile.isGoogleAuth ? (
-                    <><FiCheck className="w-3 h-3" /> Verified</>
+                    <><Check className="w-3 h-3" /> Verified</>
                   ) : (
                     'Unverified'
                   )}
@@ -537,14 +537,14 @@ export default function AccountPage() {
         {/* Crop Modal */}
         {showCropModal && imageSrc && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            <div className="glass rounded-2xl border border-white/20 w-full max-w-lg mx-4 overflow-hidden">
+            <div className="bento-card rounded-2xl border border-white/20 w-full max-w-lg mx-4 overflow-hidden">
               <div className="px-6 py-4 border-b border-white/10 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-white">Crop Profile Picture</h3>
                 <button
                   onClick={() => { setShowCropModal(false); setImageSrc(null); }}
                   className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 transition"
                 >
-                  <FiX className="w-5 h-5" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
               <div className="relative w-full h-80 bg-black">

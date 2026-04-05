@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import api from '@/lib/api';
-import { FiFilter, FiSearch } from 'react-icons/fi';
+import { Filter, Search } from 'lucide-react';
 import ProtectedRoute from '@/lib/protected-route';
 
 interface AuditLog {
@@ -75,10 +75,10 @@ export default function AuditLogs() {
     <ProtectedRoute>
       <Head><title>Audit Logs | Equestrian Events</title></Head>
       <div>
-        <h2 className="text-3xl font-bold text-white mb-8">Audit Logs</h2>
+        <h2 className="text-2xl font-bold mb-8">Audit Logs</h2>
 
         {/* Filters */}
-        <div className="card mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bento-card mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-white mb-2">Entity</label>
             <input
@@ -89,7 +89,7 @@ export default function AuditLogs() {
                 setPage(1);
               }}
               placeholder="e.g., User, Event, Club"
-              className="form-input"
+              className="input"
             />
           </div>
           <div>
@@ -102,7 +102,7 @@ export default function AuditLogs() {
                 setPage(1);
               }}
               placeholder="e.g., CREATE, UPDATE, DELETE"
-              className="form-input"
+              className="input"
             />
           </div>
           <div className="flex items-end">
@@ -120,10 +120,10 @@ export default function AuditLogs() {
         </div>
 
         {/* Logs Table */}
-        <div className="card table-container">
+        <div className="bento-card table-container">
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
               <p className="text-gray-300 mt-2">Loading audit logs...</p>
             </div>
           ) : logs.length === 0 ? (

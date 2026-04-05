@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiMoreVertical } from 'react-icons/fi';
+import { MoreVertical } from 'lucide-react';
 
 export interface ActionItem {
   label: string;
@@ -34,14 +34,30 @@ export default function ActionsDropdown({ actions }: ActionsDropdownProps) {
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="p-1.5 rounded-lg hover:bg-white hover:bg-opacity-10 text-gray-400 hover:text-white transition"
+        className="p-1.5 rounded-lg transition-colors"
+        style={{ color: 'hsl(var(--muted-foreground))' }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.background = 'hsl(var(--surface-bright))';
+          e.currentTarget.style.color = 'hsl(var(--on-surface))';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.color = 'hsl(var(--muted-foreground))';
+        }}
         title="Actions"
+        aria-label="Actions menu"
       >
-        <FiMoreVertical className="w-4 h-4" />
+        <MoreVertical size={16} />
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-1 w-44 rounded-lg shadow-xl bg-slate-800 border border-white border-opacity-10 py-1 animate-in fade-in duration-150">
+        <div
+          className="absolute right-0 z-50 mt-1 w-44 rounded-lg shadow-xl py-1 animate-fade-in"
+          style={{
+            background: 'hsl(var(--surface-container))',
+            border: '1px solid hsl(var(--border) / 0.5)',
+          }}
+        >
           {visibleActions.map((action, i) => (
             <button
               key={i}
@@ -51,9 +67,12 @@ export default function ActionsDropdown({ actions }: ActionsDropdownProps) {
                 setOpen(false);
                 action.onClick();
               }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition hover:bg-white hover:bg-opacity-10 disabled:opacity-40 disabled:cursor-not-allowed ${
-                action.className || 'text-gray-300 hover:text-white'
+              className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                action.className || ''
               }`}
+              style={{ color: action.className ? undefined : 'hsl(var(--on-surface))' }}
+              onMouseOver={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-bright))')}
+              onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               {action.icon && <span className="flex-shrink-0">{action.icon}</span>}
               {action.label}

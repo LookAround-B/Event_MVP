@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
-import { FiArrowLeft, FiEdit2, FiSave, FiX, FiPlus, FiTrash2, FiImage } from 'react-icons/fi';
+import { ArrowLeft, Pencil, Save, X, Plus, Trash2, ImageIcon } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import AddressMapPicker from '@/components/AddressMapPicker';
@@ -229,7 +229,7 @@ export default function RiderDetail() {
       <ProtectedRoute>
         <div className="text-center py-12">
           <p className="text-gray-300 text-lg">Rider not found</p>
-          <Link href="/riders" className="text-primary-400 hover:text-primary-300 mt-4 inline-block">
+          <Link href="/riders" className="text-primary hover:text-primary-300 mt-4 inline-block">
             Back to Riders
           </Link>
         </div>
@@ -244,10 +244,10 @@ export default function RiderDetail() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/riders" className="text-purple-400 hover:text-purple-300">
-              <FiArrowLeft className="w-5 h-5" />
+            <Link href="/riders" className="transition-colors">
+              <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-2xl font-bold">
               {isViewMode ? 'Rider Details' : 'Rider Profile'}
             </h1>
           </div>
@@ -257,22 +257,22 @@ export default function RiderDetail() {
                 onClick={() => router.push(`/riders/${id}`)}
                 className="btn-primary flex items-center gap-2"
               >
-                <FiEdit2 /> Switch to Edit
+                <Pencil /> Switch to Edit
               </button>
             ) : !editing ? (
               <button
                 onClick={() => setEditing(true)}
                 className="btn-primary flex items-center gap-2"
               >
-                <FiEdit2 /> Edit Rider
+                <Pencil /> Edit Rider
               </button>
             ) : (
               <>
                 <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2">
-                  <FiSave /> {saving ? 'Saving...' : 'Save Changes'}
+                  <Save /> {saving ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button onClick={() => { setEditing(false); fetchRider(); }} className="btn-secondary flex items-center gap-2">
-                  <FiX /> Cancel
+                  <X /> Cancel
                 </button>
               </>
             )}
@@ -280,7 +280,7 @@ export default function RiderDetail() {
         </div>
 
         {/* Rider Card */}
-        <div className="card p-6">
+        <div className="bento-card p-6">
           <div className="flex gap-6">
             {/* Image */}
             <div className="flex-shrink-0">
@@ -290,7 +290,7 @@ export default function RiderDetail() {
                     <Image src={editForm.imageUrl} alt="Rider" width={128} height={128} className="w-32 h-32 rounded-lg object-cover" />
                   ) : (
                     <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
-                      <FiImage className="w-12 h-12 text-gray-500" />
+                      <ImageIcon className="w-12 h-12 text-gray-500" />
                     </div>
                   )}
                   <input
@@ -298,7 +298,7 @@ export default function RiderDetail() {
                     value={editForm.imageUrl}
                     onChange={(e) => setEditForm(prev => ({ ...prev, imageUrl: e.target.value }))}
                     placeholder="Image URL"
-                    className="form-input text-sm w-32"
+                    className="input text-sm w-32"
                   />
                 </div>
               ) : (
@@ -306,7 +306,7 @@ export default function RiderDetail() {
                   <Image src={rider.imageUrl} alt="Rider" width={128} height={128} className="w-32 h-32 rounded-lg object-cover" />
                 ) : (
                   <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
-                    <FiImage className="w-12 h-12 text-gray-500" />
+                    <ImageIcon className="w-12 h-12 text-gray-500" />
                   </div>
                 )
               )}
@@ -321,7 +321,7 @@ export default function RiderDetail() {
                     type="text"
                     value={editForm.eId}
                     onChange={(e) => setEditForm(prev => ({ ...prev, eId: e.target.value }))}
-                    className="form-input font-mono"
+                    className="input font-mono"
                   />
                 ) : (
                   <p className="text-white font-mono">{rider.eId}</p>
@@ -334,7 +334,7 @@ export default function RiderDetail() {
                     type="text"
                     value={editForm.efiRiderId}
                     onChange={(e) => setEditForm(prev => ({ ...prev, efiRiderId: e.target.value }))}
-                    className="form-input"
+                    className="input"
                     required
                   />
                 ) : (
@@ -348,7 +348,7 @@ export default function RiderDetail() {
                     type="text"
                     value={editForm.firstName}
                     onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
-                    className="form-input"
+                    className="input"
                     required
                   />
                 ) : (
@@ -362,7 +362,7 @@ export default function RiderDetail() {
                     type="text"
                     value={editForm.lastName}
                     onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
-                    className="form-input"
+                    className="input"
                   />
                 ) : (
                   <p className="text-white">{rider.lastName || '-'}</p>
@@ -375,7 +375,7 @@ export default function RiderDetail() {
                     type="email"
                     value={editForm.email}
                     onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
-                    className="form-input"
+                    className="input"
                     required
                   />
                 ) : (
@@ -388,7 +388,7 @@ export default function RiderDetail() {
                   <select
                     value={editForm.gender}
                     onChange={(e) => setEditForm(prev => ({ ...prev, gender: e.target.value }))}
-                    className="form-input"
+                    className="input"
                   >
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
@@ -406,7 +406,7 @@ export default function RiderDetail() {
                     type="date"
                     value={editForm.dob}
                     onChange={(e) => setEditForm(prev => ({ ...prev, dob: e.target.value }))}
-                    className="form-input"
+                    className="input"
                   />
                 ) : (
                   <p className="text-white">{rider.dob ? new Date(rider.dob).toLocaleDateString() : '-'}</p>
@@ -419,7 +419,7 @@ export default function RiderDetail() {
                     type="tel"
                     value={editForm.mobile}
                     onChange={(e) => setEditForm(prev => ({ ...prev, mobile: e.target.value }))}
-                    className="form-input"
+                    className="input"
                   />
                 ) : (
                   <p className="text-white">{rider.mobile || '-'}</p>
@@ -432,7 +432,7 @@ export default function RiderDetail() {
                     type="tel"
                     value={editForm.optionalPhone}
                     onChange={(e) => setEditForm(prev => ({ ...prev, optionalPhone: e.target.value }))}
-                    className="form-input"
+                    className="input"
                   />
                 ) : (
                   <p className="text-white">{rider.optionalPhone || '-'}</p>
@@ -446,8 +446,8 @@ export default function RiderDetail() {
                 <p className="text-sm text-gray-400">Status</p>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   rider.isActive
-                    ? 'bg-green-500 bg-opacity-20 text-green-400'
-                    : 'bg-red-500 bg-opacity-20 text-red-400'
+                    ? 'badge-emerald'
+                    : 'badge-danger'
                 }`}>
                   {rider.isActive ? 'Active' : 'Inactive'}
                 </span>
@@ -457,7 +457,7 @@ export default function RiderDetail() {
         </div>
 
         {/* Address Section */}
-        <div className="card p-6">
+        <div className="bento-card p-6">
           <h3 className="text-xl font-bold text-white mb-4">Address</h3>
           {editing ? (
             <div className="space-y-3">
@@ -466,7 +466,7 @@ export default function RiderDetail() {
                 onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
                 placeholder="Enter address"
                 rows={3}
-                className="form-input"
+                className="input"
               />
               <AddressMapPicker
                 address={editForm.address}
@@ -482,7 +482,7 @@ export default function RiderDetail() {
         </div>
 
         {/* Social Links Section */}
-        <div className="card p-6">
+        <div className="bento-card p-6">
           <h3 className="text-xl font-bold text-white mb-4">Social Links</h3>
           {editing ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -497,7 +497,7 @@ export default function RiderDetail() {
                       socialLinks: { ...prev.socialLinks, [platform]: e.target.value },
                     }))}
                     placeholder={`${platform} URL or handle`}
-                    className="form-input"
+                    className="input"
                   />
                 </div>
               ))}
@@ -514,7 +514,7 @@ export default function RiderDetail() {
                         href={url!.startsWith('http') ? url! : `https://${url}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary-400 hover:text-primary-300 text-sm truncate"
+                        className="text-primary hover:text-primary-300 text-sm truncate"
                       >
                         {url}
                       </a>
@@ -528,7 +528,7 @@ export default function RiderDetail() {
         </div>
 
         {/* Horses Section */}
-        <div className="card p-6">
+        <div className="bento-card p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold text-white">Horses ({rider.horses.length})</h3>
             {!isViewMode && (
@@ -536,20 +536,20 @@ export default function RiderDetail() {
                 onClick={() => { setShowHorseSelector(!showHorseSelector); if (!showHorseSelector) fetchAvailableHorses(); }}
                 className="btn-primary flex items-center gap-2 text-sm"
               >
-                <FiPlus /> Add Horse
+                <Plus /> Add Horse
               </button>
             )}
           </div>
 
           {/* Horse Selector */}
           {showHorseSelector && (
-            <div className="mb-4 p-4 rounded-lg bg-white bg-opacity-5 border border-white border-opacity-10">
+            <div className="mb-4 p-4 rounded-lg  border border-white border-opacity-10">
               <p className="text-sm text-gray-300 mb-2">Select a horse to link to this rider:</p>
               <div className="flex gap-3">
                 <select
                   value={selectedHorseId}
                   onChange={(e) => setSelectedHorseId(e.target.value)}
-                  className="form-input flex-1"
+                  className="input flex-1"
                 >
                   <option value="">Choose a horse...</option>
                   {availableHorses.map(h => (
@@ -572,7 +572,7 @@ export default function RiderDetail() {
               </div>
               {availableHorses.length === 0 && (
                 <p className="text-sm text-gray-500 mt-2">
-                  No available horses. <Link href="/horses/create" className="text-primary-400">Create one</Link>.
+                  No available horses. <Link href="/horses/create" className="text-primary">Create one</Link>.
                 </p>
               )}
             </div>
@@ -610,7 +610,7 @@ export default function RiderDetail() {
                           className="text-red-400 hover:text-red-300"
                           title="Remove horse"
                         >
-                          <FiTrash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
                     )}
@@ -623,7 +623,7 @@ export default function RiderDetail() {
 
         {/* Registrations Summary */}
         {rider.registrations.length > 0 && (
-          <div className="card p-6">
+          <div className="bento-card p-6">
             <h3 className="text-xl font-bold text-white mb-4">Event Registrations ({rider.registrations.length})</h3>
             <table className="table">
               <thead>
@@ -642,7 +642,7 @@ export default function RiderDetail() {
                     <td>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         reg.paymentStatus === 'PAID'
-                          ? 'bg-green-500 bg-opacity-20 text-green-400'
+                          ? 'badge-emerald'
                           : 'bg-yellow-500 bg-opacity-20 text-yellow-400'
                       }`}>
                         {reg.paymentStatus}

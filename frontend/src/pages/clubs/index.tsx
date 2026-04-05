@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiEdit2, FiTrash2, FiPlus, FiDownload, FiEye, FiFilter, FiX } from 'react-icons/fi';
+import { Pencil, Trash2, Plus, Download, Eye, Filter, X } from 'lucide-react';
 import ActionsDropdown from '@/components/ActionsDropdown';
 
 interface Club {
@@ -206,21 +206,21 @@ export default function ClubsList() {
       <Head><title>Clubs | Equestrian Events</title></Head>
       <div>
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-white">Club Co-ordinator List</h2>
+          <h2 className="text-2xl font-bold">Club Co-ordinator List</h2>
           <div className="flex gap-3">
             {selectedIds.size > 0 && (
               <button onClick={handleBulkDelete} className="btn-secondary text-red-400 border-red-400">
-                <FiTrash2 className="inline mr-2" /> Delete ({selectedIds.size})
+                <Trash2 className="inline mr-2" /> Delete ({selectedIds.size})
               </button>
             )}
             <button onClick={handleExportCSV} className="btn-secondary">
-              <FiDownload className="inline mr-2" /> Export CSV
+              <Download className="inline mr-2" /> Export CSV
             </button>
             <button onClick={handleExportExcel} className="btn-secondary">
-              <FiDownload className="inline mr-2" /> Export Excel
+              <Download className="inline mr-2" /> Export Excel
             </button>
             <Link href="/clubs/create" className="btn-primary">
-              <FiPlus className="inline mr-2" /> Add Club
+              <Plus className="inline mr-2" /> Add Club
             </Link>
           </div>
         </div>
@@ -233,13 +233,13 @@ export default function ClubsList() {
               placeholder="Search clubs by name, email, or code..."
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
-              className="form-input flex-1"
+              className="input flex-1"
             />
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`btn-secondary flex items-center gap-2 ${showFilters ? 'ring-2 ring-purple-500' : ''}`}
+              className={`btn-secondary flex items-center gap-2 ${showFilters ? '' : ''}`}
             >
-              <FiFilter /> Filters
+              <Filter /> Filters
               {(filterCity || filterStatus) && (
                 <span className="bg-purple-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
                   {(filterCity ? 1 : 0) + (filterStatus ? 1 : 0)}
@@ -249,14 +249,14 @@ export default function ClubsList() {
           </div>
 
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-white border-opacity-10">
+            <div className="mt-4 pt-4 pt-0">
               <div className="flex gap-4 items-end">
                 <div className="flex-1">
                   <label className="block text-sm font-semibold text-gray-300 mb-1">City</label>
                   <select
                     value={filterCity}
                     onChange={e => setFilterCity(e.target.value)}
-                    className="form-input"
+                    className="input"
                   >
                     <option value="" className="bg-slate-800 text-white">All Cities</option>
                     {uniqueCities.map(city => (
@@ -269,7 +269,7 @@ export default function ClubsList() {
                   <select
                     value={filterStatus}
                     onChange={e => setFilterStatus(e.target.value as '' | 'active' | 'inactive')}
-                    className="form-input"
+                    className="input"
                   >
                     <option value="" className="bg-slate-800 text-white">All Status</option>
                     <option value="active" className="bg-slate-800 text-white">Active</option>
@@ -278,7 +278,7 @@ export default function ClubsList() {
                 </div>
                 {(filterCity || filterStatus) && (
                   <button onClick={clearFilters} className="btn-secondary flex items-center gap-1 text-red-400">
-                    <FiX /> Clear
+                    <X /> Clear
                   </button>
                 )}
               </div>
@@ -287,7 +287,7 @@ export default function ClubsList() {
         </div>
 
         {/* Table */}
-        <div className="card table-container">
+        <div className="bento-card table-container">
           {loading ? (
             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {[...Array(5)].map((_, i) => (
@@ -340,7 +340,7 @@ export default function ClubsList() {
                               type="text"
                               value={editEmbassyValue}
                               onChange={e => setEditEmbassyValue(e.target.value)}
-                              className="form-input text-xs py-1 px-2 w-32"
+                              className="input text-xs py-1 px-2 w-32"
                               onKeyDown={e => {
                                 if (e.key === 'Enter') saveEmbassyId(club.id);
                                 if (e.key === 'Escape') setEditingEmbassyId(null);
@@ -352,7 +352,7 @@ export default function ClubsList() {
                           </div>
                         ) : (
                           <span
-                            className="cursor-pointer hover:text-purple-300"
+                            className="cursor-pointer transition-colors"
                             onClick={() => {
                               setEditingEmbassyId(club.id);
                               setEditEmbassyValue(club.eId || '');
@@ -369,16 +369,16 @@ export default function ClubsList() {
                       <td>{club.city}</td>
                       <td>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          club.isActive ? 'bg-green-500 bg-opacity-20 text-green-400' : 'bg-red-500 bg-opacity-20 text-red-400'
+                          club.isActive ? 'badge-emerald' : 'badge-danger'
                         }`}>
                           {club.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
                       <td>
                         <ActionsDropdown actions={[
-                          { label: 'View', icon: <FiEye className="w-4 h-4" />, onClick: () => router.push(`/clubs/${club.id}?mode=view`) },
-                          { label: 'Edit', icon: <FiEdit2 className="w-4 h-4" />, onClick: () => router.push(`/clubs/${club.id}`), className: 'text-amber-400 hover:text-amber-300' },
-                          { label: 'Delete', icon: <FiTrash2 className="w-4 h-4" />, onClick: () => deleteClub(club.id), className: 'text-red-400 hover:text-red-300' },
+                          { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: () => router.push(`/clubs/${club.id}?mode=view`) },
+                          { label: 'Edit', icon: <Pencil className="w-4 h-4" />, onClick: () => router.push(`/clubs/${club.id}`), className: 'text-amber-400 hover:text-amber-300' },
+                          { label: 'Delete', icon: <Trash2 className="w-4 h-4" />, onClick: () => deleteClub(club.id), className: 'text-red-400 hover:text-red-300' },
                         ]} />
                       </td>
                     </tr>

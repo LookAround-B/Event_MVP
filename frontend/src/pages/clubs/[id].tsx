@@ -5,7 +5,7 @@ import Image from 'next/image';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft, FiPlus, FiTrash2, FiEdit2, FiSave, FiX, FiImage } from 'react-icons/fi';
+import { ArrowLeft, Plus, Trash2, Pencil, Save, X, ImageIcon } from 'lucide-react';
 
 interface Rider {
   id: string;
@@ -356,18 +356,18 @@ export default function ClubDetail() {
     <ProtectedRoute>
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/clubs" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
-            <FiArrowLeft /> Back to Clubs
+          <Link href="/clubs" className="transition-colors flex items-center gap-2">
+            <ArrowLeft /> Back to Clubs
           </Link>
           {isViewMode && (
             <Link href={`/clubs/${id}`} className="btn-secondary text-sm ml-auto">
-              <FiEdit2 className="inline mr-1" /> Switch to Edit
+              <Pencil className="inline mr-1" /> Switch to Edit
             </Link>
           )}
         </div>
 
         {/* Club Details Card */}
-        <div className="card">
+        <div className="bento-card">
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-4">
               {/* Club Logo/Image */}
@@ -375,17 +375,17 @@ export default function ClubDetail() {
                 {club.logoUrl ? (
                   <Image src={club.logoUrl} alt={club.name} fill className="object-cover" />
                 ) : (
-                  <FiImage className="text-gray-400" size={32} />
+                  <ImageIcon className="text-gray-400" size={32} />
                 )}
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">{club.name}</h1>
+                <h1 className="text-2xl font-bold">{club.name}</h1>
                 <p className="text-gray-400 text-sm mt-1">Embassy ID: {club.eId || '—'}</p>
               </div>
             </div>
             {!isViewMode && !editClub && (
               <button onClick={() => setEditClub(true)} className="btn-secondary flex items-center gap-2">
-                <FiEdit2 /> Edit Club
+                <Pencil /> Edit Club
               </button>
             )}
           </div>
@@ -395,88 +395,88 @@ export default function ClubDetail() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">Club Name</label>
-                  <input type="text" value={clubEditForm.name} onChange={e => setClubEditForm({ ...clubEditForm, name: e.target.value })} className="form-input" />
+                  <input type="text" value={clubEditForm.name} onChange={e => setClubEditForm({ ...clubEditForm, name: e.target.value })} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">Club Code</label>
-                  <input type="text" value={clubEditForm.shortCode} onChange={e => setClubEditForm({ ...clubEditForm, shortCode: e.target.value })} className="form-input" />
+                  <input type="text" value={clubEditForm.shortCode} onChange={e => setClubEditForm({ ...clubEditForm, shortCode: e.target.value })} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">Embassy ID</label>
-                  <input type="text" value={clubEditForm.eId} onChange={e => setClubEditForm({ ...clubEditForm, eId: e.target.value })} className="form-input" />
+                  <input type="text" value={clubEditForm.eId} onChange={e => setClubEditForm({ ...clubEditForm, eId: e.target.value })} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">Office Email</label>
-                  <input type="email" value={clubEditForm.email} onChange={e => setClubEditForm({ ...clubEditForm, email: e.target.value })} className="form-input" />
+                  <input type="email" value={clubEditForm.email} onChange={e => setClubEditForm({ ...clubEditForm, email: e.target.value })} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">Contact Number</label>
-                  <input type="tel" value={clubEditForm.contactNumber} onChange={e => setClubEditForm({ ...clubEditForm, contactNumber: e.target.value })} className="form-input" />
+                  <input type="tel" value={clubEditForm.contactNumber} onChange={e => setClubEditForm({ ...clubEditForm, contactNumber: e.target.value })} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">Optional Phone</label>
-                  <input type="tel" value={clubEditForm.optionalPhone} onChange={e => setClubEditForm({ ...clubEditForm, optionalPhone: e.target.value })} className="form-input" />
+                  <input type="tel" value={clubEditForm.optionalPhone} onChange={e => setClubEditForm({ ...clubEditForm, optionalPhone: e.target.value })} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">Logo URL</label>
-                  <input type="url" value={clubEditForm.logoUrl} onChange={e => setClubEditForm({ ...clubEditForm, logoUrl: e.target.value })} className="form-input" placeholder="https://..." />
+                  <input type="url" value={clubEditForm.logoUrl} onChange={e => setClubEditForm({ ...clubEditForm, logoUrl: e.target.value })} className="input" placeholder="https://..." />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">City</label>
-                  <input type="text" value={clubEditForm.city} onChange={e => setClubEditForm({ ...clubEditForm, city: e.target.value })} className="form-input" />
+                  <input type="text" value={clubEditForm.city} onChange={e => setClubEditForm({ ...clubEditForm, city: e.target.value })} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">State</label>
-                  <input type="text" value={clubEditForm.state} onChange={e => setClubEditForm({ ...clubEditForm, state: e.target.value })} className="form-input" />
+                  <input type="text" value={clubEditForm.state} onChange={e => setClubEditForm({ ...clubEditForm, state: e.target.value })} className="input" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-1">Country</label>
-                  <input type="text" value={clubEditForm.country} onChange={e => setClubEditForm({ ...clubEditForm, country: e.target.value })} className="form-input" />
+                  <input type="text" value={clubEditForm.country} onChange={e => setClubEditForm({ ...clubEditForm, country: e.target.value })} className="input" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-1">Address</label>
-                <input type="text" value={clubEditForm.address} onChange={e => setClubEditForm({ ...clubEditForm, address: e.target.value })} className="form-input" />
+                <input type="text" value={clubEditForm.address} onChange={e => setClubEditForm({ ...clubEditForm, address: e.target.value })} className="input" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-1">Description</label>
-                <textarea value={clubEditForm.description} onChange={e => setClubEditForm({ ...clubEditForm, description: e.target.value })} className="form-input" rows={2} />
+                <textarea value={clubEditForm.description} onChange={e => setClubEditForm({ ...clubEditForm, description: e.target.value })} className="input" rows={2} />
               </div>
 
               {/* Social Links */}
-              <div className="border-t border-white border-opacity-10 pt-4">
+              <div className="pt-0 pt-4">
                 <h3 className="text-lg font-semibold text-white mb-3">Social Links</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-1">Instagram</label>
-                    <input type="url" value={clubEditForm.socialLinks.instagram || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, instagram: e.target.value } })} className="form-input" placeholder="https://instagram.com/..." />
+                    <input type="url" value={clubEditForm.socialLinks.instagram || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, instagram: e.target.value } })} className="input" placeholder="https://instagram.com/..." />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-1">Twitter / X</label>
-                    <input type="url" value={clubEditForm.socialLinks.twitter || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, twitter: e.target.value } })} className="form-input" placeholder="https://twitter.com/..." />
+                    <input type="url" value={clubEditForm.socialLinks.twitter || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, twitter: e.target.value } })} className="input" placeholder="https://twitter.com/..." />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-1">Facebook</label>
-                    <input type="url" value={clubEditForm.socialLinks.facebook || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, facebook: e.target.value } })} className="form-input" placeholder="https://facebook.com/..." />
+                    <input type="url" value={clubEditForm.socialLinks.facebook || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, facebook: e.target.value } })} className="input" placeholder="https://facebook.com/..." />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-1">YouTube</label>
-                    <input type="url" value={clubEditForm.socialLinks.youtube || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, youtube: e.target.value } })} className="form-input" placeholder="https://youtube.com/..." />
+                    <input type="url" value={clubEditForm.socialLinks.youtube || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, youtube: e.target.value } })} className="input" placeholder="https://youtube.com/..." />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-1">Website</label>
-                    <input type="url" value={clubEditForm.socialLinks.website || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, website: e.target.value } })} className="form-input" placeholder="https://..." />
+                    <input type="url" value={clubEditForm.socialLinks.website || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, website: e.target.value } })} className="input" placeholder="https://..." />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-1">Other</label>
-                    <input type="url" value={clubEditForm.socialLinks.other || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, other: e.target.value } })} className="form-input" placeholder="https://..." />
+                    <input type="url" value={clubEditForm.socialLinks.other || ''} onChange={e => setClubEditForm({ ...clubEditForm, socialLinks: { ...clubEditForm.socialLinks, other: e.target.value } })} className="input" placeholder="https://..." />
                   </div>
                 </div>
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button onClick={saveClubEdit} className="btn-primary flex items-center gap-2"><FiSave /> Save</button>
-                <button onClick={() => setEditClub(false)} className="btn-secondary flex items-center gap-2"><FiX /> Cancel</button>
+                <button onClick={saveClubEdit} className="btn-primary flex items-center gap-2"><Save /> Save</button>
+                <button onClick={() => setEditClub(false)} className="btn-secondary flex items-center gap-2"><X /> Cancel</button>
               </div>
             </div>
           ) : (
@@ -514,26 +514,26 @@ export default function ClubDetail() {
 
               {/* Social Links Display */}
               {club.socialLinks && Object.values(club.socialLinks).some(v => v) && (
-                <div className="mt-4 pt-4 border-t border-white border-opacity-10">
+                <div className="mt-4 pt-4 pt-0">
                   <h3 className="text-sm font-semibold text-gray-400 mb-2">Social Links</h3>
                   <div className="flex flex-wrap gap-3">
                     {club.socialLinks.instagram && (
-                      <a href={club.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 text-sm">Instagram</a>
+                      <a href={club.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="transition-colors text-sm">Instagram</a>
                     )}
                     {club.socialLinks.twitter && (
-                      <a href={club.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 text-sm">Twitter / X</a>
+                      <a href={club.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="transition-colors text-sm">Twitter / X</a>
                     )}
                     {club.socialLinks.facebook && (
-                      <a href={club.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 text-sm">Facebook</a>
+                      <a href={club.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="transition-colors text-sm">Facebook</a>
                     )}
                     {club.socialLinks.youtube && (
-                      <a href={club.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 text-sm">YouTube</a>
+                      <a href={club.socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="transition-colors text-sm">YouTube</a>
                     )}
                     {club.socialLinks.website && (
-                      <a href={club.socialLinks.website} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 text-sm">Website</a>
+                      <a href={club.socialLinks.website} target="_blank" rel="noopener noreferrer" className="transition-colors text-sm">Website</a>
                     )}
                     {club.socialLinks.other && (
-                      <a href={club.socialLinks.other} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 text-sm">Other</a>
+                      <a href={club.socialLinks.other} target="_blank" rel="noopener noreferrer" className="transition-colors text-sm">Other</a>
                     )}
                   </div>
                 </div>
@@ -543,7 +543,7 @@ export default function ClubDetail() {
         </div>
 
         {/* Contact Person Card */}
-        <div className="card">
+        <div className="bento-card">
           <h2 className="text-xl font-bold text-white mb-4">Contact Person</h2>
           <div className="grid grid-cols-2 gap-4 text-gray-300">
             <div>
@@ -574,8 +574,8 @@ export default function ClubDetail() {
         </div>
 
         {/* Tabs */}
-        <div className="card">
-          <div className="flex border-b border-white border-opacity-10 mb-6">
+        <div className="bento-card">
+          <div className="flex  mb-6">
             <button
               onClick={() => setActiveTab('riders')}
               className={`px-6 py-3 font-semibold transition-colors ${
@@ -605,12 +605,12 @@ export default function ClubDetail() {
                   onClick={() => setShowAddRider(!showAddRider)}
                   className="btn-secondary mb-4 flex items-center gap-2"
                 >
-                  <FiPlus /> Add Rider
+                  <Plus /> Add Rider
                 </button>
               )}
 
               {showAddRider && !isViewMode && (
-                <form onSubmit={addRider} className="space-y-4 mb-6 pb-6 border-b border-white border-opacity-10">
+                <form onSubmit={addRider} className="space-y-4 mb-6 pb-6 ">
                   <h3 className="text-lg font-semibold text-white">Add New Rider</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <input
@@ -619,7 +619,7 @@ export default function ClubDetail() {
                       value={riderForm.firstName}
                       onChange={e => setRiderForm({ ...riderForm, firstName: e.target.value })}
                       required
-                      className="form-input"
+                      className="input"
                     />
                     <input
                       type="text"
@@ -627,7 +627,7 @@ export default function ClubDetail() {
                       value={riderForm.lastName}
                       onChange={e => setRiderForm({ ...riderForm, lastName: e.target.value })}
                       required
-                      className="form-input"
+                      className="input"
                     />
                     <input
                       type="email"
@@ -635,21 +635,21 @@ export default function ClubDetail() {
                       value={riderForm.email}
                       onChange={e => setRiderForm({ ...riderForm, email: e.target.value })}
                       required
-                      className="form-input"
+                      className="input"
                     />
                     <input
                       type="tel"
                       placeholder="Mobile"
                       value={riderForm.mobile}
                       onChange={e => setRiderForm({ ...riderForm, mobile: e.target.value })}
-                      className="form-input"
+                      className="input"
                     />
                     <input
                       type="text"
                       placeholder="EFI Rider ID"
                       value={riderForm.efiRiderId}
                       onChange={e => setRiderForm({ ...riderForm, efiRiderId: e.target.value })}
-                      className="form-input"
+                      className="input"
                     />
                     <div>
                       <label className="block text-xs text-gray-400 mb-1">Date of Birth</label>
@@ -657,13 +657,13 @@ export default function ClubDetail() {
                         type="date"
                         value={riderForm.dob}
                         onChange={e => setRiderForm({ ...riderForm, dob: e.target.value })}
-                        className="form-input"
+                        className="input"
                       />
                     </div>
                     <select
                       value={riderForm.gender}
                       onChange={e => setRiderForm({ ...riderForm, gender: e.target.value })}
-                      className="form-input"
+                      className="input"
                     >
                       <option value="Male" className="bg-slate-800 text-white">Male</option>
                       <option value="Female" className="bg-slate-800 text-white">Female</option>
@@ -674,7 +674,7 @@ export default function ClubDetail() {
                       placeholder="Address"
                       value={riderForm.address}
                       onChange={e => setRiderForm({ ...riderForm, address: e.target.value })}
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -708,26 +708,26 @@ export default function ClubDetail() {
                             <>
                               <td>
                                 <div className="flex gap-1">
-                                  <input type="text" value={editRiderForm.firstName} onChange={e => setEditRiderForm({ ...editRiderForm, firstName: e.target.value })} className="form-input text-xs py-1 px-2 w-20" placeholder="First" />
-                                  <input type="text" value={editRiderForm.lastName} onChange={e => setEditRiderForm({ ...editRiderForm, lastName: e.target.value })} className="form-input text-xs py-1 px-2 w-20" placeholder="Last" />
+                                  <input type="text" value={editRiderForm.firstName} onChange={e => setEditRiderForm({ ...editRiderForm, firstName: e.target.value })} className="input text-xs py-1 px-2 w-20" placeholder="First" />
+                                  <input type="text" value={editRiderForm.lastName} onChange={e => setEditRiderForm({ ...editRiderForm, lastName: e.target.value })} className="input text-xs py-1 px-2 w-20" placeholder="Last" />
                                 </div>
                               </td>
-                              <td><input type="text" value={editRiderForm.efiRiderId} onChange={e => setEditRiderForm({ ...editRiderForm, efiRiderId: e.target.value })} className="form-input text-xs py-1 px-2 w-24" /></td>
-                              <td><input type="email" value={editRiderForm.email} onChange={e => setEditRiderForm({ ...editRiderForm, email: e.target.value })} className="form-input text-xs py-1 px-2 w-32" /></td>
-                              <td><input type="tel" value={editRiderForm.mobile} onChange={e => setEditRiderForm({ ...editRiderForm, mobile: e.target.value })} className="form-input text-xs py-1 px-2 w-24" /></td>
+                              <td><input type="text" value={editRiderForm.efiRiderId} onChange={e => setEditRiderForm({ ...editRiderForm, efiRiderId: e.target.value })} className="input text-xs py-1 px-2 w-24" /></td>
+                              <td><input type="email" value={editRiderForm.email} onChange={e => setEditRiderForm({ ...editRiderForm, email: e.target.value })} className="input text-xs py-1 px-2 w-32" /></td>
+                              <td><input type="tel" value={editRiderForm.mobile} onChange={e => setEditRiderForm({ ...editRiderForm, mobile: e.target.value })} className="input text-xs py-1 px-2 w-24" /></td>
                               <td>
-                                <select value={editRiderForm.gender} onChange={e => setEditRiderForm({ ...editRiderForm, gender: e.target.value })} className="form-input text-xs py-1 px-2 w-20">
+                                <select value={editRiderForm.gender} onChange={e => setEditRiderForm({ ...editRiderForm, gender: e.target.value })} className="input text-xs py-1 px-2 w-20">
                                   <option value="Male" className="bg-slate-800">Male</option>
                                   <option value="Female" className="bg-slate-800">Female</option>
                                   <option value="Other" className="bg-slate-800">Other</option>
                                 </select>
                               </td>
-                              <td><input type="date" value={editRiderForm.dob} onChange={e => setEditRiderForm({ ...editRiderForm, dob: e.target.value })} className="form-input text-xs py-1 px-2 w-32" /></td>
-                              <td><input type="text" value={editRiderForm.address} onChange={e => setEditRiderForm({ ...editRiderForm, address: e.target.value })} className="form-input text-xs py-1 px-2 w-32" /></td>
+                              <td><input type="date" value={editRiderForm.dob} onChange={e => setEditRiderForm({ ...editRiderForm, dob: e.target.value })} className="input text-xs py-1 px-2 w-32" /></td>
+                              <td><input type="text" value={editRiderForm.address} onChange={e => setEditRiderForm({ ...editRiderForm, address: e.target.value })} className="input text-xs py-1 px-2 w-32" /></td>
                               <td>
                                 <div className="flex gap-1">
-                                  <button onClick={() => updateRider(rider.id)} className="text-green-400 hover:text-green-300"><FiSave size={16} /></button>
-                                  <button onClick={() => setEditingRiderId(null)} className="text-gray-400 hover:text-gray-300"><FiX size={16} /></button>
+                                  <button onClick={() => updateRider(rider.id)} className="text-green-400 hover:text-green-300"><Save size={16} /></button>
+                                  <button onClick={() => setEditingRiderId(null)} className="text-gray-400 hover:text-gray-300"><X size={16} /></button>
                                 </div>
                               </td>
                             </>
@@ -744,8 +744,8 @@ export default function ClubDetail() {
                                 <div className="flex gap-1">
                                   {!isViewMode && (
                                     <>
-                                      <button onClick={() => startEditRider(rider)} className="text-blue-400 hover:text-blue-300"><FiEdit2 size={16} /></button>
-                                      <button onClick={() => deleteRider(rider.id)} className="text-red-400 hover:text-red-300"><FiTrash2 size={16} /></button>
+                                      <button onClick={() => startEditRider(rider)} className="text-blue-400 hover:text-blue-300"><Pencil size={16} /></button>
+                                      <button onClick={() => deleteRider(rider.id)} className="text-red-400 hover:text-red-300"><Trash2 size={16} /></button>
                                     </>
                                   )}
                                 </div>
@@ -768,12 +768,12 @@ export default function ClubDetail() {
                   onClick={() => setShowAddHorse(!showAddHorse)}
                   className="btn-secondary mb-4 flex items-center gap-2"
                 >
-                  <FiPlus /> Add Horse
+                  <Plus /> Add Horse
                 </button>
               )}
 
               {showAddHorse && !isViewMode && (
-                <form onSubmit={addHorse} className="space-y-4 mb-6 pb-6 border-b border-white border-opacity-10">
+                <form onSubmit={addHorse} className="space-y-4 mb-6 pb-6 ">
                   <h3 className="text-lg font-semibold text-white">Add New Horse</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <input
@@ -782,26 +782,26 @@ export default function ClubDetail() {
                       value={horseForm.name}
                       onChange={e => setHorseForm({ ...horseForm, name: e.target.value })}
                       required
-                      className="form-input"
+                      className="input"
                     />
                     <input
                       type="text"
                       placeholder="Breed"
                       value={horseForm.breed}
                       onChange={e => setHorseForm({ ...horseForm, breed: e.target.value })}
-                      className="form-input"
+                      className="input"
                     />
                     <input
                       type="text"
                       placeholder="Color"
                       value={horseForm.color}
                       onChange={e => setHorseForm({ ...horseForm, color: e.target.value })}
-                      className="form-input"
+                      className="input"
                     />
                     <select
                       value={horseForm.gender}
                       onChange={e => setHorseForm({ ...horseForm, gender: e.target.value })}
-                      className="form-input"
+                      className="input"
                     >
                       <option value="Stallion" className="bg-slate-800 text-white">Stallion</option>
                       <option value="Mare" className="bg-slate-800 text-white">Mare</option>
@@ -814,7 +814,7 @@ export default function ClubDetail() {
                         placeholder="Year of Birth"
                         value={horseForm.yearOfBirth}
                         onChange={e => setHorseForm({ ...horseForm, yearOfBirth: parseInt(e.target.value) || 0 })}
-                        className="form-input"
+                        className="input"
                         min="1950"
                         max={new Date().getFullYear()}
                       />
@@ -824,21 +824,21 @@ export default function ClubDetail() {
                       placeholder="Passport Number"
                       value={horseForm.passportNumber}
                       onChange={e => setHorseForm({ ...horseForm, passportNumber: e.target.value })}
-                      className="form-input"
+                      className="input"
                     />
                     <input
                       type="text"
                       placeholder="Horse Code"
                       value={horseForm.horseCode}
                       onChange={e => setHorseForm({ ...horseForm, horseCode: e.target.value })}
-                      className="form-input"
+                      className="input"
                     />
                     <input
                       type="text"
                       placeholder="Height (hands)"
                       value={horseForm.height}
                       onChange={e => setHorseForm({ ...horseForm, height: e.target.value })}
-                      className="form-input"
+                      className="input"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -870,23 +870,23 @@ export default function ClubDetail() {
                         <tr key={horse.id}>
                           {editingHorseId === horse.id ? (
                             <>
-                              <td><input type="text" value={editHorseForm.name} onChange={e => setEditHorseForm({ ...editHorseForm, name: e.target.value })} className="form-input text-xs py-1 px-2 w-24" /></td>
-                              <td><input type="text" value={editHorseForm.breed} onChange={e => setEditHorseForm({ ...editHorseForm, breed: e.target.value })} className="form-input text-xs py-1 px-2 w-20" /></td>
-                              <td><input type="text" value={editHorseForm.color} onChange={e => setEditHorseForm({ ...editHorseForm, color: e.target.value })} className="form-input text-xs py-1 px-2 w-20" /></td>
+                              <td><input type="text" value={editHorseForm.name} onChange={e => setEditHorseForm({ ...editHorseForm, name: e.target.value })} className="input text-xs py-1 px-2 w-24" /></td>
+                              <td><input type="text" value={editHorseForm.breed} onChange={e => setEditHorseForm({ ...editHorseForm, breed: e.target.value })} className="input text-xs py-1 px-2 w-20" /></td>
+                              <td><input type="text" value={editHorseForm.color} onChange={e => setEditHorseForm({ ...editHorseForm, color: e.target.value })} className="input text-xs py-1 px-2 w-20" /></td>
                               <td>
-                                <select value={editHorseForm.gender} onChange={e => setEditHorseForm({ ...editHorseForm, gender: e.target.value })} className="form-input text-xs py-1 px-2 w-24">
+                                <select value={editHorseForm.gender} onChange={e => setEditHorseForm({ ...editHorseForm, gender: e.target.value })} className="input text-xs py-1 px-2 w-24">
                                   <option value="Stallion" className="bg-slate-800">Stallion</option>
                                   <option value="Mare" className="bg-slate-800">Mare</option>
                                   <option value="Gelding" className="bg-slate-800">Gelding</option>
                                 </select>
                               </td>
-                              <td><input type="number" value={editHorseForm.yearOfBirth} onChange={e => setEditHorseForm({ ...editHorseForm, yearOfBirth: parseInt(e.target.value) || 0 })} className="form-input text-xs py-1 px-2 w-20" /></td>
-                              <td><input type="text" value={editHorseForm.passportNumber} onChange={e => setEditHorseForm({ ...editHorseForm, passportNumber: e.target.value })} className="form-input text-xs py-1 px-2 w-24" /></td>
-                              <td><input type="text" value={editHorseForm.horseCode} onChange={e => setEditHorseForm({ ...editHorseForm, horseCode: e.target.value })} className="form-input text-xs py-1 px-2 w-24" /></td>
+                              <td><input type="number" value={editHorseForm.yearOfBirth} onChange={e => setEditHorseForm({ ...editHorseForm, yearOfBirth: parseInt(e.target.value) || 0 })} className="input text-xs py-1 px-2 w-20" /></td>
+                              <td><input type="text" value={editHorseForm.passportNumber} onChange={e => setEditHorseForm({ ...editHorseForm, passportNumber: e.target.value })} className="input text-xs py-1 px-2 w-24" /></td>
+                              <td><input type="text" value={editHorseForm.horseCode} onChange={e => setEditHorseForm({ ...editHorseForm, horseCode: e.target.value })} className="input text-xs py-1 px-2 w-24" /></td>
                               <td>
                                 <div className="flex gap-1">
-                                  <button onClick={() => updateHorse(horse.id)} className="text-green-400 hover:text-green-300"><FiSave size={16} /></button>
-                                  <button onClick={() => setEditingHorseId(null)} className="text-gray-400 hover:text-gray-300"><FiX size={16} /></button>
+                                  <button onClick={() => updateHorse(horse.id)} className="text-green-400 hover:text-green-300"><Save size={16} /></button>
+                                  <button onClick={() => setEditingHorseId(null)} className="text-gray-400 hover:text-gray-300"><X size={16} /></button>
                                 </div>
                               </td>
                             </>
@@ -903,8 +903,8 @@ export default function ClubDetail() {
                                 <div className="flex gap-1">
                                   {!isViewMode && (
                                     <>
-                                      <button onClick={() => startEditHorse(horse)} className="text-blue-400 hover:text-blue-300"><FiEdit2 size={16} /></button>
-                                      <button onClick={() => deleteHorse(horse.id)} className="text-red-400 hover:text-red-300"><FiTrash2 size={16} /></button>
+                                      <button onClick={() => startEditHorse(horse)} className="text-blue-400 hover:text-blue-300"><Pencil size={16} /></button>
+                                      <button onClick={() => deleteHorse(horse.id)} className="text-red-400 hover:text-red-300"><Trash2 size={16} /></button>
                                     </>
                                   )}
                                 </div>

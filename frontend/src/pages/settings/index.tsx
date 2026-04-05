@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import api from '@/lib/api';
-import { FiPlus, FiEdit2, FiTrash2, FiSave, FiX, FiMapPin } from 'react-icons/fi';
+import { Plus, Pencil, Trash2, Save, X, MapPin } from 'lucide-react';
 import AddressMapPicker from '@/components/AddressMapPicker';
 import dynamic from 'next/dynamic';
 
@@ -299,20 +299,21 @@ export default function Settings() {
   return (
     <div className="p-4 sm:p-6">
       <Head><title>Settings | Equestrian Events</title></Head>
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-white">Settings</h1>
+      <h1 className="text-2xl font-bold mb-6" style={{ color: 'hsl(var(--on-surface))' }}>Settings</h1>
 
       {/* Tabs */}
-      <div className="glass">
-        <div className="flex border-b border-white border-opacity-10 overflow-x-auto scrollbar-thin">
+      <div className="bento-card">
+        <div className="flex overflow-x-auto" style={{ borderBottom: '1px solid hsl(var(--border) / 0.3)' }}>
           {tabs.map(tab => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 sm:px-6 py-3 font-semibold whitespace-nowrap text-sm sm:text-base transition-colors ${
+              className="px-4 sm:px-6 py-3 font-semibold whitespace-nowrap text-sm sm:text-base transition-colors"
+              style={
                 activeTab === tab.key
-                  ? 'border-b-2 border-primary-500 text-primary-400'
-                  : 'text-gray-300 hover:text-white'
-              }`}
+                  ? { borderBottom: '2px solid hsl(var(--primary))', color: 'hsl(var(--primary))' }
+                  : { color: 'hsl(var(--muted-foreground))' }
+              }
             >
               {tab.label}
             </button>
@@ -322,13 +323,13 @@ export default function Settings() {
         <div className="p-4 sm:p-6">
           {loading ? (
             <div className="flex items-center justify-center h-48">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary-500"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }}></div>
             </div>
           ) : activeTab === 'venue' ? (
             /* ───── VENUE TAB ───── */
             <div>
-              <h2 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-                <FiMapPin /> Venue
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <MapPin /> Venue
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
@@ -337,7 +338,7 @@ export default function Settings() {
                     type="text"
                     value={venue.name}
                     onChange={e => setVenue({ ...venue, name: e.target.value })}
-                    className="form-input"
+                    className="input"
                     placeholder="Enter venue name"
                   />
                 </div>
@@ -347,7 +348,7 @@ export default function Settings() {
                     type="text"
                     value={venue.address}
                     onChange={e => setVenue({ ...venue, address: e.target.value })}
-                    className="form-input"
+                    className="input"
                     placeholder="Enter venue address"
                   />
                 </div>
@@ -366,14 +367,14 @@ export default function Settings() {
                 disabled={saving}
                 className="btn-primary flex items-center gap-2 disabled:opacity-50"
               >
-                <FiSave /> {saving ? 'Saving...' : 'Save Venue'}
+                <Save /> {saving ? 'Saving...' : 'Save Venue'}
               </button>
             </div>
 
           ) : activeTab === 'stables' ? (
             /* ───── STABLES TAB ───── */
             <div>
-              <h2 className="text-xl font-bold mb-4 text-white">Stable Settings</h2>
+              <h2 className="text-xl font-bold mb-4">Stable Settings</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div>
                   <label className="form-label">Number of Stables</label>
@@ -382,7 +383,7 @@ export default function Settings() {
                     min="0"
                     value={stablesSettings.stable_count}
                     onChange={e => setStablesSettings({ ...stablesSettings, stable_count: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                 </div>
                 <div>
@@ -393,7 +394,7 @@ export default function Settings() {
                     step="0.01"
                     value={stablesSettings.stable_price}
                     onChange={e => setStablesSettings({ ...stablesSettings, stable_price: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                 </div>
               </div>
@@ -402,7 +403,7 @@ export default function Settings() {
                 disabled={saving}
                 className="btn-primary flex items-center gap-2 disabled:opacity-50"
               >
-                <FiSave /> {saving ? 'Saving...' : 'Save Stable Settings'}
+                <Save /> {saving ? 'Saving...' : 'Save Stable Settings'}
               </button>
             </div>
 
@@ -417,7 +418,7 @@ export default function Settings() {
                     type="time"
                     value={timingsSettings.event_start_time}
                     onChange={e => setTimingsSettings({ ...timingsSettings, event_start_time: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                 </div>
                 <div>
@@ -426,7 +427,7 @@ export default function Settings() {
                     type="time"
                     value={timingsSettings.event_end_time}
                     onChange={e => setTimingsSettings({ ...timingsSettings, event_end_time: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                 </div>
                 <div>
@@ -436,7 +437,7 @@ export default function Settings() {
                     min="0"
                     value={timingsSettings.cutoff_time_hours}
                     onChange={e => setTimingsSettings({ ...timingsSettings, cutoff_time_hours: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                   <p className="text-xs text-gray-400 mt-1">Hours before event when changes are locked</p>
                 </div>
@@ -447,7 +448,7 @@ export default function Settings() {
                     min="0"
                     value={timingsSettings.registration_close_hours}
                     onChange={e => setTimingsSettings({ ...timingsSettings, registration_close_hours: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                   <p className="text-xs text-gray-400 mt-1">Hours before event when registration closes</p>
                 </div>
@@ -457,7 +458,7 @@ export default function Settings() {
                 disabled={saving}
                 className="btn-primary flex items-center gap-2 disabled:opacity-50"
               >
-                <FiSave /> {saving ? 'Saving...' : 'Save Timings'}
+                <Save /> {saving ? 'Saving...' : 'Save Timings'}
               </button>
             </div>
 
@@ -465,7 +466,7 @@ export default function Settings() {
             /* ───── EVENT TYPES TAB ───── */
             <div>
               <h2 className="text-xl font-bold mb-4 text-white">Event Types</h2>
-              <div className="card mb-4 p-4">
+              <div className="bento-card mb-4 p-4">
                 <h3 className="text-sm font-bold text-gray-300 mb-3">Add Event Type</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                   <input
@@ -473,7 +474,7 @@ export default function Settings() {
                     placeholder="Event Type Name"
                     value={newEventType.name}
                     onChange={e => setNewEventType({ ...newEventType, name: e.target.value })}
-                    className="form-input"
+                    className="input"
                     maxLength={100}
                   />
                   <input
@@ -481,12 +482,12 @@ export default function Settings() {
                     placeholder="Short Code (e.g. KSEC)"
                     value={newEventType.shortCode}
                     onChange={e => setNewEventType({ ...newEventType, shortCode: e.target.value.toUpperCase() })}
-                    className="form-input"
+                    className="input"
                     maxLength={20}
                   />
                 </div>
                 <button onClick={addEventType} className="btn-primary flex items-center gap-2 text-sm">
-                  <FiPlus /> Add Event Type
+                  <Plus /> Add Event Type
                 </button>
               </div>
 
@@ -509,10 +510,10 @@ export default function Settings() {
                         <td>
                           <button
                             onClick={() => deleteEventType(et.id)}
-                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
+                            className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg transition-colors"
                             title="Delete"
                           >
-                            <FiTrash2 />
+                            <Trash2 />
                           </button>
                         </td>
                       </tr>
@@ -526,7 +527,7 @@ export default function Settings() {
             /* ───── USER ROLES TAB ───── */
             <div>
               <h2 className="text-xl font-bold mb-4 text-white">User Roles</h2>
-              <div className="card mb-4 p-4">
+              <div className="bento-card mb-4 p-4">
                 <h3 className="text-sm font-bold text-gray-300 mb-3">Add User Role</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                   <input
@@ -534,7 +535,7 @@ export default function Settings() {
                     placeholder="Role Name"
                     value={newRole.name}
                     onChange={e => setNewRole({ ...newRole, name: e.target.value })}
-                    className="form-input"
+                    className="input"
                     maxLength={50}
                   />
                   <input
@@ -542,12 +543,12 @@ export default function Settings() {
                     placeholder="Description (optional)"
                     value={newRole.description}
                     onChange={e => setNewRole({ ...newRole, description: e.target.value })}
-                    className="form-input"
+                    className="input"
                     maxLength={200}
                   />
                 </div>
                 <button onClick={addRole} className="btn-primary flex items-center gap-2 text-sm">
-                  <FiPlus /> Add User Role
+                  <Plus /> Add User Role
                 </button>
               </div>
 
@@ -570,10 +571,10 @@ export default function Settings() {
                         <td>
                           <button
                             onClick={() => deleteRole(role.id)}
-                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
+                            className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg transition-colors"
                             title="Delete"
                           >
-                            <FiTrash2 />
+                            <Trash2 />
                           </button>
                         </td>
                       </tr>
@@ -587,7 +588,7 @@ export default function Settings() {
             /* ───── EVENT CATEGORIES TAB ───── */
             <div>
               <h2 className="text-xl font-bold mb-4 text-white">Event Categories</h2>
-              <div className="card mb-4 p-4">
+              <div className="bento-card mb-4 p-4">
                 <h3 className="text-sm font-bold text-gray-300 mb-3">Add Event Category</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-3">
                   <input
@@ -595,7 +596,7 @@ export default function Settings() {
                     placeholder="Category Name"
                     value={newCategory.name}
                     onChange={e => setNewCategory({ ...newCategory, name: e.target.value })}
-                    className="form-input col-span-2 sm:col-span-1"
+                    className="input col-span-2 sm:col-span-1"
                     maxLength={100}
                   />
                   <input
@@ -605,7 +606,7 @@ export default function Settings() {
                     step="0.01"
                     value={newCategory.price}
                     onChange={e => setNewCategory({ ...newCategory, price: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                   <input
                     type="number"
@@ -615,7 +616,7 @@ export default function Settings() {
                     step="0.01"
                     value={newCategory.cgst}
                     onChange={e => setNewCategory({ ...newCategory, cgst: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                   <input
                     type="number"
@@ -625,7 +626,7 @@ export default function Settings() {
                     step="0.01"
                     value={newCategory.sgst}
                     onChange={e => setNewCategory({ ...newCategory, sgst: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                   <input
                     type="number"
@@ -635,11 +636,11 @@ export default function Settings() {
                     step="0.01"
                     value={newCategory.igst}
                     onChange={e => setNewCategory({ ...newCategory, igst: e.target.value })}
-                    className="form-input"
+                    className="input"
                   />
                 </div>
                 <button onClick={addEventCategory} className="btn-primary flex items-center gap-2 text-sm">
-                  <FiPlus /> Add Event Category
+                  <Plus /> Add Event Category
                 </button>
               </div>
 
@@ -666,7 +667,7 @@ export default function Settings() {
                               type="text"
                               value={editCategoryData.name}
                               onChange={e => setEditCategoryData({ ...editCategoryData, name: e.target.value })}
-                              className="form-input text-sm py-1"
+                              className="input text-sm py-1"
                               maxLength={100}
                             />
                           </td>
@@ -675,7 +676,7 @@ export default function Settings() {
                               type="number"
                               value={editCategoryData.price}
                               onChange={e => setEditCategoryData({ ...editCategoryData, price: e.target.value })}
-                              className="form-input text-sm py-1 w-24"
+                              className="input text-sm py-1 w-24"
                               min="0"
                               step="0.01"
                             />
@@ -685,7 +686,7 @@ export default function Settings() {
                               type="number"
                               value={editCategoryData.cgst}
                               onChange={e => setEditCategoryData({ ...editCategoryData, cgst: e.target.value })}
-                              className="form-input text-sm py-1 w-20"
+                              className="input text-sm py-1 w-20"
                               min="0"
                               max="100"
                               step="0.01"
@@ -696,7 +697,7 @@ export default function Settings() {
                               type="number"
                               value={editCategoryData.sgst}
                               onChange={e => setEditCategoryData({ ...editCategoryData, sgst: e.target.value })}
-                              className="form-input text-sm py-1 w-20"
+                              className="input text-sm py-1 w-20"
                               min="0"
                               max="100"
                               step="0.01"
@@ -707,7 +708,7 @@ export default function Settings() {
                               type="number"
                               value={editCategoryData.igst}
                               onChange={e => setEditCategoryData({ ...editCategoryData, igst: e.target.value })}
-                              className="form-input text-sm py-1 w-20"
+                              className="input text-sm py-1 w-20"
                               min="0"
                               max="100"
                               step="0.01"
@@ -717,17 +718,17 @@ export default function Settings() {
                             <div className="flex gap-1">
                               <button
                                 onClick={saveEditCategory}
-                                className="p-2 text-green-400 hover:bg-white/5 rounded-lg transition-colors"
+                                className="p-2 text-green-400 transition-colors rounded-lg transition-colors"
                                 title="Save"
                               >
-                                <FiSave />
+                                <Save />
                               </button>
                               <button
                                 onClick={() => setEditingCategory(null)}
-                                className="p-2 text-gray-400 hover:bg-white/5 rounded-lg transition-colors"
+                                className="p-2 text-gray-400 transition-colors rounded-lg transition-colors"
                                 title="Cancel"
                               >
-                                <FiX />
+                                <X />
                               </button>
                             </div>
                           </td>
@@ -743,17 +744,17 @@ export default function Settings() {
                             <div className="flex gap-1">
                               <button
                                 onClick={() => startEditCategory(cat)}
-                                className="p-2 text-gray-400 hover:text-blue-400 hover:bg-white/5 rounded-lg transition-colors"
+                                className="p-2 text-gray-400 hover:text-blue-400 transition-colors rounded-lg transition-colors"
                                 title="Edit"
                               >
-                                <FiEdit2 />
+                                <Pencil />
                               </button>
                               <button
                                 onClick={() => deleteCategory(cat.id)}
-                                className="p-2 text-gray-400 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors"
+                                className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-lg transition-colors"
                                 title="Delete"
                               >
-                                <FiTrash2 />
+                                <Trash2 />
                               </button>
                             </div>
                           </td>
@@ -784,7 +785,7 @@ export default function Settings() {
                 disabled={saving}
                 className="btn-primary flex items-center gap-2 disabled:opacity-50"
               >
-                <FiSave /> {saving ? 'Saving...' : 'Save Terms & Conditions'}
+                <Save /> {saving ? 'Saving...' : 'Save Terms & Conditions'}
               </button>
             </div>
           ) : null}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import toast from 'react-hot-toast';
-import { FiCheck, FiX, FiFilter, FiChevronDown } from 'react-icons/fi';
+import { Check, X, Filter, ChevronDown } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -154,7 +154,7 @@ export default function RegistrationApprovals() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-4 flex flex-wrap gap-4 items-center">
-          <FiFilter className="text-gray-600" />
+          <Filter className="text-gray-600" />
           <select value={filter} onChange={e => setFilter(e.target.value)} className="px-3 py-2 border rounded-lg text-sm">
             <option value="PENDING">Pending</option>
             <option value="APPROVED">Approved</option>
@@ -208,10 +208,10 @@ export default function RegistrationApprovals() {
                           {reg.approvalStatus === 'PENDING' && (
                             <>
                               <button onClick={() => handleApprove(reg.id)} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200" title="Approve">
-                                <FiCheck size={16} />
+                                <Check size={16} />
                               </button>
-                              <button onClick={() => setRejectionModal({ isOpen: true, regId: reg.id })} className="p-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200" title="Reject">
-                                <FiX size={16} />
+                              <button onClick={() => setRejectionModal({ isOpen: true, regId: reg.id })} className="p-1.5 rounded-xl rounded hover:bg-red-200" title="Reject">
+                                <X size={16} />
                               </button>
                             </>
                           )}
@@ -233,7 +233,7 @@ export default function RegistrationApprovals() {
         {/* Rejection Modal */}
         {rejectionModal.isOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="bento-card max-w-md w-full p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Reject Registration</h3>
               <textarea
                 value={rejectionNotes}
@@ -252,7 +252,7 @@ export default function RegistrationApprovals() {
         {/* Payment Modal */}
         {paymentModal.isOpen && paymentModal.reg && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="bento-card max-w-md w-full p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Record Payment</h3>
               <p className="text-sm text-gray-600 mb-4">
                 {paymentModal.reg.rider.firstName} {paymentModal.reg.rider.lastName} - {paymentModal.reg.event.name}

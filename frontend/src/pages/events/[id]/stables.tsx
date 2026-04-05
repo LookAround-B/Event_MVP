@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft, FiPlus, FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
+import { ArrowLeft, Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 
 interface Stable {
   id: string;
@@ -116,10 +116,10 @@ export default function EventStables() {
       <div>
         <div className="flex items-center gap-4 mb-8">
           <Link href={`/events/${eventId}`} className="text-gray-400 hover:text-white">
-            <FiArrowLeft size={24} />
+            <ArrowLeft size={24} />
           </Link>
           <div>
-            <h2 className="text-3xl font-bold text-white">Stable Management</h2>
+            <h2 className="text-2xl font-bold">Stable Management</h2>
             {eventInfo && <p className="text-gray-400 mt-1">{eventInfo.name}</p>}
           </div>
           <div className="ml-auto">
@@ -127,20 +127,20 @@ export default function EventStables() {
               onClick={() => { resetForm(); setShowForm(!showForm); }}
               className="btn-primary"
             >
-              <FiPlus className="inline mr-2" /> Add Stable
+              <Plus className="inline mr-2" /> Add Stable
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-500 bg-opacity-15 border border-red-400 border-opacity-30 text-red-300 backdrop-blur-sm px-4 py-3 rounded mb-6">
+          <div className="rounded-xl px-4 py-3 rounded mb-6">
             {error}
           </div>
         )}
 
         {/* Add/Edit Form */}
         {showForm && (
-          <div className="card mb-6">
+          <div className="bento-card mb-6">
             <h3 className="text-lg font-semibold text-white mb-4">
               {editingId ? 'Edit Stable' : 'Add New Stable'}
             </h3>
@@ -151,7 +151,7 @@ export default function EventStables() {
                   type="text"
                   value={form.number}
                   onChange={(e) => setForm({ ...form, number: e.target.value })}
-                  className="form-input"
+                  className="input"
                   placeholder="e.g. Stable A"
                   required
                 />
@@ -162,7 +162,7 @@ export default function EventStables() {
                   type="number"
                   value={form.capacity}
                   onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-                  className="form-input"
+                  className="input"
                   min="1"
                 />
               </div>
@@ -172,7 +172,7 @@ export default function EventStables() {
                   type="number"
                   value={form.pricePerStable}
                   onChange={(e) => setForm({ ...form, pricePerStable: e.target.value })}
-                  className="form-input"
+                  className="input"
                   min="0"
                   step="0.01"
                 />
@@ -199,10 +199,10 @@ export default function EventStables() {
         )}
 
         {/* Stables Table */}
-        <div className="card table-container">
+        <div className="bento-card table-container">
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
               <p className="text-gray-300 mt-2">Loading stables...</p>
             </div>
           ) : stables.length === 0 ? (
@@ -232,11 +232,11 @@ export default function EventStables() {
                         onClick={() => handleToggleAvailability(stable)}
                         className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium cursor-pointer ${
                           stable.isAvailable
-                            ? 'bg-green-500 bg-opacity-20 text-green-300'
+                            ? 'badge-emerald'
                             : 'bg-red-500 bg-opacity-20 text-red-300'
                         }`}
                       >
-                        {stable.isAvailable ? <><FiCheck size={12} /> Yes</> : <><FiX size={12} /> No</>}
+                        {stable.isAvailable ? <><Check size={12} /> Yes</> : <><X size={12} /> No</>}
                       </button>
                     </td>
                     <td>{stable.bookingCount}</td>
@@ -247,7 +247,7 @@ export default function EventStables() {
                           className="text-blue-400 hover:text-blue-300"
                           title="Edit"
                         >
-                          <FiEdit2 size={16} />
+                          <Pencil size={16} />
                         </button>
                         {stable.bookingCount === 0 && (
                           <button
@@ -255,7 +255,7 @@ export default function EventStables() {
                             className="text-red-400 hover:text-red-300"
                             title="Delete"
                           >
-                            <FiTrash2 size={16} />
+                            <Trash2 size={16} />
                           </button>
                         )}
                       </div>
@@ -270,15 +270,15 @@ export default function EventStables() {
         {/* Summary */}
         {stables.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-            <div className="card text-center">
+            <div className="bento-card text-center">
               <p className="text-gray-400 text-sm">Total Stables</p>
               <p className="text-2xl font-bold text-white">{stables.length}</p>
             </div>
-            <div className="card text-center">
+            <div className="bento-card text-center">
               <p className="text-gray-400 text-sm">Available</p>
               <p className="text-2xl font-bold text-green-400">{stables.filter(s => s.isAvailable).length}</p>
             </div>
-            <div className="card text-center">
+            <div className="bento-card text-center">
               <p className="text-gray-400 text-sm">Total Bookings</p>
               <p className="text-2xl font-bold text-blue-400">{stables.reduce((sum, s) => sum + s.bookingCount, 0)}</p>
             </div>

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { FiArrowLeft, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 
 interface Horse {
   id: string;
@@ -76,8 +76,8 @@ export default function HorseDetail() {
       <ProtectedRoute>
         <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
           <div className="max-w-2xl mx-auto">
-            <Link href="/horses" className="text-purple-400 hover:text-purple-300 flex items-center gap-2 mb-8">
-              <FiArrowLeft /> Back to Horses
+            <Link href="/horses" className="transition-colors flex items-center gap-2 mb-8">
+              <ArrowLeft /> Back to Horses
             </Link>
             <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-6">
               <p className="text-red-300">{error || 'Horse not found'}</p>
@@ -96,29 +96,29 @@ export default function HorseDetail() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <Link href="/horses" className="text-purple-400 hover:text-purple-300 flex items-center gap-2">
-              <FiArrowLeft /> Back to Horses
+            <Link href="/horses" className="transition-colors flex items-center gap-2">
+              <ArrowLeft /> Back to Horses
             </Link>
             <div className="flex gap-2">
               <Link 
                 href={`/horses/create?id=${horse.id}`}
                 className="text-green-400 hover:text-green-300 flex items-center gap-2 px-4 py-2 bg-green-900 bg-opacity-20 rounded border border-green-400 border-opacity-30"
               >
-                <FiEdit className="w-4 h-4" /> Edit
+                <Edit className="w-4 h-4" /> Edit
               </Link>
               <button
                 onClick={handleDelete}
                 className="text-red-400 hover:text-red-300 flex items-center gap-2 px-4 py-2 bg-red-900 bg-opacity-20 rounded border border-red-400 border-opacity-30"
               >
-                <FiTrash2 className="w-4 h-4" /> Delete
+                <Trash2 className="w-4 h-4" /> Delete
               </button>
             </div>
           </div>
 
-          <div className="card overflow-hidden">
+          <div className="bento-card overflow-hidden">
             {/* Header */}
-            <div className="px-8 py-6 border-b border-white border-opacity-10 bg-gradient-to-r from-purple-900 to-slate-900">
-              <h1 className="text-3xl font-bold text-white">{horse.name}</h1>
+            <div className="px-8 py-6  bg-gradient-to-r from-purple-900 to-slate-900">
+              <h1 className="text-2xl font-bold">{horse.name}</h1>
               <p className="text-gray-300 mt-2">Horse Profile</p>
             </div>
 
@@ -178,7 +178,7 @@ export default function HorseDetail() {
               </div>
 
               {/* Metadata */}
-              <div className="mt-8 pt-8 border-t border-white border-opacity-10">
+              <div className="mt-8 pt-8 pt-0">
                 <p className="text-sm text-gray-400">
                   Created on {new Date(horse.createdAt).toLocaleDateString()}
                 </p>

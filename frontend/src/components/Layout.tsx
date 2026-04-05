@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FiMenu, FiX, FiLogOut, FiHome, FiCalendar, FiUsers, FiTrendingUp, FiSettings, FiFileText, FiBox, FiBell, FiBarChart2, FiCheckCircle, FiUser } from 'react-icons/fi';
+import {
+  Menu, X, LogOut, Home, Calendar, Users, TrendingUp,
+  Settings, FileText, Box, Bell, BarChart2, CheckCircle, User,
+  ChevronLeft,
+} from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,34 +19,32 @@ export default function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     setIsClient(true);
-    // Check if mobile on mount
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Auto-close sidebar on mobile
   useEffect(() => {
     if (isMobile) setSidebarOpen(false);
   }, [isMobile]);
 
   const navigationItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: FiHome },
-    { name: 'Profile', href: '/account', icon: FiUser },
-    { name: 'Events', href: '/events', icon: FiCalendar },
-    { name: 'Clubs', href: '/clubs', icon: FiUsers },
-    { name: 'Riders', href: '/riders', icon: FiUsers },
-    { name: 'Horses', href: '/horses', icon: FiBox },
-    { name: 'Registrations', href: '/registrations', icon: FiUsers },
-    { name: 'Approvals', href: '/registrations/approvals', icon: FiCheckCircle },
-    { name: 'Financial', href: '/financial', icon: FiTrendingUp },
-    { name: 'Reports', href: '/reports', icon: FiBarChart2 },
-    { name: 'Notifications', href: '/notifications', icon: FiBell },
-    { name: 'Users', href: '/users', icon: FiUsers },
-    { name: 'Admin', href: '/admin/approvals', icon: FiCheckCircle },
-    { name: 'Audit Logs', href: '/audit', icon: FiFileText },
-    { name: 'Settings', href: '/settings', icon: FiSettings },
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'Profile', href: '/account', icon: User },
+    { name: 'Events', href: '/events', icon: Calendar },
+    { name: 'Clubs', href: '/clubs', icon: Users },
+    { name: 'Riders', href: '/riders', icon: Users },
+    { name: 'Horses', href: '/horses', icon: Box },
+    { name: 'Registrations', href: '/registrations', icon: Users },
+    { name: 'Approvals', href: '/registrations/approvals', icon: CheckCircle },
+    { name: 'Financial', href: '/financial', icon: TrendingUp },
+    { name: 'Reports', href: '/reports', icon: BarChart2 },
+    { name: 'Notifications', href: '/notifications', icon: Bell },
+    { name: 'Users', href: '/users', icon: Users },
+    { name: 'Admin', href: '/admin/approvals', icon: CheckCircle },
+    { name: 'Audit Logs', href: '/audit', icon: FileText },
+    { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
   const handleLogout = () => {
@@ -52,101 +54,159 @@ export default function Layout({ children }: LayoutProps) {
 
   if (!isClient) {
     return (
-      <div className="flex h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="w-64 glass border-r border-white border-opacity-20"></div>
-        <div className="flex-1">
-          <div className="glass border-b border-white border-opacity-20 p-6"></div>
-          <div className="flex-1 overflow-auto">
-            <div className="p-6"></div>
-          </div>
-        </div>
+      <div className="flex h-screen" style={{ background: 'hsl(240,7%,4%)' }}>
+        <div className="w-64" style={{ background: 'hsl(240,7%,6%)' }}></div>
+        <div className="flex-1"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated background blobs */}
-      <div className="absolute top-0 -left-40 w-80 h-80 bg-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-      <div className="absolute top-0 -right-40 w-80 h-80 bg-secondary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute -bottom-8 left-20 w-80 h-80 bg-accent-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '4s' }}></div>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'hsl(var(--surface-background))' }}>
 
-      {/* Mobile Overlay - close sidebar when clicking outside on mobile */}
+      {/* Mobile overlay */}
       {isMobile && sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-5 md:hidden"
+          className="fixed inset-0 bg-black/60 z-20 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
-      <div
+      {/* ─── Sidebar ─── */}
+      <aside
         className={`${
-          sidebarOpen ? 'w-64' : 'w-20'
-        } glass border-r border-white border-opacity-20 transition-all duration-300 flex flex-col shadow-glass-lg relative z-10 ${
+          sidebarOpen ? 'w-64' : 'w-[72px]'
+        } flex flex-col transition-all duration-300 relative z-30 ${
           isMobile && !sidebarOpen ? 'hidden' : ''
         } md:flex`}
+        style={{
+          background: 'hsl(var(--surface-lowest))',
+          borderRight: '1px solid hsl(var(--border) / 0.5)',
+        }}
       >
-        <div className="p-6 flex items-center justify-between border-b border-white border-opacity-10">
+        {/* Brand */}
+        <div
+          className="flex items-center justify-between px-4 py-5"
+          style={{ borderBottom: '1px solid hsl(var(--border) / 0.3)' }}
+        >
           {sidebarOpen && (
-            <h1 className="text-xl font-black bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold" style={{ color: 'hsl(var(--primary))' }}>
               Equestrian
             </h1>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hover:bg-white hover:bg-opacity-10 p-2 rounded-lg transition text-gray-200"
+            className="p-2 rounded-lg transition-colors"
+            style={{ color: 'hsl(var(--muted-foreground))' }}
+            onMouseOver={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-bright))')}
+            onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           >
-            {sidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+            {sidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
+        {/* Nav Items */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = router.pathname ? router.pathname.startsWith(item.href) : false;
+
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                  isActive
-                    ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg'
-                    : 'text-gray-300 hover:bg-white hover:bg-opacity-10'
+                className={`flex items-center gap-3 rounded-xl transition-all duration-200 group ${
+                  sidebarOpen ? 'px-3 py-2.5' : 'justify-center px-0 py-3'
                 }`}
+                style={
+                  isActive
+                    ? {
+                        background: 'hsl(var(--primary) / 0.12)',
+                        color: 'hsl(var(--primary))',
+                        boxShadow: 'inset 3px 0 0 hsl(var(--primary))',
+                      }
+                    : { color: 'hsl(var(--muted-foreground))' }
+                }
+                onMouseOver={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'hsl(var(--surface-bright))';
+                    e.currentTarget.style.color = 'hsl(var(--on-surface))';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'hsl(var(--muted-foreground))';
+                  }
+                }}
               >
-                {Icon && <Icon className="w-5 h-5" />}
-                {sidebarOpen && <span className="font-medium">{item.name}</span>}
+                <Icon size={20} />
+                {sidebarOpen && <span className="font-medium text-sm">{item.name}</span>}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-white border-opacity-10">
+        {/* Logout */}
+        <div className="p-3" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)' }}>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-red-500 hover:bg-opacity-20 transition text-gray-300 hover:text-red-300 font-medium"
+            className={`w-full flex items-center gap-3 rounded-xl py-2.5 transition-colors font-medium text-sm ${
+              sidebarOpen ? 'px-3' : 'justify-center px-0'
+            }`}
+            style={{ color: 'hsl(var(--muted-foreground))' }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'hsl(var(--error) / 0.1)';
+              e.currentTarget.style.color = 'hsl(var(--error))';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'hsl(var(--muted-foreground))';
+            }}
           >
-            <FiLogOut className="w-5 h-5" />
+            <LogOut size={20} />
             {sidebarOpen && <span>Logout</span>}
           </button>
         </div>
-      </div>
+      </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden relative z-0">
+      {/* ─── Main Content ─── */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="glass border-b border-white border-opacity-20 p-4 md:p-8 shadow-glass-lg">
-          <h1 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-primary-400 via-secondary-400 to-accent-400 bg-clip-text text-transparent mb-1 md:mb-2">
-            Equestrian Event Management
-          </h1>
-          <p className="text-gray-300 font-medium text-xs md:text-base hidden sm:block">Welcome to your event management dashboard</p>
-        </div>
+        <header
+          className="px-6 py-4 md:px-8 md:py-5 flex items-center justify-between"
+          style={{
+            background: 'hsl(var(--surface-lowest))',
+            borderBottom: '1px solid hsl(var(--border) / 0.5)',
+          }}
+        >
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'hsl(var(--on-surface))' }}>
+              Equestrian Event Management
+            </h1>
+            <p className="text-xs md:text-sm mt-0.5 hidden sm:block" style={{ color: 'hsl(var(--muted-foreground))' }}>
+              Welcome to your event management dashboard
+            </p>
+          </div>
+
+          {/* Mobile menu toggle */}
+          {isMobile && (
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-lg md:hidden"
+              style={{ color: 'hsl(var(--on-surface))' }}
+              aria-label="Toggle menu"
+            >
+              <Menu size={24} />
+            </button>
+          )}
+        </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-4 md:p-8">{children}</div>
-        </div>
+        <main className="flex-1 overflow-auto">
+          <div className="p-4 md:p-8 animate-fade-in">{children}</div>
+        </main>
       </div>
     </div>
   );

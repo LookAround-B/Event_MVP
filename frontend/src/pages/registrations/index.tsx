@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { FiPlus, FiTrash2, FiSearch, FiDownload } from 'react-icons/fi';
+import { Plus, Trash2, Search, Download } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 
@@ -172,16 +172,16 @@ export default function Registrations() {
       <Head><title>Registrations | Equestrian Events</title></Head>
       <div>
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-white">Registrations</h2>
+            <h2 className="text-2xl font-bold">Registrations</h2>
             <div className="flex gap-3">
               <button onClick={handleExportCSV} className="btn-secondary">
-                <FiDownload className="inline mr-2" /> Export CSV
+                <Download className="inline mr-2" /> Export CSV
               </button>
               <button onClick={handleExportExcel} className="btn-secondary">
-                <FiDownload className="inline mr-2" /> Export Excel
+                <Download className="inline mr-2" /> Export Excel
               </button>
               <Link href="/registrations/create" className="btn-primary">
-                <FiPlus className="inline mr-2" /> New Registration
+                <Plus className="inline mr-2" /> New Registration
               </Link>
             </div>
           </div>
@@ -194,14 +194,14 @@ export default function Registrations() {
 
           <div className="mb-6 card">
             <div className="relative">
-              <FiSearch className="absolute left-3 top-3 text-gray-500" />
+              <Search className="absolute left-3 top-3 text-gray-500" />
               <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="form-input pl-10"
+                className="input pl-10"
               >
                 <option value="">All Payment Statuses</option>
                 <option value="PAID">Paid</option>
@@ -212,7 +212,7 @@ export default function Registrations() {
             </div>
           </div>
 
-          <div className="card table-container">
+          <div className="bento-card table-container">
             {loading ? (
               <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {[...Array(5)].map((_, i) => (
@@ -270,7 +270,7 @@ export default function Registrations() {
                             className="text-red-400 hover:text-red-300"
                             title="Delete"
                           >
-                            <FiTrash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>

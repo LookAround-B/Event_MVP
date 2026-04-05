@@ -5,7 +5,7 @@ import Head from 'next/head';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/api';
-import { FiCheck, FiX, FiRefreshCw, FiUsers, FiFileText } from 'react-icons/fi';
+import { Check, X, RefreshCw, Users, FileText } from 'lucide-react';
 
 interface PendingUser {
   id: string;
@@ -102,7 +102,7 @@ export default function AdminApprovals() {
   if (!isAdmin || loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <FiRefreshCw className="w-8 h-8 text-indigo-600 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin" />
       </div>
     );
   }
@@ -136,10 +136,10 @@ export default function AdminApprovals() {
         {/* Tabs */}
         <div className="flex gap-2">
           <button onClick={() => setTab('users')} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 ${tab === 'users' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}>
-            <FiUsers size={16} /> User Approvals ({pendingUsers.length})
+            <Users size={16} /> User Approvals ({pendingUsers.length})
           </button>
           <button onClick={() => setTab('registrations')} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 ${tab === 'registrations' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}>
-            <FiFileText size={16} /> Registration Approvals ({regCounts.pending})
+            <FileText size={16} /> Registration Approvals ({regCounts.pending})
           </button>
         </div>
 
@@ -173,7 +173,7 @@ export default function AdminApprovals() {
                             disabled={approving === user.id}
                             className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm"
                           >
-                            {approving === user.id ? <FiRefreshCw className="w-4 h-4 animate-spin" /> : <FiCheck size={14} />}
+                            {approving === user.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check size={14} />}
                             Approve
                           </button>
                         </td>
@@ -216,8 +216,8 @@ export default function AdminApprovals() {
                         <td className="px-4 py-3 text-sm font-semibold">₹{reg.totalAmount}</td>
                         <td className="px-4 py-3 text-sm">
                           <div className="flex gap-2">
-                            <button onClick={() => handleApproveReg(reg.id)} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200"><FiCheck size={14} /></button>
-                            <button onClick={() => handleRejectReg(reg.id)} className="p-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200"><FiX size={14} /></button>
+                            <button onClick={() => handleApproveReg(reg.id)} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200"><Check size={14} /></button>
+                            <button onClick={() => handleRejectReg(reg.id)} className="p-1.5 rounded-xl rounded hover:bg-red-200"><X size={14} /></button>
                           </div>
                         </td>
                       </tr>
