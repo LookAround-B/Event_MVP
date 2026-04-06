@@ -120,46 +120,52 @@ export default function CreateTransaction() {
   if (dataLoading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-              <p className="text-muted-foreground mt-4">Loading...</p>
-            </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-md animate-fade-in" />
+          <div className="relative z-10 w-full max-w-sm flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-surface-low shadow-2xl p-8 animate-fade-in">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground text-center">Loading...</p>
           </div>
         </div>
       </ProtectedRoute>
     );
   }
 
+  const inputClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground";
+  const selectClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground appearance-none";
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center mb-8">
-            <Link href="/financial" className="transition-colors flex items-center gap-2">
-              <ArrowLeft /> Back to Financial
+      {/* ── Modal overlay ── */}
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-md animate-fade-in" />
+        
+        {/* ── Modal box ── */}
+        <div className="relative z-10 w-full max-w-2xl flex flex-col rounded-2xl border border-border/60 bg-surface-low shadow-2xl shadow-black/40 animate-fade-in pointer-events-auto"
+          style={{ maxHeight: "min(90vh, 720px)" }}>
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-border/40 flex-shrink-0">
+            <div>
+              <h3 className="text-base font-bold text-on-surface">Record Payment</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">Create a new transaction record</p>
+            </div>
+            <Link href="/financial" className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors">
+              <span className="sr-only">Close</span>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
             </Link>
           </div>
 
-          <div className="bento-card overflow-hidden">
-            {/* Title Section */}
-            <div className="px-8 py-6 ">
-              <h1 className="text-2xl font-bold">Record Payment</h1>
-              <p className="text-muted-foreground mt-2">Create a new transaction record</p>
-            </div>
-
-            {/* Form Section */}
-            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto px-6 py-5 scrollbar-none">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-4">
-                  <p className="text-destructive font-medium">{error}</p>
+                <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
+                  {error}
                 </div>
               )}
 
-              {/* Registration - Mandatory */}
               <div>
-                <label className="block text-sm font-semibold text-on-surface mb-2">
+                <label className="label-tech block mb-1.5">
                   Registration <span className="text-destructive">*</span>
                 </label>
                 <select
@@ -167,24 +173,23 @@ export default function CreateTransaction() {
                   value={formData.registrationId}
                   onChange={handleRegistrationChange}
                   required
-                  className="input"
+                  className={selectClass}
                 >
                   <option value="">Select a registration</option>
                   {registrations.map(reg => (
-                    <option key={reg.id} value={reg.id} className="bg-slate-800 text-on-surface">
+                    <option key={reg.id} value={reg.id}>
                       {reg.rider.firstName} {reg.rider.lastName} - {reg.event.name} (₹{reg.totalAmount})
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Amount Section */}
-              <div className="pt-0 pt-6">
-                <h3 className="text-sm font-semibold text-on-surface mb-4">Payment Amount</h3>
+              <div className="pt-2">
+                <h3 className="text-sm font-bold text-on-surface mb-4 uppercase tracking-wider text-muted-foreground">Payment Amount</h3>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                    <label className="label-tech block mb-1.5">
                       Amount <span className="text-destructive">*</span>
                     </label>
                     <input
@@ -196,32 +201,32 @@ export default function CreateTransaction() {
                       step="0.01"
                       min="0.01"
                       placeholder="0.00"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">Payment Method</label>
+                    <label className="label-tech block mb-1.5">Payment Method</label>
                     <select
                       name="paymentMethod"
                       value={formData.paymentMethod}
                       onChange={handleChange}
-                      className="input"
+                      className={selectClass}
                     >
-                      <option value="Credit Card" className="bg-slate-800 text-on-surface">Credit Card</option>
-                      <option value="Debit Card" className="bg-slate-800 text-on-surface">Debit Card</option>
-                      <option value="UPI" className="bg-slate-800 text-on-surface">UPI</option>
-                      <option value="Bank Transfer" className="bg-slate-800 text-on-surface">Bank Transfer</option>
-                      <option value="Cheque" className="bg-slate-800 text-on-surface">Cheque</option>
-                      <option value="Cash" className="bg-slate-800 text-on-surface">Cash</option>
+                      <option value="Credit Card">Credit Card</option>
+                      <option value="Debit Card">Debit Card</option>
+                      <option value="UPI">UPI</option>
+                      <option value="Bank Transfer">Bank Transfer</option>
+                      <option value="Cheque">Cheque</option>
+                      <option value="Cash">Cash</option>
                     </select>
                   </div>
                 </div>
 
                 {/* GST Breakdown */}
-                <div className="grid grid-cols-3 gap-4 mt-6">
+                <div className="grid grid-cols-3 gap-5 mt-6">
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">CGST (9%)</label>
+                    <label className="label-tech block mb-1.5">CGST (9%)</label>
                     <input
                       type="number"
                       name="cgstAmount"
@@ -230,12 +235,12 @@ export default function CreateTransaction() {
                       step="0.01"
                       min="0"
                       placeholder="0.00"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">SGST (9%)</label>
+                    <label className="label-tech block mb-1.5">SGST (9%)</label>
                     <input
                       type="number"
                       name="sgstAmount"
@@ -244,12 +249,12 @@ export default function CreateTransaction() {
                       step="0.01"
                       min="0"
                       placeholder="0.00"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">IGST (18%)</label>
+                    <label className="label-tech block mb-1.5">IGST (18%)</label>
                     <input
                       type="number"
                       name="igstAmount"
@@ -258,56 +263,57 @@ export default function CreateTransaction() {
                       step="0.01"
                       min="0"
                       placeholder="0.00"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Reference Section */}
-              <div className="pt-0 pt-6">
+              <div className="pt-2">
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface mb-2">Reference Number</label>
+                  <label className="label-tech block mb-1.5">Reference Number</label>
                   <input
                     type="text"
                     name="referenceNumber"
                     value={formData.referenceNumber}
                     onChange={handleChange}
                     placeholder="e.g., CHQ-12345, TXN-67890"
-                    className="input"
+                    className={inputClass}
                   />
                 </div>
 
-                <div className="mt-6">
-                  <label className="block text-sm font-semibold text-on-surface mb-2">Notes</label>
+                <div className="mt-5">
+                  <label className="label-tech block mb-1.5">Notes</label>
                   <textarea
                     name="notes"
                     value={formData.notes}
                     onChange={handleChange}
                     placeholder="Any additional details about this transaction..."
-                    rows={4}
-                    className="input"
+                    rows={3}
+                    className={`${inputClass} resize-none`}
                   />
                 </div>
               </div>
 
-              {/* Submit */}
-              <div className="flex gap-4 pt-6 pt-0">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 btn-primary"
-                >
-                  {loading ? 'Creating...' : 'Record Payment'}
-                </button>
-                <Link
-                  href="/financial"
-                  className="flex-1 text-center btn-secondary"
-                >
-                  Cancel
-                </Link>
-              </div>
             </form>
+          </div>
+
+          {/* ── Sticky footer ── */}
+          <div className="flex items-center gap-3 px-6 py-4 border-t border-border/40 flex-shrink-0">
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="flex-1 py-2.5 btn-cta rounded-xl text-sm font-bold"
+            >
+              {loading ? 'Creating...' : 'Record Payment'}
+            </button>
+            <Link
+              href="/financial"
+              className="flex-1 py-2.5 bg-surface-container rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/50 text-center"
+            >
+              Cancel
+            </Link>
           </div>
         </div>
       </div>

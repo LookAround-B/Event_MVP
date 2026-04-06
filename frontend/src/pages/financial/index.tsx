@@ -2,11 +2,19 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { Plus, Pencil, Download, X, Check } from 'lucide-react';
+import {
+  Plus, Pencil, Download, X, Check,
+  DollarSign, Clock, ShieldCheck, TrendingUp, CreditCard,
+  Search, FileText, FileSpreadsheet,
+} from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import ExportModal from '@/components/ExportModal';
+import { FilterDropdown } from '@/components/FilterDropdown';
+import { KPICard } from '@/components/dashboard/KPICard';
+import { KPIGrid } from '@/components/dashboard/KPIGrid';
 
-/* ─── Types ─── */
+/* ─── Types (preserved) ─── */
 interface FinanceRegistration {
   id: string;
   paymentStatus: string;
@@ -49,7 +57,7 @@ interface FilterOption {
 
 type Tab = 'finance' | 'transactions';
 
-/* ─── Utilities ─── */
+/* ─── Utilities (preserved) ─── */
 function escapeCSVField(field: string | number): string {
   const s = String(field);
   if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
@@ -65,7 +73,7 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-function exportToExcel(headers: string[], rows: (string | number)[][], filename: string) {
+function exportToExcelFile(headers: string[], rows: (string | number)[][], filename: string) {
   const esc = (s: string | number) =>
     String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('');
@@ -80,20 +88,22 @@ function exportToExcel(headers: string[], rows: (string | number)[][], filename:
   downloadBlob(new Blob([xml], { type: 'application/vnd.ms-excel' }), filename);
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  PAID: 'badge-success',
-  PARTIAL: 'badge-warning',
-  UNPAID: 'badge-danger',
-  CANCELLED: 'badge-secondary',
-};
+const fmt = (n: number) => `₹${n.toLocaleString('en-IN')}`;
 
-const getStatusColor = (status: string) => STATUS_COLORS[status?.toUpperCase()] || 'badge-secondary';
+const paymentBadge = (status: string) => {
+  switch (status?.toUpperCase()) {
+    case 'PAID': return 'bg-primary/10 text-primary border-primary/20';
+    case 'UNPAID': return 'bg-destructive/10 text-destructive border-destructive/20';
+    case 'PARTIAL': return 'bg-secondary/10 text-secondary border-secondary/20';
+    default: return 'bg-surface-container text-muted-foreground border-border/30';
+  }
+};
 
 /* ─── Component ─── */
 export default function Financial() {
   const [activeTab, setActiveTab] = useState<Tab>('finance');
 
-  // Finance tab state
+  // Finance tab state (preserved)
   const [registrations, setRegistrations] = useState<FinanceRegistration[]>([]);
   const [events, setEvents] = useState<FilterOption[]>([]);
   const [categories, setCategories] = useState<FilterOption[]>([]);
@@ -104,7 +114,7 @@ export default function Financial() {
   const [financeTotalPages, setFinanceTotalPages] = useState(1);
   const [financeLoading, setFinanceLoading] = useState(true);
 
-  // Transaction tab state
+  // Transaction tab state (preserved)
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<Summary>({ totalRevenue: 0, totalTransactions: 0, averageTransaction: 0 });
   const [statusFilter, setStatusFilter] = useState('');
@@ -113,7 +123,7 @@ export default function Financial() {
   const [transLoading, setTransLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Edit modal state
+  // Edit modal state (preserved)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [editForm, setEditForm] = useState({
     amount: '', cgstAmount: '', sgstAmount: '', igstAmount: '',
@@ -121,9 +131,16 @@ export default function Financial() {
   });
   const [editLoading, setEditLoading] = useState(false);
 
+  // Search + filter dropdowns
+  const [search, setSearch] = useState('');
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
+  const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
+  const [exportOpen, setExportOpen] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
 
-  /* ── Data fetchers ── */
+  /* ─── Data fetchers (ALL preserved) ─── */
   const fetchSummary = useCallback(async () => {
     try {
       const res = await api.get('/api/financial/summary');
@@ -183,19 +200,15 @@ export default function Financial() {
     }
   }, [transPage, statusFilter]);
 
-  // Fetch summary on mount
   useEffect(() => { fetchSummary(); }, [fetchSummary]);
-
-  // Fetch tab-specific data
   useEffect(() => {
     if (activeTab === 'finance') fetchFinanceData();
   }, [activeTab, fetchFinanceData]);
-
   useEffect(() => {
     if (activeTab === 'transactions') fetchTransactionsData();
   }, [activeTab, fetchTransactionsData]);
 
-  /* ── Selection handlers ── */
+  /* ─── Selection handlers (preserved) ─── */
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
@@ -212,7 +225,7 @@ export default function Financial() {
     );
   };
 
-  /* ── Export handlers ── */
+  /* ─── Export (preserved) ─── */
   const getExportData = () => {
     const headers = ['Ref #', 'Amount', 'CGST', 'SGST', 'IGST', 'Total', 'Method', 'Status', 'Date'];
     const source = selectedIds.size > 0 ? transactions.filter(t => selectedIds.has(t.id)) : transactions;
@@ -230,20 +243,20 @@ export default function Financial() {
     return { headers, rows };
   };
 
-  const handleExportCSV = () => {
+  const handleExport = (type: 'csv' | 'excel') => {
     const { headers, rows } = getExportData();
-    const csv = [headers.map(escapeCSVField).join(','), ...rows.map(r => r.map(escapeCSVField).join(','))].join('\n');
-    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'transactions.csv');
-    toast.success('Exported as CSV');
+    if (type === 'csv') {
+      const csv = [headers.map(escapeCSVField).join(','), ...rows.map(r => r.map(escapeCSVField).join(','))].join('\n');
+      downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'transactions.csv');
+      toast.success('Exported as CSV');
+    } else {
+      exportToExcelFile(headers, rows, 'transactions.xls');
+      toast.success('Exported as Excel');
+    }
+    setExportOpen(false);
   };
 
-  const handleExportExcel = () => {
-    const { headers, rows } = getExportData();
-    exportToExcel(headers, rows, 'transactions.xls');
-    toast.success('Exported as Excel');
-  };
-
-  /* ── Edit handlers ── */
+  /* ─── Edit handlers (preserved) ─── */
   const openEditModal = (t: Transaction) => {
     setEditingTransaction(t);
     setEditForm({
@@ -261,7 +274,6 @@ export default function Financial() {
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTransaction) return;
-
     try {
       setEditLoading(true);
       await api.patch(`/api/financial/transactions/${editingTransaction.id}`, {
@@ -289,317 +301,343 @@ export default function Financial() {
     setEditForm(prev => ({ ...prev, [name]: value }));
   };
 
-  /* ── Pagination ── */
-  const Pagination = ({ page, total, setPage }: { page: number; total: number; setPage: (p: number) => void }) => {
-    if (total <= 1) return null;
-    return (
-      <div className="flex justify-center gap-2 mt-4">
-        <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="btn-secondary disabled:opacity-50">Previous</button>
-        <span className="px-4 py-2 text-muted-foreground">Page {page} of {total}</span>
-        <button onClick={() => setPage(Math.min(total, page + 1))} disabled={page === total} className="btn-secondary disabled:opacity-50">Next</button>
-      </div>
-    );
-  };
-
-  /* ── Tab button ── */
-  const TabButton = ({ tab, label }: { tab: Tab; label: string }) => (
-    <button
-      onClick={() => setActiveTab(tab)}
-      className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all ${activeTab === tab ? 'btn-primary' : 'btn-ghost'}`}
-    >
-      {label}
-    </button>
-  );
+  /* ─── Computed ─── */
+  const paidRevenue = registrations.filter(r => r.paymentStatus === 'PAID').reduce((acc, r) => acc + r.totalAmount, 0);
+  const unpaidRevenue = registrations.filter(r => r.paymentStatus === 'UNPAID').reduce((acc, r) => acc + r.totalAmount, 0);
+  const gstAccrued = transactions.reduce((acc, t) => acc + t.cgstAmount + t.sgstAmount + t.igstAmount, 0);
 
   return (
     <ProtectedRoute>
       <Head><title>Financial | Equestrian Events</title></Head>
-      <div>
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Financial <span className="gradient-text">Overview</span></h1>
-          {activeTab === 'transactions' && (
-            <div className="flex flex-wrap gap-3">
-              <button onClick={handleExportCSV} className="btn-secondary">
-                <Download className="inline mr-2" /> Export CSV
-              </button>
-              <button onClick={handleExportExcel} className="btn-secondary">
-                <Download className="inline mr-2" /> Export Excel
-              </button>
-              <Link href="/financial/transactions/create" className="btn-primary">
-                <Plus className="inline mr-2" /> Record Transaction
-              </Link>
-            </div>
-          )}
+      <div className="animate-fade-in max-w-[1600px] mx-auto">
+
+        {/* ═══ Page Header ═══ */}
+        <div className="mb-6 lg:mb-8">
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+            Fiscal <span className="gradient-text">Ledger</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">
+            Comprehensive financial oversight of event championships, club settlements, and transaction histories.
+          </p>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
-          <div className="hero-kpi primary-card-glow animate-slide-up-1">
-            <div className="hero-label">Total Revenue</div>
-            <div className="hero-value">₹{summary.totalRevenue.toFixed(2)}</div>
+        {/* ═══ KPI Cards ═══ */}
+        <KPIGrid>
+          <KPICard
+            title="Total Collections"
+            value={fmt(summary.totalRevenue || paidRevenue)}
+            icon={DollarSign}
+            variant="primary"
+            subText="Current fiscal cycle"
+            className="animate-slide-up-1"
+          />
+          <KPICard
+            title="Pending Receivables"
+            value={fmt(unpaidRevenue)}
+            icon={Clock}
+            variant="outline"
+            subText="Awaiting processing"
+            className="animate-slide-up-2"
+          />
+          <KPICard
+            title="GST Compliance"
+            value={fmt(gstAccrued)}
+            icon={ShieldCheck}
+            variant="outline"
+            subText="Tax accrued"
+            className="animate-slide-up-3"
+          />
+          <KPICard
+            title="Transactions"
+            value={summary.totalTransactions}
+            icon={TrendingUp}
+            variant="secondary"
+            subText={`Avg: ${fmt(summary.averageTransaction)}`}
+            className="animate-slide-up-4"
+          />
+        </KPIGrid>
+
+        {/* ═══ Filter Bar ═══ */}
+        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-2 border-beam">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10 w-full">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {activeTab === 'finance' && (
+                <>
+                  <div>
+                    <select
+                      value={eventFilter}
+                      onChange={(e) => { setEventFilter(e.target.value); setFinancePage(1); }}
+                      className="px-3 py-2 rounded-xl text-sm bg-surface-container/50 border border-border/30 text-on-surface focus:ring-1 focus:ring-primary/50 focus:outline-none"
+                    >
+                      <option value="">All Events</option>
+                      {events.map(ev => (
+                        <option key={ev.id} value={ev.id}>{ev.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => { setCategoryFilter(e.target.value); setFinancePage(1); }}
+                      className="px-3 py-2 rounded-xl text-sm bg-surface-container/50 border border-border/30 text-on-surface focus:ring-1 focus:ring-primary/50 focus:outline-none"
+                    >
+                      <option value="">All Categories</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+              <FilterDropdown
+                label="Status"
+                options={[
+                  { label: 'Paid', value: 'PAID' },
+                  { label: 'Unpaid', value: 'UNPAID' },
+                  { label: 'Partial', value: 'PARTIAL' },
+                  { label: 'Cancelled', value: 'CANCELLED' },
+                ]}
+                selected={selectedStatuses}
+                onChange={(vals) => {
+                  setSelectedStatuses(vals);
+                  if (activeTab === 'finance') {
+                    setPaymentFilter(vals.length === 1 ? vals[0] : '');
+                    setFinancePage(1);
+                  } else {
+                    setStatusFilter(vals.length === 1 ? vals[0] : '');
+                    setTransPage(1);
+                  }
+                }}
+              />
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-64 border border-border/30 transition-all focus:bg-surface-container"
+                  placeholder="Find ledger entry..."
+                />
+              </div>
+              <button onClick={() => setExportOpen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
+              </button>
+              {activeTab === 'transactions' && (
+                <Link href="/financial/transactions/create" className="flex items-center gap-2 px-4 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20">
+                  <Plus className="w-4 h-4" /> Record
+                </Link>
+              )}
+            </div>
           </div>
-          <div className="stat-card animate-slide-up-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest" >Total Transactions</p>
-            <p className="text-2xl font-bold mt-1" >{summary.totalTransactions}</p>
-          </div>
-          <div className="stat-card animate-slide-up-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest" >Average Transaction</p>
-            <p className="text-2xl font-bold mt-1" >₹{summary.averageTransaction.toFixed(2)}</p>
+        </div>
+
+        {/* ═══ Tabs ═══ */}
+        <div className="mb-4 animate-slide-up-2">
+          <div className="flex gap-1 bg-surface-container rounded-xl p-1 w-fit border border-border/30 shadow-inner">
+            {(['finance', 'transactions'] as const).map((tab) => (
+              <button key={tab} onClick={() => setActiveTab(tab)}
+                className={`px-4 sm:px-5 py-2 text-sm font-semibold rounded-lg capitalize transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-on-surface'}`}>
+                {tab === 'finance' ? 'Revenue Stream' : 'Ledger Flow'}
+              </button>
+            ))}
           </div>
         </div>
 
         {error && (
-          <div className="rounded-xl px-4 py-3 rounded mb-6">
+          <div className="bento-card p-4 mb-4 border-l-4 border-destructive text-destructive text-sm animate-slide-up">
             {error}
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div className="flex gap-2 mb-6">
-          <TabButton tab="finance" label="Finance" />
-          <TabButton tab="transactions" label="Transactions" />
-        </div>
-
-        {/* ═══════════════════ FINANCE TAB ═══════════════════ */}
+        {/* ═══════════════ FINANCE TAB ═══════════════ */}
         {activeTab === 'finance' && (
-          <>
-            {/* Filters */}
-            <div className="bento-card mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label className="form-label">Select Event</label>
-                <select
-                  value={eventFilter}
-                  onChange={(e) => { setEventFilter(e.target.value); setFinancePage(1); }}
-                  className="input"
-                >
-                  <option value="">All Events</option>
-                  {events.map(ev => (
-                    <option key={ev.id} value={ev.id}>{ev.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="form-label">Select Event Category</label>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => { setCategoryFilter(e.target.value); setFinancePage(1); }}
-                  className="input"
-                >
-                  <option value="">All Categories</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="form-label">Payment Status</label>
-                <select
-                  value={paymentFilter}
-                  onChange={(e) => { setPaymentFilter(e.target.value); setFinancePage(1); }}
-                  className="input"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="PAID">Paid</option>
-                  <option value="UNPAID">Unpaid</option>
-                  <option value="PARTIAL">Partial</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Finance Table */}
-            <div className="bento-card table-container">
+          <div className="bento-card overflow-hidden animate-slide-up-3">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary" />
+            <div className="overflow-x-auto">
               {financeLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
-                  <p className="text-muted-foreground mt-2">Loading...</p>
+                <div className="p-6 space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
+                  ))}
                 </div>
               ) : registrations.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No registrations found matching your filters.</div>
+                <div className="p-12 text-center text-sm text-muted-foreground italic">No financial artifacts detected.</div>
               ) : (
-                <>
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Event Name</th>
-                        <th>Event Date</th>
-                        <th>Rider Name</th>
-                        <th>Club Name</th>
-                        <th>Horse Name</th>
-                        <th>Event Category</th>
-                        <th>Price</th>
-                        <th>Payment</th>
+                <table className="w-full text-sm min-w-[900px]">
+                  <thead>
+                    <tr className="label-tech text-left bg-surface-container/40">
+                      <th className="p-3 sm:p-4 w-12"><input type="checkbox" className="accent-primary rounded" /></th>
+                      <th className="p-3 sm:p-4">Transaction Identity</th>
+                      <th className="p-3 sm:p-4">Temporal Node</th>
+                      <th className="p-3 sm:p-4">Entity Map</th>
+                      <th className="p-3 sm:p-4 text-right">Fee Alpha</th>
+                      <th className="p-3 sm:p-4 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/10">
+                    {registrations.map((item) => (
+                      <tr key={item.id} className="group hover:bg-surface-container/20 transition-all duration-300">
+                        <td className="p-3 sm:p-4"><input type="checkbox" className="accent-primary rounded" /></td>
+                        <td className="p-3 sm:p-4">
+                          <div className="flex flex-col">
+                            <span className="text-on-surface font-bold tracking-tight">{item.event.name}</span>
+                            <span className="text-[10px] text-muted-foreground/70 uppercase tracking-widest">{item.category.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 sm:p-4 text-secondary font-mono text-xs">{new Date(item.event.startDate).toLocaleDateString()}</td>
+                        <td className="p-3 sm:p-4">
+                          <div className="flex flex-col">
+                            <span className="text-on-surface-variant font-medium">{item.rider.firstName} {item.rider.lastName}</span>
+                            <span className="text-[9px] text-muted-foreground uppercase">{item.club?.name || '—'}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 sm:p-4 text-right text-on-surface font-black tracking-tighter text-base">{fmt(item.totalAmount)}</td>
+                        <td className="p-3 sm:p-4 text-center">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${paymentBadge(item.paymentStatus)}`}>
+                            {item.paymentStatus}
+                          </span>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {registrations.map(reg => (
-                        <tr key={reg.id}>
-                          <td className="font-medium">{reg.event.name}</td>
-                          <td>{new Date(reg.event.startDate).toLocaleDateString()}</td>
-                          <td>{reg.rider.firstName} {reg.rider.lastName}</td>
-                          <td>{reg.club?.name || '-'}</td>
-                          <td>{reg.horse.name}</td>
-                          <td>{reg.category.name}</td>
-                          <td className="font-bold">₹{reg.totalAmount.toFixed(2)}</td>
-                          <td>
-                            <span className={`badge ${getStatusColor(reg.paymentStatus)}`}>
-                              {reg.paymentStatus}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <Pagination page={financePage} total={financeTotalPages} setPage={setFinancePage} />
-                </>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
-          </>
+            {financeTotalPages > 1 && (
+              <div className="bg-surface-container/20 p-3 border-t border-border/10 flex justify-center gap-2">
+                <button onClick={() => setFinancePage(Math.max(1, financePage - 1))} disabled={financePage === 1} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Previous</button>
+                <span className="px-4 py-2 text-sm text-muted-foreground">Page {financePage} of {financeTotalPages}</span>
+                <button onClick={() => setFinancePage(Math.min(financeTotalPages, financePage + 1))} disabled={financePage === financeTotalPages} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Next</button>
+              </div>
+            )}
+          </div>
         )}
 
-        {/* ═══════════════════ TRANSACTIONS TAB ═══════════════════ */}
+        {/* ═══════════════ TRANSACTIONS TAB ═══════════════ */}
         {activeTab === 'transactions' && (
-          <>
-            {/* Status Filter */}
-            <div className="bento-card mb-6">
-              <div className="max-w-xs">
-                <label className="form-label">Filter by Status</label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => { setStatusFilter(e.target.value); setTransPage(1); }}
-                  className="input"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="PAID">Paid</option>
-                  <option value="UNPAID">Unpaid</option>
-                  <option value="PARTIAL">Partial</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Transactions Table */}
-            <div className="bento-card table-container">
+          <div className="bento-card overflow-hidden animate-slide-up-3">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary via-primary to-secondary" />
+            <div className="overflow-x-auto">
               {transLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
-                  <p className="text-muted-foreground mt-2">Loading transactions...</p>
+                <div className="p-6 space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
+                  ))}
                 </div>
               ) : transactions.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No transactions found. Record one to get started!</div>
+                <div className="p-12 text-center text-sm text-muted-foreground italic">No transaction matrix detected.</div>
               ) : (
-                <>
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.size === transactions.length && transactions.length > 0}
-                            onChange={toggleSelectAll}
-                            className="rounded border-border"
-                          />
-                        </th>
-                        <th>Ref #</th>
-                        <th>Amount</th>
-                        <th>CGST</th>
-                        <th>SGST</th>
-                        <th>IGST</th>
-                        <th>Total</th>
-                        <th>Method</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Actions</th>
+                <table className="w-full text-sm min-w-[900px]">
+                  <thead>
+                    <tr className="label-tech text-left bg-surface-container/40">
+                      <th className="p-3 sm:p-4 w-12">
+                        <input type="checkbox" checked={selectedIds.size === transactions.length && transactions.length > 0} onChange={toggleSelectAll} className="accent-primary rounded" />
+                      </th>
+                      <th className="p-3 sm:p-4">Reference Alpha</th>
+                      <th className="p-3 sm:p-4">Base Quantum</th>
+                      <th className="p-3 sm:p-4">GST Vector</th>
+                      <th className="p-3 sm:p-4 font-bold">Total Aggregate</th>
+                      <th className="p-3 sm:p-4 text-center">Protocol</th>
+                      <th className="p-3 sm:p-4">Status</th>
+                      <th className="p-3 sm:p-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/10">
+                    {transactions.map((txn) => (
+                      <tr key={txn.id} className="group hover:bg-surface-container/20 transition-all duration-300">
+                        <td className="p-3 sm:p-4">
+                          <input type="checkbox" checked={selectedIds.has(txn.id)} onChange={() => toggleSelect(txn.id)} className="accent-primary rounded" />
+                        </td>
+                        <td className="p-3 sm:p-4 font-mono text-[10px] text-secondary font-black tracking-widest">{txn.referenceNumber || txn.id.slice(0, 8)}</td>
+                        <td className="p-3 sm:p-4 text-on-surface/70 font-mono text-xs">{fmt(txn.amount)}</td>
+                        <td className="p-3 sm:p-4">
+                          <div className="text-[9px] text-muted-foreground flex flex-col gap-0.5">
+                            <span>C: {fmt(txn.cgstAmount)}</span>
+                            <span>S: {fmt(txn.sgstAmount)}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 sm:p-4 text-on-surface font-black tracking-tighter text-base">{fmt(txn.totalAmount)}</td>
+                        <td className="p-3 sm:p-4 text-center">
+                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-surface-container/60 border border-border/20">
+                            <CreditCard className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-[10px] font-bold uppercase">{txn.paymentMethod?.replace('_', ' ') || '—'}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${paymentBadge(txn.status)}`}>
+                            {txn.status}
+                          </span>
+                        </td>
+                        <td className="p-3 sm:p-4 text-right">
+                          <button onClick={() => openEditModal(txn)} className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all opacity-0 group-hover:opacity-100 active:scale-95" title="Edit">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {transactions.map(trans => (
-                        <tr key={trans.id}>
-                          <td>
-                            <input
-                              type="checkbox"
-                              checked={selectedIds.has(trans.id)}
-                              onChange={() => toggleSelect(trans.id)}
-                              className="rounded border-border"
-                            />
-                          </td>
-                          <td className="font-medium text-sm">{trans.referenceNumber || trans.id.slice(0, 8)}</td>
-                          <td>₹{trans.amount.toFixed(2)}</td>
-                          <td className="text-sm">₹{trans.cgstAmount.toFixed(2)}</td>
-                          <td className="text-sm">₹{trans.sgstAmount.toFixed(2)}</td>
-                          <td className="text-sm">₹{trans.igstAmount.toFixed(2)}</td>
-                          <td className="font-bold text-emerald-400">₹{trans.totalAmount.toFixed(2)}</td>
-                          <td className="capitalize">{trans.paymentMethod?.replace('_', ' ') || '-'}</td>
-                          <td>
-                            <span className={`badge ${getStatusColor(trans.status)}`}>
-                              {trans.status.charAt(0).toUpperCase() + trans.status.slice(1).toLowerCase()}
-                            </span>
-                          </td>
-                          <td>{new Date(trans.createdAt).toLocaleDateString()}</td>
-                          <td>
-                            <button
-                              onClick={() => openEditModal(trans)}
-                              className="transition-colors transition-colors p-1"
-                              title="Edit Transaction"
-                            >
-                              <Pencil size={16} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <Pagination page={transPage} total={transTotalPages} setPage={setTransPage} />
-                </>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
-          </>
+            {transTotalPages > 1 && (
+              <div className="bg-surface-container/20 p-3 border-t border-border/10 flex justify-center gap-2">
+                <button onClick={() => setTransPage(Math.max(1, transPage - 1))} disabled={transPage === 1} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Previous</button>
+                <span className="px-4 py-2 text-sm text-muted-foreground">Page {transPage} of {transTotalPages}</span>
+                <button onClick={() => setTransPage(Math.min(transTotalPages, transPage + 1))} disabled={transPage === transTotalPages} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Next</button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-      {/* ═══════════════════ EDIT MODAL ═══════════════════ */}
+      {/* ═══ Export Modal (popup) ═══ */}
+      <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} onExport={handleExport} />
+
+      {/* ═══ Edit Transaction Modal (popup form) ═══ */}
       {editingTransaction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div
-            className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl"
-            style={{ background: 'hsl(var(--surface-card))', border: '1px solid hsl(var(--border) / 0.5)' }}
-          >
-            <div className="flex justify-between items-center px-6 py-4 border-b border-border/30">
-              <h3 className="text-xl font-bold" >Edit Transaction</h3>
-              <button onClick={() => setEditingTransaction(null)} className="text-muted-foreground hover:text-on-surface transition-colors">
-                <X size={20} />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-md animate-fade-in" onClick={() => setEditingTransaction(null)} />
+          <div className="relative z-10 w-full max-w-2xl flex flex-col rounded-2xl border border-border/60 bg-surface-low shadow-2xl shadow-black/40 animate-fade-in pointer-events-auto" style={{ maxHeight: 'min(90vh, 720px)' }}>
+            {/* Sticky header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-border/40 flex-shrink-0">
+              <h3 className="text-base font-bold text-on-surface">Edit Transaction</h3>
+              <button onClick={() => setEditingTransaction(null)} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors">
+                <X className="w-4 h-4" />
               </button>
             </div>
-            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Scrollable body */}
+            <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto px-6 py-5 scrollbar-none">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4">
                 <div>
-                  <label className="form-label">Amount</label>
-                  <input type="number" name="amount" step="0.01" value={editForm.amount} onChange={handleEditChange} className="input" required />
+                  <label className="label-tech block mb-1.5">Amount <span className="text-destructive">*</span></label>
+                  <input type="number" name="amount" step="0.01" value={editForm.amount} onChange={handleEditChange}
+                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground" required />
                 </div>
                 <div>
-                  <label className="form-label">Ref #</label>
-                  <input type="text" name="referenceNumber" value={editForm.referenceNumber} onChange={handleEditChange} className="input" />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="form-label">CGST</label>
-                  <input type="number" name="cgstAmount" step="0.01" value={editForm.cgstAmount} onChange={handleEditChange} className="input" />
+                  <label className="label-tech block mb-1.5">Ref #</label>
+                  <input type="text" name="referenceNumber" value={editForm.referenceNumber} onChange={handleEditChange}
+                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground" />
                 </div>
                 <div>
-                  <label className="form-label">SGST</label>
-                  <input type="number" name="sgstAmount" step="0.01" value={editForm.sgstAmount} onChange={handleEditChange} className="input" />
+                  <label className="label-tech block mb-1.5">CGST</label>
+                  <input type="number" name="cgstAmount" step="0.01" value={editForm.cgstAmount} onChange={handleEditChange}
+                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50" />
                 </div>
                 <div>
-                  <label className="form-label">IGST</label>
-                  <input type="number" name="igstAmount" step="0.01" value={editForm.igstAmount} onChange={handleEditChange} className="input" />
+                  <label className="label-tech block mb-1.5">SGST</label>
+                  <input type="number" name="sgstAmount" step="0.01" value={editForm.sgstAmount} onChange={handleEditChange}
+                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50" />
                 </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="form-label">Payment Method</label>
-                  <select name="paymentMethod" value={editForm.paymentMethod} onChange={handleEditChange} className="input">
+                  <label className="label-tech block mb-1.5">IGST</label>
+                  <input type="number" name="igstAmount" step="0.01" value={editForm.igstAmount} onChange={handleEditChange}
+                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50" />
+                </div>
+                <div>
+                  <label className="label-tech block mb-1.5">Payment Method</label>
+                  <select name="paymentMethod" value={editForm.paymentMethod} onChange={handleEditChange}
+                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50">
                     <option value="">Select</option>
                     <option value="Credit Card">Credit Card</option>
                     <option value="Debit Card">Debit Card</option>
@@ -610,28 +648,33 @@ export default function Financial() {
                   </select>
                 </div>
                 <div>
-                  <label className="form-label">Status</label>
-                  <select name="status" value={editForm.status} onChange={handleEditChange} className="input">
+                  <label className="label-tech block mb-1.5">Status</label>
+                  <select name="status" value={editForm.status} onChange={handleEditChange}
+                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50">
                     <option value="UNPAID">Unpaid</option>
                     <option value="PAID">Paid</option>
                     <option value="PARTIAL">Partial</option>
                     <option value="CANCELLED">Cancelled</option>
                   </select>
                 </div>
-              </div>
-              <div>
-                <label className="form-label">Notes</label>
-                <textarea name="notes" value={editForm.notes} onChange={handleEditChange} rows={3} className="input" />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={editLoading} className="flex-1 btn-primary">
-                  <Check className="inline mr-2" /> {editLoading ? 'Saving...' : 'Save Changes'}
-                </button>
-                <button type="button" onClick={() => setEditingTransaction(null)} className="flex-1 btn-secondary">
-                  Cancel
-                </button>
+                <div className="sm:col-span-2">
+                  <label className="label-tech block mb-1.5">Notes</label>
+                  <textarea name="notes" value={editForm.notes} onChange={handleEditChange} rows={3}
+                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 resize-none placeholder:text-muted-foreground" />
+                </div>
               </div>
             </form>
+            {/* Sticky footer */}
+            <div className="flex items-center gap-3 px-6 py-4 border-t border-border/40 flex-shrink-0">
+              <button type="submit" disabled={editLoading} onClick={handleEditSubmit}
+                className="flex-1 py-2.5 btn-cta rounded-xl text-sm font-bold disabled:opacity-50">
+                <Check className="inline w-4 h-4 mr-2" /> {editLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+              <button type="button" onClick={() => setEditingTransaction(null)}
+                className="flex-1 py-2.5 bg-surface-container rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/50">
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -216,26 +216,54 @@ export default function Horses() {
   return (
     <ProtectedRoute>
       <Head><title>Horses | Equestrian Events</title></Head>
-      <div>
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Horse <span className="gradient-text">Registry</span></h1>
-          <div className="flex gap-3">
-            <button onClick={handleExportCSV} className="btn-secondary">
-              <Download className="inline mr-2" /> Export CSV
-            </button>
-            <button onClick={handleExportExcel} className="btn-secondary">
-              <Download className="inline mr-2" /> Export Excel
-            </button>
-            <Link href="/horses/create" className="btn-primary">
-              <Plus className="inline mr-2" /> New Horse
-            </Link>
+      <div className="animate-fade-in max-w-[1600px] mx-auto">
+        {/* ═══ Header ═══ */}
+        <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+              Horse <span className="gradient-text">Registry</span>
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2 max-w-xl">Complete inventory of equine athletes registered across the platform.</p>
+          </div>
+        </div>
+
+        {/* ═══ Filter / Action Bar ═══ */}
+        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-2 border-beam">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search horses..."
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+                />
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm border border-border/30 transition-colors ${activeFilterCount > 0 ? 'border-primary/50 text-primary bg-primary/5' : 'bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright'}`}
+              >
+                <Filter className="w-4 h-4" /> Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
+              </button>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">CSV</span>
+              </button>
+              <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Excel</span>
+              </button>
+              <Link href="/horses/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold flex-1 sm:flex-initial justify-center shadow-lg shadow-primary/20">
+                <Plus className="w-4 h-4" /> New Horse
+              </Link>
+            </div>
           </div>
         </div>
 
         {error && (
-          <div className="rounded-xl px-4 py-3 rounded mb-6">
-            {error}
-          </div>
+          <div className="bento-card p-4 mb-4 border-l-4 border-destructive text-destructive text-sm animate-slide-up">{error}</div>
         )}
 
         <div className="mb-6 bento-card">
@@ -250,12 +278,12 @@ export default function Horses() {
                   setSearchTerm(e.target.value);
                   setPage(1);
                 }}
-                className="input pl-10"
+                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full border border-border/30 transition-all focus:bg-surface-container"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`btn-secondary flex items-center gap-2 ${activeFilterCount > 0 ? '' : ''}`}
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm border border-border/30 transition-colors ${activeFilterCount > 0 ? 'border-primary/50 text-primary bg-primary/5' : 'bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright'}`}
             >
               <Filter className="w-4 h-4" />
               Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
@@ -329,11 +357,13 @@ export default function Horses() {
           )}
         </div>
 
-        <div className="bento-card table-container">
+        <div className="bento-card overflow-hidden animate-slide-up-3">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="text-muted-foreground mt-2">Loading horses...</p>
+            <div className="p-6 space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
+              ))}
             </div>
           ) : horses.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
@@ -341,61 +371,51 @@ export default function Horses() {
             </div>
           ) : (
             <>
-              <table className="table">
+              <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[1100px]">
                 <thead>
-                  <tr>
-                    <th>
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.size === horses.length && horses.length > 0}
-                        onChange={toggleSelectAll}
-                        className="rounded border-border"
-                      />
+                  <tr className="label-tech text-left bg-surface-container/40">
+                    <th className="p-3 sm:p-4 w-12">
+                      <input type="checkbox" checked={selectedIds.size === horses.length && horses.length > 0} onChange={toggleSelectAll} className="accent-primary rounded" />
                     </th>
-                    <th>Horse Name</th>
-                    <th>Sex</th>
-                    <th>Birth Year</th>
-                    <th>Passport #</th>
-                    <th>Embassy ID</th>
-                    <th>Rider</th>
-                    <th>Club</th>
-                    <th>User Type</th>
-                    <th>Color</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th className="p-3 sm:p-4">Horse Name</th>
+                    <th className="p-3 sm:p-4">Sex</th>
+                    <th className="p-3 sm:p-4">Birth Year</th>
+                    <th className="p-3 sm:p-4">Passport #</th>
+                    <th className="p-3 sm:p-4">Embassy ID</th>
+                    <th className="p-3 sm:p-4">Rider</th>
+                    <th className="p-3 sm:p-4">Club</th>
+                    <th className="p-3 sm:p-4">User Type</th>
+                    <th className="p-3 sm:p-4">Color</th>
+                    <th className="p-3 sm:p-4">Status</th>
+                    <th className="p-3 sm:p-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {horses.map((horse) => {
-                    return (
-                    <tr key={horse.id}>
-                      <td>
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(horse.id)}
-                          onChange={() => toggleSelect(horse.id)}
-                          className="rounded border-border"
-                        />
+                <tbody className="divide-y divide-border/10">
+                  {horses.map((horse) => (
+                    <tr key={horse.id} className="group hover:bg-surface-container/20 transition-all duration-300">
+                      <td className="p-3 sm:p-4">
+                        <input type="checkbox" checked={selectedIds.has(horse.id)} onChange={() => toggleSelect(horse.id)} className="accent-primary rounded" />
                       </td>
-                      <td className="font-medium">{horse.name}</td>
-                      <td>{horse.gender || '-'}</td>
-                      <td>{horse.yearOfBirth || '-'}</td>
-                      <td className="text-xs font-mono">{horse.passportNumber || '-'}</td>
-                      <td className="text-xs font-mono">{horse.embassyId || '-'}</td>
-                      <td>{horse.riderName || '-'}</td>
-                      <td>{horse.clubName || '-'}</td>
-                      <td>
+                      <td className="p-3 sm:p-4 font-bold text-on-surface">🐎 {horse.name}</td>
+                      <td className="p-3 sm:p-4 text-on-surface-variant">{horse.gender || '-'}</td>
+                      <td className="p-3 sm:p-4 text-on-surface-variant">{horse.yearOfBirth || '-'}</td>
+                      <td className="p-3 sm:p-4 text-xs font-mono text-secondary">{horse.passportNumber || '-'}</td>
+                      <td className="p-3 sm:p-4 text-xs font-mono text-secondary">{horse.embassyId || '-'}</td>
+                      <td className="p-3 sm:p-4 text-on-surface-variant">{horse.riderName || '-'}</td>
+                      <td className="p-3 sm:p-4 text-on-surface-variant">{horse.clubName || '-'}</td>
+                      <td className="p-3 sm:p-4">
                         {horse.userType ? (
                           <span className="badge badge-info text-xs">{horse.userType}</span>
                         ) : '-'}
                       </td>
-                      <td>{horse.color || '-'}</td>
-                      <td>
-                        <span className={`badge ${horse.isActive ? 'badge-success' : 'badge-danger'}`}>
+                      <td className="p-3 sm:p-4 text-on-surface-variant">{horse.color || '-'}</td>
+                      <td className="p-3 sm:p-4">
+                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${horse.isActive ? 'bg-primary/10 text-primary border-primary/20' : 'bg-destructive/10 text-destructive border-destructive/20'}`}>
                           {horse.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
-                      <td>
+                      <td className="p-3 sm:p-4 text-right">
                         <ActionsDropdown actions={[
                           { label: 'View', icon: <Eye className="w-4 h-4" />, onClick: () => router.push(`/horses/${horse.id}`) },
                           { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: () => router.push(`/horses/create?id=${horse.id}`), className: 'text-amber-400 hover:text-amber-300' },
@@ -403,30 +423,16 @@ export default function Horses() {
                         ]} />
                       </td>
                     </tr>
-                    );
-                  })}
+                  ))}
                 </tbody>
               </table>
+              </div>
 
               {totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-4">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="btn-secondary disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  <span className="px-4 py-2">
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="btn-secondary disabled:opacity-50"
-                  >
-                    Next
-                  </button>
+                <div className="bg-surface-container/20 p-3 border-t border-border/10 flex justify-center gap-2">
+                  <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Previous</button>
+                  <span className="px-4 py-2 text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+                  <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Next</button>
                 </div>
               )}
             </>

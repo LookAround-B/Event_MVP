@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import apiClient from '@/lib/api';
 import Cookies from 'js-cookie';
 import { Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { ShaderAnimation } from '@/components/shader-lines';
 import { GoogleLogin } from '@react-oauth/google';
 
 export default function Login() {
@@ -40,11 +41,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black relative py-12 px-4 shadow-[inset_0_0_100px_rgba(var(--primary-rgb),0.05)]">
-      {/* Dark ambient overlay */}
+      {/* Shader background */}
+      <div className="absolute inset-0 z-0">
+        <ShaderAnimation />
+      </div>
+      {/* Dark overlay */}
       <div className="absolute inset-0 z-[1] bg-black/55" />
-      {/* Decorative gradient blobs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-[160px] opacity-10 bg-primary pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full blur-[120px] opacity-[0.06] pointer-events-none" style={{ background: 'hsl(253,90%,73%)' }} />
 
       <div className="relative z-[2] w-full max-w-md animate-fade-in">
 

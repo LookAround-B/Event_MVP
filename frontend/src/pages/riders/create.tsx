@@ -175,15 +175,16 @@ export default function CreateRider() {
   if (success) {
     return (
       <ProtectedRoute>
-        <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 to-purple-900">
-          <div className="bento-card p-12 text-center max-w-md">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-green-600 bg-opacity-20 rounded-full flex items-center justify-center">
-                <Check className="w-8 h-8 text-emerald-400" />
-              </div>
+        {/* ── Modal overlay ── */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-md animate-fade-in" />
+          
+          <div className="relative z-10 w-full max-w-sm flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-surface-low shadow-2xl p-8 animate-fade-in">
+            <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
+              <Check className="w-8 h-8 text-primary" />
             </div>
             <h2 className="text-2xl font-bold text-on-surface mb-2">Success!</h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-center">
               Rider {isEdit ? 'updated' : 'created'} successfully. Redirecting...
             </p>
           </div>
@@ -192,42 +193,44 @@ export default function CreateRider() {
     );
   }
 
+  const inputClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground";
+  const selectClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground appearance-none";
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <Link href="/riders" className="transition-colors flex items-center gap-2">
-              <ArrowLeft /> Back to Riders
+      {/* ── Modal overlay ── */}
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-md animate-fade-in" />
+        
+        {/* ── Modal box ── */}
+        <div className="relative z-10 w-full max-w-2xl flex flex-col rounded-2xl border border-border/60 bg-surface-low shadow-2xl shadow-black/40 animate-fade-in pointer-events-auto"
+          style={{ maxHeight: "min(90vh, 720px)" }}>
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-border/40 flex-shrink-0">
+            <div>
+              <h3 className="text-base font-bold text-on-surface">{isEdit ? 'Edit Rider' : 'Register New Rider'}</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">{isEdit ? 'Update rider profile' : 'Create a new rider profile'}</p>
+            </div>
+            <Link href="/riders" className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-on-surface hover:bg-surface-container transition-colors">
+              <span className="sr-only">Close</span>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
             </Link>
           </div>
 
-          <div className="bento-card overflow-hidden">
-            <div className="px-8 py-6 ">
-              <h1 className="text-2xl font-bold">
-                {isEdit ? 'Edit Rider' : 'Register New Rider'}
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                {isEdit ? 'Update rider profile' : 'Create a new rider profile'}
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto px-6 py-5 scrollbar-none">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 rounded-lg p-4">
-                  <p className="text-destructive font-medium">{error}</p>
+                <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
+                  {error}
                 </div>
               )}
 
-              {/* Personal Information */}
               <div>
-                <h2 className="text-xl font-bold text-on-surface mb-6 pb-3 ">
-                  Personal Information
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <h4 className="text-sm font-bold text-on-surface mb-4 uppercase tracking-wider text-muted-foreground">Personal Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                    <label className="label-tech block mb-1.5">
                       First Name <span className="text-destructive">*</span>
                     </label>
                     <input
@@ -236,25 +239,23 @@ export default function CreateRider() {
                       value={formData.firstName}
                       onChange={handleInputChange}
                       placeholder="First name"
-                      className="input"
+                      className={inputClass}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
-                      Last Name
-                    </label>
+                    <label className="label-tech block mb-1.5">Last Name</label>
                     <input
                       type="text"
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleInputChange}
                       placeholder="Last name (optional)"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                    <label className="label-tech block mb-1.5">
                       Email <span className="text-destructive">*</span>
                     </label>
                     <input
@@ -263,29 +264,29 @@ export default function CreateRider() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="rider@example.com"
-                      className="input"
+                      className={inputClass}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                    <label className="label-tech block mb-1.5">
                       Gender <span className="text-destructive">*</span>
                     </label>
                     <select
                       name="gender"
                       value={formData.gender}
                       onChange={handleInputChange}
-                      className="input"
+                      className={selectClass}
                       required
                     >
-                      <option value="" className="bg-slate-800 text-on-surface">Select Gender</option>
-                      <option value="Male" className="bg-slate-800 text-on-surface">Male</option>
-                      <option value="Female" className="bg-slate-800 text-on-surface">Female</option>
-                      <option value="Other" className="bg-slate-800 text-on-surface">Other</option>
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                    <label className="label-tech block mb-1.5">
                       Date of Birth <span className="text-destructive">*</span>
                     </label>
                     <input
@@ -293,63 +294,54 @@ export default function CreateRider() {
                       name="dob"
                       value={formData.dob}
                       onChange={handleInputChange}
-                      className="input"
+                      className={inputClass}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
-                      Mobile
-                    </label>
+                    <label className="label-tech block mb-1.5">Mobile</label>
                     <input
                       type="tel"
                       name="mobile"
                       value={formData.mobile}
                       onChange={handleInputChange}
                       placeholder="+91 9876543210"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
-                      Optional Phone
-                    </label>
+                    <label className="label-tech block mb-1.5">Optional Phone</label>
                     <input
                       type="tel"
                       name="optionalPhone"
                       value={formData.optionalPhone}
                       onChange={handleInputChange}
                       placeholder="Alternative number"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
-                      Image URL
-                    </label>
+                    <label className="label-tech block mb-1.5">Image URL</label>
                     <input
                       type="text"
                       name="imageUrl"
                       value={formData.imageUrl}
                       onChange={handleInputChange}
                       placeholder="https://..."
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                 </div>
 
-                {/* Address with Map */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface mb-2">
-                    Address
-                  </label>
+                  <label className="label-tech block mb-1.5">Address</label>
                   <textarea
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder="Enter address"
                     rows={3}
-                    className="input"
+                    className={`${inputClass} resize-none mb-3`}
                   />
                   <AddressMapPicker
                     address={formData.address}
@@ -361,14 +353,11 @@ export default function CreateRider() {
                 </div>
               </div>
 
-              {/* Professional Information */}
               <div>
-                <h2 className="text-xl font-bold text-on-surface mb-6 pb-3 ">
-                  Professional Information
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h4 className="text-sm font-bold text-on-surface mb-4 uppercase tracking-wider text-muted-foreground mt-6 pt-6 border-t border-border/40">Professional Info</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
+                    <label className="label-tech block mb-1.5">
                       EFI Rider ID <span className="text-destructive">*</span>
                     </label>
                     <input
@@ -377,118 +366,111 @@ export default function CreateRider() {
                       value={formData.efiRiderId}
                       onChange={handleInputChange}
                       placeholder="EFI identifier (required)"
-                      className="input"
+                      className={inputClass}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">
-                      Designation
-                    </label>
+                    <label className="label-tech block mb-1.5">Designation</label>
                     <input
                       type="text"
                       name="designation"
                       value={formData.designation}
                       onChange={handleInputChange}
                       placeholder="e.g., Professional, Amateur, Youth"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Social Links */}
               <div>
-                <h2 className="text-xl font-bold text-on-surface mb-6 pb-3 ">
-                  Social Links
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h4 className="text-sm font-bold text-on-surface mb-4 uppercase tracking-wider text-muted-foreground mt-6 pt-6 border-t border-border/40">Social Links</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">Instagram</label>
+                    <label className="label-tech block mb-1.5">Instagram</label>
                     <input
                       type="text"
                       value={socialLinks.instagram}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, instagram: e.target.value }))}
                       placeholder="Instagram URL or handle"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">Twitter</label>
+                    <label className="label-tech block mb-1.5">Twitter</label>
                     <input
                       type="text"
                       value={socialLinks.twitter}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, twitter: e.target.value }))}
                       placeholder="Twitter URL or handle"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">Facebook</label>
+                    <label className="label-tech block mb-1.5">Facebook</label>
                     <input
                       type="text"
                       value={socialLinks.facebook}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, facebook: e.target.value }))}
                       placeholder="Facebook URL"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">YouTube</label>
+                    <label className="label-tech block mb-1.5">YouTube</label>
                     <input
                       type="text"
                       value={socialLinks.youtube}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, youtube: e.target.value }))}
                       placeholder="YouTube URL"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">Website</label>
+                    <label className="label-tech block mb-1.5">Website</label>
                     <input
                       type="text"
                       value={socialLinks.website}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, website: e.target.value }))}
                       placeholder="Website URL"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface mb-2">Other</label>
+                    <label className="label-tech block mb-1.5">Other</label>
                     <input
                       type="text"
                       value={socialLinks.other}
                       onChange={(e) => setSocialLinks(prev => ({ ...prev, other: e.target.value }))}
                       placeholder="Other link"
-                      className="input"
+                      className={inputClass}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-4 pt-6 pt-0">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 btn-primary"
-                >
-                  {loading
-                    ? (isEdit ? 'Updating Rider...' : 'Creating Rider...')
-                    : (isEdit ? 'Update Rider' : 'Create Rider')
-                  }
-                </button>
-                <Link
-                  href="/riders"
-                  className="flex-1 text-center btn-secondary"
-                >
-                  Cancel
-                </Link>
-              </div>
             </form>
           </div>
+
+          {/* ── Sticky footer ── */}
+          <div className="flex items-center gap-3 px-6 py-4 border-t border-border/40 flex-shrink-0">
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="flex-1 py-2.5 btn-cta rounded-xl text-sm font-bold"
+            >
+              {loading ? (isEdit ? 'Updating Rider...' : 'Creating Rider...') : (isEdit ? 'Update Rider' : 'Create Rider')}
+            </button>
+            <Link
+              href="/riders"
+              className="flex-1 py-2.5 bg-surface-container rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/50 text-center"
+            >
+              Cancel
+            </Link>
+          </div>
+          </div>
         </div>
-      </div>
     </ProtectedRoute>
   );
 }

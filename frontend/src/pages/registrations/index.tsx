@@ -2,10 +2,21 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Search, Download } from 'lucide-react';
+import {
+  Plus, Trash2, Search, Download, Eye, Edit,
+  ClipboardCheck, Activity, CreditCard, AlertCircle, Calendar, Trophy,
+} from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import ExportModal from '@/components/ExportModal';
+import ViewModal from '@/components/ViewModal';
+import ConfirmModal from '@/components/ConfirmModal';
+import Pagination from '@/components/Pagination';
+import { FilterDropdown } from '@/components/FilterDropdown';
+import { KPICard } from '@/components/dashboard/KPICard';
+import { KPIGrid } from '@/components/dashboard/KPIGrid';
 
+/* ─── Types (preserved) ─── */
 interface Registration {
   id: string;
   eventAmount: number;
@@ -13,26 +24,13 @@ interface Registration {
   gstAmount: number;
   totalAmount: number;
   paymentStatus: string;
-  rider: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  horse: {
-    id: string;
-    name: string;
-    color?: string;
-    gender: string;
-  };
-  event: {
-    id: string;
-    name: string;
-    startDate: string;
-    endDate: string;
-  };
+  rider: { firstName: string; lastName: string; email: string };
+  horse: { id: string; name: string; color?: string; gender: string };
+  event: { id: string; name: string; startDate: string; endDate: string };
   createdAt: string;
 }
 
+/* ─── CSV/Excel utilities (preserved) ─── */
 function escapeCSVField(field: string | number): string {
   const s = String(field);
   if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
@@ -62,15 +60,37 @@ function exportToExcel(headers: string[], rows: (string | number)[][], filename:
   downloadBlob(new Blob([xml], { type: 'application/vnd.ms-excel' }), filename);
 }
 
+/* ─── Badge helpers ─── */
+const paymentBadge = (s: string) => {
+  switch (s?.toUpperCase()) {
+    case 'PAID': return 'bg-primary/10 text-primary border-primary/20';
+    case 'UNPAID': return 'bg-destructive/10 text-destructive border-destructive/20';
+    case 'PARTIAL': return 'bg-secondary/10 text-secondary border-secondary/20';
+    default: return 'bg-surface-container text-muted-foreground border-border/30';
+  }
+};
+
+const PER_PAGE = 10;
+
 export default function Registrations() {
+  /* ─── State (all backend state preserved) ─── */
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+  /* ─── Modal state ─── */
+  const [viewItem, setViewItem] = useState<Registration | null>(null);
+  const [deleteItem, setDeleteItem] = useState<Registration | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+
+  /* ─── Data fetching (preserved) ─── */
   useEffect(() => {
     fetchRegistrations();
   }, [page, statusFilter]);
@@ -81,13 +101,13 @@ export default function Registrations() {
       const response = await api.get('/api/registrations', {
         params: {
           page,
-          limit: 10,
-          status: statusFilter,
+          limit: PER_PAGE,
+          status: statusFilter || (selectedStatuses.length === 1 ? selectedStatuses[0] : ''),
         },
       });
-
       setRegistrations(response.data.data.registrations);
       setTotalPages(response.data.data.pagination.pages);
+      setTotalCount(response.data.data.pagination.total || response.data.data.registrations.length);
       setError(null);
     } catch (err) {
       console.error('Failed to fetch registrations:', err);
@@ -97,6 +117,7 @@ export default function Registrations() {
     }
   };
 
+  /* ─── Selection handlers (preserved) ─── */
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
@@ -113,6 +134,7 @@ export default function Registrations() {
     }
   };
 
+  /* ─── Export (preserved) ─── */
   const getExportData = () => {
     const headers = ['Rider Name', 'Horse Name', 'Event Name', 'Total Amount', 'Payment Status'];
     const source = selectedIds.size > 0 ? registrations.filter(r => selectedIds.has(r.id)) : registrations;
@@ -126,29 +148,26 @@ export default function Registrations() {
     return { headers, rows };
   };
 
-  const handleExportCSV = () => {
+  const handleExport = (type: 'csv' | 'excel') => {
     const { headers, rows } = getExportData();
-    const csv = [
-      headers.map(escapeCSVField).join(','),
-      ...rows.map(r => r.map(escapeCSVField).join(',')),
-    ].join('\n');
-    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'registrations.csv');
-    toast.success('Registrations exported as CSV');
+    if (type === 'csv') {
+      const csv = [headers.map(escapeCSVField).join(','), ...rows.map(r => r.map(escapeCSVField).join(','))].join('\n');
+      downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'registrations.csv');
+      toast.success('Registrations exported as CSV');
+    } else {
+      exportToExcel(headers, rows, 'registrations.xls');
+      toast.success('Registrations exported as Excel');
+    }
+    setExportOpen(false);
   };
 
-  const handleExportExcel = () => {
-    const { headers, rows } = getExportData();
-    exportToExcel(headers, rows, 'registrations.xls');
-    toast.success('Registrations exported as Excel');
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this registration?')) return;
-
+  /* ─── Delete (preserved) ─── */
+  const handleDelete = async () => {
+    if (!deleteItem) return;
     try {
-      await api.delete(`/api/registrations/${id}`);
-      setRegistrations(registrations.filter(r => r.id !== id));
-      selectedIds.delete(id);
+      await api.delete(`/api/registrations/${deleteItem.id}`);
+      setRegistrations(registrations.filter(r => r.id !== deleteItem.id));
+      selectedIds.delete(deleteItem.id);
       setSelectedIds(new Set(selectedIds));
       toast.success('Registration deleted successfully');
     } catch (err) {
@@ -157,151 +176,248 @@ export default function Registrations() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      PAID: 'badge-success',
-      UNPAID: 'badge-warning',
-      PARTIAL: 'badge-info',
-      CANCELLED: 'badge-danger',
-    };
-    return colors[status] || 'badge-secondary';
-  };
+  /* ─── Client-side search filter ─── */
+  const displayed = registrations.filter(r => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      `${r.rider.firstName} ${r.rider.lastName}`.toLowerCase().includes(q) ||
+      r.horse.name.toLowerCase().includes(q) ||
+      r.event.name.toLowerCase().includes(q)
+    );
+  });
+
+  /* ─── KPI calculations ─── */
+  const paidCount = registrations.filter(r => r.paymentStatus === 'PAID').length;
+  const unpaidRevenue = registrations.filter(r => r.paymentStatus !== 'PAID').reduce((s, r) => s + r.totalAmount, 0);
 
   return (
     <ProtectedRoute>
       <Head><title>Registrations | Equestrian Events</title></Head>
-      <div>
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Registration <span className="gradient-text">Ledger</span></h1>
-            <div className="flex gap-3">
-              <button onClick={handleExportCSV} className="btn-secondary">
-                <Download className="inline mr-2" /> Export CSV
+      <div className="animate-fade-in max-w-[1600px] mx-auto">
+
+        {/* ═══ Page Header ═══ */}
+        <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+              Event <span className="gradient-text">Logistics</span>
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2 max-w-xl">
+              Coordinate rider participation, horse logistics, and financial clearances for upcoming season events.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 bg-surface-container/40 px-4 py-2 rounded-2xl border border-border/30">
+            <Calendar className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold text-on-surface tracking-widest">REGISTRATION: OPEN</span>
+          </div>
+        </div>
+
+        {/* ═══ KPI Cards ═══ */}
+        <KPIGrid>
+          <KPICard
+            title="Total Entries"
+            value={totalCount || registrations.length}
+            icon={ClipboardCheck}
+            variant="primary"
+            subText="Current Season"
+            className="animate-slide-up-1"
+          />
+          <KPICard
+            title="Paid Entries"
+            value={paidCount}
+            icon={Activity}
+            variant="outline"
+            subText="Ready to compete"
+            className="animate-slide-up-2"
+          />
+          <KPICard
+            title="Pending Revenue"
+            value={`₹${(unpaidRevenue / 1000).toFixed(1)}k`}
+            icon={CreditCard}
+            variant="outline"
+            subText="Awaiting payment"
+            className="animate-slide-up-3"
+          />
+          <KPICard
+            title="This Page"
+            value={registrations.length}
+            icon={AlertCircle}
+            variant="secondary"
+            subText={`Page ${page} of ${totalPages}`}
+            className="animate-slide-up-4"
+          />
+        </KPIGrid>
+
+        {/* ═══ Filter / Action Bar ═══ */}
+        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-2 border-beam">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+                  placeholder="Find entry..."
+                />
+              </div>
+              <FilterDropdown
+                label="Payment Status"
+                options={[
+                  { label: 'Paid', value: 'PAID' },
+                  { label: 'Unpaid', value: 'UNPAID' },
+                  { label: 'Partial', value: 'PARTIAL' },
+                  { label: 'Cancelled', value: 'CANCELLED' },
+                ]}
+                selected={selectedStatuses}
+                onChange={(vals) => {
+                  setSelectedStatuses(vals);
+                  setStatusFilter(vals.length === 1 ? vals[0] : '');
+                  setPage(1);
+                }}
+              />
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <button onClick={() => setExportOpen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
               </button>
-              <button onClick={handleExportExcel} className="btn-secondary">
-                <Download className="inline mr-2" /> Export Excel
-              </button>
-              <Link href="/registrations/create" className="btn-primary">
-                <Plus className="inline mr-2" /> New Registration
+              <Link href="/registrations/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold flex-1 sm:flex-initial justify-center shadow-lg shadow-primary/20">
+                <Plus className="w-4 h-4" /> New Entry
               </Link>
             </div>
           </div>
+        </div>
 
-          {error && (
-            <div className="bg-red-900 bg-opacity-20 border border-red-400 border-opacity-30 text-destructive backdrop-blur-sm px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
-
-          <div className="mb-6 bento-card">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 text-muted-foreground" />
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="input pl-10"
-              >
-                <option value="">All Payment Statuses</option>
-                <option value="PAID">Paid</option>
-                <option value="UNPAID">Unpaid</option>
-                <option value="PARTIAL">Partial</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
-            </div>
+        {error && (
+          <div className="bento-card p-4 mb-4 border-l-4 border-destructive text-destructive text-sm animate-slide-up">
+            {error}
           </div>
+        )}
 
-          <div className="bento-card table-container">
+        {/* ═══ Table ═══ */}
+        <div className="bento-card overflow-hidden animate-slide-up-3">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
+          <div className="overflow-x-auto">
             {loading ? (
-              <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div className="p-6 space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} style={{ height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                  <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
                 ))}
               </div>
-            ) : registrations.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {statusFilter ? 'No registrations with this status' : 'No registrations yet. Create one to get started!'}
+            ) : displayed.length === 0 ? (
+              <div className="p-12 text-center text-sm text-muted-foreground italic">
+                {statusFilter ? 'No registrations with this status' : 'No event registrations found.'}
               </div>
             ) : (
-              <>
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>
+              <table className="w-full text-sm min-w-[950px]">
+                <thead>
+                  <tr className="label-tech text-left bg-surface-container/40">
+                    <th className="p-3 sm:p-4 w-12">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.size === registrations.length && registrations.length > 0}
+                        onChange={toggleSelectAll}
+                        className="accent-primary rounded"
+                      />
+                    </th>
+                    <th className="p-3 sm:p-4">Event & Category</th>
+                    <th className="p-3 sm:p-4">Competitor</th>
+                    <th className="p-3 sm:p-4">Horse</th>
+                    <th className="p-3 sm:p-4">Fee Details</th>
+                    <th className="p-3 sm:p-4">Payment</th>
+                    <th className="p-3 sm:p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/10">
+                  {displayed.map((reg) => (
+                    <tr key={reg.id} className="group hover:bg-surface-container/20 transition-all duration-300">
+                      <td className="p-3 sm:p-4">
                         <input
                           type="checkbox"
-                          checked={selectedIds.size === registrations.length && registrations.length > 0}
-                          onChange={toggleSelectAll}
-                          className="rounded border-border"
+                          checked={selectedIds.has(reg.id)}
+                          onChange={() => toggleSelect(reg.id)}
+                          className="accent-primary rounded"
                         />
-                      </th>
-                      <th>Rider Name</th>
-                      <th>Horse Name</th>
-                      <th>Event Name</th>
-                      <th>Total Amount</th>
-                      <th>Payment Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {registrations.map((reg) => (
-                      <tr key={reg.id}>
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.has(reg.id)}
-                            onChange={() => toggleSelect(reg.id)}
-                            className="rounded border-border"
-                          />
-                        </td>
-                        <td className="font-medium">{reg.rider.firstName} {reg.rider.lastName}</td>
-                        <td>{reg.horse.name} ({reg.horse.gender})</td>
-                        <td>{reg.event.name}</td>
-                        <td className="font-medium">₹{reg.totalAmount}</td>
-                        <td>
-                          <span className={`badge ${getStatusColor(reg.paymentStatus)}`}>
-                            {reg.paymentStatus.charAt(0).toUpperCase() + reg.paymentStatus.slice(1).toLowerCase()}
-                          </span>
-                        </td>
-                        <td>
-                          <button
-                            onClick={() => handleDelete(reg.id)}
-                            className="text-destructive hover:text-destructive"
-                            title="Delete"
-                          >
+                      </td>
+                      <td className="p-3 sm:p-4">
+                        <div className="flex flex-col">
+                          <span className="text-on-surface font-bold tracking-tight line-clamp-1 text-xs">{reg.event.name}</span>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <Trophy className="w-3 h-3 text-secondary" />
+                            <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">
+                              {new Date(reg.event.startDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-3 sm:p-4 font-medium text-on-surface-variant">
+                        {reg.rider.firstName} {reg.rider.lastName}
+                      </td>
+                      <td className="p-3 sm:p-4">
+                        <span className="text-xs text-on-surface-variant font-mono">🐎 {reg.horse.name}</span>
+                      </td>
+                      <td className="p-3 sm:p-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-on-surface">₹{reg.totalAmount.toLocaleString('en-IN')}</span>
+                          <span className="text-[10px] text-muted-foreground/60 font-mono tracking-tighter">ID: {reg.id.slice(0, 8)}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 sm:p-4">
+                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${paymentBadge(reg.paymentStatus)}`}>
+                          {reg.paymentStatus}
+                        </span>
+                      </td>
+                      <td className="p-3 sm:p-4 text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <button onClick={() => setViewItem(reg)} title="Inspect" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => setDeleteItem(reg)} title="Cancel" className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all active:scale-95">
                             <Trash2 className="w-4 h-4" />
                           </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {totalPages > 1 && (
-                  <div className="flex justify-center gap-2 mt-4">
-                    <button
-                      onClick={() => setPage(Math.max(1, page - 1))}
-                      disabled={page === 1}
-                      className="btn-secondary disabled:opacity-50"
-                    >
-                      Previous
-                    </button>
-                    <span className="px-4 py-2 text-muted-foreground">
-                      Page {page} of {totalPages}
-                    </span>
-                    <button
-                      onClick={() => setPage(Math.min(totalPages, page + 1))}
-                      disabled={page === totalPages}
-                      className="btn-secondary disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
-              </>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
+          {totalPages > 1 && (
+            <div className="bg-surface-container/20 p-2 border-t border-border/10">
+              <Pagination total={totalCount || registrations.length * totalPages} page={page} perPage={PER_PAGE} onChange={setPage} />
+            </div>
+          )}
+        </div>
+
+        {/* ═══ Modals (popup forms) ═══ */}
+        <ViewModal
+          open={!!viewItem}
+          onClose={() => setViewItem(null)}
+          title="Registration Details"
+          fields={viewItem ? [
+            { label: 'Registration ID', value: viewItem.id },
+            { label: 'Event', value: viewItem.event.name },
+            { label: 'Event Date', value: new Date(viewItem.event.startDate).toLocaleDateString() },
+            { label: 'Rider', value: `${viewItem.rider.firstName} ${viewItem.rider.lastName}` },
+            { label: 'Rider Email', value: viewItem.rider.email },
+            { label: 'Horse', value: `${viewItem.horse.name} (${viewItem.horse.gender})` },
+            { label: 'Event Amount', value: `₹${viewItem.eventAmount.toLocaleString('en-IN')}` },
+            { label: 'Stable Amount', value: `₹${viewItem.stableAmount.toLocaleString('en-IN')}` },
+            { label: 'GST Amount', value: `₹${viewItem.gstAmount.toLocaleString('en-IN')}` },
+            { label: 'Total Amount', value: `₹${viewItem.totalAmount.toLocaleString('en-IN')}` },
+            { label: 'Payment Status', value: viewItem.paymentStatus },
+            { label: 'Created', value: new Date(viewItem.createdAt).toLocaleDateString() },
+          ] : []}
+        />
+        <ConfirmModal
+          open={!!deleteItem}
+          onClose={() => setDeleteItem(null)}
+          onConfirm={handleDelete}
+          title="Cancel Registration"
+          description={`Are you sure you want to cancel this registration for "${deleteItem?.rider.firstName} ${deleteItem?.rider.lastName}"? This action cannot be undone.`}
+        />
+        <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} onExport={handleExport} />
       </div>
     </ProtectedRoute>
   );

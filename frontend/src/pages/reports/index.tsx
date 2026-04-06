@@ -109,31 +109,46 @@ export default function Reports() {
   return (
     <ProtectedRoute>
       <Head><title>Reports | Equestrian</title></Head>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Data <span className="gradient-text">Reports</span></h1>
-
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2">
-          {[
-            { key: 'events', label: 'Event Summary', icon: Calendar },
-            { key: 'financial', label: 'Financial Reconciliation', icon: DollarSign },
-            { key: 'riders', label: 'Rider Statistics', icon: Users },
-            { key: 'attendance', label: 'Attendance', icon: BarChart2 },
-          ].map(t => (
-            <button key={t.key} onClick={() => setTab(t.key as any)} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition ${tab === t.key ? 'btn-primary' : 'bg-white/10 text-muted-foreground hover:bg-white/20'}`}>
-              <t.icon size={16} /> {t.label}
-            </button>
-          ))}
+      <div className="animate-fade-in max-w-[1600px] mx-auto space-y-6">
+        <div className="mb-6 lg:mb-8">
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+            Data <span className="gradient-text">Reports</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">Event summaries, financial reconciliation, and rider analytics.</p>
         </div>
 
-        {loading && <div className="text-center py-8 text-muted-foreground">Loading report...</div>}
+        {/* Tabs */}
+        <div className="mb-4 animate-slide-up-2">
+          <div className="flex gap-1 bg-surface-container rounded-xl p-1 w-fit border border-border/30 shadow-inner flex-wrap">
+            {[
+              { key: 'events', label: 'Events', icon: Calendar },
+              { key: 'financial', label: 'Financial', icon: DollarSign },
+              { key: 'riders', label: 'Riders', icon: Users },
+              { key: 'attendance', label: 'Attendance', icon: BarChart2 },
+            ].map(t => (
+              <button key={t.key} onClick={() => setTab(t.key as any)} className={`px-4 sm:px-5 py-2 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all ${tab === t.key ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-on-surface'}`}>
+                <t.icon className="w-4 h-4" /> {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {loading && (
+          <div className="bento-card p-6 space-y-3 animate-slide-up-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
+            ))}
+          </div>
+        )}
 
         {/* Event Summary Report */}
         {!loading && tab === 'events' && (
-          <div className="bento-card table-container">
-            <table className="table">
+          <div className="bento-card overflow-hidden animate-slide-up-3">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[800px]">
               <thead>
-                <tr>
+                <tr className="label-tech text-left bg-surface-container/40">
                   <th>Event</th>
                   <th>Type</th>
                   <th>Date</th>
@@ -171,6 +186,7 @@ export default function Reports() {
                 </tfoot>
               )}
             </table>
+            </div>
           </div>
         )}
 
@@ -186,9 +202,9 @@ export default function Reports() {
                 <label className="text-sm font-medium text-muted-foreground block mb-1">End Date</label>
                 <input type="date" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} className="input text-sm" />
               </div>
-              <button onClick={loadReport} className="btn-primary text-sm">Apply</button>
-              <button onClick={downloadFinancialCSV} className="btn-secondary text-sm flex items-center gap-1">
-                <Download size={14} /> Export CSV
+              <button onClick={loadReport} className="px-4 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20">Apply</button>
+              <button onClick={downloadFinancialCSV} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> Export CSV
               </button>
             </div>
 
@@ -242,10 +258,12 @@ export default function Reports() {
 
         {/* Rider Statistics Report */}
         {!loading && tab === 'riders' && (
-          <div className="bento-card table-container">
-            <table className="table">
+          <div className="bento-card overflow-hidden animate-slide-up-3">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary/30 via-primary to-secondary/30" />
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[800px]">
               <thead>
-                <tr>
+                <tr className="label-tech text-left bg-surface-container/40">
                   <th>Rider</th>
                   <th>Email</th>
                   <th>Club</th>
@@ -272,6 +290,7 @@ export default function Reports() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 
@@ -288,7 +307,7 @@ export default function Reports() {
                   ))}
                 </select>
               </div>
-              <button onClick={loadReport} className="btn-primary text-sm">Load</button>
+              <button onClick={loadReport} className="px-4 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20">Load</button>
             </div>
 
             {attendanceReport.map((event: any) => (

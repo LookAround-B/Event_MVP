@@ -2,9 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { Pencil, Trash2, Plus, Search, Check, Clock, Download, Shield, Filter, X, ChevronDown } from 'lucide-react';
+import { Pencil, Trash2, Plus, Search, Check, Clock, Download, Shield, Filter, X, ChevronDown, UserCog, Users as UsersIcon, Activity } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import ConfirmModal from '@/components/ConfirmModal';
+import { KPICard } from '@/components/dashboard/KPICard';
+import { KPIGrid } from '@/components/dashboard/KPIGrid';
 
 interface User {
   id: string;
@@ -219,29 +222,62 @@ export default function Users() {
   return (
     <ProtectedRoute>
       <Head><title>Users | Equestrian Events</title></Head>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="animate-fade-in max-w-[1600px] mx-auto">
+
+        {/* ═══ Page Header ═══ */}
+        <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">User <span className="gradient-text">Directory</span></h1>
-            <p className="text-muted-foreground mt-2">Manage system users and permissions</p>
+            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+              User <span className="gradient-text">Directory</span>
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2 max-w-xl">Manage system users, roles, and access permissions across the platform.</p>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <button onClick={handleExportCSV} className="btn-secondary flex items-center gap-2">
-              <Download /> Export CSV
-            </button>
-            <Link href="/users/create" className="btn-primary flex items-center gap-2">
-              <Plus /> Add User
-            </Link>
+        </div>
+
+        {/* ═══ KPI Cards ═══ */}
+        <KPIGrid>
+          <KPICard title="Total Users" value={pagination.total || users.length} icon={UsersIcon} variant="primary" subText="Registered accounts" className="animate-slide-up-1" />
+          <KPICard title="Approved" value={users.filter(u => u.isApproved).length} icon={Check} variant="outline" subText="Active users" className="animate-slide-up-2" />
+          <KPICard title="Pending" value={users.filter(u => !u.isApproved).length} icon={Clock} variant="secondary" subText="Awaiting approval" className="animate-slide-up-3" />
+        </KPIGrid>
+
+        {/* ═══ Filter / Action Bar ═══ */}
+        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-2 border-beam">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                />
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm border border-border/30 transition-colors ${hasActiveFilters ? 'border-primary/50 text-primary bg-primary/5' : 'bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright'}`}
+              >
+                <Filter className="w-4 h-4" /> Filters {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary" />}
+              </button>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
+              </button>
+              <Link href="/users/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold flex-1 sm:flex-initial justify-center shadow-lg shadow-primary/20">
+                <Plus className="w-4 h-4" /> Add User
+              </Link>
+            </div>
           </div>
         </div>
 
         {error && (
-          <div className="rounded-xl px-4 py-3 rounded">
-            {error}
-          </div>
+          <div className="bento-card p-4 mb-4 border-l-4 border-destructive text-destructive text-sm animate-slide-up">{error}</div>
         )}
 
-        <div className="bento-card">
+        <div className="space-y-4">
           {/* Search and Filter Bar */}
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -268,7 +304,7 @@ export default function Users() {
 
             {/* Expandable Filters */}
             {showFilters && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-surface-container/30 border border-border/20">
                 <div>
                   <label className="block text-xs font-semibold text-muted-foreground mb-1">Role</label>
                   <select
@@ -363,12 +399,13 @@ export default function Users() {
             </div>
           )}
 
+        <div className="bento-card overflow-hidden animate-slide-up-3">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
           {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading users...</p>
-              </div>
+            <div className="p-6 space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
+              ))}
             </div>
           ) : users.length === 0 ? (
             <div className="text-center py-12">
@@ -379,8 +416,8 @@ export default function Users() {
             </div>
           ) : (
             <>
-              <div className="table-container">
-                <table className="table">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[900px]">
                   <thead>
                     <tr>
                       {isAdmin && (
@@ -518,6 +555,7 @@ export default function Users() {
               )}
             </>
           )}
+        </div>
         </div>
       </div>
     </ProtectedRoute>
