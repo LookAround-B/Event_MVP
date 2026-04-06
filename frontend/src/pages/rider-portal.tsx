@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Calendar, TrendingUp, Award, ChevronRight, Box } from 'lucide-react';
+import Head from 'next/head';
+import { Plus, Calendar, TrendingUp, Award, ChevronRight, Box, Clock } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import { KPICard } from '@/components/dashboard/KPICard';
+import { KPIGrid } from '@/components/dashboard/KPIGrid';
 
 interface DashboardWidgets {
   horseCount: number;
@@ -150,27 +153,13 @@ export default function RiderPortal() {
     }
   };
 
-  const Widget = ({ icon: Icon, title, value, color }: any) => (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-muted-foreground text-sm font-medium">{title}</p>
-          <p className="text-4xl font-bold text-on-surface mt-2">{value}</p>
-        </div>
-        <div className={`p-4 rounded-lg ${color}`}>
-          <Icon className="w-8 h-8 text-on-surface" />
-        </div>
-      </div>
-    </div>
-  );
-
   const TabButton = ({ name, label }: { name: typeof activeTab; label: string }) => (
     <button
       onClick={() => setActiveTab(name)}
-      className={`px-4 py-2 font-medium rounded-lg transition ${
+      className={`px-4 sm:px-5 py-2 text-sm font-semibold rounded-lg transition-all ${
         activeTab === name
-          ? 'bg-blue-600 text-on-surface'
-          : 'bg-surface-container text-on-surface-variant hover:bg-surface-bright'
+          ? 'bg-primary text-primary-foreground shadow-lg'
+          : 'text-muted-foreground hover:text-on-surface'
       }`}
     >
       {label}
@@ -179,80 +168,69 @@ export default function RiderPortal() {
 
   return (
     <ProtectedRoute>
-      <div className="space-y-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-on-surface">Rider Portal</h1>
-          <p className="text-muted-foreground mt-1">Manage your events and horses</p>
+      <Head><title>Rider Portal | Equestrian Events</title></Head>
+      <div className="animate-fade-in max-w-[1600px] mx-auto">
+        <div className="mb-6 lg:mb-8">
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+            Rider <span className="gradient-text">Portal</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2">Manage your events and horses</p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          <TabButton name="dashboard" label="📊 Dashboard" />
-          <TabButton name="myEvents" label="📅 My Events" />
-          <TabButton name="myHorses" label="🐴 My Horses" />
-          <TabButton name="events" label="🎪 Browse Events" />
-          <TabButton name="featured" label="⭐ Featured" />
+        <div className="mb-4 animate-slide-up-1">
+          <div className="flex gap-1 bg-surface-container rounded-xl p-1 w-fit border border-border/30 shadow-inner overflow-x-auto">
+            <TabButton name="dashboard" label="📊 Dashboard" />
+            <TabButton name="myEvents" label="📅 My Events" />
+            <TabButton name="myHorses" label="🐴 My Horses" />
+            <TabButton name="events" label="🎪 Browse Events" />
+            <TabButton name="featured" label="⭐ Featured" />
+          </div>
         </div>
 
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Widget
-                icon={Box}
-                title="Total Horses"
-                value={widgets.horseCount}
-                color="bg-amber-500"
-              />
-              <Widget
-                icon={Calendar}
-                title="Events on Platform"
-                value={widgets.eventsCount}
-                color="bg-blue-500"
-              />
-              <Widget
-                icon={TrendingUp}
-                title="Events Participated"
-                value={widgets.eventsParticipated}
-                color="bg-green-500"
-              />
-              <Widget
-                icon={Award}
-                title="Registered Events"
-                value={widgets.registeredEvents}
-                color="bg-purple-500"
-              />
-            </div>
+          <div className="space-y-6">
+            <KPIGrid>
+              <KPICard title="Total Horses" value={widgets.horseCount} icon={Box} variant="primary" subText="Your stable" className="animate-slide-up-1" />
+              <KPICard title="Events on Platform" value={widgets.eventsCount} icon={Calendar} variant="outline" subText="Available now" className="animate-slide-up-2" />
+              <KPICard title="Participated" value={widgets.eventsParticipated} icon={TrendingUp} variant="outline" subText="Your history" className="animate-slide-up-3" />
+              <KPICard title="Registered" value={widgets.registeredEvents} icon={Award} variant="secondary" subText="Current season" className="animate-slide-up-4" />
+            </KPIGrid>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-on-surface mb-4">Quick Actions</h2>
+            <div className="bento-card p-6 animate-slide-up-3">
+              <h2 className="text-lg font-bold text-on-surface mb-4">Quick Actions</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Link
                   href="/horses/create"
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-surface-lowest transition"
+                  className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:bg-surface-container/50 transition group"
                 >
                   <div className="flex items-center gap-3">
-                    <Plus className="text-blue-600 text-xl" />
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Plus className="w-5 h-5 text-primary" />
+                    </div>
                     <div>
-                      <p className="font-semibold text-on-surface">Add New Horse</p>
-                      <p className="text-sm text-muted-foreground">Register your horse</p>
+                      <p className="font-bold text-on-surface text-sm">Add New Horse</p>
+                      <p className="text-xs text-muted-foreground">Register your horse</p>
                     </div>
                   </div>
-                  <ChevronRight className="text-muted-foreground" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 </Link>
 
                 <Link
                   href="/events"
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-surface-lowest transition"
+                  className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:bg-surface-container/50 transition group"
                 >
                   <div className="flex items-center gap-3">
-                    <Calendar className="text-green-600 text-xl" />
+                    <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Calendar className="w-5 h-5 text-secondary" />
+                    </div>
                     <div>
-                      <p className="font-semibold text-on-surface">Browse Events</p>
-                      <p className="text-sm text-muted-foreground">Find upcoming events</p>
+                      <p className="font-bold text-on-surface text-sm">Browse Events</p>
+                      <p className="text-xs text-muted-foreground">Find upcoming events</p>
                     </div>
                   </div>
-                  <ChevronRight className="text-muted-foreground" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 </Link>
               </div>
             </div>
@@ -261,70 +239,82 @@ export default function RiderPortal() {
 
         {/* My Events Tab */}
         {activeTab === 'myEvents' && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-on-surface">My Event Registrations</h2>
-            {loading ? (
-              <div className="text-center py-8">Loading...</div>
-            ) : myEvents.length === 0 ? (
-              <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded">
-                No event registrations yet. <Link href="/events" className="font-semibold underline">Browse events</Link>
+          <div className="space-y-4 animate-slide-up-2">
+            <div className="bento-card overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/40 via-secondary/40 to-primary/40" />
+              <div className="p-5">
+                <h2 className="text-lg font-bold text-on-surface mb-4">My Event Registrations</h2>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {myEvents.map(reg => (
-                  <div key={reg.id} className="bg-white rounded-lg shadow p-4 flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold text-on-surface">{reg.event?.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {reg.event?.startDate && new Date(reg.event.startDate).toLocaleDateString()}
-                      </p>
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
+                </div>
+              ) : myEvents.length === 0 ? (
+                <div className="p-12 text-center text-sm text-muted-foreground italic">
+                  No event registrations yet. <Link href="/events" className="text-primary font-semibold">Browse events</Link>
+                </div>
+              ) : (
+                <div className="space-y-2 p-4 pt-0">
+                  {myEvents.map(reg => (
+                    <div key={reg.id} className="flex justify-between items-center p-4 rounded-xl border border-border/20 hover:bg-surface-container/30 transition-all group">
+                      <div>
+                        <p className="font-bold text-on-surface text-sm group-hover:text-primary transition-colors">{reg.event?.name}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
+                          <Clock className="w-3 h-3 text-secondary" />
+                          {reg.event?.startDate && new Date(reg.event.startDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-tighter border ${
+                          reg.paymentStatus === 'PAID'
+                            ? 'bg-primary/10 text-primary border-primary/20'
+                            : 'bg-secondary/10 text-secondary border-secondary/20'
+                        }`}>
+                          {reg.paymentStatus}
+                        </span>
+                        <p className="font-bold text-on-surface text-sm">₹{reg.totalAmount?.toLocaleString('en-IN')}</p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        reg.paymentStatus === 'PAID'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {reg.paymentStatus}
-                      </span>
-                      <p className="font-semibold text-on-surface">₹{reg.totalAmount}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* My Horses Tab */}
         {activeTab === 'myHorses' && (
-          <div className="space-y-4">
+          <div className="space-y-4 animate-slide-up-2">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-on-surface">My Horses</h2>
+              <h2 className="text-lg font-bold text-on-surface">My Horses</h2>
               <Link
                 href="/horses/create"
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-on-surface rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-2 px-4 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 transition-all active:scale-95"
               >
-                <Plus /> Add Horse
+                <Plus className="w-4 h-4" /> Add Horse
               </Link>
             </div>
             {loading ? (
-              <div className="text-center py-8">Loading...</div>
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
+              </div>
             ) : horses.length === 0 ? (
-              <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded">
+              <div className="bento-card p-12 text-center text-sm text-muted-foreground italic">
                 No horses registered yet. Add your first horse to get started!
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {horses.map(horse => (
-                  <Link key={horse.id} href={`/horses/${horse.id}`} className="block bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
+                  <Link key={horse.id} href={`/horses/${horse.id}`} className="bento-card p-4 hover:border-primary/25 transition-colors group">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-semibold text-on-surface text-lg">{horse.name}</p>
-                        <p className="text-sm text-muted-foreground">Color: {horse.color}</p>
-                        <p className="text-sm text-muted-foreground">Gender: {horse.gender}</p>
+                        <p className="font-bold text-on-surface group-hover:text-primary transition-colors">{horse.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Color: {horse.color}</p>
+                        <p className="text-xs text-muted-foreground">Gender: {horse.gender}</p>
                       </div>
-                      <Box className="text-amber-600 text-3xl" />
+                      <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Box className="w-5 h-5 text-muted-foreground" />
+                      </div>
                     </div>
                   </Link>
                 ))}
@@ -335,12 +325,14 @@ export default function RiderPortal() {
 
         {/* Browse All Events Tab */}
         {activeTab === 'events' && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-on-surface">All Available Events</h2>
+          <div className="space-y-4 animate-slide-up-2">
+            <h2 className="text-lg font-bold text-on-surface">All Available Events</h2>
             {loading ? (
-              <div className="text-center py-8">Loading...</div>
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
+              </div>
             ) : allEvents.length === 0 ? (
-              <div className="bg-surface-lowest border border-gray-200 text-gray-800 px-4 py-3 rounded">
+              <div className="bento-card p-12 text-center text-sm text-muted-foreground italic">
                 No events available at this time.
               </div>
             ) : (
@@ -349,16 +341,17 @@ export default function RiderPortal() {
                   <Link
                     key={event.id}
                     href={`/events/${event.id}`}
-                    className="block bg-white rounded-lg shadow p-4 hover:shadow-lg transition"
+                    className="block bento-card p-4 hover:border-primary/25 transition-colors group"
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-semibold text-on-surface text-lg">{event.name}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="font-bold text-on-surface group-hover:text-primary transition-colors">{event.name}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
+                          <Clock className="w-3 h-3 text-secondary" />
                           {event.startDate && new Date(event.startDate).toLocaleDateString()} - {event.endDate && new Date(event.endDate).toLocaleDateString()}
                         </p>
                       </div>
-                      <span className="px-4 py-2 bg-blue-600 text-on-surface rounded hover:bg-blue-700">
+                      <span className="px-3 py-1.5 btn-cta rounded-lg text-xs font-bold">
                         View Details
                       </span>
                     </div>
@@ -371,21 +364,24 @@ export default function RiderPortal() {
 
         {/* Featured Events Tab */}
         {activeTab === 'featured' && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-on-surface">Featured Events</h2>
+          <div className="space-y-6 animate-slide-up-2">
+            <h2 className="text-lg font-bold text-on-surface">Featured Events</h2>
             {loading ? (
-              <div className="text-center py-8">Loading...</div>
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
+              </div>
             ) : featuredEvents.length === 0 ? (
-              <div className="bg-surface-lowest border border-gray-200 text-gray-800 px-4 py-6 rounded text-center">
-                <p>No featured events at this time.</p>
+              <div className="bento-card p-12 text-center text-sm text-muted-foreground italic">
+                No featured events at this time.
               </div>
             ) : (
               <div className="space-y-4">
                 {featuredEvents.map(event => (
-                  <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
-                      <h3 className="text-xl font-bold text-on-surface">{event.name}</h3>
-                      <p className="text-blue-100 text-sm mt-1">
+                  <div key={event.id} className="bento-card overflow-hidden group hover:border-primary/25 transition-colors">
+                    <div className="bg-gradient-to-r from-primary/20 via-secondary/15 to-primary/20 px-6 py-4 border-b border-border/10">
+                      <h3 className="text-lg font-bold text-on-surface group-hover:text-primary transition-colors">{event.name}</h3>
+                      <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                        <Clock className="w-3 h-3 text-secondary" />
                         {new Date(event.startDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         {event.endDate && ` — ${new Date(event.endDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`}
                       </p>
@@ -394,14 +390,14 @@ export default function RiderPortal() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           {event.registrationCount !== undefined && (
-                            <span className="flex items-center gap-1">
-                              <TrendingUp className="text-green-500" /> {event.registrationCount} registrations
+                            <span className="flex items-center gap-1.5 text-xs">
+                              <TrendingUp className="w-3.5 h-3.5 text-primary" /> {event.registrationCount} registrations
                             </span>
                           )}
                         </div>
                         <Link
                           href={`/events/${event.id}`}
-                          className="px-6 py-2 bg-blue-600 text-on-surface rounded-lg hover:bg-blue-700 font-medium transition"
+                          className="px-4 py-2 btn-cta rounded-xl text-sm font-bold transition-all active:scale-95"
                         >
                           View & Register
                         </Link>
@@ -413,9 +409,9 @@ export default function RiderPortal() {
             )}
 
             {termsConditions && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-on-surface mb-3">Terms & Conditions</h3>
-                <div className="prose prose-sm max-w-none text-on-surface-variant whitespace-pre-wrap">
+              <div className="bento-card p-6">
+                <h3 className="text-lg font-bold text-on-surface mb-3">Terms & Conditions</h3>
+                <div className="prose prose-sm max-w-none text-on-surface-variant whitespace-pre-wrap text-xs leading-relaxed">
                   {termsConditions}
                 </div>
               </div>
@@ -424,7 +420,14 @@ export default function RiderPortal() {
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+          <div
+            className="px-4 py-3 rounded-xl text-sm mt-4"
+            style={{
+              background: 'hsl(var(--error) / 0.1)',
+              border: '1px solid hsl(var(--error) / 0.3)',
+              color: 'hsl(var(--error))',
+            }}
+          >
             {error}
           </div>
         )}

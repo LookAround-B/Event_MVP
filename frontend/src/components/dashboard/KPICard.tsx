@@ -6,6 +6,7 @@ interface KPICardProps {
   title: string;
   value: string | number;
   subText?: string;
+  subValue?: string;
   icon?: LucideIcon;
   trend?: { value: string; isUp: boolean };
   variant?: "primary" | "secondary" | "outline";
@@ -13,8 +14,9 @@ interface KPICardProps {
 }
 
 export const KPICard: React.FC<KPICardProps> = ({
-  title, value, subText, icon: Icon, trend, variant = "outline", className,
+  title, value, subText: subTextProp, subValue, icon: Icon, trend, variant = "outline", className,
 }) => {
+  const subText = subTextProp || subValue;
   if (variant === "primary") {
     return (
       <div className={cn("h-full rounded-2xl bg-primary p-5 flex flex-col justify-between relative overflow-hidden group border-beam", className)}

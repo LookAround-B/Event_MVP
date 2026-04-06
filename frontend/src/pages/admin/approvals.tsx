@@ -5,7 +5,10 @@ import Head from 'next/head';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/api';
-import { Check, X, RefreshCw, Users, FileText } from 'lucide-react';
+import { Check, X, RefreshCw, Users, FileText, Search, Clock, UserCheck, Zap, ShieldCheck, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { KPICard } from '@/components/dashboard/KPICard';
+import { KPIGrid } from '@/components/dashboard/KPIGrid';
+import Pagination from '@/components/Pagination';
 
 interface PendingUser {
   id: string;
@@ -102,7 +105,7 @@ export default function AdminApprovals() {
   if (!isAdmin || loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin" />
+        <RefreshCw className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
@@ -110,72 +113,86 @@ export default function AdminApprovals() {
   return (
     <>
       <Head><title>Admin Approvals | Equestrian</title></Head>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl">Admin <span className="gradient-text">Approvals</span></h1>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-muted-foreground">Pending Users</p>
-            <p className="text-2xl font-bold text-yellow-600">{pendingUsers.length}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-muted-foreground">Pending Registrations</p>
-            <p className="text-2xl font-bold text-yellow-600">{regCounts.pending}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-muted-foreground">Approved Registrations</p>
-            <p className="text-2xl font-bold text-green-600">{regCounts.approved}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-muted-foreground">Rejected Registrations</p>
-            <p className="text-2xl font-bold text-red-600">{regCounts.rejected}</p>
-          </div>
+      <div className="animate-fade-in max-w-[1600px] mx-auto">
+        <div className="mb-6 lg:mb-8">
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+            Onboarding <span className="gradient-text">Guard</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">
+            Verify digital identities and authorize platform access for new riders and clubs.
+          </p>
         </div>
 
+        {/* KPI Stats */}
+        <KPIGrid>
+          <KPICard title="Awaiting Review" value={pendingUsers.length} icon={Clock} variant="primary" subText="Pending validation" className="animate-slide-up-1" />
+          <KPICard title="Pending Regs" value={regCounts.pending} icon={UserCheck} variant="outline" subText="Registration queue" className="animate-slide-up-2" />
+          <KPICard title="Approved Regs" value={regCounts.approved} icon={Zap} variant="outline" subText="Access granted" className="animate-slide-up-3" />
+          <KPICard title="Compliance" value="Strict" icon={ShieldCheck} variant="secondary" subText="Policy active" className="animate-slide-up-4" />
+        </KPIGrid>
+
         {/* Tabs */}
-        <div className="flex gap-2">
-          <button onClick={() => setTab('users')} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 ${tab === 'users' ? 'bg-blue-600 text-on-surface' : 'bg-white text-on-surface-variant'}`}>
-            <Users size={16} /> User Approvals ({pendingUsers.length})
-          </button>
-          <button onClick={() => setTab('registrations')} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 ${tab === 'registrations' ? 'bg-blue-600 text-on-surface' : 'bg-white text-on-surface-variant'}`}>
-            <FileText size={16} /> Registration Approvals ({regCounts.pending})
-          </button>
+        <div className="mb-4 animate-slide-up-2">
+          <div className="flex gap-1 bg-surface-container rounded-xl p-1 w-fit border border-border/30 shadow-inner">
+            <button
+              onClick={() => setTab('users')}
+              className={`px-4 sm:px-5 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${tab === 'users' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-on-surface'}`}
+            >
+              <Users size={14} /> Review Queue ({pendingUsers.length})
+            </button>
+            <button
+              onClick={() => setTab('registrations')}
+              className={`px-4 sm:px-5 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${tab === 'registrations' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-on-surface'}`}
+            >
+              <FileText size={14} /> Registrations ({regCounts.pending})
+            </button>
+          </div>
         </div>
 
         {/* User Approvals Tab */}
         {tab === 'users' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bento-card overflow-hidden animate-slide-up-3">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/50 via-secondary/50 to-primary/50" />
             {pendingUsers.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">No pending user approvals</div>
+              <div className="p-12 text-center text-sm text-muted-foreground italic">No candidates found in the review queue.</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-surface-lowest border-b">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-on-surface">Name</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-on-surface">Email</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-on-surface">Phone</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-on-surface">Date</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-on-surface">Actions</th>
+                <table className="w-full text-sm min-w-[850px]">
+                  <thead>
+                    <tr className="label-tech text-left bg-surface-container/40">
+                      <th className="p-3 sm:p-4">Applicant Persona</th>
+                      <th className="p-3 sm:p-4">Digital Identity</th>
+                      <th className="p-3 sm:p-4">Contact</th>
+                      <th className="p-3 sm:p-4">Registered</th>
+                      <th className="p-3 sm:p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-border/10">
                     {pendingUsers.map(user => (
-                      <tr key={user.id} className="hover:bg-surface-lowest">
-                        <td className="px-6 py-4 text-sm text-on-surface">{user.firstName} {user.lastName}</td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">{user.email}</td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">{user.phone || '-'}</td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</td>
-                        <td className="px-6 py-4 text-sm">
-                          <button
-                            onClick={() => handleApproveUser(user.id, `${user.firstName} ${user.lastName}`)}
-                            disabled={approving === user.id}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 text-sm"
-                          >
-                            {approving === user.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check size={14} />}
-                            Approve
-                          </button>
+                      <tr key={user.id} className="group hover:bg-surface-container/20 transition-all duration-300">
+                        <td className="p-3 sm:p-4">
+                          <span className="text-on-surface font-bold tracking-tight">{user.firstName} {user.lastName}</span>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <span className="text-on-surface-variant font-medium text-xs">{user.email}</span>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <span className="text-[10px] text-muted-foreground font-mono">{user.phone || 'No contact meta'}</span>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <span className="text-[10px] text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</span>
+                        </td>
+                        <td className="p-3 sm:p-4 text-right">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => handleApproveUser(user.id, `${user.firstName} ${user.lastName}`)}
+                              disabled={approving === user.id}
+                              title="Authorize"
+                              className="p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all active:scale-90"
+                            >
+                              {approving === user.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -188,36 +205,44 @@ export default function AdminApprovals() {
 
         {/* Registration Approvals Tab */}
         {tab === 'registrations' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="p-4 border-b flex justify-between items-center">
+          <div className="bento-card overflow-hidden animate-slide-up-3">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary/50 via-primary/50 to-secondary/50" />
+            <div className="p-4 border-b border-border/10 flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Pending registration approvals</span>
-              <Link href="/registrations/approvals" className="text-sm text-blue-600 hover:underline">View All →</Link>
+              <Link href="/registrations/approvals" className="text-sm text-primary hover:text-primary/80 font-semibold transition-colors">View All →</Link>
             </div>
             {pendingRegs.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">No pending registration approvals</div>
+              <div className="p-12 text-center text-sm text-muted-foreground italic">No pending registration approvals.</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-surface-lowest border-b">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Rider</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Event</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Horse</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Amount</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Actions</th>
+                <table className="w-full text-sm min-w-[750px]">
+                  <thead>
+                    <tr className="label-tech text-left bg-surface-container/40">
+                      <th className="p-3 sm:p-4">Athlete</th>
+                      <th className="p-3 sm:p-4">Event Championship</th>
+                      <th className="p-3 sm:p-4">Equine Asset</th>
+                      <th className="p-3 sm:p-4">Fee Amount</th>
+                      <th className="p-3 sm:p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-border/10">
                     {pendingRegs.map(reg => (
-                      <tr key={reg.id} className="hover:bg-surface-lowest">
-                        <td className="px-4 py-3 text-sm">{reg.rider.firstName} {reg.rider.lastName}</td>
-                        <td className="px-4 py-3 text-sm text-on-surface">{reg.event.name}</td>
-                        <td className="px-4 py-3 text-sm text-on-surface">{reg.horse.name}</td>
-                        <td className="px-4 py-3 text-sm font-semibold">₹{reg.totalAmount}</td>
-                        <td className="px-4 py-3 text-sm">
-                          <div className="flex gap-2">
-                            <button onClick={() => handleApproveReg(reg.id)} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200"><Check size={14} /></button>
-                            <button onClick={() => handleRejectReg(reg.id)} className="p-1.5 rounded-xl rounded hover:bg-red-200"><X size={14} /></button>
+                      <tr key={reg.id} className="group hover:bg-surface-container/20 transition-all duration-300">
+                        <td className="p-3 sm:p-4">
+                          <div className="flex flex-col">
+                            <span className="text-on-surface font-bold tracking-tight">{reg.rider.firstName} {reg.rider.lastName}</span>
+                            <span className="text-[10px] text-muted-foreground">{reg.rider.email}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 sm:p-4 text-on-surface-variant font-medium">{reg.event.name}</td>
+                        <td className="p-3 sm:p-4 text-on-surface-variant">{reg.horse.name}</td>
+                        <td className="p-3 sm:p-4">
+                          <span className="text-on-surface font-bold">₹{reg.totalAmount.toLocaleString('en-IN')}</span>
+                        </td>
+                        <td className="p-3 sm:p-4 text-right">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleApproveReg(reg.id)} title="Approve" className="p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all active:scale-90"><CheckCircle className="w-4 h-4" /></button>
+                            <button onClick={() => handleRejectReg(reg.id)} title="Reject" className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all active:scale-90"><XCircle className="w-4 h-4" /></button>
                           </div>
                         </td>
                       </tr>
