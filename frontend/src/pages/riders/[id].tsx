@@ -8,6 +8,8 @@ import { ArrowLeft, Pencil, Save, X, Plus, Trash2, ImageIcon, Ban } from 'lucide
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import AddressMapPicker from '@/components/AddressMapPicker';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { DatePicker } from '@/components/DatePicker';
 
 interface SocialLinks {
   instagram?: string;
@@ -417,16 +419,15 @@ export default function RiderDetail() {
               <div>
                 <p className="text-sm text-muted-foreground">Gender</p>
                 {editing ? (
-                  <select
-                    value={editForm.gender}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, gender: e.target.value }))}
-                    className="input"
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  <Select value={editForm.gender || '__none__'} onValueChange={v => setEditForm(prev => ({ ...prev, gender: v === '__none__' ? '' : v }))}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="Select Gender" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Select Gender</SelectItem>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <p className="text-on-surface">{rider.gender || '-'}</p>
                 )}
@@ -434,11 +435,10 @@ export default function RiderDetail() {
               <div>
                 <p className="text-sm text-muted-foreground">Date of Birth</p>
                 {editing ? (
-                  <input
-                    type="date"
-                    value={editForm.dob}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, dob: e.target.value }))}
-                    className="input"
+                  <DatePicker
+                    value={editForm.dob ? new Date(editForm.dob) : undefined}
+                    onChange={(date: Date | undefined) => setEditForm(prev => ({ ...prev, dob: date ? date.toISOString().split('T')[0] : '' }))}
+                    placeholder="Select date"
                   />
                 ) : (
                   <p className="text-on-surface">{rider.dob ? new Date(rider.dob).toLocaleDateString() : '-'}</p>
@@ -578,16 +578,15 @@ export default function RiderDetail() {
             <div className="mb-4 p-4 rounded-lg  border border-white border-opacity-10">
               <p className="text-sm text-muted-foreground mb-2">Select a horse to link to this rider:</p>
               <div className="flex gap-3">
-                <select
-                  value={selectedHorseId}
-                  onChange={(e) => setSelectedHorseId(e.target.value)}
-                  className="input flex-1"
-                >
-                  <option value="">Choose a horse...</option>
-                  {availableHorses.map(h => (
-                    <option key={h.id} value={h.id}>{h.name} ({h.breed || h.gender})</option>
-                  ))}
-                </select>
+                <Select value={selectedHorseId || '__none__'} onValueChange={v => setSelectedHorseId(v === '__none__' ? '' : v)}>
+                  <SelectTrigger className="flex-1"><SelectValue placeholder="Choose a horse..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Choose a horse...</SelectItem>
+                    {availableHorses.map(h => (
+                      <SelectItem key={h.id} value={h.id}>{h.name} ({h.breed || h.gender})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <button
                   onClick={handleLinkHorse}
                   disabled={!selectedHorseId}

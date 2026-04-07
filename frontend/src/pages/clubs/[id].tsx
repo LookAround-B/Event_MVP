@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Plus, Trash2, Pencil, Save, X, ImageIcon } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import DatePicker from '@/components/DatePicker';
 
 interface Rider {
   id: string;
@@ -653,22 +655,20 @@ export default function ClubDetail() {
                     />
                     <div>
                       <label className="block text-xs text-muted-foreground mb-1">Date of Birth</label>
-                      <input
-                        type="date"
-                        value={riderForm.dob}
-                        onChange={e => setRiderForm({ ...riderForm, dob: e.target.value })}
-                        className="input"
+                      <DatePicker
+                        value={riderForm.dob ? new Date(riderForm.dob) : undefined}
+                        onChange={(date) => setRiderForm({ ...riderForm, dob: date ? date.toISOString().split('T')[0] : '' })}
+                        placeholder="Select date"
                       />
                     </div>
-                    <select
-                      value={riderForm.gender}
-                      onChange={e => setRiderForm({ ...riderForm, gender: e.target.value })}
-                      className="input"
-                    >
-                      <option value="Male" className="bg-slate-800 text-on-surface">Male</option>
-                      <option value="Female" className="bg-slate-800 text-on-surface">Female</option>
-                      <option value="Other" className="bg-slate-800 text-on-surface">Other</option>
-                    </select>
+                    <Select value={riderForm.gender} onValueChange={v => setRiderForm({ ...riderForm, gender: v })}>
+                      <SelectTrigger className="w-full"><SelectValue placeholder="Gender" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <input
                       type="text"
                       placeholder="Address"
@@ -716,13 +716,22 @@ export default function ClubDetail() {
                               <td><input type="email" value={editRiderForm.email} onChange={e => setEditRiderForm({ ...editRiderForm, email: e.target.value })} className="input text-xs py-1 px-2 w-32" /></td>
                               <td><input type="tel" value={editRiderForm.mobile} onChange={e => setEditRiderForm({ ...editRiderForm, mobile: e.target.value })} className="input text-xs py-1 px-2 w-24" /></td>
                               <td>
-                                <select value={editRiderForm.gender} onChange={e => setEditRiderForm({ ...editRiderForm, gender: e.target.value })} className="input text-xs py-1 px-2 w-20">
-                                  <option value="Male" className="bg-slate-800">Male</option>
-                                  <option value="Female" className="bg-slate-800">Female</option>
-                                  <option value="Other" className="bg-slate-800">Other</option>
-                                </select>
+                                <Select value={editRiderForm.gender} onValueChange={v => setEditRiderForm({ ...editRiderForm, gender: v })}>
+                                  <SelectTrigger className="h-8 text-xs w-20"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Male">Male</SelectItem>
+                                    <SelectItem value="Female">Female</SelectItem>
+                                    <SelectItem value="Other">Other</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </td>
-                              <td><input type="date" value={editRiderForm.dob} onChange={e => setEditRiderForm({ ...editRiderForm, dob: e.target.value })} className="input text-xs py-1 px-2 w-32" /></td>
+                              <td>
+                                <DatePicker
+                                  value={editRiderForm.dob ? new Date(editRiderForm.dob) : undefined}
+                                  onChange={(date) => setEditRiderForm({ ...editRiderForm, dob: date ? date.toISOString().split('T')[0] : '' })}
+                                  placeholder="DOB"
+                                />
+                              </td>
                               <td><input type="text" value={editRiderForm.address} onChange={e => setEditRiderForm({ ...editRiderForm, address: e.target.value })} className="input text-xs py-1 px-2 w-32" /></td>
                               <td>
                                 <div className="flex gap-1">
@@ -798,15 +807,14 @@ export default function ClubDetail() {
                       onChange={e => setHorseForm({ ...horseForm, color: e.target.value })}
                       className="input"
                     />
-                    <select
-                      value={horseForm.gender}
-                      onChange={e => setHorseForm({ ...horseForm, gender: e.target.value })}
-                      className="input"
-                    >
-                      <option value="Stallion" className="bg-slate-800 text-on-surface">Stallion</option>
-                      <option value="Mare" className="bg-slate-800 text-on-surface">Mare</option>
-                      <option value="Gelding" className="bg-slate-800 text-on-surface">Gelding</option>
-                    </select>
+                    <Select value={horseForm.gender} onValueChange={v => setHorseForm({ ...horseForm, gender: v })}>
+                      <SelectTrigger className="w-full"><SelectValue placeholder="Gender" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Stallion">Stallion</SelectItem>
+                        <SelectItem value="Mare">Mare</SelectItem>
+                        <SelectItem value="Gelding">Gelding</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <div>
                       <label className="block text-xs text-muted-foreground mb-1">Year of Birth</label>
                       <input
@@ -874,11 +882,14 @@ export default function ClubDetail() {
                               <td><input type="text" value={editHorseForm.breed} onChange={e => setEditHorseForm({ ...editHorseForm, breed: e.target.value })} className="input text-xs py-1 px-2 w-20" /></td>
                               <td><input type="text" value={editHorseForm.color} onChange={e => setEditHorseForm({ ...editHorseForm, color: e.target.value })} className="input text-xs py-1 px-2 w-20" /></td>
                               <td>
-                                <select value={editHorseForm.gender} onChange={e => setEditHorseForm({ ...editHorseForm, gender: e.target.value })} className="input text-xs py-1 px-2 w-24">
-                                  <option value="Stallion" className="bg-slate-800">Stallion</option>
-                                  <option value="Mare" className="bg-slate-800">Mare</option>
-                                  <option value="Gelding" className="bg-slate-800">Gelding</option>
-                                </select>
+                                <Select value={editHorseForm.gender} onValueChange={v => setEditHorseForm({ ...editHorseForm, gender: v })}>
+                                  <SelectTrigger className="h-8 text-xs w-24"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Stallion">Stallion</SelectItem>
+                                    <SelectItem value="Mare">Mare</SelectItem>
+                                    <SelectItem value="Gelding">Gelding</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </td>
                               <td><input type="number" value={editHorseForm.yearOfBirth} onChange={e => setEditHorseForm({ ...editHorseForm, yearOfBirth: parseInt(e.target.value) || 0 })} className="input text-xs py-1 px-2 w-20" /></td>
                               <td><input type="text" value={editHorseForm.passportNumber} onChange={e => setEditHorseForm({ ...editHorseForm, passportNumber: e.target.value })} className="input text-xs py-1 px-2 w-24" /></td>

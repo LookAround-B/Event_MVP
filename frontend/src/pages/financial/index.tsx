@@ -14,6 +14,7 @@ import ExportModal from '@/components/ExportModal';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 /* ─── Types (preserved) ─── */
 interface FinanceRegistration {
@@ -366,30 +367,28 @@ export default function Financial() {
               {activeTab === 'finance' && (
                 <>
                   <div>
-                    <select
-                      value={eventFilter}
-                      onChange={(e) => { setEventFilter(e.target.value); setFinancePage(1); }}
-                      className="px-3 py-2 rounded-xl text-sm bg-surface-container/50 border border-border/30 text-on-surface focus:ring-1 focus:ring-primary/50 focus:outline-none"
-                    >
-                      <option value="">All Events</option>
-                      {events.map(ev => (
-                        <option key={ev.id} value={ev.id}>
-                          {ev.name}{ev.startDate ? ` - ${new Date(ev.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : ''}
-                        </option>
-                      ))}
-                    </select>
+                    <Select value={eventFilter || '__all__'} onValueChange={v => { setEventFilter(v === '__all__' ? '' : v); setFinancePage(1); }}>
+                      <SelectTrigger className="w-[220px]"><SelectValue placeholder="All Events" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">All Events</SelectItem>
+                        {events.map(ev => (
+                          <SelectItem key={ev.id} value={ev.id}>
+                            {ev.name}{ev.startDate ? ` - ${new Date(ev.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
-                    <select
-                      value={categoryFilter}
-                      onChange={(e) => { setCategoryFilter(e.target.value); setFinancePage(1); }}
-                      className="px-3 py-2 rounded-xl text-sm bg-surface-container/50 border border-border/30 text-on-surface focus:ring-1 focus:ring-primary/50 focus:outline-none"
-                    >
-                      <option value="">All Categories</option>
-                      {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </select>
+                    <Select value={categoryFilter || '__all__'} onValueChange={v => { setCategoryFilter(v === '__all__' ? '' : v); setFinancePage(1); }}>
+                      <SelectTrigger className="w-[180px]"><SelectValue placeholder="All Categories" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">All Categories</SelectItem>
+                        {categories.map(cat => (
+                          <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </>
               )}
@@ -632,26 +631,30 @@ export default function Financial() {
                 </div>
                 <div>
                   <label className="label-tech block mb-1.5">Payment Method</label>
-                  <select name="paymentMethod" value={editForm.paymentMethod} onChange={handleEditChange}
-                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50">
-                    <option value="">Select</option>
-                    <option value="Credit Card">Credit Card</option>
-                    <option value="Debit Card">Debit Card</option>
-                    <option value="UPI">UPI</option>
-                    <option value="Bank Transfer">Bank Transfer</option>
-                    <option value="Cheque">Cheque</option>
-                    <option value="Cash">Cash</option>
-                  </select>
+                  <Select value={editForm.paymentMethod || '__none__'} onValueChange={v => setEditForm(prev => ({ ...prev, paymentMethod: v === '__none__' ? '' : v }))}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Select</SelectItem>
+                      <SelectItem value="Credit Card">Credit Card</SelectItem>
+                      <SelectItem value="Debit Card">Debit Card</SelectItem>
+                      <SelectItem value="UPI">UPI</SelectItem>
+                      <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                      <SelectItem value="Cheque">Cheque</SelectItem>
+                      <SelectItem value="Cash">Cash</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="label-tech block mb-1.5">Status</label>
-                  <select name="status" value={editForm.status} onChange={handleEditChange}
-                    className="w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50">
-                    <option value="UNPAID">Unpaid</option>
-                    <option value="PAID">Paid</option>
-                    <option value="PARTIAL">Partial</option>
-                    <option value="CANCELLED">Cancelled</option>
-                  </select>
+                  <Select value={editForm.status} onValueChange={v => setEditForm(prev => ({ ...prev, status: v }))}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="Select status" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="UNPAID">Unpaid</SelectItem>
+                      <SelectItem value="PAID">Paid</SelectItem>
+                      <SelectItem value="PARTIAL">Partial</SelectItem>
+                      <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="label-tech block mb-1.5">Notes</label>

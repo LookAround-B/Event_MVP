@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { Check, X, Filter, ChevronDown } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface Registration {
   id: string;
@@ -34,7 +35,7 @@ export default function RegistrationApprovals() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('PENDING');
   const [events, setEvents] = useState<{ id: string; name: string }[]>([]);
-  const [eventFilter, setEventFilter] = useState('');
+  const [eventFilter, setEventFilter] = useState('__all__');
   const [rejectionModal, setRejectionModal] = useState<{ isOpen: boolean; regId?: string }>({ isOpen: false });
   const [rejectionNotes, setRejectionNotes] = useState('');
   const [paymentModal, setPaymentModal] = useState<{ isOpen: boolean; reg?: Registration }>({ isOpen: false });
@@ -59,7 +60,7 @@ export default function RegistrationApprovals() {
     try {
       setLoading(true);
       const params = new URLSearchParams({ approvalStatus: filter, limit: '50' });
-      if (eventFilter) params.set('eventId', eventFilter);
+      if (eventFilter && eventFilter !== '__all__') params.set('eventId', eventFilter);
       const res = await api.get(`/api/registrations/pending?${params}`);
       setRegistrations(res.data.data?.registrations || []);
       setCounts(res.data.data?.counts || { pending: 0, approved: 0, rejected: 0 });
@@ -119,15 +120,15 @@ export default function RegistrationApprovals() {
 
   const statusBadge = (status: string) => {
     const colors: Record<string, string> = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      APPROVED: 'bg-green-100 text-green-800',
-      REJECTED: 'bg-red-100 text-red-800',
-      PAID: 'bg-green-100 text-green-800',
-      UNPAID: 'bg-red-100 text-red-800',
-      PARTIAL: 'bg-orange-100 text-orange-800',
+      PENDING: 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/20',
+      APPROVED: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20',
+      REJECTED: 'bg-red-500/15 text-red-400 border border-red-500/20',
+      PAID: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20',
+      UNPAID: 'bg-red-500/15 text-red-400 border border-red-500/20',
+      PARTIAL: 'bg-orange-500/15 text-orange-400 border border-orange-500/20',
     };
     return (
-      <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${colors[status] || 'bg-surface-container text-gray-800'}`}>
+      <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${colors[status] || 'bg-surface-container text-muted-foreground'}`}>
         {status}
       </span>
     );
@@ -141,39 +142,49 @@ export default function RegistrationApprovals() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-yellow-50 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-yellow-700">{counts.pending}</p>
-            <p className="text-sm text-yellow-600">Pending</p>
+          <div className="bento-card p-4 text-center border-l-2 border-yellow-500/50">
+            <p className="text-2xl font-bold text-yellow-400">{counts.pending}</p>
+            <p className="text-sm text-muted-foreground">Pending</p>
           </div>
-          <div className="bg-green-50 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-green-700">{counts.approved}</p>
-            <p className="text-sm text-green-600">Approved</p>
+          <div className="bento-card p-4 text-center border-l-2 border-emerald-500/50">
+            <p className="text-2xl font-bold text-emerald-400">{counts.approved}</p>
+            <p className="text-sm text-muted-foreground">Approved</p>
           </div>
-          <div className="bg-red-50 rounded-lg p-4 text-center">
-            <p className="text-2xl font-bold text-red-700">{counts.rejected}</p>
-            <p className="text-sm text-red-600">Rejected</p>
+          <div className="bento-card p-4 text-center border-l-2 border-red-500/50">
+            <p className="text-2xl font-bold text-red-400">{counts.rejected}</p>
+            <p className="text-sm text-muted-foreground">Rejected</p>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 flex flex-wrap gap-4 items-center">
-          <Filter className="text-muted-foreground" />
-          <select value={filter} onChange={e => setFilter(e.target.value)} className="px-3 py-2 border rounded-lg text-sm">
-            <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="ALL">All</option>
-          </select>
-          <select value={eventFilter} onChange={e => setEventFilter(e.target.value)} className="px-3 py-2 border rounded-lg text-sm">
-            <option value="">All Events</option>
-            {events.map(ev => (
-              <option key={ev.id} value={ev.id}>{ev.name}</option>
-            ))}
-          </select>
+        <div className="bento-card p-4 flex flex-wrap gap-4 items-center">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-[160px] bg-surface-container border-border/30">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PENDING">Pending</SelectItem>
+              <SelectItem value="APPROVED">Approved</SelectItem>
+              <SelectItem value="REJECTED">Rejected</SelectItem>
+              <SelectItem value="ALL">All</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={eventFilter} onValueChange={setEventFilter}>
+            <SelectTrigger className="w-[200px] bg-surface-container border-border/30">
+              <SelectValue placeholder="All Events" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">All Events</SelectItem>
+              {events.map(ev => (
+                <SelectItem key={ev.id} value={ev.id}>{ev.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bento-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-surface-container border-b">
@@ -210,16 +221,16 @@ export default function RegistrationApprovals() {
                         <div className="flex gap-2">
                           {reg.approvalStatus === 'PENDING' && (
                             <>
-                              <button onClick={() => handleApprove(reg.id)} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200" title="Approve">
+                              <button onClick={() => handleApprove(reg.id)} className="p-1.5 bg-emerald-500/15 text-emerald-400 rounded-lg hover:bg-emerald-500/25 transition-colors" title="Approve">
                                 <Check size={16} />
                               </button>
-                              <button onClick={() => setRejectionModal({ isOpen: true, regId: reg.id })} className="p-1.5 rounded-xl rounded hover:bg-red-200" title="Reject">
+                              <button onClick={() => setRejectionModal({ isOpen: true, regId: reg.id })} className="p-1.5 bg-red-500/15 text-red-400 rounded-lg hover:bg-red-500/25 transition-colors" title="Reject">
                                 <X size={16} />
                               </button>
                             </>
                           )}
                           {reg.approvalStatus === 'APPROVED' && reg.paymentStatus !== 'PAID' && (
-                            <button onClick={() => { setPaymentModal({ isOpen: true, reg }); setPaymentForm({ ...paymentForm, amount: String(reg.totalAmount) }); }} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">
+                            <button onClick={() => { setPaymentModal({ isOpen: true, reg }); setPaymentForm({ ...paymentForm, amount: String(reg.totalAmount) }); }} className="px-2 py-1 bg-blue-500/15 text-blue-400 rounded-lg text-xs hover:bg-blue-500/25 transition-colors">
                               Record Payment
                             </button>
                           )}
@@ -249,7 +260,7 @@ export default function RegistrationApprovals() {
                 value={rejectionNotes}
                 onChange={e => setRejectionNotes(e.target.value)}
                 placeholder="Reason for rejection (required)..."
-                className="w-full px-3 py-2 border rounded-lg text-sm h-24 mb-4"
+                className="w-full px-3 py-2 bg-surface-container border border-border/30 rounded-xl text-sm text-on-surface h-24 mb-4 focus:outline-none focus:ring-1 focus:ring-primary/50 placeholder:text-muted-foreground"
               />
               <div className="flex gap-2 justify-end">
                 <button onClick={() => { setRejectionModal({ isOpen: false }); setRejectionNotes(''); }} className="px-4 py-2 bg-surface-bright rounded-lg text-sm">Cancel</button>
@@ -271,25 +282,32 @@ export default function RegistrationApprovals() {
               <div className="space-y-3">
                 <div>
                   <label className="text-sm font-medium text-on-surface-variant">Payment Method</label>
-                  <select value={paymentForm.method} onChange={e => setPaymentForm({ ...paymentForm, method: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm mt-1">
-                    <option value="CARD">Card</option>
-                    <option value="BANK_TRANSFER">Bank Transfer</option>
-                    <option value="CHEQUE">Cheque</option>
-                    <option value="UPI">UPI</option>
-                    <option value="CASH">Cash</option>
-                  </select>
+                  <div className="mt-1">
+                    <Select value={paymentForm.method} onValueChange={(v) => setPaymentForm({ ...paymentForm, method: v })}>
+                      <SelectTrigger className="w-full bg-surface-container border-border/30">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="CARD">Card</SelectItem>
+                        <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                        <SelectItem value="CHEQUE">Cheque</SelectItem>
+                        <SelectItem value="UPI">UPI</SelectItem>
+                        <SelectItem value="CASH">Cash</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-on-surface-variant">Amount (₹)</label>
-                  <input type="number" value={paymentForm.amount} onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm mt-1" />
+                  <input type="number" value={paymentForm.amount} onChange={e => setPaymentForm({ ...paymentForm, amount: e.target.value })} className="w-full px-3 py-2 bg-surface-container border border-border/30 rounded-xl text-sm text-on-surface mt-1 focus:outline-none focus:ring-1 focus:ring-primary/50" />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-on-surface-variant">Reference Number</label>
-                  <input type="text" value={paymentForm.ref} onChange={e => setPaymentForm({ ...paymentForm, ref: e.target.value })} placeholder="Transaction/cheque ref" className="w-full px-3 py-2 border rounded-lg text-sm mt-1" />
+                  <input type="text" value={paymentForm.ref} onChange={e => setPaymentForm({ ...paymentForm, ref: e.target.value })} placeholder="Transaction/cheque ref" className="w-full px-3 py-2 bg-surface-container border border-border/30 rounded-xl text-sm text-on-surface mt-1 focus:outline-none focus:ring-1 focus:ring-primary/50 placeholder:text-muted-foreground" />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-on-surface-variant">Notes</label>
-                  <textarea value={paymentForm.notes} onChange={e => setPaymentForm({ ...paymentForm, notes: e.target.value })} className="w-full px-3 py-2 border rounded-lg text-sm mt-1 h-16" />
+                  <textarea value={paymentForm.notes} onChange={e => setPaymentForm({ ...paymentForm, notes: e.target.value })} className="w-full px-3 py-2 bg-surface-container border border-border/30 rounded-xl text-sm text-on-surface mt-1 h-16 focus:outline-none focus:ring-1 focus:ring-primary/50" />
                 </div>
               </div>
               <div className="flex gap-2 justify-end mt-4">

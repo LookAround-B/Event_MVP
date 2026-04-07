@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import toast from 'react-hot-toast';
 import {
   Plus, Trash2, Search, Download, Eye, Edit,
-  ClipboardCheck, Activity, CreditCard, AlertCircle, Calendar, Trophy,
+  ClipboardCheck, Activity, CreditCard, AlertCircle, Calendar, Trophy, Check,
 } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
@@ -15,6 +14,8 @@ import AuditPagination from '@/components/AuditPagination';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 /* ─── Types (preserved) ─── */
 interface Registration {
@@ -89,6 +90,71 @@ export default function Registrations() {
   const [viewItem, setViewItem] = useState<Registration | null>(null);
   const [deleteItem, setDeleteItem] = useState<Registration | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+
+  /* ─── Create modal state ─── */
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ eventId: '', riderId: '', horseId: '', categoryId: '' });
+  const [createEvents, setCreateEvents] = useState<{ id: string; name: string }[]>([]);
+  const [createRiders, setCreateRiders] = useState<{ id: string; firstName: string; lastName: string }[]>([]);
+  const [createHorses, setCreateHorses] = useState<{ id: string; name: string }[]>([]);
+  const [createCategories, setCreateCategories] = useState<{ id: string; name: string; price: number }[]>([]);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createDataLoading, setCreateDataLoading] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  const openCreateModal = useCallback(async () => {
+    setCreateOpen(true);
+    setCreateForm({ eventId: '', riderId: '', horseId: '', categoryId: '' });
+    setCreateCategories([]);
+    setCreateError(null);
+    try {
+      setCreateDataLoading(true);
+      const [eventsRes, ridersRes, horsesRes] = await Promise.all([
+        api.get('/api/events?limit=100'),
+        api.get('/api/riders?limit=100'),
+        api.get('/api/horses?limit=100'),
+      ]);
+      setCreateEvents(Array.isArray(eventsRes.data?.data?.events) ? eventsRes.data.data.events : []);
+      setCreateRiders(Array.isArray(ridersRes.data?.data?.riders) ? ridersRes.data.data.riders : []);
+      setCreateHorses(Array.isArray(horsesRes.data?.data?.horses) ? horsesRes.data.data.horses : []);
+    } catch (err: any) {
+      setCreateError(err.response?.status === 401 ? 'Not authenticated. Please log in first.' : 'Failed to load dropdown data');
+    } finally {
+      setCreateDataLoading(false);
+    }
+  }, []);
+
+  const handleCreateEventChange = async (eventId: string) => {
+    setCreateForm(prev => ({ ...prev, eventId, categoryId: '' }));
+    if (eventId) {
+      try {
+        const response = await api.get(`/api/events/${eventId}`);
+        setCreateCategories(response.data.data.categories || []);
+      } catch { setCreateCategories([]); }
+    } else {
+      setCreateCategories([]);
+    }
+  };
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateError(null);
+    if (!createForm.eventId || !createForm.riderId || !createForm.horseId || !createForm.categoryId) {
+      setCreateError('All fields are required');
+      return;
+    }
+    try {
+      setCreateLoading(true);
+      await api.post('/api/registrations', createForm);
+      toast.success('Registration created successfully!');
+      setCreateOpen(false);
+      fetchRegistrations();
+    } catch (err: any) {
+      setCreateError(err.response?.data?.message || 'Failed to create registration');
+    } finally {
+      setCreateLoading(false);
+    }
+  };
 
   /* ─── Data fetching (preserved) ─── */
   useEffect(() => {
@@ -281,9 +347,9 @@ export default function Registrations() {
               <button onClick={() => setExportOpen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
                 <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
               </button>
-              <Link href="/registrations/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold flex-1 sm:flex-initial justify-center shadow-lg shadow-primary/20">
+              <button onClick={openCreateModal} className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold flex-1 sm:flex-initial justify-center shadow-lg shadow-primary/20">
                 <Plus className="w-4 h-4" /> New Entry
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -416,6 +482,106 @@ export default function Registrations() {
           description={`Are you sure you want to cancel this registration for "${deleteItem?.rider.firstName} ${deleteItem?.rider.lastName}"? This action cannot be undone.`}
         />
         <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} onExport={handleExport} />
+
+        {/* ═══ Create Registration Modal ═══ */}
+        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+          <DialogContent className="sm:max-w-lg bg-surface border-border/50">
+            <DialogHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <ClipboardCheck className="w-4 h-4 text-primary" />
+                </div>
+                <DialogTitle className="text-base font-bold text-on-surface">New Registration</DialogTitle>
+              </div>
+            </DialogHeader>
+
+            {createDataLoading ? (
+              <div className="space-y-4 py-2">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-14 rounded-xl bg-surface-container/40 animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <form onSubmit={handleCreateSubmit} className="space-y-5 pt-2">
+                {createError && (
+                  <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
+                    {createError}
+                  </div>
+                )}
+
+                {/* Event */}
+                <div>
+                  <label className="label-tech block mb-1.5">Event <span className="text-destructive">*</span></label>
+                  <Select value={createForm.eventId} onValueChange={handleCreateEventChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select an event" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {createEvents.map(ev => (
+                        <SelectItem key={ev.id} value={ev.id}>{ev.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Rider */}
+                <div>
+                  <label className="label-tech block mb-1.5">Rider <span className="text-destructive">*</span></label>
+                  <Select value={createForm.riderId} onValueChange={v => setCreateForm(p => ({ ...p, riderId: v }))}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a rider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {createRiders.map(r => (
+                        <SelectItem key={r.id} value={r.id}>{r.firstName} {r.lastName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Horse */}
+                <div>
+                  <label className="label-tech block mb-1.5">Horse <span className="text-destructive">*</span></label>
+                  <Select value={createForm.horseId} onValueChange={v => setCreateForm(p => ({ ...p, horseId: v }))}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a horse" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {createHorses.map(h => (
+                        <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="label-tech block mb-1.5">Category <span className="text-destructive">*</span></label>
+                  <Select value={createForm.categoryId} onValueChange={v => setCreateForm(p => ({ ...p, categoryId: v }))} disabled={!createForm.eventId}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={createForm.eventId ? 'Select a category' : 'Select an event first'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {createCategories.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.name} - ₹{c.price}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-3 pt-4 border-t border-border/40">
+                  <button type="submit" disabled={createLoading} className="flex-1 py-2.5 btn-cta rounded-xl text-sm font-bold disabled:opacity-50 flex items-center justify-center gap-2">
+                    <Check className="w-4 h-4" /> {createLoading ? 'Creating...' : 'Create Registration'}
+                  </button>
+                  <button type="button" onClick={() => setCreateOpen(false)} className="flex-1 py-2.5 bg-surface-container rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/50 text-center">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </ProtectedRoute>
   );

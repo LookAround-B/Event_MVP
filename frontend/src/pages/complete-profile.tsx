@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import apiClient from '@/lib/api';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export default function CompleteProfile() {
   const router = useRouter();
@@ -106,20 +107,16 @@ export default function CompleteProfile() {
               <label htmlFor="gender" className="form-label">
                 Gender
               </label>
-              <select
-                id="gender"
-                name="gender"
-                value={formData.gender}
-                onChange={handleInputChange}
-                required
-                className="input"
-              >
-                <option value="">Select your gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-                <option value="Prefer not to say">Prefer not to say</option>
-              </select>
+              <Select value={formData.gender || '__none__'} onValueChange={v => setFormData(prev => ({ ...prev, gender: v === '__none__' ? '' : v }))}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="Select your gender" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Select your gender</SelectItem>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

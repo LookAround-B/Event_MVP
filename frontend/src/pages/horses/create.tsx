@@ -306,7 +306,7 @@ export default function CreateHorse() {
                         horseCode: '',
                       }));
                     }}
-                    className="w-4 h-4 border border-gray-300 rounded"
+                    className="w-4 h-4 border border-border rounded"
                   />
                   <span className="text-sm text-muted-foreground">Use Horse Code instead of Passport Number</span>
                 </label>

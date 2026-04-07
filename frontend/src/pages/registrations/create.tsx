@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, ClipboardCheck, Check, X } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface Event { id: string; name: string; }
 interface Rider { id: string; firstName: string; lastName: string; }
@@ -57,8 +58,7 @@ export default function CreateRegistration() {
     }
   };
 
-  const handleEventChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const eventId = e.target.value;
+  const handleEventChange = async (eventId: string) => {
     setFormData(prev => ({ ...prev, eventId, categoryId: '' }));
     if (eventId) {
       try {
@@ -69,11 +69,6 @@ export default function CreateRegistration() {
     } else {
       setCategories([]);
     }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -149,45 +144,57 @@ export default function CreateRegistration() {
               {/* Event */}
               <div>
                 <label className="label-tech block mb-1.5">Event <span className="text-destructive">*</span></label>
-                <select name="eventId" value={formData.eventId} onChange={handleEventChange} required className={selectClass}>
-                  <option value="">Select an event</option>
-                  {events.map(event => (
-                    <option key={event.id} value={event.id}>{event.name}</option>
-                  ))}
-                </select>
+                <Select value={formData.eventId || '__none__'} onValueChange={v => handleEventChange(v === '__none__' ? '' : v)}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select an event" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Select an event</SelectItem>
+                    {events.map(event => (
+                      <SelectItem key={event.id} value={event.id}>{event.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Rider */}
               <div>
                 <label className="label-tech block mb-1.5">Rider <span className="text-destructive">*</span></label>
-                <select name="riderId" value={formData.riderId} onChange={handleChange} required className={selectClass}>
-                  <option value="">Select a rider</option>
-                  {riders.map(rider => (
-                    <option key={rider.id} value={rider.id}>{rider.firstName} {rider.lastName}</option>
-                  ))}
-                </select>
+                <Select value={formData.riderId || '__none__'} onValueChange={v => setFormData(prev => ({ ...prev, riderId: v === '__none__' ? '' : v }))}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select a rider" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Select a rider</SelectItem>
+                    {riders.map(rider => (
+                      <SelectItem key={rider.id} value={rider.id}>{rider.firstName} {rider.lastName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Horse */}
               <div>
                 <label className="label-tech block mb-1.5">Horse <span className="text-destructive">*</span></label>
-                <select name="horseId" value={formData.horseId} onChange={handleChange} required className={selectClass}>
-                  <option value="">Select a horse</option>
-                  {horses.map(horse => (
-                    <option key={horse.id} value={horse.id}>{horse.name}</option>
-                  ))}
-                </select>
+                <Select value={formData.horseId || '__none__'} onValueChange={v => setFormData(prev => ({ ...prev, horseId: v === '__none__' ? '' : v }))}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select a horse" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Select a horse</SelectItem>
+                    {horses.map(horse => (
+                      <SelectItem key={horse.id} value={horse.id}>{horse.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Category */}
               <div>
                 <label className="label-tech block mb-1.5">Category <span className="text-destructive">*</span></label>
-                <select name="categoryId" value={formData.categoryId} onChange={handleChange} required disabled={!formData.eventId} className={selectClass}>
-                  <option value="">{formData.eventId ? 'Select a category' : 'Select an event first'}</option>
-                  {categories.map(category => (
-                    <option key={category.id} value={category.id}>{category.name} - ₹{category.price}</option>
-                  ))}
-                </select>
+                <Select value={formData.categoryId || '__none__'} onValueChange={v => setFormData(prev => ({ ...prev, categoryId: v === '__none__' ? '' : v }))} disabled={!formData.eventId}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder={formData.eventId ? 'Select a category' : 'Select an event first'} /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{formData.eventId ? 'Select a category' : 'Select an event first'}</SelectItem>
+                    {categories.map(category => (
+                      <SelectItem key={category.id} value={category.id}>{category.name} - ₹{category.price}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Actions */}

@@ -7,6 +7,7 @@ import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Download, ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Users, Search, X, Eye } from 'lucide-react';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { KPICard } from '@/components/dashboard/KPICard';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface EventDetail {
   id: string;
@@ -329,25 +330,23 @@ export default function EventDetail() {
                   className="w-full pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/30"
                 />
               </div>
-              <select
-                value={filterPaymentStatus}
-                onChange={e => { setFilterPaymentStatus(e.target.value); setPage(1); }}
-                className="px-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface border border-border/30 focus:outline-none focus:ring-1 focus:ring-primary/50"
-              >
-                <option value="">All Payment Statuses</option>
-                <option value="PAID">Paid</option>
-                <option value="UNPAID">Unpaid</option>
-                <option value="PARTIAL">Partial</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
-              <select
-                value={filterCategory}
-                onChange={e => { setFilterCategory(e.target.value); setPage(1); }}
-                className="px-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface border border-border/30 focus:outline-none focus:ring-1 focus:ring-primary/50"
-              >
-                <option value="">All Categories</option>
-                {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <Select value={filterPaymentStatus || '__all__'} onValueChange={v => { setFilterPaymentStatus(v === '__all__' ? '' : v); setPage(1); }}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="All Payment Statuses" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">All Payment Statuses</SelectItem>
+                  <SelectItem value="PAID">Paid</SelectItem>
+                  <SelectItem value="UNPAID">Unpaid</SelectItem>
+                  <SelectItem value="PARTIAL">Partial</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filterCategory || '__all__'} onValueChange={v => { setFilterCategory(v === '__all__' ? '' : v); setPage(1); }}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="All Categories" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">All Categories</SelectItem>
+                  {uniqueCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Table */}

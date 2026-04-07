@@ -200,14 +200,14 @@ function FinancialInsightCard({ collectible, receivable, loading }: { collectibl
       <div className="absolute inset-0 stripe-pattern opacity-[0.12] pointer-events-none" />
       {/* Stars */}
       {STAR_POSITIONS.map(([top, left], i) => (
-        <div key={i} className="absolute rounded-full bg-white pointer-events-none"
+        <div key={i} className="absolute rounded-full bg-primary-foreground pointer-events-none"
           style={{ top: `${top}%`, left: `${left}%`, width: i % 4 === 0 ? 3 : 2, height: i % 4 === 0 ? 3 : 2, opacity: 0.2 + (i % 3) * 0.15 }} />
       ))}
 
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold text-white">Financial Insight</h3>
-          <div className="text-[10px] text-white/50 bg-white/10 rounded-full px-3 py-1 border border-white/15">
+          <div className="text-[10px] text-muted-foreground bg-surface-container/60 rounded-full px-3 py-1 border border-border/30">
             Overview
           </div>
         </div>
@@ -234,12 +234,12 @@ function FinancialInsightCard({ collectible, receivable, loading }: { collectibl
               { label: 'Outstanding', pct: 28, color: 'hsl(253,65%,58%)' },
             ].map(d => (
               <div key={d.label}>
-                <div className="flex justify-between mb-1">
-                  <span className="text-[10px] text-white/40">{d.label}</span>
-                  <span className="text-[10px] font-bold text-white/70">{d.pct}%</span>
+                <div className="flex justify-between mb-1.5">
+                  <span className="text-[11px] font-medium text-white/50">{d.label}</span>
+                  <span className="text-[11px] font-bold text-white/80">{d.pct}%</span>
                 </div>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${d.pct}%`, background: d.color }} />
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${d.pct}%`, background: d.color, boxShadow: `0 0 8px ${d.color}` }} />
                 </div>
               </div>
             ))}
@@ -259,21 +259,21 @@ function Pagination({ page, totalPages, onPageChange }: { page: number; totalPag
       <button
         onClick={() => onPageChange(Math.max(1, page - 1))}
         disabled={page === 1}
-        className="btn btn-ghost p-2 disabled:opacity-30"
+        className="w-7 h-7 rounded-full border border-border/50 text-muted-foreground flex items-center justify-center hover:bg-surface-container transition-colors disabled:opacity-30"
         aria-label="Previous page"
       >
-        <ChevronLeft size={16} />
+        <ChevronLeft size={14} />
       </button>
-      <span className="text-sm px-3" >
-        Page {page} of {totalPages}
+      <span className="text-xs font-semibold text-on-surface px-2">
+        {page} / {totalPages}
       </span>
       <button
         onClick={() => onPageChange(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
-        className="btn btn-ghost p-2 disabled:opacity-30"
+        className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold disabled:opacity-30"
         aria-label="Next page"
       >
-        <ChevronRight size={16} />
+        <ChevronRight size={14} />
       </button>
     </div>
   );
@@ -291,57 +291,43 @@ function MultiSelect({ label, options, selected, onChange }: { label: string; op
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="input w-full text-left flex justify-between items-center cursor-pointer"
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm bg-surface-container text-on-surface border border-border/50 hover:border-primary/40 transition-colors cursor-pointer"
       >
-        <span className="text-sm">{selected.length > 0 ? `${label} (${selected.length})` : label}</span>
-        <Filter size={14}  />
+        <span>{selected.length > 0 ? `${label} (${selected.length})` : label}</span>
+        <Filter size={14} className="text-muted-foreground" />
       </button>
       {open && (
-        <div
-          className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg shadow-xl"
-          style={{
-            background: 'hsl(var(--surface-container))',
-            border: '1px solid hsl(var(--border) / 0.5)',
-          }}
-        >
+        <div className="absolute z-50 mt-1.5 w-full max-h-48 overflow-y-auto rounded-xl shadow-2xl shadow-black/30 bg-surface-low border border-border/60">
           {options.length === 0 ? (
-            <div className="px-3 py-2 text-xs" >No options</div>
+            <div className="px-4 py-3 text-xs text-muted-foreground">No options</div>
           ) : (
             options.map(opt => (
               <label
                 key={opt.value}
-                className="flex items-center gap-2 px-3 py-2 cursor-pointer text-sm transition-colors"
-                
-                onMouseOver={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-bright))')}
-                onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
+                className="flex items-center gap-2 px-4 py-2.5 cursor-pointer text-sm text-on-surface transition-colors hover:bg-surface-container"
               >
                 <input
                   type="checkbox"
                   checked={selected.includes(opt.value)}
                   onChange={() => toggle(opt.value)}
-                  className="rounded"
-                  style={{ accentColor: 'hsl(var(--primary))' }}
+                  className="rounded accent-primary"
                 />
                 {opt.label}
               </label>
             ))
           )}
-          <div
-            className="p-2 flex gap-2 border-t border-border/30"
-          >
+          <div className="p-2 flex gap-2 border-t border-border/30">
             <button
               type="button"
               onClick={() => { onChange([]); setOpen(false); }}
-              className="text-xs transition-colors"
-              
+              className="text-xs text-muted-foreground hover:text-on-surface transition-colors"
             >
               Clear
             </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="text-xs ml-auto transition-colors"
-              style={{ color: 'hsl(var(--primary))' }}
+              className="text-xs ml-auto text-primary font-semibold hover:text-primary/80 transition-colors"
             >
               Done
             </button>
@@ -358,11 +344,8 @@ function SectionSpinner({ label }: { label?: string }) {
   return (
     <div className="flex items-center justify-center py-12">
       <div className="text-center">
-        <div
-          className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 mx-auto mb-3"
-          style={{ borderColor: 'hsl(var(--primary))' }}
-        />
-        {label && <p className="text-sm" >{label}</p>}
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto mb-3" />
+        {label && <p className="text-sm text-muted-foreground">{label}</p>}
       </div>
     </div>
   );
@@ -582,14 +565,7 @@ function DashboardContent() {
         </div>
 
         {error && (
-          <div
-            className="px-4 py-3 rounded-xl text-sm"
-            style={{
-              background: 'hsl(var(--error) / 0.1)',
-              border: '1px solid hsl(var(--error) / 0.3)',
-              color: 'hsl(var(--error))',
-            }}
-          >
+          <div className="px-4 py-3 rounded-xl text-sm font-medium bg-destructive/10 border border-destructive/30 text-destructive">
             {error}
           </div>
         )}
@@ -640,22 +616,48 @@ function DashboardContent() {
               ) : chartDisplayData.length > 0 ? (
                 <div className="flex-1 min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartDisplayData} barCategoryGap="20%" barSize={14}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsla(224,20%,20%,0.3)" />
+                    <BarChart data={chartDisplayData} barCategoryGap="25%" barSize={20}>
+                      <defs>
+                        <linearGradient id="gradUnpaid" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(0,85%,60%)" stopOpacity={1} />
+                          <stop offset="100%" stopColor="hsl(0,70%,45%)" stopOpacity={0.7} />
+                        </linearGradient>
+                        <linearGradient id="gradRiders" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(145,63%,55%)" stopOpacity={1} />
+                          <stop offset="100%" stopColor="hsl(145,50%,38%)" stopOpacity={0.7} />
+                        </linearGradient>
+                        <linearGradient id="gradHorses" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(253,90%,73%)" stopOpacity={0.95} />
+                          <stop offset="100%" stopColor="hsl(253,55%,48%)" stopOpacity={0.6} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsla(224,20%,30%,0.15)" vertical={false} />
                       <XAxis
                         dataKey="eventName"
                         angle={-35}
                         textAnchor="end"
                         height={60}
-                        tick={{ fill: 'hsl(224,8%,50%)', fontSize: 9 }}
+                        tick={{ fill: 'hsl(224,15%,55%)', fontSize: 10, fontWeight: 500 }}
                         interval={0}
+                        axisLine={false}
+                        tickLine={false}
                       />
-                      <YAxis tick={{ fill: 'hsl(224,8%,50%)', fontSize: 10 }} allowDecimals={false} width={25} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend wrapperStyle={{ fontSize: 10 }} />
-                      <Bar dataKey="unpaidRegistrations" fill="hsl(0,85%,60%)" name="Unpaid" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="totalRiders" fill="hsl(145,63%,55%)" name="Riders" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="totalHorses" fill="hsl(253,90%,73%)" name="Horses" radius={[4, 4, 0, 0]} />
+                      <YAxis
+                        tick={{ fill: 'hsl(224,15%,55%)', fontSize: 10 }}
+                        allowDecimals={false}
+                        width={28}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+                      <Legend
+                        wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                        iconType="circle"
+                        iconSize={8}
+                      />
+                      <Bar dataKey="unpaidRegistrations" fill="url(#gradUnpaid)" name="Unpaid" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="totalRiders" fill="url(#gradRiders)" name="Riders" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="totalHorses" fill="url(#gradHorses)" name="Horses" radius={[6, 6, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -702,16 +704,16 @@ function DashboardContent() {
               </div>
 
               {/* Tab toggles */}
-              <div className="flex gap-1 rounded-lg p-1 mb-4" style={{ background: 'hsl(var(--surface-container))' }}>
+              <div className="flex gap-1 rounded-xl p-1 mb-4 bg-surface-container border border-border/30">
                 <button
                   onClick={() => { setEventTab('current'); setEventPage(1); }}
-                  className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${eventTab === 'current' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-on-surface'}`}
+                  className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${eventTab === 'current' ? 'btn-cta shadow-none' : 'text-muted-foreground hover:text-on-surface hover:bg-surface-bright'}`}
                 >
                   Current
                 </button>
                 <button
                   onClick={() => { setEventTab('all'); setEventPage(1); }}
-                  className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${eventTab === 'all' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-on-surface'}`}
+                  className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${eventTab === 'all' ? 'btn-cta shadow-none' : 'text-muted-foreground hover:text-on-surface hover:bg-surface-bright'}`}
                 >
                   All ({eventCount})
                 </button>
@@ -731,7 +733,7 @@ function DashboardContent() {
                         <span className="text-sm font-semibold text-on-surface group-hover/item:text-primary transition-colors truncate">{ev.name}</span>
                       </div>
                       <p className="text-xs text-muted-foreground">{formatDate(ev.startDate)} — {formatDate(ev.endDate)}</p>
-                      <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: 'hsl(var(--surface-container))' }}>
+                      <div className="mt-2 h-1.5 rounded-full overflow-hidden bg-surface-container">
                         <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: '100%' }} />
                       </div>
                     </div>
@@ -771,10 +773,8 @@ function DashboardContent() {
               ) : (
                 <div className="space-y-3">
                   {participants.slice(0, 6).map(p => (
-                    <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl transition-colors duration-200" style={{ background: 'hsl(var(--surface-container)/0.5)' }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-container))')}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-container)/0.5)')}>
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs flex-shrink-0" style={{ background: 'hsl(var(--surface-bright)/0.5)' }}>
+                    <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl transition-colors duration-200 bg-surface-container/50 hover:bg-surface-container">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs flex-shrink-0 bg-surface-bright/50">
                         🏇
                       </div>
                       <div className="flex-1 min-w-0">
@@ -823,26 +823,22 @@ function DashboardContent() {
                 ].map((item) => (
                   <div key={item.name}
                     onClick={() => router.push(item.href)}
-                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group/item transition-colors duration-200"
-                    style={{ background: 'hsl(var(--surface-container)/0.5)' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-container))')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-container)/0.5)')}>
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 group-hover/item:scale-110 transition-transform duration-200"
-                      style={{ background: 'hsl(var(--surface-bright)/0.5)' }}>
+                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group/item transition-colors duration-200 bg-surface-container/50 hover:bg-surface-container">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 group-hover/item:scale-110 transition-transform duration-200 bg-surface-bright/50">
                       {item.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-on-surface truncate group-hover/item:text-primary transition-colors">{item.name}</p>
                       <p className="text-[11px] text-muted-foreground mt-0.5">{item.sub}</p>
-                      <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: 'hsl(var(--surface-bright)/0.6)' }}>
+                      <div className="mt-2 h-1 rounded-full overflow-hidden bg-surface-bright/60">
                         <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${item.pct}%` }} />
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                      <span className="text-[10px] font-bold text-muted-foreground">{item.pct}%</span>
-                      <div className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-primary text-primary-foreground">
-                        Go →
-                      </div>
+                      <span className="text-[10px] text-muted-foreground">{item.pct}%</span>
+                      <button className="btn-cta text-[10px] px-2.5 py-1 rounded-full font-bold flex items-center gap-0.5">
+                        Go <ChevronRight className="w-3 h-3" />
+                      </button>
                     </div>
                   </div>
                 ))}

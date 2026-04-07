@@ -20,7 +20,7 @@ const pageTitles: Record<string, string> = {
   "/notifications":    "Notifications",
   "/audit":            "Audit Log",
   "/settings":         "Settings",
-  "/profile":          "Profile",
+  "/account":          "Profile",
 };
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -78,7 +78,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               </Link>
 
               {/* Avatar */}
-              <Link href="/profile" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-sm font-bold border border-primary/30 shimmer-card hover:opacity-80 transition-opacity"
+              <Link href="/account" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-sm font-bold border border-primary/30 shimmer-card hover:opacity-80 transition-opacity"
                 style={{ background: "hsl(var(--primary)/0.15)", color: "hsl(var(--primary))" }}>
                 A
               </Link>

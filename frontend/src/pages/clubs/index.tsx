@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { Pencil, Trash2, Plus, Download, Eye, Filter, X } from 'lucide-react';
 import ActionsDropdown from '@/components/ActionsDropdown';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface Club {
   id: string;
@@ -264,28 +265,26 @@ export default function ClubsList() {
               <div className="flex gap-4 items-end">
                 <div className="flex-1">
                   <label className="form-label">City</label>
-                  <select
-                    value={filterCity}
-                    onChange={e => setFilterCity(e.target.value)}
-                    className="input"
-                  >
-                    <option value="" className="bg-slate-800 text-on-surface">All Cities</option>
-                    {uniqueCities.map(city => (
-                      <option key={city} value={city} className="bg-slate-800 text-on-surface">{city}</option>
-                    ))}
-                  </select>
+                  <Select value={filterCity || '__all__'} onValueChange={v => setFilterCity(v === '__all__' ? '' : v)}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="All Cities" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Cities</SelectItem>
+                      {uniqueCities.map(city => (
+                        <SelectItem key={city} value={city}>{city}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex-1">
                   <label className="form-label">Status</label>
-                  <select
-                    value={filterStatus}
-                    onChange={e => setFilterStatus(e.target.value as '' | 'active' | 'inactive')}
-                    className="input"
-                  >
-                    <option value="" className="bg-slate-800 text-on-surface">All Status</option>
-                    <option value="active" className="bg-slate-800 text-on-surface">Active</option>
-                    <option value="inactive" className="bg-slate-800 text-on-surface">Inactive</option>
-                  </select>
+                  <Select value={filterStatus || '__all__'} onValueChange={v => setFilterStatus((v === '__all__' ? '' : v) as '' | 'active' | 'inactive')}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="All Status" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Status</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 {(filterCity || filterStatus) && (
                   <button onClick={clearFilters} className="btn-secondary flex items-center gap-1 text-destructive">

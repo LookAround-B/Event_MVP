@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
 import AuditPagination from '@/components/AuditPagination';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface Rider {
   id: string;
@@ -240,41 +241,38 @@ export default function Riders() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="form-label">Gender</label>
-                  <select
-                    value={filterGender}
-                    onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
-                    className="input"
-                  >
-                    <option value="">All Genders</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  <Select value={filterGender || '__all__'} onValueChange={v => { setFilterGender(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="All Genders" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Genders</SelectItem>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="form-label">Club</label>
-                  <select
-                    value={filterClubId}
-                    onChange={(e) => { setFilterClubId(e.target.value); setPage(1); }}
-                    className="input"
-                  >
-                    <option value="">All Clubs</option>
-                    {clubs.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                  <Select value={filterClubId || '__all__'} onValueChange={v => { setFilterClubId(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="All Clubs" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Clubs</SelectItem>
+                      {clubs.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="form-label">Status</label>
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-                    className="input"
-                  >
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
+                  <Select value={filterStatus || '__all__'} onValueChange={v => { setFilterStatus(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="All Status" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Status</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               {hasActiveFilters && (

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface Registration {
   id: string;
@@ -168,20 +169,21 @@ export default function CreateTransaction() {
                 <label className="label-tech block mb-1.5">
                   Registration <span className="text-destructive">*</span>
                 </label>
-                <select
-                  name="registrationId"
-                  value={formData.registrationId}
-                  onChange={handleRegistrationChange}
-                  required
-                  className={selectClass}
-                >
-                  <option value="">Select a registration</option>
-                  {registrations.map(reg => (
-                    <option key={reg.id} value={reg.id}>
-                      {reg.rider.firstName} {reg.rider.lastName} - {reg.event.name} (₹{reg.totalAmount})
-                    </option>
-                  ))}
-                </select>
+                <Select value={formData.registrationId || '__none__'} onValueChange={v => {
+                  const val = v === '__none__' ? '' : v;
+                  const syntheticEvent = { target: { name: 'registrationId', value: val } } as React.ChangeEvent<HTMLSelectElement>;
+                  handleRegistrationChange(syntheticEvent);
+                }}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select a registration" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Select a registration</SelectItem>
+                    {registrations.map(reg => (
+                      <SelectItem key={reg.id} value={reg.id}>
+                        {reg.rider.firstName} {reg.rider.lastName} - {reg.event.name} (₹{reg.totalAmount})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="pt-2">
@@ -207,19 +209,20 @@ export default function CreateTransaction() {
 
                   <div>
                     <label className="label-tech block mb-1.5">Payment Method</label>
-                    <select
-                      name="paymentMethod"
-                      value={formData.paymentMethod}
-                      onChange={handleChange}
-                      className={selectClass}
-                    >
-                      <option value="Credit Card">Credit Card</option>
-                      <option value="Debit Card">Debit Card</option>
-                      <option value="UPI">UPI</option>
-                      <option value="Bank Transfer">Bank Transfer</option>
-                      <option value="Cheque">Cheque</option>
-                      <option value="Cash">Cash</option>
-                    </select>
+                    <Select value={formData.paymentMethod} onValueChange={v => {
+                      const syntheticEvent = { target: { name: 'paymentMethod', value: v } } as React.ChangeEvent<HTMLSelectElement>;
+                      handleChange(syntheticEvent as any);
+                    }}>
+                      <SelectTrigger className="w-full"><SelectValue placeholder="Select method" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Credit Card">Credit Card</SelectItem>
+                        <SelectItem value="Debit Card">Debit Card</SelectItem>
+                        <SelectItem value="UPI">UPI</SelectItem>
+                        <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                        <SelectItem value="Cheque">Cheque</SelectItem>
+                        <SelectItem value="Cash">Cash</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

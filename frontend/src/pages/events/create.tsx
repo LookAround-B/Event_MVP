@@ -15,7 +15,7 @@ import { DatePicker } from '@/components/DatePicker';
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
   ssr: false,
   loading: () => (
-    <div className="rounded-lg border border-white/[0.12] min-h-[260px] flex items-center justify-center text-muted-foreground text-sm bg-white/[0.02]">
+    <div className="rounded-lg border border-border/30 min-h-[260px] flex items-center justify-center text-muted-foreground text-sm bg-surface-container/30">
       <div className="flex flex-col items-center gap-2">
         <div className="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
         Loading editor...
@@ -341,7 +341,7 @@ export default function CreateEventPage() {
                   Event File / Banner <span className="text-muted-foreground text-xs">(optional)</span>
                 </label>
                 <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-10 text-on-surface rounded-lg hover:bg-opacity-20 cursor-pointer transition text-sm">
+                  <label className="flex items-center gap-2 px-4 py-2 bg-surface-container/60 text-on-surface rounded-lg hover:bg-surface-bright cursor-pointer transition text-sm">
                     <Upload />
                     {uploading ? 'Uploading...' : 'Choose File'}
                     <input

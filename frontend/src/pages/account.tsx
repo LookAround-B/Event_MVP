@@ -5,6 +5,8 @@ import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import { Pencil, Save, X, Camera, Check, Mail, Phone, MapPin, User, Calendar, Shield, Hash } from 'lucide-react';
 import Cropper, { Area } from 'react-easy-crop';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { DatePicker } from '@/components/DatePicker';
 
 interface UserProfile {
   id: string;
@@ -56,9 +58,9 @@ function InlineField({
   };
 
   return (
-    <div className="group flex items-center justify-between py-3 px-4 rounded-xl transition-colors transition-all duration-200">
+    <div className="group flex items-center justify-between py-3 px-4 rounded-xl transition-all duration-200">
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-muted-foreground flex-shrink-0">
+        <div className="w-9 h-9 rounded-lg bg-surface-container/50 flex items-center justify-center text-muted-foreground flex-shrink-0">
           <Icon className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
@@ -66,18 +68,21 @@ function InlineField({
           {isEditing ? (
             <div className="flex items-center gap-2">
               {type === 'select' && options ? (
-                <select
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  autoFocus
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-on-surface text-sm focus:outline-none focus:border-primary w-full max-w-xs"
-                >
-                  <option value="" className="bg-gray-800">Select</option>
-                  {options.map((o) => (
-                    <option key={o.value} value={o.value} className="bg-gray-800">{o.label}</option>
-                  ))}
-                </select>
+                <Select value={editValue || '__none__'} onValueChange={v => setEditValue(v === '__none__' ? '' : v)}>
+                  <SelectTrigger className="w-full max-w-xs"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Select</SelectItem>
+                    {options.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : type === 'date' ? (
+                <DatePicker
+                  value={editValue ? new Date(editValue) : undefined}
+                  onChange={(date: Date | undefined) => setEditValue(date ? date.toISOString().split('T')[0] : '')}
+                  placeholder="Select date"
+                />
               ) : type === 'textarea' ? (
                 <textarea
                   value={editValue}
@@ -85,7 +90,7 @@ function InlineField({
                   onKeyDown={handleKeyDown}
                   autoFocus
                   rows={2}
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-on-surface text-sm focus:outline-none focus:border-primary w-full max-w-md resize-none"
+                  className="bg-surface-container/50 border border-border/30 rounded-lg px-3 py-1.5 text-on-surface text-sm focus:outline-none focus:border-primary w-full max-w-md resize-none"
                 />
               ) : (
                 <input
@@ -94,7 +99,7 @@ function InlineField({
                   onChange={(e) => setEditValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   autoFocus
-                  className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-on-surface text-sm focus:outline-none focus:border-primary w-full max-w-xs"
+                  className="bg-surface-container/50 border border-border/30 rounded-lg px-3 py-1.5 text-on-surface text-sm focus:outline-none focus:border-primary w-full max-w-xs"
                 />
               )}
               <button
@@ -122,7 +127,7 @@ function InlineField({
       {!isEditing && !readOnly && (
         <button
           onClick={() => onStartEdit(field, (value || ''))}
-          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-muted-foreground transition-all"
+          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-surface-container/60 text-muted-foreground hover:text-muted-foreground transition-all"
         >
           <Pencil className="w-3.5 h-3.5" />
         </button>
@@ -365,7 +370,7 @@ export default function AccountPage() {
         )}
 
         {/* Profile Header Card */}
-        <div className="bento-card rounded-2xl p-6 border border-white/10">
+        <div className="bento-card rounded-2xl p-6 border border-border/30">
           <div className="flex items-center gap-6">
             {/* Profile Picture */}
             <div className="relative group">
@@ -406,7 +411,7 @@ export default function AccountPage() {
                       onChange={(e) => setEditValue(e.target.value)}
                       onKeyDown={(e) => handleKeyDown(e, 'name')}
                       autoFocus
-                      className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-on-surface text-xl font-bold focus:outline-none focus:border-primary"
+                      className="bg-surface-container/60 border border-border/50 rounded-lg px-3 py-1.5 text-on-surface text-xl font-bold focus:outline-none focus:border-primary"
                     />
                     <button
                       onClick={() => saveField('name', editValue)}
@@ -429,7 +434,7 @@ export default function AccountPage() {
                     </h1>
                     <button
                       onClick={() => startEdit('name', `${profile.firstName} ${profile.lastName}`)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-muted-foreground transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-surface-container/60 text-muted-foreground hover:text-muted-foreground transition-all"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
@@ -441,7 +446,7 @@ export default function AccountPage() {
                   <Shield className="w-3 h-3" />
                   {profile.role || 'Rider'}
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 text-muted-foreground text-xs font-mono">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container/60 text-muted-foreground text-xs font-mono">
                   <Hash className="w-3 h-3" />
                   {profile.eId}
                 </span>
@@ -451,8 +456,8 @@ export default function AccountPage() {
         </div>
 
         {/* Personal Information */}
-        <div className="bento-card rounded-2xl border border-white/10 overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/10">
+        <div className="bento-card rounded-2xl border border-border/30 overflow-hidden">
+          <div className="px-6 py-4 border-b border-border/30">
             <h2 className="text-lg font-semibold text-on-surface">Personal Information</h2>
           </div>
           <div className="p-2 divide-y divide-white/5">
@@ -537,12 +542,12 @@ export default function AccountPage() {
         {/* Crop Modal */}
         {showCropModal && imageSrc && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            <div className="bento-card rounded-2xl border border-white/20 w-full max-w-lg mx-4 overflow-hidden">
-              <div className="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+            <div className="bento-card rounded-2xl border border-border/50 w-full max-w-lg mx-4 overflow-hidden">
+              <div className="px-6 py-4 border-b border-border/30 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-on-surface">Crop Profile Picture</h3>
                 <button
                   onClick={() => { setShowCropModal(false); setImageSrc(null); }}
-                  className="p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground transition"
+                  className="p-1.5 rounded-lg hover:bg-surface-container/60 text-muted-foreground transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -560,7 +565,7 @@ export default function AccountPage() {
                   onCropComplete={onCropComplete}
                 />
               </div>
-              <div className="px-6 py-3 border-t border-white/10">
+              <div className="px-6 py-3 border-t border-border/30">
                 <label className="text-xs text-muted-foreground mb-1 block">Zoom</label>
                 <input
                   type="range"
@@ -572,10 +577,10 @@ export default function AccountPage() {
                   className="w-full accent-primary-500"
                 />
               </div>
-              <div className="px-6 py-4 border-t border-white/10 flex gap-3 justify-end">
+              <div className="px-6 py-4 border-t border-border/30 flex gap-3 justify-end">
                 <button
                   onClick={() => { setShowCropModal(false); setImageSrc(null); }}
-                  className="px-4 py-2 rounded-xl border border-white/20 text-muted-foreground hover:bg-white/10 transition text-sm"
+                  className="px-4 py-2 rounded-xl border border-border/50 text-muted-foreground hover:bg-surface-container/60 transition text-sm"
                 >
                   Cancel
                 </button>
