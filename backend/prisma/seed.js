@@ -258,31 +258,32 @@ async function main() {
     let existing = await prisma.rider.findUnique({
       where: { email: riders[i].email },
     });
-    if (!existing) {
-      // Create User account for the rider
-      let riderUser = await prisma.user.findUnique({
-        where: { email: riders[i].email },
-      });
-      if (!riderUser) {
-        riderUser = await prisma.user.create({
-          data: {
-            email: riders[i].email,
-            password: riderPassword,
-            firstName: riders[i].firstName,
-            lastName: riders[i].lastName,
-            gender: riders[i].gender,
-            phone: riders[i].mobile,
-            isActive: true,
-            isApproved: true,
-            profileComplete: true,
-            isGoogleAuth: false,
-            roles: {
-              connect: [{ id: riderRole.id }],
-            },
+    // Ensure User account exists for the rider
+    let riderUser = await prisma.user.findUnique({
+      where: { email: riders[i].email },
+    });
+    if (!riderUser) {
+      riderUser = await prisma.user.create({
+        data: {
+          email: riders[i].email,
+          password: riderPassword,
+          firstName: riders[i].firstName,
+          lastName: riders[i].lastName,
+          gender: riders[i].gender,
+          phone: riders[i].mobile,
+          isActive: true,
+          isApproved: true,
+          profileComplete: true,
+          isGoogleAuth: false,
+          roles: {
+            connect: [{ id: riderRole.id }],
           },
-        });
-      }
+        },
+      });
+      console.log(`  ✓ Created user account for ${riders[i].email}`);
+    }
 
+    if (!existing) {
       existing = await prisma.rider.create({
         data: {
           ...riders[i],
@@ -290,6 +291,11 @@ async function main() {
           userId: riderUser.id,
           isActive: true,
         },
+      });
+    } else if (!existing.userId) {
+      await prisma.rider.update({
+        where: { id: existing.id },
+        data: { userId: riderUser.id },
       });
     }
     createdRiders.push(existing);
