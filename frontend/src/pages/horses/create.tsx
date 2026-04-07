@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export default function CreateHorse() {
   const router = useRouter();
@@ -243,17 +244,16 @@ export default function CreateHorse() {
                 <label className="label-tech block mb-1.5">
                   Gender <span className="text-destructive">*</span>
                 </label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  required
-                  className={selectClass}
-                >
-                  <option value="Mare">Mare (Female)</option>
-                  <option value="Stallion">Stallion (Male)</option>
-                  <option value="Gelding">Gelding (Castrated Male)</option>
-                </select>
+                <Select value={formData.gender} onValueChange={(v) => setFormData(prev => ({ ...prev, gender: v }))}>
+                  <SelectTrigger className={selectClass}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Mare">Mare (Female)</SelectItem>
+                    <SelectItem value="Stallion">Stallion (Male)</SelectItem>
+                    <SelectItem value="Gelding">Gelding (Castrated Male)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Passport/Horse Code */}

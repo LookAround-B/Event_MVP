@@ -3,14 +3,15 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, Search, Eye, Copy, ToggleLeft, ToggleRight, Download, Calendar, Check, Layers, Activity, Filter, Ban, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, Download, Calendar, Check, Layers, Activity, Clock, MapPin, LayoutGrid, Table as TableIcon, Copy, ToggleLeft, ToggleRight, Ban } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import ActionsDropdown from '@/components/ActionsDropdown';
-import type { ActionItem } from '@/components/ActionsDropdown';
 import Pagination from '@/components/Pagination';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
+import { FilterDropdown } from '@/components/FilterDropdown';
+import { CalendarView } from '@/components/CalendarView';
+import { cn } from '@/lib/utils';import CreateEventModal from '@/components/CreateEventModal';import { ActionItem } from '@/components/ActionsDropdown';
 
 interface Event {
   id: string;
@@ -21,6 +22,8 @@ interface Event {
   description: string;
   isPublished: boolean;
   registrationCount: number;
+  eventType?: string;
+  categoryCount?: number;
 }
 
 function escapeCSVField(field: string | number): string {
@@ -60,8 +63,10 @@ export default function Events() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [showFilters, setShowFilters] = useState(false);
-  const [filterPublished, setFilterPublished] = useState<'' | 'published' | 'unpublished'>('');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
+  const [activeTab, setActiveTab] = useState<'current' | 'all'>('all');
+  const [createOpen, setCreateOpen] = useState(false);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -173,19 +178,12 @@ export default function Events() {
     }
   };
 
-  const getEventActions = (event: Event): ActionItem[] => [
-    { label: 'View', icon: <Eye size={16} />, onClick: () => router.push(`/events/${event.id}`) },
-    { label: 'Edit', icon: <Edit size={16} />, onClick: () => router.push(`/events/create?id=${event.id}`), className: 'text-amber-400 hover:text-amber-300' },
-    { label: 'Duplicate', icon: <Copy size={16} />, onClick: () => handleDuplicate(event.id), className: 'text-blue-400 hover:text-blue-300' },
-    {
-      label: event.isPublished ? 'Unpublish' : 'Publish',
-      icon: event.isPublished ? <ToggleLeft size={16} /> : <ToggleRight size={16} />,
-      onClick: () => handleTogglePublish(event.id, event.isPublished),
-      className: event.isPublished ? 'text-yellow-400 hover:text-yellow-300' : 'text-emerald-400 hover:text-green-300',
-    },
-    { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(event.id), className: 'text-destructive hover:text-destructive' },
-    { label: event.isPublished ? 'Disable' : 'Enable', icon: <Ban size={16} />, onClick: () => handleTogglePublish(event.id, event.isPublished), className: event.isPublished ? 'text-orange-400 hover:text-orange-300' : 'text-emerald-400 hover:text-emerald-300' },
-  ];
+  const displayEvents = (() => {
+    let result = events;
+    if (activeTab === 'current') result = result.filter(e => e.isPublished);
+    if (selectedTypes.length > 0) result = result.filter(e => selectedTypes.includes(e.eventType || ''));
+    return result;
+  })();
 
   return (
     <ProtectedRoute>
@@ -195,78 +193,91 @@ export default function Events() {
         {/* Page heading */}
         <div className="mb-6 lg:mb-8">
           <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
-            Event <span className="gradient-text">Registry</span>
+            National <span className="gradient-text">Registry</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-xl">
-            Master list of all equestrian championships and regional qualifiers.
+            Master list of all equestrian championships and regional qualifiers. Manage venues, timelines, and registration tiers.
           </p>
         </div>
 
         {/* KPI Stats */}
         <KPIGrid>
-          <KPICard title="Scheduled" value={events.length} icon={Calendar} variant="primary" trend={{ value: 'Season', isUp: true }} subText="Current season" className="animate-slide-up-1" />
-          <KPICard title="Published" value={events.filter(e => e.isPublished).length} icon={Check} variant="outline" subText="Live on portal" className="animate-slide-up-2" />
-          <KPICard title="Registrations" value={events.reduce((a, e) => a + (e.registrationCount || 0), 0)} icon={Layers} variant="outline" subText="Total athletes" className="animate-slide-up-3" />
-          <KPICard title="Platform" value="Normal" icon={Activity} variant="secondary" subText="Latency: 14ms" className="animate-slide-up-4" />
+          <KPICard title="Scheduled Events" value={events.length} icon={Calendar} variant="primary" trend={{ value: '+2', isUp: true }} subText="Current season" className="animate-slide-up-1" />
+          <KPICard title="Published Status" value={events.filter(e => e.isPublished).length} icon={Check} variant="outline" subText="Live on portal" className="animate-slide-up-2" />
+          <KPICard title="Global Categories" value={events.reduce((a, e) => a + (e.categoryCount || 0), 0)} icon={Layers} variant="outline" subText="Across all shows" className="animate-slide-up-3" />
+          <KPICard title="Platform Load" value="Normal" icon={Activity} variant="secondary" subText="Latency: 14ms" className="animate-slide-up-4" />
         </KPIGrid>
 
         {/* Action bar */}
-        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-2 border-beam">
+        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-2 border-beam" style={{ overflow: 'visible' }}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10 w-full">
-            <div className="relative flex-1 sm:flex-initial">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Find championship..."
-                value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Find championship..."
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+                />
+              </div>
+              <FilterDropdown
+                label="Event Logic"
+                options={[
+                  { label: 'KSEC', value: 'KSEC' },
+                  { label: 'EPL', value: 'EPL' },
+                  { label: 'EIRS Show', value: 'EIRS Show' },
+                ]}
+                selected={selectedTypes}
+                onChange={(vals) => { setSelectedTypes(vals); setPage(1); }}
               />
+              <div className="flex items-center gap-1 bg-surface-container/40 p-1 rounded-xl border border-border/30 ml-auto sm:ml-0">
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={cn('p-1.5 rounded-lg transition-all', viewMode === 'table' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-on-surface')}
+                  title="Table View"
+                >
+                  <TableIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('calendar')}
+                  className={cn('p-1.5 rounded-lg transition-all', viewMode === 'calendar' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-on-surface')}
+                  title="Calendar View"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">CSV</span>
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export Manifest</span>
               </button>
-              <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Excel</span>
-              </button>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm border transition-colors ${filterPublished ? 'border-primary/50 text-primary bg-primary/5' : 'text-on-surface-variant bg-surface-container/60 hover:bg-surface-bright border-border/30'}`}
-              >
-                <Filter className="w-4 h-4" /> <span className="hidden sm:inline">Filters</span>
-              </button>
-              <Link href="/events/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center transition-all active:scale-95">
+              <button onClick={() => setCreateOpen(true)} className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center transition-all active:scale-95">
                 <Plus className="w-4 h-4" /> Define Event
-              </Link>
+              </button>
             </div>
           </div>
-          {showFilters && (
-            <div className="mt-3 pt-3 border-t border-border/30">
-              <div className="flex items-center gap-3">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Status</label>
-                  <select
-                    value={filterPublished}
-                    onChange={(e) => setFilterPublished(e.target.value as '' | 'published' | 'unpublished')}
-                    className="px-3 py-2 rounded-xl text-sm bg-surface-container/50 border border-border/30 text-on-surface focus:ring-1 focus:ring-primary/50 focus:outline-none"
-                  >
-                    <option value="">All Status</option>
-                    <option value="published">Published</option>
-                    <option value="unpublished">Draft</option>
-                  </select>
-                </div>
-                {filterPublished && (
-                  <button onClick={() => setFilterPublished('')} className="mt-4 text-xs text-destructive flex items-center gap-1">
-                    <X size={12} /> Clear
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Table */}
+        {/* Tabs */}
+        <div className="mb-4 animate-slide-up-2">
+          <div className="flex gap-1 bg-surface-container rounded-xl p-1 w-fit border border-border/30 shadow-inner">
+            {(['current', 'all'] as const).map((tab) => (
+              <button key={tab} onClick={() => { setActiveTab(tab); setPage(1); }}
+                className={`px-4 sm:px-5 py-2 text-sm font-semibold rounded-lg transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-on-surface'}`}>
+                {tab === 'current' ? 'Global Public' : 'Entire Roster'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        {viewMode === 'calendar' ? (
+          <div className="bento-card p-4 animate-slide-up-3">
+            <CalendarView events={displayEvents.map(e => ({ ...e, id: parseInt(e.id) || 0, eventType: e.eventType || '' }))} />
+          </div>
+        ) : (
         <div className="bento-card overflow-hidden animate-slide-up-3">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary/40 via-primary/40 to-secondary/40" />
           {loading ? (
@@ -281,33 +292,20 @@ export default function Events() {
                 ))}
               </div>
             </div>
-          ) : (() => {
-            const displayEvents = filterPublished
-              ? events.filter(e => filterPublished === 'published' ? e.isPublished : !e.isPublished)
-              : events;
-            return displayEvents.length === 0 ? (
-            <div className="text-center py-8" >
-              No events match your filters
+          ) : displayEvents.length === 0 ? (
+            <div className="text-center py-8 text-sm text-muted-foreground italic">
+              No championship events detected in this frequency.
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px] text-sm">
+              <table className="w-full min-w-[900px] text-sm">
                 <thead>
                   <tr className="label-tech text-left bg-surface-container/40">
-                    <th className="p-3 sm:p-4 w-12">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.size === displayEvents.length && displayEvents.length > 0}
-                        onChange={toggleSelectAll}
-                        className="accent-primary rounded"
-                      />
-                    </th>
+                    <th className="p-3 sm:p-4 w-12"><input type="checkbox" checked={selectedIds.size === displayEvents.length && displayEvents.length > 0} onChange={toggleSelectAll} className="accent-primary rounded" /></th>
                     <th className="p-3 sm:p-4">Championship Manifest</th>
+                    <th className="p-3 sm:p-4">Timeline Alpha</th>
                     <th className="p-3 sm:p-4">Operational Node</th>
-                    <th className="p-3 sm:p-4">Timeline</th>
-                    <th className="p-3 sm:p-4">End Date</th>
-                    <th className="p-3 sm:p-4">Status</th>
                     <th className="p-3 sm:p-4 text-center">Registrations</th>
                     <th className="p-3 sm:p-4 text-right">Actions</th>
                   </tr>
@@ -315,14 +313,7 @@ export default function Events() {
                 <tbody className="divide-y divide-border/10">
                   {displayEvents.map((event) => (
                     <tr key={event.id} className="group hover:bg-surface-container/20 transition-all duration-300">
-                      <td className="p-3 sm:p-4">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(event.id)}
-                          onChange={() => toggleSelect(event.id)}
-                          className="accent-primary rounded"
-                        />
-                      </td>
+                      <td className="p-3 sm:p-4"><input type="checkbox" checked={selectedIds.has(event.id)} onChange={() => toggleSelect(event.id)} className="accent-primary rounded" /></td>
                       <td className="p-3 sm:p-4">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-border/30 shadow-inner group-hover:scale-110 transition-transform ${event.isPublished ? 'bg-primary/10 text-primary' : 'bg-surface-container text-muted-foreground'}`}>
@@ -330,26 +321,44 @@ export default function Events() {
                           </div>
                           <div className="flex flex-col">
                             <span className="text-on-surface font-bold tracking-tight">{event.name}</span>
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border w-fit mt-0.5 ${event.isPublished ? 'bg-primary/10 text-primary border-primary/20' : 'bg-surface-container text-muted-foreground border-border/30'}`}>
-                              {event.isPublished ? 'PUBLISHED' : 'DRAFT'}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              {event.eventType && <span className="text-[10px] font-black uppercase tracking-widest text-primary/70">{event.eventType}</span>}
+                              <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter border w-fit ${event.isPublished ? 'bg-primary/10 text-primary border-primary/20' : 'bg-surface-container text-muted-foreground border-border/30'}`}>
+                                {event.isPublished ? 'PUBLISHED' : 'DRAFT'}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="p-3 sm:p-4 text-on-surface-variant font-medium">{event.venueName || 'TBD'}</td>
-                      <td className="p-3 sm:p-4 text-xs font-mono text-on-surface-variant">{new Date(event.startDate).toLocaleDateString()}</td>
-                      <td className="p-3 sm:p-4 text-xs font-mono text-on-surface-variant">{new Date(event.endDate).toLocaleDateString()}</td>
                       <td className="p-3 sm:p-4">
-                        <span className={`badge ${event.isPublished ? 'badge-success' : 'badge-muted'}`}>
-                          {event.isPublished ? 'Published' : 'Draft'}
-                        </span>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1.5 text-xs font-mono text-on-surface-variant">
+                            <Clock className="w-3 h-3 text-secondary" /> {new Date(event.startDate).toLocaleDateString()}
+                          </div>
+                          <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest ml-4">End: {new Date(event.endDate).toLocaleDateString()}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 sm:p-4">
+                        <div className="flex flex-col">
+                          <span className="text-on-surface-variant font-medium flex items-center gap-1.5">
+                            <MapPin className="w-3 h-3 text-muted-foreground" /> {event.venueName || 'TBD'}
+                          </span>
+                          {event.categoryCount != null && (
+                            <span className="text-[10px] text-muted-foreground uppercase ml-4">{event.categoryCount} Categories</span>
+                          )}
+                        </div>
                       </td>
                       <td className="p-3 sm:p-4 text-center">
-                        <span className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">{event.registrationCount}</span>
+                        <div className="inline-flex flex-col items-center">
+                          <span className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">{event.registrationCount}</span>
+                          <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Athletes</span>
+                        </div>
                       </td>
                       <td className="p-3 sm:p-4 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <ActionsDropdown actions={getEventActions(event)} />
+                          <button onClick={() => router.push(`/events/${event.id}`)} title="View" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95"><Eye className="w-4 h-4" /></button>
+                          <button onClick={() => router.push(`/events/create?id=${event.id}`)} title="Edit" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => handleDelete(event.id)} title="Delete" className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all active:scale-95"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>
@@ -359,13 +368,15 @@ export default function Events() {
               </div>
 
               <div className="bg-surface-container/20 p-2 border-t border-border/10">
-                <Pagination total={events.length * totalPages} page={page} perPage={10} onChange={setPage} />
+                <Pagination total={displayEvents.length} page={page} perPage={10} onChange={setPage} />
               </div>
             </>
-          );
-          })()}
+          )}
         </div>
+        )}
       </div>
+
+      <CreateEventModal open={createOpen} onClose={() => setCreateOpen(false)} onCreated={fetchEvents} />
     </ProtectedRoute>
   );
 }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface Role {
   id: string;
@@ -157,19 +158,19 @@ export default function CreateUser() {
 
             <div>
               <label className="label-tech block mb-1.5">Role</label>
-              <select
-                name="roleId"
-                value={formData.roleId}
-                onChange={handleChange}
-                className={selectClass}
-              >
-                <option value="">Select Role (optional)</option>
-                {roles.map((role) => (
-                  <option key={role.id} value={role.id}>
-                    {role.name}
-                  </option>
-                ))}
-              </select>
+              <Select value={formData.roleId || '__none__'} onValueChange={(v) => setFormData({ ...formData, roleId: v === '__none__' ? '' : v })}>
+                <SelectTrigger className={selectClass}>
+                  <SelectValue placeholder="Select Role (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Select Role (optional)</SelectItem>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      {role.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </form>
           </div>

@@ -8,6 +8,8 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import VenueMapPicker from '@/components/VenueMapPicker';
 import { ArrowLeft, MapPin, Upload, Plus, Trash2, Calendar, Clock, FileText, Tag, Save } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { DatePicker } from '@/components/DatePicker';
 
 // Dynamic import — TipTap uses browser APIs (document/window) for editor DOM
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
@@ -287,17 +289,16 @@ export default function CreateEventPage() {
                 <label className="form-label">
                   Event Type <span className="text-destructive">*</span>
                 </label>
-                <select
-                  name="eventType"
-                  value={formData.eventType}
-                  onChange={handleChange}
-                  required
-                  className="input"
-                >
-                  <option value="KSEC" className="bg-slate-800 text-on-surface">KSEC</option>
-                  <option value="EPL" className="bg-slate-800 text-on-surface">EPL</option>
-                  <option value="EIRS Show" className="bg-slate-800 text-on-surface">EIRS Show</option>
-                </select>
+                <Select value={formData.eventType} onValueChange={(v) => setFormData(prev => ({ ...prev, eventType: v }))}>
+                  <SelectTrigger className="bg-surface-container border-border/30">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="KSEC">KSEC</SelectItem>
+                    <SelectItem value="EPL">EPL</SelectItem>
+                    <SelectItem value="EIRS Show">EIRS Show</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Event Name */}
@@ -377,13 +378,10 @@ export default function CreateEventPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-xs text-muted-foreground mb-1">Date</label>
-                    <input
-                      type="date"
-                      name="startDate"
+                    <DatePicker
                       value={formData.startDate}
-                      onChange={handleChange}
-                      required
-                      className="input"
+                      onChange={(v) => setFormData(prev => ({ ...prev, startDate: v }))}
+                      placeholder="Select start date"
                     />
                   </div>
                   <div>
@@ -419,14 +417,10 @@ export default function CreateEventPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-xs text-muted-foreground mb-1">Date</label>
-                    <input
-                      type="date"
-                      name="endDate"
+                    <DatePicker
                       value={formData.endDate}
-                      onChange={handleChange}
-                      required
-                      min={formData.startDate || undefined}
-                      className="input"
+                      onChange={(v) => setFormData(prev => ({ ...prev, endDate: v }))}
+                      placeholder="Select end date"
                     />
                   </div>
                   <div>
@@ -545,34 +539,31 @@ export default function CreateEventPage() {
                   <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-end gap-3 p-3  rounded-lg">
                     <div className="flex-1 w-full sm:w-auto">
                       <label className="block text-xs text-muted-foreground mb-1">Category</label>
-                      <select
-                        value={sel.categoryId}
-                        onChange={(e) => handleCategoryChange(idx, 'categoryId', e.target.value)}
-                        className="input text-sm"
-                      >
-                        <option value="" className="bg-slate-800">Select category...</option>
-                        {categories.map((cat) => (
-                          <option
-                            key={cat.id}
-                            value={cat.id}
-                            disabled={usedCategoryIds.includes(cat.id) && sel.categoryId !== cat.id}
-                            className="bg-slate-800"
-                          >
-                            {cat.name} - ₹{cat.price}
-                            {cat.cgst > 0 ? ` (CGST: ${cat.cgst}%)` : ''}
-                          </option>
-                        ))}
-                      </select>
+                      <Select value={sel.categoryId || '__none__'} onValueChange={(v) => handleCategoryChange(idx, 'categoryId', v === '__none__' ? '' : v)}>
+                        <SelectTrigger className="bg-surface-container border-border/30 text-sm">
+                          <SelectValue placeholder="Select category..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">Select category...</SelectItem>
+                          {categories.map((cat) => (
+                            <SelectItem
+                              key={cat.id}
+                              value={cat.id}
+                              disabled={usedCategoryIds.includes(cat.id) && sel.categoryId !== cat.id}
+                            >
+                              {cat.name} - ₹{cat.price}
+                              {cat.cgst > 0 ? ` (CGST: ${cat.cgst}%)` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="w-full sm:w-44">
                       <label className="block text-xs text-muted-foreground mb-1">Date</label>
-                      <input
-                        type="date"
+                      <DatePicker
                         value={sel.date}
-                        onChange={(e) => handleCategoryChange(idx, 'date', e.target.value)}
-                        min={formData.startDate || undefined}
-                        max={formData.endDate || undefined}
-                        className="input text-sm"
+                        onChange={(v) => handleCategoryChange(idx, 'date', v)}
+                        placeholder="Select date"
                       />
                     </div>
                     <button

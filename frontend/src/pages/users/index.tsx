@@ -9,6 +9,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import AuditPagination from '@/components/AuditPagination';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface User {
   id: string;
@@ -279,70 +280,50 @@ export default function Users() {
         )}
 
         <div className="space-y-4">
-          {/* Search and Filter Bar */}
-          <div className="flex flex-col gap-4 mb-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="flex items-center gap-2 flex-1">
-                <Search className="text-muted-foreground shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Search users by email or name..."
-                  className="input"
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                />
-              </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`btn-secondary flex items-center gap-2 ${hasActiveFilters ? 'border-primary text-primary' : ''}`}
-              >
-                <Filter /> Filters {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary-500" />}
-              </button>
-            </div>
-
-            {/* Expandable Filters */}
-            {showFilters && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-surface-container/30 border border-border/20">
+          {/* Expandable Filters */}
+          {showFilters && (
+            <div className="bento-card mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4">
                 <div>
                   <label className="block text-xs font-semibold text-muted-foreground mb-1">Role</label>
-                  <select
-                    className="input"
-                    value={roleFilter}
-                    onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-                  >
-                    <option value="">All Roles</option>
-                    {roles.map(r => (
-                      <option key={r.id} value={r.name}>{r.name}</option>
-                    ))}
-                  </select>
+                  <Select value={roleFilter || '__all__'} onValueChange={(v) => { setRoleFilter(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="bg-surface-container border-border/30 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Roles</SelectItem>
+                      {roles.map(r => (
+                        <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-muted-foreground mb-1">Gender</label>
-                  <select
-                    className="input"
-                    value={genderFilter}
-                    onChange={(e) => { setGenderFilter(e.target.value); setPage(1); }}
-                  >
-                    <option value="">All Genders</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  <Select value={genderFilter || '__all__'} onValueChange={(v) => { setGenderFilter(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="bg-surface-container border-border/30 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Genders</SelectItem>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-muted-foreground mb-1">Status</label>
-                  <select
-                    className="input"
-                    value={statusFilter}
-                    onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-                  >
-                    <option value="">All Statuses</option>
-                    <option value="approved">Approved</option>
-                    <option value="pending">Pending</option>
-                  </select>
+                  <Select value={statusFilter || '__all__'} onValueChange={(v) => { setStatusFilter(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="bg-surface-container border-border/30 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Statuses</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 {hasActiveFilters && (
                   <div className="sm:col-span-3">
@@ -352,8 +333,8 @@ export default function Users() {
                   </div>
                 )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Bulk Actions Bar */}
           {selectedUsers.length > 0 && isAdmin && (
@@ -361,28 +342,30 @@ export default function Users() {
               <span className="text-sm text-primary-300 font-semibold whitespace-nowrap">
                 {selectedUsers.length} selected
               </span>
-              <select
-                className="input text-sm"
-                value={bulkAction}
-                onChange={(e) => setBulkAction(e.target.value)}
-              >
-                <option value="">Choose action...</option>
-                <option value="approve">Approve</option>
-                <option value="activate">Activate</option>
-                <option value="deactivate">Deactivate</option>
-                <option value="assignRole">Assign Role</option>
-              </select>
+              <Select value={bulkAction || '__none__'} onValueChange={(v) => setBulkAction(v === '__none__' ? '' : v)}>
+                <SelectTrigger className="bg-surface-container border-border/30 text-sm w-[180px]">
+                  <SelectValue placeholder="Choose action..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Choose action...</SelectItem>
+                  <SelectItem value="approve">Approve</SelectItem>
+                  <SelectItem value="activate">Activate</SelectItem>
+                  <SelectItem value="deactivate">Deactivate</SelectItem>
+                  <SelectItem value="assignRole">Assign Role</SelectItem>
+                </SelectContent>
+              </Select>
               {bulkAction === 'assignRole' && (
-                <select
-                  className="input text-sm"
-                  value={bulkRoleId}
-                  onChange={(e) => setBulkRoleId(e.target.value)}
-                >
-                  <option value="">Select Role...</option>
-                  {roles.map(r => (
-                    <option key={r.id} value={r.id}>{r.name}</option>
-                  ))}
-                </select>
+                <Select value={bulkRoleId || '__none__'} onValueChange={(v) => setBulkRoleId(v === '__none__' ? '' : v)}>
+                  <SelectTrigger className="bg-surface-container border-border/30 text-sm w-[160px]">
+                    <SelectValue placeholder="Select Role..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Select Role...</SelectItem>
+                    {roles.map(r => (
+                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
               <button
                 onClick={handleBulkAction}
@@ -466,7 +449,7 @@ export default function Users() {
                         </td>
                         <td>
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            user.role?.includes('admin') ? 'bg-purple-100 text-purple-800' : 'bg-surface-container text-gray-800'
+                            user.role?.includes('admin') ? 'bg-purple-500/15 text-purple-400 border border-purple-500/20' : 'bg-surface-container text-on-surface-variant'
                           }`}>
                             {user.role || 'user'}
                           </span>
@@ -474,11 +457,11 @@ export default function Users() {
                         {isAdmin && (
                           <td>
                             {!user.isApproved ? (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">
                                 <Clock className="w-4 h-4" /> Pending
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
                                 <Check className="w-4 h-4" /> Approved
                               </span>
                             )}

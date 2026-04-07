@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
 import AuditPagination from '@/components/AuditPagination';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface Horse {
   id: string;
@@ -267,83 +268,64 @@ export default function Horses() {
           <div className="bento-card p-4 mb-4 border-l-4 border-destructive text-destructive text-sm animate-slide-up">{error}</div>
         )}
 
-        <div className="mb-6 bento-card">
-          <div className="flex gap-3 items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search horses by name, passport, embassy ID..."
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setPage(1);
-                }}
-                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full border border-border/30 transition-all focus:bg-surface-container"
-              />
-            </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm border border-border/30 transition-colors ${activeFilterCount > 0 ? 'border-primary/50 text-primary bg-primary/5' : 'bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright'}`}
-            >
-              <Filter className="w-4 h-4" />
-              Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
-            </button>
-          </div>
-
-          {showFilters && (
-            <div className="mt-4 pt-4 pt-0">
+        {showFilters && (
+          <div className="bento-card mb-4">
+            <div className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <label className="form-label">Sex</label>
-                  <select
-                    value={filterGender}
-                    onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
-                    className="input text-sm"
-                  >
-                    <option value="">All</option>
-                    <option value="Stallion">Stallion</option>
-                    <option value="Mare">Mare</option>
-                    <option value="Gelding">Gelding</option>
-                  </select>
+                  <Select value={filterGender || '__all__'} onValueChange={(v) => { setFilterGender(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="bg-surface-container border-border/30 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All</SelectItem>
+                      <SelectItem value="Stallion">Stallion</SelectItem>
+                      <SelectItem value="Mare">Mare</SelectItem>
+                      <SelectItem value="Gelding">Gelding</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="form-label">Club</label>
-                  <select
-                    value={filterClubId}
-                    onChange={(e) => { setFilterClubId(e.target.value); setPage(1); }}
-                    className="input text-sm"
-                  >
-                    <option value="">All Clubs</option>
-                    {clubs.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                  <Select value={filterClubId || '__all__'} onValueChange={(v) => { setFilterClubId(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="bg-surface-container border-border/30 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Clubs</SelectItem>
+                      {clubs.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="form-label">Rider</label>
-                  <select
-                    value={filterRiderId}
-                    onChange={(e) => { setFilterRiderId(e.target.value); setPage(1); }}
-                    className="input text-sm"
-                  >
-                    <option value="">All Riders</option>
-                    {riders.map(r => (
-                      <option key={r.id} value={r.id}>{r.firstName} {r.lastName}</option>
-                    ))}
-                  </select>
+                  <Select value={filterRiderId || '__all__'} onValueChange={(v) => { setFilterRiderId(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="bg-surface-container border-border/30 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All Riders</SelectItem>
+                      {riders.map(r => (
+                        <SelectItem key={r.id} value={r.id}>{r.firstName} {r.lastName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="form-label">Status</label>
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-                    className="input text-sm"
-                  >
-                    <option value="">All</option>
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </select>
+                  <Select value={filterStatus || '__all__'} onValueChange={(v) => { setFilterStatus(v === '__all__' ? '' : v); setPage(1); }}>
+                    <SelectTrigger className="bg-surface-container border-border/30 text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All</SelectItem>
+                      <SelectItem value="true">Active</SelectItem>
+                      <SelectItem value="false">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               {activeFilterCount > 0 && (
@@ -355,8 +337,8 @@ export default function Horses() {
                 </button>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="bento-card overflow-hidden animate-slide-up-3">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />

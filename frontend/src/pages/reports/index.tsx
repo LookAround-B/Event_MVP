@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 import { Download, BarChart2, DollarSign, Users, Calendar } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import { DatePicker } from '@/components/DatePicker';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface EventSummary {
   id: string;
@@ -206,11 +208,11 @@ export default function Reports() {
             <div className="bento-card p-4 flex flex-wrap gap-4 items-end">
               <div>
                 <label className="text-sm font-medium text-muted-foreground block mb-1">Start Date</label>
-                <input type="date" value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} className="input text-sm" />
+                <DatePicker value={dateRange.start} onChange={(v) => setDateRange({ ...dateRange, start: v })} placeholder="Start date" />
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground block mb-1">End Date</label>
-                <input type="date" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} className="input text-sm" />
+                <DatePicker value={dateRange.end} onChange={(v) => setDateRange({ ...dateRange, end: v })} placeholder="End date" />
               </div>
               <button onClick={loadReport} className="px-4 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20">Apply</button>
               <button onClick={downloadFinancialCSV} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
@@ -317,12 +319,17 @@ export default function Reports() {
             <div className="bento-card p-4 flex flex-wrap gap-4 items-end">
               <div>
                 <label className="text-sm font-medium text-muted-foreground block mb-1">Filter by Event</label>
-                <select value={selectedEvent} onChange={e => setSelectedEvent(e.target.value)} className="input text-sm mt-1">
-                  <option value="">All Events</option>
-                  {eventSummaries.map(ev => (
-                    <option key={ev.id} value={ev.id}>{ev.name}</option>
-                  ))}
-                </select>
+                <Select value={selectedEvent || '__all__'} onValueChange={(v) => setSelectedEvent(v === '__all__' ? '' : v)}>
+                  <SelectTrigger className="bg-surface-container border-border/30 text-sm mt-1 w-[220px]">
+                    <SelectValue placeholder="All Events" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">All Events</SelectItem>
+                    {eventSummaries.map(ev => (
+                      <SelectItem key={ev.id} value={ev.id}>{ev.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <button onClick={loadReport} className="px-4 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20">Load</button>
             </div>

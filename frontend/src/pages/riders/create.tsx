@@ -6,6 +6,8 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Check, Paperclip } from 'lucide-react';
 import AddressMapPicker from '@/components/AddressMapPicker';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { DatePicker } from '@/components/DatePicker';
 
 interface SocialLinks {
   instagram: string;
@@ -279,30 +281,26 @@ export default function CreateRider() {
                     <label className="label-tech block mb-1.5">
                       Gender <span className="text-destructive">*</span>
                     </label>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                      className={selectClass}
-                      required
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
+                    <Select value={formData.gender || '__none__'} onValueChange={(v) => { setFormData(prev => ({ ...prev, gender: v === '__none__' ? '' : v })); if (error) setError(null); }}>
+                      <SelectTrigger className={selectClass}>
+                        <SelectValue placeholder="Select Gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">Select Gender</SelectItem>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <label className="label-tech block mb-1.5">
                       Date of Birth <span className="text-destructive">*</span>
                     </label>
-                    <input
-                      type="date"
-                      name="dob"
+                    <DatePicker
                       value={formData.dob}
-                      onChange={handleInputChange}
-                      className={inputClass}
-                      required
+                      onChange={(v) => { setFormData(prev => ({ ...prev, dob: v })); if (error) setError(null); }}
+                      placeholder="Select date of birth"
                     />
                   </div>
                   <div>

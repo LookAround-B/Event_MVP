@@ -306,7 +306,7 @@ export default function RiderDetail() {
                   {editForm.imageUrl ? (
                     <Image src={editForm.imageUrl} alt="Rider" width={128} height={128} className="w-32 h-32 rounded-lg object-cover" />
                   ) : (
-                    <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
+                    <div className="w-32 h-32 rounded-lg bg-surface-container flex items-center justify-center">
                       <ImageIcon className="w-12 h-12 text-muted-foreground" />
                     </div>
                   )}
@@ -337,7 +337,7 @@ export default function RiderDetail() {
                 rider.imageUrl ? (
                   <Image src={rider.imageUrl} alt="Rider" width={128} height={128} className="w-32 h-32 rounded-lg object-cover" />
                 ) : (
-                  <div className="w-32 h-32 rounded-lg bg-gray-700 flex items-center justify-center">
+                  <div className="w-32 h-32 rounded-lg bg-surface-container flex items-center justify-center">
                     <ImageIcon className="w-12 h-12 text-muted-foreground" />
                   </div>
                 )
@@ -675,7 +675,7 @@ export default function RiderDetail() {
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         reg.paymentStatus === 'PAID'
                           ? 'badge-emerald'
-                          : 'bg-yellow-500 bg-opacity-20 text-yellow-400'
+                          : 'bg-surface-bright text-muted-foreground'
                       }`}>
                         {reg.paymentStatus}
                       </span>

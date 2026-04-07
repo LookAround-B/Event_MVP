@@ -10,6 +10,7 @@ declare global {
 
 export function ShaderAnimation() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const initializedRef = useRef(false)
   const sceneRef = useRef<{
     camera: any
     scene: any
@@ -27,21 +28,34 @@ export function ShaderAnimation() {
   })
 
   useEffect(() => {
+    if (initializedRef.current) {
+      return
+    }
+
     // Load Three.js dynamically if not already present
     if (window.THREE) {
       initThreeJS()
       return
     }
 
-    const script = document.createElement("script")
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/89/three.min.js"
-    script.async = true
-    script.onload = () => {
+    const existingScript = document.querySelector<HTMLScriptElement>('script[data-threejs-cdn="true"]')
+
+    const handleLoad = () => {
       if (containerRef.current && window.THREE) {
         initThreeJS()
       }
     }
-    document.head.appendChild(script)
+
+    if (existingScript) {
+      existingScript.addEventListener("load", handleLoad)
+    } else {
+      const script = document.createElement("script")
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/89/three.min.js"
+      script.async = true
+      script.dataset.threejsCdn = "true"
+      script.addEventListener("load", handleLoad)
+      document.head.appendChild(script)
+    }
 
     return () => {
       // Cleanup
@@ -57,15 +71,21 @@ export function ShaderAnimation() {
           sceneRef.current.renderer.domElement.parentNode.removeChild(sceneRef.current.renderer.domElement)
         }
       }
+      if (existingScript) {
+        existingScript.removeEventListener("load", handleLoad)
+      }
+      initializedRef.current = false
       // Note: We don't remove the script from head to avoid reloading it on every mount
     }
   }, [])
 
   const initThreeJS = () => {
-    if (!containerRef.current || !window.THREE) return
+    if (!containerRef.current || !window.THREE || initializedRef.current) return
 
     const THREE = window.THREE
     const container = containerRef.current
+    initializedRef.current = true
+    container.replaceChildren()
 
     // Initialize camera
     const camera = new THREE.Camera()
@@ -144,7 +164,7 @@ export function ShaderAnimation() {
     scene.add(mesh)
 
     // Initialize renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" })
     renderer.setPixelRatio(window.devicePixelRatio)
     container.appendChild(renderer.domElement)
 

@@ -174,8 +174,8 @@ export default function UserPermissions() {
                 onClick={() => toggleRole(role.id)}
                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
                   userRoleIds.includes(role.id)
-                    ? 'border-primary bg-primary-500 bg-opacity-20 text-primary-300'
-                    : 'border-border text-muted-foreground hover:border-gray-400'
+                    ? 'border-primary/40 bg-primary/10 text-primary'
+                    : 'border-border/50 text-muted-foreground hover:border-border'
                 }`}
               >
                 {userRoleIds.includes(role.id) && <Check className="inline w-4 h-4 mr-1" />}
@@ -207,25 +207,25 @@ export default function UserPermissions() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="px-3 py-2 text-left text-muted-foreground font-semibold">Resource</th>
+                <tr className="label-tech text-left bg-surface-container/40">
+                  <th className="p-3">Resource</th>
                   {ACTIONS.map(action => (
-                    <th key={action} className="px-3 py-2 text-center">
+                    <th key={action} className="p-3 text-center">
                       <button
                         onClick={() => toggleAllForAction(action)}
-                        className="text-muted-foreground font-semibold hover:text-primary transition-colors"
+                        className="hover:text-primary transition-colors"
                         title={`Toggle all ${action}`}
                       >
                         {action}
                       </button>
                     </th>
                   ))}
-                  <th className="px-3 py-2 text-center text-muted-foreground text-xs">Toggle All</th>
+                  <th className="p-3 text-center">Toggle All</th>
                 </tr>
               </thead>
               <tbody>
                 {RESOURCES.map(resource => (
-                  <tr key={resource} className="border-b border-gray-700 hover:bg-white hover:bg-opacity-5">
+                  <tr key={resource} className="border-b border-border/10 hover:bg-surface-container/20 transition-all">
                     <td className="px-3 py-3 font-medium text-on-surface">{resource}</td>
                     {ACTIONS.map(action => {
                       const key = `${action}:${resource}`;
@@ -234,10 +234,10 @@ export default function UserPermissions() {
                         <td key={action} className="px-3 py-3 text-center">
                           <button
                             onClick={() => togglePermission(action, resource)}
-                            className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
                               granted
-                                ? 'bg-green-600 text-on-surface hover:bg-green-700'
-                                : 'bg-gray-700 text-muted-foreground hover:bg-gray-600'
+                                ? 'bg-primary/15 text-primary hover:bg-primary/25 border border-primary/30'
+                                : 'bg-surface-container text-muted-foreground hover:bg-surface-bright border border-border/30'
                             }`}
                           >
                             {granted ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}

@@ -3,8 +3,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import apiClient from '@/lib/api';
 import Cookies from 'js-cookie';
-import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { ShaderAnimation } from '@/components/shader-lines';
 import { GoogleLogin } from '@react-oauth/google';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function Signup() {
   const router = useRouter();
@@ -41,187 +46,169 @@ export default function Signup() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 bg-dot-grid"
-      style={{ background: 'hsl(var(--surface-background))' }}
-    >
-      <div
-        className="w-full max-w-md rounded-2xl animate-fade-in"
-        style={{
-          background: 'hsl(var(--surface-card))',
-          border: '1px solid hsl(var(--border) / 0.5)',
-        }}
-      >
-        <div className="p-8">
-          {/* Brand */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-black" style={{ color: 'hsl(var(--primary))' }}>
-              Equestrian
-            </h1>
-            <p className="mt-2 font-medium" >
-              Create Your Account
-            </p>
-          </div>
+    <div className="relative min-h-[100dvh] overflow-x-hidden bg-black">
+      {/* Shader background */}
+      <div className="pointer-events-none fixed inset-0 z-0 shadow-[inset_0_0_100px_rgba(var(--primary-rgb),0.05)]">
+        <ShaderAnimation />
+      </div>
+      {/* Dark overlay */}
+      <div className="pointer-events-none fixed inset-0 z-[1] bg-black/55" />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="form-group">
-                <label className="form-label">First Name</label>
-                <div className="relative">
-                  <User
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2"
-                    
-                  />
-                  <input
+      <div className="relative z-[2] flex min-h-[100dvh] w-full items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md animate-fade-in">
+
+        {/* Brand */}
+        <div className="text-center mb-8 sm:mb-10">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-on-surface">
+            EQ<span className="text-primary">WI</span>
+          </h1>
+          <p className="text-on-surface-variant text-sm mt-2 tracking-wide">
+            Create Your Account
+          </p>
+        </div>
+
+        {/* Signup Card */}
+        <Card
+          className="rounded-2xl border-white/10 bg-transparent shadow-none"
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
+          }}
+        >
+          <CardContent className="p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Name fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="label-tech">First Name</Label>
+                  <Input
                     type="text"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="input pl-10"
+                    className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
+                    style={{ background: 'rgba(255,255,255,0.07)' }}
                     placeholder="First name"
                     required
                   />
                 </div>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Last Name</label>
-                <div className="relative">
-                  <User
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2"
-                    
-                  />
-                  <input
+                <div className="space-y-2">
+                  <Label className="label-tech">Last Name</Label>
+                  <Input
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="input pl-10"
+                    className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
+                    style={{ background: 'rgba(255,255,255,0.07)' }}
                     placeholder="Last name"
                     required
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <div className="relative">
-                <Mail
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2"
-                  
-                />
-                <input
+              {/* Email */}
+              <div className="space-y-2">
+                <Label className="label-tech">Email</Label>
+                <Input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="input pl-10"
+                  className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
+                  style={{ background: 'rgba(255,255,255,0.07)' }}
                   placeholder="your@email.com"
                   required
                 />
               </div>
-            </div>
 
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2"
-                  
-                />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input pl-10 pr-10"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+              {/* Password */}
+              <div className="space-y-2">
+                <Label className="label-tech">Password</Label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10 pr-12"
+                    style={{ background: 'rgba(255,255,255,0.07)' }}
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-on-surface hover:bg-transparent"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
               </div>
-            </div>
 
-            <div className="form-group">
-              <label className="form-label">Confirm Password</label>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2"
-                  
-                />
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="input pl-10 pr-10"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  
-                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <Label className="label-tech">Confirm Password</Label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10 pr-12"
+                    style={{ background: 'rgba(255,255,255,0.07)' }}
+                    placeholder="Confirm your password"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-on-surface hover:bg-transparent"
+                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
               </div>
-            </div>
 
-            {error && (
-              <div
-                className="p-4 rounded-xl text-sm font-medium"
-                style={{
-                  background: 'hsl(var(--error) / 0.1)',
-                  border: '1px solid hsl(var(--error) / 0.3)',
-                  color: 'hsl(var(--error))',
-                }}
+              {/* Error */}
+              {error && (
+                <div className="p-4 rounded-xl text-sm font-medium bg-destructive/10 border border-destructive/30 text-destructive">
+                  {error}
+                </div>
+              )}
+
+              {/* Submit */}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 rounded-xl btn-cta text-sm font-bold uppercase tracking-wider group disabled:opacity-50"
               >
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary w-full mt-6 py-3 text-base disabled:opacity-50"
-            >
-              {loading ? 'Creating account...' : 'Sign Up'}
-            </button>
+                {loading ? 'Creating account...' : 'Sign Up'}
+                {!loading && <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+              </Button>
+            </form>
 
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full" style={{ borderTop: '1px solid hsl(var(--border) / 0.5)' }}></div>
+                <div className="w-full border-t border-white/10" />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span
-                  className="px-2 font-medium"
-                  style={{
-                    background: 'hsl(var(--surface-card))',
-                    color: 'hsl(var(--muted-foreground))',
-                  }}
-                >
-                  Or
+              <div className="relative flex justify-center">
+                <span className="px-3 text-xs font-medium text-muted-foreground" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                  Or continue with
                 </span>
               </div>
             </div>
 
+            {/* Google Login */}
             <div className="flex justify-center">
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
@@ -248,16 +235,25 @@ export default function Signup() {
                 }}
               />
             </div>
-          </form>
+          </CardContent>
+        </Card>
 
-          <div className="mt-6 text-center" style={{ borderTop: '1px solid hsl(var(--border) / 0.3)', paddingTop: '1.5rem' }}>
-            <p className="text-sm" >
-              Already have an account?{' '}
-              <Link href="/auth/login" className="font-bold transition-colors" style={{ color: 'hsl(var(--primary))' }}>
-                Log in
-              </Link>
-            </p>
-          </div>
+        {/* Footer link */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{' '}
+            <Link href="/auth/login" className="font-bold text-primary hover:text-primary/80 transition-colors">
+              Log in
+            </Link>
+          </p>
+        </div>
+
+        <p className="text-center text-muted-foreground text-xs mt-6">
+          &copy; 2025 EQWI. All rights reserved.
+        </p>
+        <p className="text-center text-on-surface-variant/70 text-[11px] mt-2 font-semibold tracking-widest uppercase opacity-80">
+          Powered by LookAround.
+        </p>
         </div>
       </div>
     </div>

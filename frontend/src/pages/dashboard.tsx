@@ -2,14 +2,16 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import {
-  Calendar, Users, BarChart3, DollarSign, TrendingUp,
-  Box, Download, Filter, ChevronLeft, ChevronRight, Search,
+  Calendar, Users, DollarSign,
+  Box, Download, Filter, ChevronLeft, ChevronRight,
+  ArrowUpRight, Zap, Clock,
 } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell,
 } from 'recharts';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 /* ===================== TYPES ===================== */
 
@@ -109,8 +111,9 @@ function exportTableToExcel(headers: string[], rows: (string | number)[][], file
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="chart-tooltip">
-      <p className="font-semibold text-sm mb-1" >{label}</p>
+    <div className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-on-surface"
+      style={{ background: "hsl(var(--surface-container))", border: "1px solid hsl(var(--border)/0.4)" }}>
+      <p className="font-semibold text-sm mb-1">{label}</p>
       {payload.map((entry: any, i: number) => (
         <p key={i} className="text-xs" style={{ color: entry.color }}>
           {entry.name}: {entry.value}
@@ -120,55 +123,129 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-/* ===================== STAT CARD ===================== */
+/* ===================== BENTO CARD: Revenue Hero ===================== */
 
-const iconColors: Record<string, { bg: string; text: string }> = {
-  emerald: { bg: 'hsla(145,63%,42%,0.12)', text: 'hsl(145,63%,55%)' },
-  violet: { bg: 'hsla(253,90%,73%,0.12)', text: 'hsl(253,90%,73%)' },
-  sky: { bg: 'hsla(199,89%,48%,0.12)', text: 'hsl(199,89%,60%)' },
-  rose: { bg: 'hsl(var(--primary) / 0.12)', text: 'hsl(var(--primary))' },
-  amber: { bg: 'hsla(38,92%,50%,0.12)', text: 'hsl(38,92%,58%)' },
-};
-
-function StatCard({
-  icon: Icon, title, value, colorKey, animClass,
-}: {
-  icon: React.ComponentType<any>;
-  title: string;
-  value: string | number;
-  colorKey: string;
-  animClass?: string;
-}) {
-  const c = iconColors[colorKey] || iconColors.emerald;
+function RevenueHeroCard({ value, loading }: { value: string; loading: boolean }) {
   return (
-    <div className={`stat-card ${animClass || ''}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p
-            className="text-[10px] font-bold uppercase tracking-widest"
-            
-          >
-            {title}
-          </p>
-          <p className="text-2xl font-bold mt-1" >
-            {value}
-          </p>
+    <div className="h-full rounded-2xl bg-primary p-5 flex flex-col justify-between relative overflow-hidden group primary-card-glow">
+      {/* decorative rings */}
+      <div className="absolute -right-5 -top-5 w-28 h-28 rounded-full border-2 border-primary-foreground/10 group-hover:scale-110 transition-transform duration-500" />
+      <div className="absolute -right-1 top-10 w-14 h-14 rounded-full border border-primary-foreground/10 group-hover:scale-125 transition-transform duration-700" />
+      <div className="absolute right-4 -bottom-4 w-20 h-20 rounded-full bg-primary-foreground/10 group-hover:scale-110 transition-transform duration-600" />
+
+      <div className="relative flex items-center gap-2.5">
+        <div className="w-9 h-9 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
+          <DollarSign className="w-4 h-4 text-primary-foreground" />
         </div>
-        <div className="p-2.5 rounded-lg" style={{ background: c.bg }}>
-          <Icon size={20} style={{ color: c.text }} />
-        </div>
+        <span className="text-sm font-bold text-primary-foreground/90">Total Revenue</span>
+      </div>
+
+      <div className="relative mt-auto pt-4">
+        <span className="text-4xl font-black text-primary-foreground tracking-tight leading-none">
+          {loading ? '...' : value}
+        </span>
+        <p className="text-sm text-primary-foreground/65 mt-1.5">Platform Total</p>
       </div>
     </div>
   );
 }
 
-/* ===================== HERO KPI CARD ===================== */
+/* ===================== BENTO CARD: Stat ===================== */
 
-function HeroKpiCard({ title, value, animClass }: { title: string; value: string; animClass?: string }) {
+function BentoStatCard({
+  icon: Icon, title, value, subtitle, loading, animClass,
+}: {
+  icon: React.ComponentType<any>;
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  loading?: boolean;
+  animClass?: string;
+}) {
   return (
-    <div className={`hero-kpi primary-card-glow ${animClass || ''}`}>
-      <div className="hero-value">{value}</div>
-      <div className="hero-label">{title}</div>
+    <div className={`h-full bento-card p-5 flex flex-col justify-between group hover:border-primary/25 transition-colors duration-300 ${animClass || ''}`}>
+      <div className="flex items-center gap-2.5">
+        <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center">
+          <Icon className="w-4 h-4 text-muted-foreground" />
+        </div>
+        <span className="text-sm font-semibold text-on-surface">{title}</span>
+      </div>
+      <div className="mt-auto pt-4">
+        <span className="text-3xl font-black text-on-surface tracking-tight leading-none">
+          {loading ? '...' : value}
+        </span>
+        {subtitle && <p className="text-xs text-muted-foreground mt-1.5">{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
+
+/* ===================== BENTO CARD: Financial Insight (purple cosmic) ===================== */
+
+const STAR_POSITIONS = [
+  [8,12],[15,38],[25,60],[33,20],[44,75],[54,44],[65,8],[74,65],[20,85],
+  [30,30],[40,52],[50,70],[60,25],[70,48],[10,78],[80,15],[42,62],[58,35],
+  [88,58],[12,50],
+];
+
+function FinancialInsightCard({ collectible, receivable, loading }: { collectible: string; receivable: string; loading: boolean }) {
+  return (
+    <div className="h-full rounded-2xl relative overflow-hidden flex flex-col p-5"
+      style={{
+        background: "linear-gradient(145deg, hsl(253,38%,16%) 0%, hsl(253,28%,11%) 55%, hsl(253,48%,9%) 100%)",
+        border: "1px solid hsl(253,45%,28%,0.4)",
+        boxShadow: "0 0 40px -12px hsla(253,90%,73%,0.25)",
+      }}>
+      {/* Stripe overlay */}
+      <div className="absolute inset-0 stripe-pattern opacity-[0.12] pointer-events-none" />
+      {/* Stars */}
+      {STAR_POSITIONS.map(([top, left], i) => (
+        <div key={i} className="absolute rounded-full bg-white pointer-events-none"
+          style={{ top: `${top}%`, left: `${left}%`, width: i % 4 === 0 ? 3 : 2, height: i % 4 === 0 ? 3 : 2, opacity: 0.2 + (i % 3) * 0.15 }} />
+      ))}
+
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-bold text-white">Financial Insight</h3>
+          <div className="text-[10px] text-white/50 bg-white/10 rounded-full px-3 py-1 border border-white/15">
+            Overview
+          </div>
+        </div>
+
+        <div className="flex items-baseline gap-2">
+          <span className="text-4xl font-black tracking-tight leading-none" style={{ color: 'hsl(253,90%,73%)' }}>
+            {loading ? '...' : collectible}
+          </span>
+        </div>
+        <p className="text-xs text-white/50 mt-1">Collectible</p>
+
+        <div className="mt-4 rounded-xl p-3"
+          style={{ background: "rgba(255,255,255,0.07)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <p className="text-[10px] text-white/40 mb-0.5">· Receivable</p>
+          <span className="text-2xl font-black text-white tracking-tight">
+            {loading ? '...' : receivable}
+          </span>
+        </div>
+
+        <div className="mt-4 flex-1 min-h-0">
+          <div className="space-y-3">
+            {[
+              { label: 'Collections', pct: 72, color: 'hsl(253,90%,73%)' },
+              { label: 'Outstanding', pct: 28, color: 'hsl(253,65%,58%)' },
+            ].map(d => (
+              <div key={d.label}>
+                <div className="flex justify-between mb-1">
+                  <span className="text-[10px] text-white/40">{d.label}</span>
+                  <span className="text-[10px] font-bold text-white/70">{d.pct}%</span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${d.pct}%`, background: d.color }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -490,16 +567,17 @@ function DashboardContent() {
             <p className="text-sm text-muted-foreground mt-2">Real-time platform analytics and event intelligence.</p>
           </div>
           <div className="w-full md:w-72">
-            <select
-              value={mainEventFilter}
-              onChange={e => { setMainEventFilter(e.target.value); setParticipantPage(1); }}
-              className="input w-full"
-            >
-              <option value="">All Events</option>
-              {eventOptions.map(ev => (
-                <option key={ev.id} value={ev.id}>{ev.name}</option>
-              ))}
-            </select>
+            <Select value={mainEventFilter || '__all__'} onValueChange={(v) => { setMainEventFilter(v === '__all__' ? '' : v); setParticipantPage(1); }}>
+              <SelectTrigger className="bg-surface-container border-border/30">
+                <SelectValue placeholder="All Events" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All Events</SelectItem>
+                {eventOptions.map(ev => (
+                  <SelectItem key={ev.id} value={ev.id}>{ev.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -516,281 +594,261 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* ═══════ SECTION 1: KPI STAT CARDS ═══════ */}
-        {kpiLoading ? (
-          <SectionSpinner label="Loading KPIs..." />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            <HeroKpiCard
-              title="Total Revenue"
+        {/* ═══════ BENTO GRID: TOP SECTION ═══════ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          {/* Col 1 Row 1 — Revenue Hero */}
+          <div className="lg:col-start-1 lg:row-start-1 min-h-[160px] animate-slide-up-1 border-beam rounded-2xl">
+            <RevenueHeroCard
               value={`₹${kpiCards.totalRevenue.toLocaleString('en-IN')}`}
-              animClass="animate-slide-up-1"
+              loading={kpiLoading}
             />
-            <StatCard icon={Calendar} title="Total Events" value={kpiCards.totalEvents} colorKey="emerald" animClass="animate-slide-up-2" />
-            <StatCard icon={Users} title="Clubs | Riders" value={`${kpiCards.clubsRegistered} | ${kpiCards.ridersRegistered}`} colorKey="violet" animClass="animate-slide-up-3" />
-            <StatCard icon={Box} title="Horse Count" value={kpiCards.horseCount} colorKey="violet" animClass="animate-slide-up-4" />
-            <StatCard icon={TrendingUp} title="Collectible" value={`₹${kpiCards.collectibleAmount.toLocaleString('en-IN')}`} colorKey="sky" animClass="animate-slide-up-5" />
-            <StatCard icon={BarChart3} title="Receivable" value={`₹${kpiCards.receivableAmount.toLocaleString('en-IN')}`} colorKey="rose" animClass="animate-slide-up-6" />
-          </div>
-        )}
-
-        {/* ═══════ SECTION 2: BAR CHART ═══════ */}
-        {kpiLoading ? (
-          <SectionSpinner label="Loading charts..." />
-        ) : (
-          <div className="bento-card">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-              <h3 className="text-lg font-semibold" >Event Stats</h3>
-              <select
-                value={selectedChartEvent}
-                onChange={e => setSelectedChartEvent(e.target.value)}
-                className="input w-auto"
-              >
-                <option value="">All Events</option>
-                {eventChartData.map(ev => (
-                  <option key={ev.eventId} value={ev.eventId}>{ev.eventName}</option>
-                ))}
-              </select>
-            </div>
-            {chartDisplayData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={chartDisplayData} barCategoryGap="28%" margin={{ bottom: 60 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsla(224,20%,20%,0.3)" />
-                  <XAxis
-                    dataKey="eventName"
-                    angle={-35}
-                    textAnchor="end"
-                    height={80}
-                    tick={{ fill: 'hsl(224,8%,50%)', fontSize: 11 }}
-                    interval={0}
-                  />
-                  <YAxis tick={{ fill: 'hsl(224,8%,50%)', fontSize: 12 }} allowDecimals={false} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ color: 'hsl(224,10%,80%)' }} />
-                  <Bar dataKey="unpaidRegistrations" fill="hsl(0,85%,60%)" name="Unpaid" radius={[5, 5, 2, 2]} />
-                  <Bar dataKey="totalRiders" fill="hsl(145,63%,55%)" name="Riders" radius={[5, 5, 2, 2]} />
-                  <Bar dataKey="totalHorses" fill="hsl(253,90%,73%)" name="Horses" radius={[5, 5, 2, 2]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-center py-8" >No event data</p>
-            )}
-          </div>
-        )}
-
-        {/* ═══════ SECTION 3: EVENTS TABLE ═══════ */}
-        <div className="bento-card">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
-            {/* Tab toggles */}
-            <div
-              className="flex gap-1 rounded-lg p-1"
-              style={{ background: 'hsl(var(--surface-container))' }}
-            >
-              <button
-                onClick={() => { setEventTab('current'); setEventPage(1); }}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  eventTab === 'current' ? 'btn-primary' : ''
-                }`}
-                style={eventTab !== 'current' ? { color: 'hsl(var(--muted-foreground))' } : {}}
-              >
-                Current Events
-              </button>
-              <button
-                onClick={() => { setEventTab('all'); setEventPage(1); }}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  eventTab === 'all' ? 'btn-primary' : ''
-                }`}
-                style={eventTab !== 'all' ? { color: 'hsl(var(--muted-foreground))' } : {}}
-              >
-                All Events ({eventCount})
-              </button>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={handleExportEventsCSV} className="btn btn-ghost text-xs">
-                <Download size={14} /> CSV
-              </button>
-              <button onClick={handleExportEventsExcel} className="btn btn-secondary text-xs">
-                <Download size={14} /> Excel
-              </button>
-            </div>
           </div>
 
-          {eventsLoading ? (
-            <SectionSpinner label="Loading events..." />
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      <th>Event Name</th>
-                      <th>Start Date</th>
-                      <th>End Date</th>
-                      <th>Venue Address</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {events.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="text-center py-8" >
-                          No events found
-                        </td>
-                      </tr>
-                    ) : (
-                      events.map(ev => (
-                        <tr
-                          key={ev.id}
-                          onClick={() => router.push(`/events/${ev.id}`)}
-                          className="cursor-pointer"
-                        >
-                          <td className="font-medium" >{ev.name}</td>
-                          <td>{formatDate(ev.startDate)}</td>
-                          <td>{formatDate(ev.endDate)}</td>
-                          <td className="text-xs" >
-                            {ev.venueAddress || ev.venueName || 'N/A'}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+          {/* Col 2 Row 1 — Total Events */}
+          <div className="lg:col-start-2 lg:row-start-1 min-h-[160px] animate-slide-up-2">
+            <BentoStatCard icon={Calendar} title="Total Events" value={kpiCards.totalEvents} subtitle="Active & Completed" loading={kpiLoading} />
+          </div>
+
+          {/* Col 3 Rows 1-2 — Event Stats Chart (row-span-2) */}
+          <div className="lg:col-start-3 lg:row-start-1 lg:row-span-2 min-h-[340px] lg:min-h-0 animate-slide-up-3">
+            <div className="h-full bento-card p-5 flex flex-col group hover:border-primary/25 transition-colors duration-300">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-base font-bold text-on-surface">Event Stats</h3>
+                <button className="w-8 h-8 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors">
+                  <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
+                </button>
               </div>
-              <Pagination page={eventPage} totalPages={eventTotalPages} onPageChange={setEventPage} />
-            </>
-          )}
+
+              <div className="mt-1 mb-3">
+                <Select value={selectedChartEvent || '__all__'} onValueChange={(v) => setSelectedChartEvent(v === '__all__' ? '' : v)}>
+                  <SelectTrigger className="bg-surface-container/50 border-border/30 h-8 text-xs">
+                    <SelectValue placeholder="All Events" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">All Events</SelectItem>
+                    {eventChartData.map(ev => (
+                      <SelectItem key={ev.eventId} value={ev.eventId}>{ev.eventName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {kpiLoading ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" />
+                </div>
+              ) : chartDisplayData.length > 0 ? (
+                <div className="flex-1 min-h-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartDisplayData} barCategoryGap="20%" barSize={14}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsla(224,20%,20%,0.3)" />
+                      <XAxis
+                        dataKey="eventName"
+                        angle={-35}
+                        textAnchor="end"
+                        height={60}
+                        tick={{ fill: 'hsl(224,8%,50%)', fontSize: 9 }}
+                        interval={0}
+                      />
+                      <YAxis tick={{ fill: 'hsl(224,8%,50%)', fontSize: 10 }} allowDecimals={false} width={25} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend wrapperStyle={{ fontSize: 10 }} />
+                      <Bar dataKey="unpaidRegistrations" fill="hsl(0,85%,60%)" name="Unpaid" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="totalRiders" fill="hsl(145,63%,55%)" name="Riders" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="totalHorses" fill="hsl(253,90%,73%)" name="Horses" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground">No event data</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Col 4 Rows 1-2 — Financial Insight (purple cosmic) */}
+          <div className="lg:col-start-4 lg:row-start-1 lg:row-span-2 min-h-[340px] lg:min-h-0 animate-slide-up-4">
+            <FinancialInsightCard
+              collectible={`₹${kpiCards.collectibleAmount.toLocaleString('en-IN')}`}
+              receivable={`₹${kpiCards.receivableAmount.toLocaleString('en-IN')}`}
+              loading={kpiLoading}
+            />
+          </div>
+
+          {/* Col 1 Row 2 — Clubs | Riders */}
+          <div className="lg:col-start-1 lg:row-start-2 min-h-[120px] animate-slide-up-2">
+            <BentoStatCard icon={Users} title="Clubs | Riders" value={`${kpiCards.clubsRegistered} | ${kpiCards.ridersRegistered}`} subtitle="Registered entities" loading={kpiLoading} />
+          </div>
+
+          {/* Col 2 Row 2 — Horse Count */}
+          <div className="lg:col-start-2 lg:row-start-2 min-h-[120px] animate-slide-up-3">
+            <BentoStatCard icon={Box} title="Horse Count" value={kpiCards.horseCount} subtitle="Total registered horses" loading={kpiLoading} />
+          </div>
         </div>
 
-        {/* ═══════ SECTION 4: PARTICIPANTS LIST ═══════ */}
-        <div className="bento-card">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
-            <h3 className="text-lg font-semibold" >
-              Participants List{' '}
-              <span className="text-sm font-normal" >
-                ({participantCount} total)
-              </span>
-            </h3>
-            <div className="flex gap-2">
-              <button onClick={handleExportParticipantsCSV} className="btn btn-ghost text-xs">
-                <Download size={14} /> CSV
-              </button>
-              <button onClick={handleExportParticipantsExcel} className="btn btn-secondary text-xs">
-                <Download size={14} /> Excel
-              </button>
+        {/* ═══════ BOTTOM GRID: Events + Participants + Quick Actions ═══════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
+          {/* Events Table Card */}
+          <div className="animate-slide-up-3">
+            <div className="bento-card p-5 group hover:border-primary/20 transition-colors duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-on-surface">Events</h3>
+                <div className="flex items-center gap-2">
+                  <button onClick={handleExportEventsCSV} className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors">
+                    <Download className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Tab toggles */}
+              <div className="flex gap-1 rounded-lg p-1 mb-4" style={{ background: 'hsl(var(--surface-container))' }}>
+                <button
+                  onClick={() => { setEventTab('current'); setEventPage(1); }}
+                  className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${eventTab === 'current' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-on-surface'}`}
+                >
+                  Current
+                </button>
+                <button
+                  onClick={() => { setEventTab('all'); setEventPage(1); }}
+                  className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${eventTab === 'all' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-on-surface'}`}
+                >
+                  All ({eventCount})
+                </button>
+              </div>
+
+              {eventsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" />
+                </div>
+              ) : events.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">No events found</p>
+              ) : (
+                <div className="space-y-3">
+                  {events.slice(0, 5).map(ev => (
+                    <div key={ev.id} onClick={() => router.push(`/events/${ev.id}`)} className="cursor-pointer group/item">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-semibold text-on-surface group-hover/item:text-primary transition-colors truncate">{ev.name}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{formatDate(ev.startDate)} — {formatDate(ev.endDate)}</p>
+                      <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: 'hsl(var(--surface-container))' }}>
+                        <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: '100%' }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {events.length > 0 && (
+                <div className="mt-4 inline-flex items-center gap-1.5 bg-primary/12 text-primary text-[11px] font-bold px-3 py-1.5 rounded-full">
+                  <Clock className="w-3 h-3" />
+                  {events.length} event{events.length !== 1 ? 's' : ''}
+                </div>
+              )}
+              <Pagination page={eventPage} totalPages={eventTotalPages} onPageChange={setEventPage} />
             </div>
           </div>
 
-          {/* Search + Filters */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search by rider, club, horse, event..."
-              value={participantSearch}
-              onChange={(e) => { setParticipantSearch(e.target.value); setParticipantPage(1); }}
-              className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-96 border border-border/30 transition-all focus:bg-surface-container"
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-            <MultiSelect
-              label="Month & Year"
-              options={monthOptions}
-              selected={filterMonths}
-              onChange={v => { setFilterMonths(v); setParticipantPage(1); }}
-            />
-            <MultiSelect
-              label="Select Events"
-              options={eventOptions.map(e => ({ value: e.id, label: e.name }))}
-              selected={filterEvents}
-              onChange={v => { setFilterEvents(v); setParticipantPage(1); }}
-            />
-            <MultiSelect
-              label="Event Category"
-              options={categoryOptions.map(c => ({ value: c.id, label: c.name }))}
-              selected={filterCategories}
-              onChange={v => { setFilterCategories(v); setParticipantPage(1); }}
-            />
-            <MultiSelect
-              label="Payment Status"
-              options={[
-                { value: 'PAID', label: 'Paid' },
-                { value: 'UNPAID', label: 'Unpaid' },
-                { value: 'PARTIAL', label: 'Partial' },
-                { value: 'CANCELLED', label: 'Cancelled' },
-              ]}
-              selected={filterPayment}
-              onChange={v => { setFilterPayment(v); setParticipantPage(1); }}
-            />
+          {/* Participants Schedule Card */}
+          <div className="animate-slide-up-4">
+            <div className="bento-card p-5 group hover:border-primary/20 transition-colors duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-on-surface">Participants</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">{participantCount} total</span>
+                  <button onClick={handleExportParticipantsCSV} className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors">
+                    <Download className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
+                </div>
+              </div>
+
+              {participantsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" />
+                </div>
+              ) : participants.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">No participants found</p>
+              ) : (
+                <div className="space-y-3">
+                  {participants.slice(0, 6).map(p => (
+                    <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl transition-colors duration-200" style={{ background: 'hsl(var(--surface-container)/0.5)' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-container))')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-container)/0.5)')}>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs flex-shrink-0" style={{ background: 'hsl(var(--surface-bright)/0.5)' }}>
+                        🏇
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-on-surface truncate">{p.riderName}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">{p.eventName} · {p.horseName}</p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <span className={`badge text-[10px] ${paymentBadge(p.paymentStatus)}`}>{p.paymentStatus}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Pagination page={participantPage} totalPages={participantTotalPages} onPageChange={setParticipantPage} />
+            </div>
           </div>
 
-          {participantsLoading ? (
-            <SectionSpinner label="Loading participants..." />
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      <th className="w-10">
-                        <input
-                          type="checkbox"
-                          checked={participants.length > 0 && selectedParticipants.size === participants.length}
-                          onChange={toggleAllParticipants}
-                          style={{ accentColor: 'hsl(var(--primary))' }}
-                        />
-                      </th>
-                      <th>Event Name</th>
-                      <th>Event Date</th>
-                      <th>Rider Name</th>
-                      <th>Club Name</th>
-                      <th>Horse Name</th>
-                      <th>Event Category</th>
-                      <th>Price (₹)</th>
-                      <th>Payment Method</th>
-                      <th>Payment Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {participants.length === 0 ? (
-                      <tr>
-                        <td colSpan={10} className="text-center py-8" >
-                          No participants found
-                        </td>
-                      </tr>
-                    ) : (
-                      participants.map(p => (
-                        <tr key={p.id}>
-                          <td>
-                            <input
-                              type="checkbox"
-                              checked={selectedParticipants.has(p.id)}
-                              onChange={() => toggleParticipant(p.id)}
-                              style={{ accentColor: 'hsl(var(--primary))' }}
-                            />
-                          </td>
-                          <td className="font-medium" >{p.eventName}</td>
-                          <td>{formatDate(p.eventDate)}</td>
-                          <td>{p.riderName}</td>
-                          <td>{p.clubName}</td>
-                          <td>{p.horseName}</td>
-                          <td>{p.eventCategory}</td>
-                          <td className="font-medium" >
-                            ₹{p.price.toLocaleString('en-IN')}
-                          </td>
-                          <td className="text-xs" >{p.paymentMethod}</td>
-                          <td>
-                            <span className={`badge ${paymentBadge(p.paymentStatus)}`}>
-                              {p.paymentStatus}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+          {/* Quick Actions + Tip Card Column */}
+          <div className="space-y-3 lg:space-y-4 animate-slide-up-5">
+            {/* AI Tip */}
+            <div className="bento-card p-4 flex items-center gap-3 group hover:border-secondary/30 transition-colors duration-300">
+              <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-300"
+                style={{ background: 'linear-gradient(135deg,hsl(253,90%,73%,0.35),hsl(253,50%,50%,0.2))' }}>
+                <Zap className="w-5 h-5 text-secondary" />
               </div>
-              <Pagination page={participantPage} totalPages={participantTotalPages} onPageChange={setParticipantPage} />
-            </>
-          )}
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Manage your platform from the{' '}
+                <span className="text-on-surface font-semibold">Command Center</span>.
+              </p>
+            </div>
+
+            {/* Quick Actions / Continue */}
+            <div className="bento-card p-5 group hover:border-primary/20 transition-colors duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-on-surface">Continue Actions</h3>
+                <button className="w-8 h-8 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors">
+                  <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
+
+              <div className="space-y-2.5">
+                {[
+                  { name: 'Manage Events', sub: `${kpiCards.totalEvents} events registered`, pct: 100, icon: '📅', href: '/events' },
+                  { name: 'Review Registrations', sub: 'Pending approvals', pct: 60, icon: '📋', href: '/registrations/approvals' },
+                  { name: 'Financial Reports', sub: 'Revenue tracking', pct: 45, icon: '💰', href: '/reports' },
+                ].map((item) => (
+                  <div key={item.name}
+                    onClick={() => router.push(item.href)}
+                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group/item transition-colors duration-200"
+                    style={{ background: 'hsl(var(--surface-container)/0.5)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-container))')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'hsl(var(--surface-container)/0.5)')}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 group-hover/item:scale-110 transition-transform duration-200"
+                      style={{ background: 'hsl(var(--surface-bright)/0.5)' }}>
+                      {item.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-on-surface truncate group-hover/item:text-primary transition-colors">{item.name}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{item.sub}</p>
+                      <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: 'hsl(var(--surface-bright)/0.6)' }}>
+                        <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${item.pct}%` }} />
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                      <span className="text-[10px] font-bold text-muted-foreground">{item.pct}%</span>
+                      <div className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-primary text-primary-foreground">
+                        Go →
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </ProtectedRoute>

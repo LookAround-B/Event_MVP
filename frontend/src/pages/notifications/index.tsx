@@ -64,13 +64,13 @@ export default function Notifications() {
 
   const typeIcon = (type: string) => {
     const colors: Record<string, string> = {
-      REGISTRATION_APPROVED: 'bg-emerald-500/15 text-emerald-400',
-      REGISTRATION_REJECTED: 'bg-red-500/15 text-destructive',
-      PAYMENT_RECEIVED: 'bg-blue-500/15 text-blue-400',
-      EVENT_UPDATE: 'bg-purple-500/15 text-purple-400',
-      SYSTEM: 'bg-surface-lowest0/15 text-muted-foreground',
+      REGISTRATION_APPROVED: 'bg-primary/10 text-primary',
+      REGISTRATION_REJECTED: 'bg-destructive/10 text-destructive',
+      PAYMENT_RECEIVED: 'bg-secondary/10 text-secondary',
+      EVENT_UPDATE: 'bg-secondary/10 text-secondary',
+      SYSTEM: 'bg-surface-container text-muted-foreground',
     };
-    return colors[type] || 'bg-surface-lowest0/15 text-muted-foreground';
+    return colors[type] || 'bg-surface-container text-muted-foreground';
   };
 
   const timeAgo = (dateStr: string) => {
@@ -99,12 +99,12 @@ export default function Notifications() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setShowUnreadOnly(!showUnreadOnly)}
-              className={`px-3 py-2 rounded-lg text-sm transition ${showUnreadOnly ? 'bg-purple-600 text-on-surface' : 'bg-white/10 text-muted-foreground hover:bg-white/20'}`}
+              className={`px-3 py-2 rounded-xl text-sm transition ${showUnreadOnly ? 'bg-primary text-primary-foreground' : 'bg-surface-container/60 text-muted-foreground hover:bg-surface-bright border border-border/30'}`}
             >
               {showUnreadOnly ? 'Show All' : 'Unread Only'}
             </button>
             {unreadCount > 0 && (
-              <button onClick={markAllAsRead} className="px-3 py-2 bg-white/10 text-muted-foreground rounded-lg text-sm hover:bg-white/20 flex items-center gap-1 transition">
+              <button onClick={markAllAsRead} className="px-3 py-2 bg-surface-container/60 text-muted-foreground rounded-xl text-sm hover:bg-surface-bright flex items-center gap-1 transition border border-border/30">
                 <CheckCircle size={14} /> Mark All Read
               </button>
             )}
@@ -121,7 +121,7 @@ export default function Notifications() {
         ) : (
           <div className="space-y-2">
             {notifications.map(n => (
-              <div key={n.id} className={`card p-4 flex items-start gap-3 ${!n.isRead ? 'border-l-4 border-purple-500' : ''}`}>
+              <div key={n.id} className={`bento-card p-4 flex items-start gap-3 ${!n.isRead ? 'border-l-4 border-primary' : ''}`}>
                 <div className={`p-2 rounded-full ${typeIcon(n.type)} flex-shrink-0 mt-0.5`}>
                   <Bell size={14} />
                 </div>

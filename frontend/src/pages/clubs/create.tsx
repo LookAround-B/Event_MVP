@@ -6,6 +6,8 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import AddressMapPicker from '@/components/AddressMapPicker';
 import toast from 'react-hot-toast';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { DatePicker } from '@/components/DatePicker';
 
 export default function CreateClub() {
   const router = useRouter();
@@ -307,26 +309,24 @@ export default function CreateClub() {
                 </div>
                 <div>
                   <label className="label-tech block mb-1.5">Date of Birth</label>
-                  <input
-                    type="date"
-                    name="primaryContactDob"
+                  <DatePicker
                     value={formData.primaryContactDob}
-                    onChange={handleChange}
-                    className={inputClass}
+                    onChange={(v) => setFormData(prev => ({ ...prev, primaryContactDob: v }))}
+                    placeholder="Select date of birth"
                   />
                 </div>
                 <div>
                   <label className="label-tech block mb-1.5">Gender</label>
-                  <select
-                    name="primaryContactGender"
-                    value={formData.primaryContactGender}
-                    onChange={handleChange}
-                    className={selectClass}
-                  >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  <Select value={formData.primaryContactGender} onValueChange={(v) => setFormData(prev => ({ ...prev, primaryContactGender: v }))}>
+                    <SelectTrigger className={selectClass}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <label className="label-tech block mb-1.5">Mobile Number</label>

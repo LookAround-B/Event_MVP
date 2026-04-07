@@ -185,7 +185,7 @@ export default function EventStables() {
                     type="checkbox"
                     checked={form.isAvailable}
                     onChange={(e) => setForm({ ...form, isAvailable: e.target.checked })}
-                    className="rounded border-border bg-gray-700 text-primary-500"
+                    className="rounded border-border bg-surface-container text-primary"
                   />
                   Available
                 </label>
@@ -246,7 +246,7 @@ export default function EventStables() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(stable)}
-                          className="text-blue-400 hover:text-blue-300"
+                          className="text-primary hover:text-primary/80"
                           title="Edit"
                         >
                           <Pencil size={16} />
