@@ -79,8 +79,8 @@ function InlineField({
                 </Select>
               ) : type === 'date' ? (
                 <DatePicker
-                  value={editValue ? new Date(editValue) : undefined}
-                  onChange={(date: Date | undefined) => setEditValue(date ? date.toISOString().split('T')[0] : '')}
+                  value={editValue || ''}
+                  onChange={(v) => setEditValue(v)}
                   placeholder="Select date"
                 />
               ) : type === 'textarea' ? (

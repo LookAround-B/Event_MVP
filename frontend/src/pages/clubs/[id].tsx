@@ -7,7 +7,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Plus, Trash2, Pencil, Save, X, ImageIcon } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import DatePicker from '@/components/DatePicker';
+import { DatePicker } from '@/components/DatePicker';
 
 interface Rider {
   id: string;
@@ -656,8 +656,8 @@ export default function ClubDetail() {
                     <div>
                       <label className="block text-xs text-muted-foreground mb-1">Date of Birth</label>
                       <DatePicker
-                        value={riderForm.dob ? new Date(riderForm.dob) : undefined}
-                        onChange={(date) => setRiderForm({ ...riderForm, dob: date ? date.toISOString().split('T')[0] : '' })}
+                        value={riderForm.dob || ''}
+                        onChange={(v) => setRiderForm({ ...riderForm, dob: v })}
                         placeholder="Select date"
                       />
                     </div>
@@ -727,8 +727,8 @@ export default function ClubDetail() {
                               </td>
                               <td>
                                 <DatePicker
-                                  value={editRiderForm.dob ? new Date(editRiderForm.dob) : undefined}
-                                  onChange={(date) => setEditRiderForm({ ...editRiderForm, dob: date ? date.toISOString().split('T')[0] : '' })}
+                                  value={editRiderForm.dob || ''}
+                                  onChange={(v) => setEditRiderForm({ ...editRiderForm, dob: v })}
                                   placeholder="DOB"
                                 />
                               </td>

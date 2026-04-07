@@ -436,8 +436,8 @@ export default function RiderDetail() {
                 <p className="text-sm text-muted-foreground">Date of Birth</p>
                 {editing ? (
                   <DatePicker
-                    value={editForm.dob ? new Date(editForm.dob) : undefined}
-                    onChange={(date: Date | undefined) => setEditForm(prev => ({ ...prev, dob: date ? date.toISOString().split('T')[0] : '' }))}
+                    value={editForm.dob || ''}
+                    onChange={(v) => setEditForm(prev => ({ ...prev, dob: v }))}
                     placeholder="Select date"
                   />
                 ) : (
