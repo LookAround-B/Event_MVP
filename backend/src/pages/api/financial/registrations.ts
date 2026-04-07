@@ -45,7 +45,7 @@ async function handler(
       }),
       prisma.registration.count({ where }),
       prisma.event.findMany({
-        select: { id: true, name: true },
+        select: { id: true, name: true, startDate: true },
         orderBy: { name: 'asc' },
       }),
       prisma.eventCategory.findMany({

@@ -31,6 +31,8 @@ export default function EventStables() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ number: '', capacity: '1', pricePerStable: '0', isAvailable: true });
+  const [page, setPage] = useState(1);
+  const perPage = 10;
 
   useEffect(() => {
     if (eventId) fetchStables();
@@ -222,7 +224,7 @@ export default function EventStables() {
                 </tr>
               </thead>
               <tbody>
-                {stables.map((stable) => (
+                {stables.slice((page - 1) * perPage, page * perPage).map((stable) => (
                   <tr key={stable.id}>
                     <td className="font-medium text-on-surface">{stable.number}</td>
                     <td>{stable.capacity}</td>
@@ -265,6 +267,15 @@ export default function EventStables() {
               </tbody>
             </table>
           )}
+          {(() => { const totalPages = Math.ceil(stables.length / perPage); return totalPages > 0 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border/10">
+              <span className="text-sm text-muted-foreground">Page {page} of {totalPages} ({stables.length} total)</span>
+              <div className="flex gap-2">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="px-3 py-1.5 text-sm rounded-lg border border-border/20 hover:bg-muted/50 disabled:opacity-40 transition-all">Previous</button>
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} className="px-3 py-1.5 text-sm rounded-lg border border-border/20 hover:bg-muted/50 disabled:opacity-40 transition-all">Next</button>
+              </div>
+            </div>
+          ); })()}
         </div>
 
         {/* Summary */}

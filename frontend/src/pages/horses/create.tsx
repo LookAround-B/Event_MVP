@@ -83,7 +83,13 @@ export default function CreateHorse() {
       return;
     }
 
-    if (formData.embassyId && !/^EIRSHR\d{5}$/.test(formData.embassyId)) {
+    if (!formData.embassyId) {
+      toast.error('Embassy ID is mandatory');
+      setLoading(false);
+      return;
+    }
+
+    if (!/^EIRSHR\d{5}$/.test(formData.embassyId)) {
       toast.error('Embassy ID must be in format EIRSHR followed by 5 digits (e.g., EIRSHR00076)');
       setLoading(false);
       return;
@@ -307,7 +313,7 @@ export default function CreateHorse() {
 
                 <div className="mt-4">
                   <label className="label-tech block mb-1.5">
-                    Embassy ID
+                    Embassy ID <span className="text-destructive">*</span>
                   </label>
                   <input
                     type="text"
@@ -316,6 +322,7 @@ export default function CreateHorse() {
                     onChange={handleChange}
                     placeholder="e.g., EIRSHR00076"
                     maxLength={11}
+                    required
                     className={`${inputClass} font-mono`}
                   />
                   <p className="text-xs text-muted-foreground mt-1">Format: EIRSHR followed by 5 digits (e.g., EIRSHR00076)</p>

@@ -14,7 +14,6 @@ export default function CreateClub() {
   const [formData, setFormData] = useState({
     name: '',
     shortCode: '',
-    registrationNumber: '',
     contactNumber: '',
     optionalPhone: '',
     email: '',
@@ -168,17 +167,7 @@ export default function CreateClub() {
                     className={inputClass}
                   />
                 </div>
-                <div>
-                  <label className="label-tech block mb-1.5">Registration Number</label>
-                  <input
-                    type="text"
-                    name="registrationNumber"
-                    placeholder="Reg. number"
-                    value={formData.registrationNumber}
-                    onChange={handleChange}
-                    className={inputClass}
-                  />
-                </div>
+
                 <div>
                   <label className="label-tech block mb-1.5">GST Number</label>
                   <input

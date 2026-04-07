@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, Search, Eye, Copy, ToggleLeft, ToggleRight, Download, Calendar, Check, Layers, Activity } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, Copy, ToggleLeft, ToggleRight, Download, Calendar, Check, Layers, Activity, Filter, Ban, X } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
@@ -60,6 +60,8 @@ export default function Events() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterPublished, setFilterPublished] = useState<'' | 'published' | 'unpublished'>('');
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -182,6 +184,7 @@ export default function Events() {
       className: event.isPublished ? 'text-yellow-400 hover:text-yellow-300' : 'text-emerald-400 hover:text-green-300',
     },
     { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(event.id), className: 'text-destructive hover:text-destructive' },
+    { label: event.isPublished ? 'Disable' : 'Enable', icon: <Ban size={16} />, onClick: () => handleTogglePublish(event.id, event.isPublished), className: event.isPublished ? 'text-orange-400 hover:text-orange-300' : 'text-emerald-400 hover:text-emerald-300' },
   ];
 
   return (
@@ -227,11 +230,40 @@ export default function Events() {
               <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
                 <Download className="w-4 h-4" /> <span className="hidden sm:inline">Excel</span>
               </button>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm border transition-colors ${filterPublished ? 'border-primary/50 text-primary bg-primary/5' : 'text-on-surface-variant bg-surface-container/60 hover:bg-surface-bright border-border/30'}`}
+              >
+                <Filter className="w-4 h-4" /> <span className="hidden sm:inline">Filters</span>
+              </button>
               <Link href="/events/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center transition-all active:scale-95">
                 <Plus className="w-4 h-4" /> Define Event
               </Link>
             </div>
           </div>
+          {showFilters && (
+            <div className="mt-3 pt-3 border-t border-border/30">
+              <div className="flex items-center gap-3">
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Status</label>
+                  <select
+                    value={filterPublished}
+                    onChange={(e) => setFilterPublished(e.target.value as '' | 'published' | 'unpublished')}
+                    className="px-3 py-2 rounded-xl text-sm bg-surface-container/50 border border-border/30 text-on-surface focus:ring-1 focus:ring-primary/50 focus:outline-none"
+                  >
+                    <option value="">All Status</option>
+                    <option value="published">Published</option>
+                    <option value="unpublished">Draft</option>
+                  </select>
+                </div>
+                {filterPublished && (
+                  <button onClick={() => setFilterPublished('')} className="mt-4 text-xs text-destructive flex items-center gap-1">
+                    <X size={12} /> Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Table */}
@@ -249,9 +281,13 @@ export default function Events() {
                 ))}
               </div>
             </div>
-          ) : events.length === 0 ? (
+          ) : (() => {
+            const displayEvents = filterPublished
+              ? events.filter(e => filterPublished === 'published' ? e.isPublished : !e.isPublished)
+              : events;
+            return displayEvents.length === 0 ? (
             <div className="text-center py-8" >
-              {searchTerm ? 'No events match your search' : 'No events yet. Create one to get started!'}
+              No events match your filters
             </div>
           ) : (
             <>
@@ -262,7 +298,7 @@ export default function Events() {
                     <th className="p-3 sm:p-4 w-12">
                       <input
                         type="checkbox"
-                        checked={selectedIds.size === events.length && events.length > 0}
+                        checked={selectedIds.size === displayEvents.length && displayEvents.length > 0}
                         onChange={toggleSelectAll}
                         className="accent-primary rounded"
                       />
@@ -270,13 +306,14 @@ export default function Events() {
                     <th className="p-3 sm:p-4">Championship Manifest</th>
                     <th className="p-3 sm:p-4">Operational Node</th>
                     <th className="p-3 sm:p-4">Timeline</th>
+                    <th className="p-3 sm:p-4">End Date</th>
                     <th className="p-3 sm:p-4">Status</th>
                     <th className="p-3 sm:p-4 text-center">Registrations</th>
                     <th className="p-3 sm:p-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/10">
-                  {events.map((event) => (
+                  {displayEvents.map((event) => (
                     <tr key={event.id} className="group hover:bg-surface-container/20 transition-all duration-300">
                       <td className="p-3 sm:p-4">
                         <input
@@ -301,6 +338,7 @@ export default function Events() {
                       </td>
                       <td className="p-3 sm:p-4 text-on-surface-variant font-medium">{event.venueName || 'TBD'}</td>
                       <td className="p-3 sm:p-4 text-xs font-mono text-on-surface-variant">{new Date(event.startDate).toLocaleDateString()}</td>
+                      <td className="p-3 sm:p-4 text-xs font-mono text-on-surface-variant">{new Date(event.endDate).toLocaleDateString()}</td>
                       <td className="p-3 sm:p-4">
                         <span className={`badge ${event.isPublished ? 'badge-success' : 'badge-muted'}`}>
                           {event.isPublished ? 'Published' : 'Draft'}
@@ -324,7 +362,8 @@ export default function Events() {
                 <Pagination total={events.length * totalPages} page={page} perPage={10} onChange={setPage} />
               </div>
             </>
-          )}
+          );
+          })()}
         </div>
       </div>
     </ProtectedRoute>

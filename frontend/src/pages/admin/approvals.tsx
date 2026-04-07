@@ -8,7 +8,7 @@ import apiClient from '@/lib/api';
 import { Check, X, RefreshCw, Users, FileText, Search, Clock, UserCheck, Zap, ShieldCheck, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
-import Pagination from '@/components/Pagination';
+import AuditPagination from '@/components/AuditPagination';
 
 interface PendingUser {
   id: string;
@@ -40,6 +40,9 @@ export default function AdminApprovals() {
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userPage, setUserPage] = useState(1);
+  const [regPage, setRegPage] = useState(1);
+  const perPage = 10;
 
   useEffect(() => {
     const token = Cookies.get('authToken');
@@ -56,6 +59,20 @@ export default function AdminApprovals() {
       Promise.all([fetchPendingUsers(), fetchPendingRegistrations()]);
     }
   }, [isAdmin]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(pendingUsers.length / perPage));
+    if (userPage > totalPages) {
+      setUserPage(totalPages);
+    }
+  }, [pendingUsers.length, perPage, userPage]);
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(pendingRegs.length / perPage));
+    if (regPage > totalPages) {
+      setRegPage(totalPages);
+    }
+  }, [pendingRegs.length, perPage, regPage]);
 
   const fetchPendingUsers = async () => {
     try {
@@ -156,6 +173,7 @@ export default function AdminApprovals() {
             {pendingUsers.length === 0 ? (
               <div className="p-12 text-center text-sm text-muted-foreground italic">No candidates found in the review queue.</div>
             ) : (
+              <>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm min-w-[850px]">
                   <thead>
@@ -168,7 +186,7 @@ export default function AdminApprovals() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/10">
-                    {pendingUsers.map(user => (
+                    {pendingUsers.slice((userPage - 1) * perPage, userPage * perPage).map(user => (
                       <tr key={user.id} className="group hover:bg-surface-container/20 transition-all duration-300">
                         <td className="p-3 sm:p-4">
                           <span className="text-on-surface font-bold tracking-tight">{user.firstName} {user.lastName}</span>
@@ -199,6 +217,18 @@ export default function AdminApprovals() {
                   </tbody>
                 </table>
               </div>
+              {(() => {
+                const totalPages = Math.ceil(pendingUsers.length / perPage);
+                return (
+                  <AuditPagination
+                    page={userPage}
+                    totalPages={totalPages}
+                    onPageChange={setUserPage}
+                    className="mt-0 border-t border-border/10 px-4 py-3"
+                  />
+                );
+              })()}
+              </>
             )}
           </div>
         )}
@@ -214,6 +244,7 @@ export default function AdminApprovals() {
             {pendingRegs.length === 0 ? (
               <div className="p-12 text-center text-sm text-muted-foreground italic">No pending registration approvals.</div>
             ) : (
+              <>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm min-w-[750px]">
                   <thead>
@@ -226,7 +257,7 @@ export default function AdminApprovals() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/10">
-                    {pendingRegs.map(reg => (
+                    {pendingRegs.slice((regPage - 1) * perPage, regPage * perPage).map(reg => (
                       <tr key={reg.id} className="group hover:bg-surface-container/20 transition-all duration-300">
                         <td className="p-3 sm:p-4">
                           <div className="flex flex-col">
@@ -250,6 +281,18 @@ export default function AdminApprovals() {
                   </tbody>
                 </table>
               </div>
+              {(() => {
+                const totalPages = Math.ceil(pendingRegs.length / perPage);
+                return (
+                  <AuditPagination
+                    page={regPage}
+                    totalPages={totalPages}
+                    onPageChange={setRegPage}
+                    className="mt-0 border-t border-border/10 px-4 py-3"
+                  />
+                );
+              })()}
+              </>
             )}
           </div>
         )}

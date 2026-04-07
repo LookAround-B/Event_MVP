@@ -56,6 +56,9 @@ export default function Reports() {
   const [attendanceReport, setAttendanceReport] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [evPage, setEvPage] = useState(1);
+  const [riderPage, setRiderPage] = useState(1);
+  const perPage = 10;
 
   useEffect(() => {
     loadReport();
@@ -159,7 +162,7 @@ export default function Reports() {
                 </tr>
               </thead>
               <tbody>
-                {eventSummaries.map(ev => (
+                {eventSummaries.slice((evPage - 1) * perPage, evPage * perPage).map(ev => (
                   <tr key={ev.id}>
                     <td className="font-medium">{ev.name}</td>
                     <td className="text-muted-foreground">{ev.eventType}</td>
@@ -187,6 +190,13 @@ export default function Reports() {
               )}
             </table>
             </div>
+            {eventSummaries.length > 0 && (
+              <div className="flex justify-center items-center gap-2 py-3 border-t border-border/30">
+                <button onClick={() => setEvPage(Math.max(1, evPage - 1))} disabled={evPage === 1} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Previous</button>
+                <span className="px-4 py-2 text-muted-foreground text-sm">Page {evPage} of {Math.ceil(eventSummaries.length / perPage) || 1} ({eventSummaries.length} total)</span>
+                <button onClick={() => setEvPage(Math.min(Math.ceil(eventSummaries.length / perPage), evPage + 1))} disabled={evPage >= Math.ceil(eventSummaries.length / perPage)} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Next</button>
+              </div>
+            )}
           </div>
         )}
 
@@ -274,7 +284,7 @@ export default function Reports() {
                 </tr>
               </thead>
               <tbody>
-                {riderStats.map(r => (
+                {riderStats.slice((riderPage - 1) * perPage, riderPage * perPage).map(r => (
                   <tr key={r.id}>
                     <td className="font-medium">{r.name}</td>
                     <td className="text-muted-foreground">{r.email}</td>
@@ -291,6 +301,13 @@ export default function Reports() {
               </tbody>
             </table>
             </div>
+            {riderStats.length > 0 && (
+              <div className="flex justify-center items-center gap-2 py-3 border-t border-border/30">
+                <button onClick={() => setRiderPage(Math.max(1, riderPage - 1))} disabled={riderPage === 1} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Previous</button>
+                <span className="px-4 py-2 text-muted-foreground text-sm">Page {riderPage} of {Math.ceil(riderStats.length / perPage) || 1} ({riderStats.length} total)</span>
+                <button onClick={() => setRiderPage(Math.min(Math.ceil(riderStats.length / perPage), riderPage + 1))} disabled={riderPage >= Math.ceil(riderStats.length / perPage)} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Next</button>
+              </div>
+            )}
           </div>
         )}
 

@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import {
   Calendar, Users, BarChart3, DollarSign, TrendingUp,
-  Box, Download, Filter, ChevronLeft, ChevronRight,
+  Box, Download, Filter, ChevronLeft, ChevronRight, Search,
 } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
@@ -318,6 +318,7 @@ function DashboardContent() {
   const [filterEvents, setFilterEvents] = useState<string[]>([]);
   const [filterCategories, setFilterCategories] = useState<string[]>([]);
   const [filterPayment, setFilterPayment] = useState<string[]>([]);
+  const [participantSearch, setParticipantSearch] = useState('');
 
   const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(new Set());
 
@@ -375,6 +376,7 @@ function DashboardContent() {
       if (filterEvents.length) params.events = filterEvents.join(',');
       if (filterCategories.length) params.categories = filterCategories.join(',');
       if (filterPayment.length) params.payment = filterPayment.join(',');
+      if (participantSearch.trim()) params.search = participantSearch.trim();
       const res = await api.get('/api/dashboard/participants', { params });
       const data = res.data.data;
       setParticipants(data.data || []);
@@ -385,7 +387,7 @@ function DashboardContent() {
     } finally {
       setParticipantsLoading(false);
     }
-  }, [mainEventFilter, participantPage, filterMonths, filterEvents, filterCategories, filterPayment]);
+  }, [mainEventFilter, participantPage, filterMonths, filterEvents, filterCategories, filterPayment, participantSearch]);
 
   useEffect(() => { fetchKpis(); }, [fetchKpis]);
   useEffect(() => { fetchEvents(); }, [fetchEvents]);
@@ -677,7 +679,17 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* Filters */}
+          {/* Search + Filters */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search by rider, club, horse, event..."
+              value={participantSearch}
+              onChange={(e) => { setParticipantSearch(e.target.value); setParticipantPage(1); }}
+              className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-96 border border-border/30 transition-all focus:bg-surface-container"
+            />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
             <MultiSelect
               label="Month & Year"

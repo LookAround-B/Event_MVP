@@ -3,10 +3,11 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, Search, Eye, Download, Filter, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, Download, Filter, X, Ban } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
+import AuditPagination from '@/components/AuditPagination';
 
 interface Rider {
   id: string;
@@ -356,6 +357,14 @@ export default function Riders() {
                         <ActionsDropdown actions={[
                           { label: 'View', icon: <Eye size={16} />, onClick: () => router.push(`/riders/${rider.id}`) },
                           { label: 'Edit', icon: <Edit size={16} />, onClick: () => router.push(`/riders/create?id=${rider.id}`), className: 'text-amber-400 hover:text-amber-300' },
+                          { label: rider.isActive ? 'Disable' : 'Enable', icon: <Ban size={16} />, onClick: async () => {
+                            if (!confirm(`${rider.isActive ? 'Disable' : 'Enable'} this rider?`)) return;
+                            try {
+                              await api.patch(`/api/riders/${rider.id}/disable`, { isActive: !rider.isActive });
+                              toast.success(`Rider ${rider.isActive ? 'disabled' : 'enabled'}`);
+                              fetchRiders();
+                            } catch { toast.error('Failed to update rider status'); }
+                          }, className: rider.isActive ? 'text-orange-400 hover:text-orange-300' : 'text-emerald-400 hover:text-emerald-300' },
                           { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(rider.id), className: 'text-destructive hover:text-destructive' },
                         ]} />
                       </td>
@@ -364,27 +373,9 @@ export default function Riders() {
                 </tbody>
               </table>
 
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-4">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="btn btn-ghost disabled:opacity-30"
-                  >
-                    Previous
-                  </button>
-                  <span className="px-4 py-2 text-sm" >
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="btn btn-ghost disabled:opacity-30"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
+              <div className="border-t border-border/10 bg-surface-container/20 p-3">
+                <AuditPagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-0" />
+              </div>
             </>
           )}
         </div>

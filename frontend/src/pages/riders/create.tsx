@@ -4,7 +4,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Paperclip } from 'lucide-react';
 import AddressMapPicker from '@/components/AddressMapPicker';
 
 interface SocialLinks {
@@ -37,6 +37,7 @@ export default function CreateRider() {
     optionalPhone: '',
     address: '',
     imageUrl: '',
+    aadharNumber: '',
   });
 
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({
@@ -70,6 +71,7 @@ export default function CreateRider() {
         optionalPhone: rider.optionalPhone || '',
         address: rider.address || '',
         imageUrl: rider.imageUrl || '',
+        aadharNumber: rider.aadharNumber || '',
       });
       const sl = (rider.socialLinks || {}) as any;
       setSocialLinks({
@@ -112,6 +114,10 @@ export default function CreateRider() {
       setError('Date of birth is required');
       return false;
     }
+    if (!formData.aadharNumber.trim()) {
+      setError('Aadhar Number is required');
+      return false;
+    }
     return true;
   };
 
@@ -139,6 +145,7 @@ export default function CreateRider() {
         optionalPhone: formData.optionalPhone || null,
         address: formData.address,
         imageUrl: formData.imageUrl || null,
+        aadharNumber: formData.aadharNumber,
         socialLinks: Object.keys(socialLinksClean).length > 0 ? socialLinksClean : null,
       };
 
@@ -321,15 +328,47 @@ export default function CreateRider() {
                     />
                   </div>
                   <div>
-                    <label className="label-tech block mb-1.5">Image URL</label>
+                    <label className="label-tech block mb-1.5">
+                      Aadhar Number <span className="text-destructive">*</span>
+                    </label>
                     <input
                       type="text"
-                      name="imageUrl"
-                      value={formData.imageUrl}
+                      name="aadharNumber"
+                      value={formData.aadharNumber}
                       onChange={handleInputChange}
-                      placeholder="https://..."
+                      placeholder="e.g., 1234 5678 9012"
+                      maxLength={14}
                       className={inputClass}
+                      required
                     />
+                  </div>
+                  <div>
+                    <label className="label-tech block mb-1.5">Profile Photo</label>
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-2 px-4 py-2.5 bg-surface-container rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/50 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        Attach Image
+                        <input
+                          type="file"
+                          accept=".jpg,.jpeg,.png"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const fd = new FormData();
+                            fd.append('file', file);
+                            try {
+                              const res = await api.post('/api/upload', fd);
+                              setFormData(prev => ({ ...prev, imageUrl: res.data.data?.url || res.data.url }));
+                              toast.success('Image uploaded');
+                            } catch (err) {
+                              toast.error('Failed to upload image');
+                            }
+                          }}
+                        />
+                      </label>
+                      {formData.imageUrl && <span className="text-xs text-emerald-400 truncate max-w-[150px]">Attached</span>}
+                    </div>
                   </div>
                 </div>
 

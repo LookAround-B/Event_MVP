@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
+import Cookies from 'js-cookie';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { Pencil, Trash2, Plus, Download, Eye, Filter, X } from 'lucide-react';
@@ -69,7 +70,18 @@ export default function ClubsList() {
   const [filterStatus, setFilterStatus] = useState<'' | 'active' | 'inactive'>('');
   const [editingEmbassyId, setEditingEmbassyId] = useState<string | null>(null);
   const [editEmbassyValue, setEditEmbassyValue] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const limit = 10;
+
+  useEffect(() => {
+    try {
+      const token = Cookies.get('authToken');
+      if (token) {
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('utf-8'));
+        setIsAdmin(payload.role === 'admin');
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     fetchClubs();
@@ -126,11 +138,10 @@ export default function ClubsList() {
   };
 
   const getExportData = () => {
-    const headers = ['Club Name', 'Club Code', 'Embassy ID', 'First Name', 'Last Name', 'Email', 'City'];
+    const headers = ['Club Name', 'Embassy ID', 'First Name', 'Last Name', 'Email', 'City'];
     const source = selectedIds.size > 0 ? clubs.filter(c => selectedIds.has(c.id)) : clubs;
     const rows = source.map(c => [
       c.name,
-      c.shortCode,
       c.eId || '',
       c.primaryContact?.firstName || '',
       c.primaryContact?.lastName || '',
@@ -310,7 +321,7 @@ export default function ClubsList() {
                       />
                     </th>
                     <th>Club Name</th>
-                    <th>Club Code</th>
+                    {isAdmin && <th>Club Code</th>}
                     <th>Embassy ID</th>
                     <th>First Name</th>
                     <th>Last Name</th>
@@ -332,7 +343,7 @@ export default function ClubsList() {
                         />
                       </td>
                       <td className="font-medium">{club.name}</td>
-                      <td>{club.shortCode}</td>
+                      {isAdmin && <td className="font-mono text-sm">{club.shortCode || '—'}</td>}
                       <td>
                         {editingEmbassyId === club.id ? (
                           <div className="flex items-center gap-1">
@@ -386,8 +397,7 @@ export default function ClubsList() {
                 </tbody>
               </table>
 
-              {pages > 1 && (
-                <div className="flex justify-center gap-2 mt-4">
+              <div className="flex justify-center items-center gap-2 mt-4 py-3 border-t border-border/30">
                   <button
                     onClick={() => setPage(Math.max(1, page - 1))}
                     disabled={page === 1}
@@ -395,18 +405,17 @@ export default function ClubsList() {
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2 text-muted-foreground">
-                    Page {page} of {pages}
+                  <span className="px-4 py-2 text-muted-foreground text-sm">
+                    Page {page} of {pages || 1} ({total} total)
                   </span>
                   <button
                     onClick={() => setPage(Math.min(pages, page + 1))}
-                    disabled={page === pages}
+                    disabled={page >= pages}
                     className="btn-secondary disabled:opacity-50"
                   >
                     Next
                   </button>
                 </div>
-              )}
             </>
           )}
         </div>

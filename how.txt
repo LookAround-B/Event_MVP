@@ -2,3 +2,6 @@ $env:DATABASE_URL="postgres://90fe774c7cd3f8a404f5210450985552884401489a6ce4d99a
 cd "d:\LookAround\2. Event\backend"
 npx prisma migrate deploy
 npx prisma db seed
+
+
+taskkill /F /IM node.exe 2>&1; Write-Host "✓ Killed all Node processes"

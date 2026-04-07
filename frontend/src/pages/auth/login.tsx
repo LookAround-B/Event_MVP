@@ -39,31 +39,53 @@ export default function Login() {
     }
   };
 
+  const inputStyle: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.07)',
+    color: '#ffffff',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '0.75rem',
+    padding: '0.75rem 1rem',
+    fontSize: '0.875rem',
+    outline: 'none',
+    width: '100%',
+    fontFamily: 'inherit',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+  };
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black relative py-12 px-4 shadow-[inset_0_0_100px_rgba(var(--primary-rgb),0.05)]">
+    <div
+      className="min-h-screen flex flex-col items-center justify-center relative py-12 px-4"
+      style={{ background: '#000', boxShadow: 'inset 0 0 100px hsl(4 85% 52% / 0.05)' }}
+    >
       {/* Shader background */}
       <div className="absolute inset-0 z-0">
         <ShaderAnimation />
       </div>
       {/* Dark overlay */}
-      <div className="absolute inset-0 z-[1] bg-black/55" />
+      <div className="absolute inset-0 z-[1]" style={{ background: 'rgba(0,0,0,0.55)' }} />
 
       <div className="relative z-[2] w-full max-w-md animate-fade-in">
 
         {/* Brand */}
         <div className="text-center mb-8 sm:mb-10">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-on-surface">
-            EQ<span className="text-primary">WI</span>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight" style={{ color: 'hsl(224 100% 98%)' }}>
+            EQ<span style={{ color: 'hsl(4 85% 52%)' }}>WI</span>
           </h1>
-          <p className="text-on-surface-variant text-sm mt-2 tracking-wide">
+          <p className="text-sm mt-2 tracking-wide" style={{ color: 'hsl(224 20% 65%)' }}>
             Equestrian Event Management Platform
           </p>
         </div>
 
         {/* Login Card */}
         <div
-          className="p-6 sm:p-8 rounded-2xl border border-white/10"
-          style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)' }}
+          className="p-6 sm:p-8 rounded-2xl"
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}
         >
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
@@ -74,10 +96,11 @@ export default function Login() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl text-white placeholder:text-white/30 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-white/10 transition-all"
-                style={{ background: 'rgba(255,255,255,0.07)' }}
+                style={inputStyle}
                 placeholder="Enter your email"
                 required
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'hsl(4 85% 52% / 0.5)'; e.currentTarget.style.boxShadow = '0 0 0 3px hsl(4 85% 52% / 0.12)'; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.boxShadow = 'none'; }}
               />
             </div>
 
@@ -90,15 +113,17 @@ export default function Login() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl text-white placeholder:text-white/30 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-white/10 transition-all pr-12"
-                  style={{ background: 'rgba(255,255,255,0.07)' }}
+                  style={{ ...inputStyle, paddingRight: '3rem' }}
                   placeholder="Enter your password"
                   required
+                  onFocus={(e) => { e.currentTarget.style.borderColor = 'hsl(4 85% 52% / 0.5)'; e.currentTarget.style.boxShadow = '0 0 0 3px hsl(4 85% 52% / 0.12)'; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.boxShadow = 'none'; }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-on-surface transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: 'hsl(224 15% 45%)' }}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -106,9 +131,9 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Remember + Forgot */}
+            {/* Remember */}
             <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 text-muted-foreground cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer" style={{ color: 'hsl(224 15% 45%)' }}>
                 <input type="checkbox" className="rounded accent-primary w-3.5 h-3.5" />
                 Remember me
               </label>
@@ -119,9 +144,9 @@ export default function Login() {
               <div
                 className="p-4 rounded-xl text-sm font-medium"
                 style={{
-                  background: 'hsl(var(--error) / 0.1)',
-                  border: '1px solid hsl(var(--error) / 0.3)',
-                  color: 'hsl(var(--error))',
+                  background: 'hsl(0 84% 60% / 0.1)',
+                  border: '1px solid hsl(0 84% 60% / 0.3)',
+                  color: 'hsl(0 84% 60%)',
                 }}
               >
                 {error}
@@ -142,10 +167,10 @@ export default function Login() {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
+              <div className="w-full" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}></div>
             </div>
             <div className="relative flex justify-center">
-              <span className="px-3 text-xs font-medium text-muted-foreground" style={{ background: 'rgba(255,255,255,0.06)' }}>
+              <span className="px-3 text-xs font-medium" style={{ color: 'hsl(224 15% 45%)', background: 'rgba(255,255,255,0.06)' }}>
                 Or continue with
               </span>
             </div>
@@ -183,18 +208,18 @@ export default function Login() {
 
         {/* Footer link */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm" style={{ color: 'hsl(224 15% 45%)' }}>
             Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="font-bold text-primary hover:text-primary/80 transition-colors">
+            <Link href="/auth/signup" className="font-bold transition-colors" style={{ color: 'hsl(4 85% 52%)' }}>
               Sign up
             </Link>
           </p>
         </div>
 
-        <p className="text-center text-muted-foreground text-xs mt-6">
+        <p className="text-center text-xs mt-6" style={{ color: 'hsl(224 15% 45%)' }}>
           © 2025 EQWI. All rights reserved.
         </p>
-        <p className="text-center text-on-surface-variant/70 text-[11px] mt-2 font-semibold tracking-widest uppercase opacity-80">
+        <p className="text-center text-[11px] mt-2 font-semibold tracking-widest uppercase" style={{ color: 'hsl(224 20% 65% / 0.7)' }}>
           Powered by LookAround.
         </p>
       </div>

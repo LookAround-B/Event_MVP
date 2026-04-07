@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import AuditPagination from '@/components/AuditPagination';
 import ExportModal from '@/components/ExportModal';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { KPICard } from '@/components/dashboard/KPICard';
@@ -53,6 +54,7 @@ interface Summary {
 interface FilterOption {
   id: string;
   name: string;
+  startDate?: string;
 }
 
 type Tab = 'finance' | 'transactions';
@@ -371,7 +373,9 @@ export default function Financial() {
                     >
                       <option value="">All Events</option>
                       {events.map(ev => (
-                        <option key={ev.id} value={ev.id}>{ev.name}</option>
+                        <option key={ev.id} value={ev.id}>
+                          {ev.name}{ev.startDate ? ` - ${new Date(ev.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : ''}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -469,7 +473,7 @@ export default function Financial() {
                     <tr className="label-tech text-left bg-surface-container/40">
                       <th className="p-3 sm:p-4 w-12"><input type="checkbox" className="accent-primary rounded" /></th>
                       <th className="p-3 sm:p-4">Transaction Identity</th>
-                      <th className="p-3 sm:p-4">Temporal Node</th>
+                      <th className="p-3 sm:p-4">Event Date</th>
                       <th className="p-3 sm:p-4">Entity Map</th>
                       <th className="p-3 sm:p-4 text-right">Fee Alpha</th>
                       <th className="p-3 sm:p-4 text-center">Status</th>
@@ -504,13 +508,9 @@ export default function Financial() {
                 </table>
               )}
             </div>
-            {financeTotalPages > 1 && (
-              <div className="bg-surface-container/20 p-3 border-t border-border/10 flex justify-center gap-2">
-                <button onClick={() => setFinancePage(Math.max(1, financePage - 1))} disabled={financePage === 1} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Previous</button>
-                <span className="px-4 py-2 text-sm text-muted-foreground">Page {financePage} of {financeTotalPages}</span>
-                <button onClick={() => setFinancePage(Math.min(financeTotalPages, financePage + 1))} disabled={financePage === financeTotalPages} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Next</button>
-              </div>
-            )}
+            <div className="bg-surface-container/20 p-3 border-t border-border/10">
+              <AuditPagination page={financePage} totalPages={financeTotalPages} onPageChange={setFinancePage} className="mt-0" />
+            </div>
           </div>
         )}
 
@@ -580,13 +580,9 @@ export default function Financial() {
                 </table>
               )}
             </div>
-            {transTotalPages > 1 && (
-              <div className="bg-surface-container/20 p-3 border-t border-border/10 flex justify-center gap-2">
-                <button onClick={() => setTransPage(Math.max(1, transPage - 1))} disabled={transPage === 1} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Previous</button>
-                <span className="px-4 py-2 text-sm text-muted-foreground">Page {transPage} of {transTotalPages}</span>
-                <button onClick={() => setTransPage(Math.min(transTotalPages, transPage + 1))} disabled={transPage === transTotalPages} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Next</button>
-              </div>
-            )}
+            <div className="bg-surface-container/20 p-3 border-t border-border/10">
+              <AuditPagination page={transPage} totalPages={transTotalPages} onPageChange={setTransPage} className="mt-0" />
+            </div>
           </div>
         )}
       </div>

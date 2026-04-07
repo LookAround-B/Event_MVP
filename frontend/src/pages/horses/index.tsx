@@ -7,6 +7,7 @@ import { Plus, Edit, Trash2, Search, Eye, Download, Filter, X } from 'lucide-rea
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
+import AuditPagination from '@/components/AuditPagination';
 
 interface Horse {
   id: string;
@@ -428,13 +429,9 @@ export default function Horses() {
               </table>
               </div>
 
-              {totalPages > 1 && (
-                <div className="bg-surface-container/20 p-3 border-t border-border/10 flex justify-center gap-2">
-                  <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Previous</button>
-                  <span className="px-4 py-2 text-sm text-muted-foreground">Page {page} of {totalPages}</span>
-                  <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="px-4 py-2 rounded-lg text-sm font-semibold bg-surface-container/60 text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-40">Next</button>
-                </div>
-              )}
+              <div className="border-t border-border/10 bg-surface-container/20 p-3">
+                <AuditPagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-0" />
+              </div>
             </>
           )}
         </div>

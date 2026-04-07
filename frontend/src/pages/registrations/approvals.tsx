@@ -39,10 +39,13 @@ export default function RegistrationApprovals() {
   const [rejectionNotes, setRejectionNotes] = useState('');
   const [paymentModal, setPaymentModal] = useState<{ isOpen: boolean; reg?: Registration }>({ isOpen: false });
   const [paymentForm, setPaymentForm] = useState({ method: 'CARD', ref: '', notes: '', amount: '' });
+  const [page, setPage] = useState(1);
+  const perPage = 10;
 
   useEffect(() => {
     fetchRegistrations();
     fetchEvents();
+    setPage(1);
   }, [filter, eventFilter]);
 
   const fetchEvents = async () => {
@@ -191,7 +194,7 @@ export default function RegistrationApprovals() {
                 ) : registrations.length === 0 ? (
                   <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No registrations found</td></tr>
                 ) : (
-                  registrations.map(reg => (
+                  registrations.slice((page - 1) * perPage, page * perPage).map(reg => (
                     <tr key={reg.id} className="hover:bg-surface-lowest">
                       <td className="px-4 py-3 text-sm">
                         <p className="font-medium text-on-surface">{reg.rider.firstName} {reg.rider.lastName}</p>
@@ -228,6 +231,13 @@ export default function RegistrationApprovals() {
               </tbody>
             </table>
           </div>
+          {registrations.length > 0 && (
+            <div className="flex justify-center items-center gap-2 py-3 border-t border-border/30">
+              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Previous</button>
+              <span className="px-4 py-2 text-muted-foreground text-sm">Page {page} of {Math.ceil(registrations.length / perPage) || 1} ({registrations.length} total)</span>
+              <button onClick={() => setPage(Math.min(Math.ceil(registrations.length / perPage), page + 1))} disabled={page >= Math.ceil(registrations.length / perPage)} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Next</button>
+            </div>
+          )}
         </div>
 
         {/* Rejection Modal */}

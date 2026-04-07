@@ -11,7 +11,7 @@ import ProtectedRoute from '@/lib/protected-route';
 import ExportModal from '@/components/ExportModal';
 import ViewModal from '@/components/ViewModal';
 import ConfirmModal from '@/components/ConfirmModal';
-import Pagination from '@/components/Pagination';
+import AuditPagination from '@/components/AuditPagination';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
@@ -383,11 +383,9 @@ export default function Registrations() {
               </table>
             )}
           </div>
-          {totalPages > 1 && (
-            <div className="bg-surface-container/20 p-2 border-t border-border/10">
-              <Pagination total={totalCount || registrations.length * totalPages} page={page} perPage={PER_PAGE} onChange={setPage} />
-            </div>
-          )}
+          <div className="bg-surface-container/20 p-2 border-t border-border/10">
+            <AuditPagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-0" />
+          </div>
         </div>
 
         {/* ═══ Modals (popup forms) ═══ */}

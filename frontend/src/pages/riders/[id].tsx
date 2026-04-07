@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Pencil, Save, X, Plus, Trash2, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Pencil, Save, X, Plus, Trash2, ImageIcon, Ban } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import AddressMapPicker from '@/components/AddressMapPicker';
@@ -260,12 +260,29 @@ export default function RiderDetail() {
                 <Pencil /> Switch to Edit
               </button>
             ) : !editing ? (
+              <>
               <button
                 onClick={() => setEditing(true)}
                 className="btn-primary flex items-center gap-2"
               >
                 <Pencil /> Edit Rider
               </button>
+              <button
+                onClick={async () => {
+                  if (!confirm(`${rider.isActive ? 'Disable' : 'Enable'} this rider?`)) return;
+                  try {
+                    await api.patch(`/api/riders/${id}/disable`, { isActive: !rider.isActive });
+                    toast.success(`Rider ${rider.isActive ? 'disabled' : 'enabled'}`);
+                    fetchRider();
+                  } catch (err) {
+                    toast.error('Failed to update rider status');
+                  }
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-colors ${rider.isActive ? 'text-orange-400 bg-orange-400/10 border-orange-400/20 hover:bg-orange-400/15' : 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20 hover:bg-emerald-400/15'}`}
+              >
+                <Ban className="w-4 h-4" /> {rider.isActive ? 'Disable' : 'Enable'}
+              </button>
+              </>
             ) : (
               <>
                 <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2">
@@ -293,13 +310,28 @@ export default function RiderDetail() {
                       <ImageIcon className="w-12 h-12 text-muted-foreground" />
                     </div>
                   )}
-                  <input
-                    type="text"
-                    value={editForm.imageUrl}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, imageUrl: e.target.value }))}
-                    placeholder="Image URL"
-                    className="input text-sm w-32"
-                  />
+                  <label className="flex items-center gap-2 px-3 py-2 bg-surface-container rounded-lg text-xs text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/50 cursor-pointer w-32">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                    Attach
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const fd = new FormData();
+                        fd.append('file', file);
+                        try {
+                          const res = await api.post('/api/upload', fd);
+                          setEditForm(prev => ({ ...prev, imageUrl: res.data.data?.url || res.data.url }));
+                          toast.success('Image uploaded');
+                        } catch (err) {
+                          toast.error('Failed to upload image');
+                        }
+                      }}
+                    />
+                  </label>
                 </div>
               ) : (
                 rider.imageUrl ? (

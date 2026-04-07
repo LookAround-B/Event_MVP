@@ -3,6 +3,7 @@ import Head from 'next/head';
 import api from '@/lib/api';
 import { Filter, Search } from 'lucide-react';
 import ProtectedRoute from '@/lib/protected-route';
+import AuditPagination from '@/components/AuditPagination';
 
 interface AuditLog {
   id: string;
@@ -175,23 +176,7 @@ export default function AuditLogs() {
               </table>
 
               {/* Pagination */}
-              <div className="flex justify-center gap-2 mt-4">
-                <button
-                  onClick={() => setPage(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  className="btn-secondary disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <span className="px-4 py-2 text-muted-foreground">Page {page} of {totalPages}</span>
-                <button
-                  onClick={() => setPage(Math.min(totalPages, page + 1))}
-                  disabled={page === totalPages}
-                  className="btn-secondary disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
+              <AuditPagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </>
           )}
         </div>

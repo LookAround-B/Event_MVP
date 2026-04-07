@@ -73,6 +73,12 @@ export default function Settings() {
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [editCategoryData, setEditCategoryData] = useState({ name: '', price: '', cgst: '', sgst: '', igst: '' });
 
+  // Pagination
+  const [etPage, setEtPage] = useState(1);
+  const [rolePage, setRolePage] = useState(1);
+  const [catPage, setCatPage] = useState(1);
+  const settingsPerPage = 10;
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -503,7 +509,7 @@ export default function Settings() {
                   <tbody>
                     {eventTypes.length === 0 ? (
                       <tr><td colSpan={3} className="text-center text-muted-foreground py-8">No event types yet</td></tr>
-                    ) : eventTypes.map(et => (
+                    ) : eventTypes.slice((etPage - 1) * settingsPerPage, etPage * settingsPerPage).map(et => (
                       <tr key={et.id}>
                         <td className="text-sm text-muted-foreground">{et.name}</td>
                         <td><span className="badge badge-info">{et.shortCode}</span></td>
@@ -521,6 +527,13 @@ export default function Settings() {
                   </tbody>
                 </table>
               </div>
+              {eventTypes.length > 0 && (
+                <div className="flex justify-center items-center gap-2 py-3 border-t border-border/30">
+                  <button onClick={() => setEtPage(Math.max(1, etPage - 1))} disabled={etPage === 1} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Previous</button>
+                  <span className="px-4 py-2 text-muted-foreground text-sm">Page {etPage} of {Math.ceil(eventTypes.length / settingsPerPage) || 1} ({eventTypes.length} total)</span>
+                  <button onClick={() => setEtPage(Math.min(Math.ceil(eventTypes.length / settingsPerPage), etPage + 1))} disabled={etPage >= Math.ceil(eventTypes.length / settingsPerPage)} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Next</button>
+                </div>
+              )}
             </div>
 
           ) : activeTab === 'roles' ? (
@@ -540,7 +553,7 @@ export default function Settings() {
                   />
                   <input
                     type="text"
-                    placeholder="Description (optional)"
+                    placeholder="Designation (optional)"
                     value={newRole.description}
                     onChange={e => setNewRole({ ...newRole, description: e.target.value })}
                     className="input"
@@ -557,14 +570,14 @@ export default function Settings() {
                   <thead>
                     <tr>
                       <th>User Role</th>
-                      <th className="hidden sm:table-cell">Description</th>
+                      <th className="hidden sm:table-cell">Designation</th>
                       <th className="w-24">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {roles.length === 0 ? (
                       <tr><td colSpan={3} className="text-center text-muted-foreground py-8">No roles yet</td></tr>
-                    ) : roles.map(role => (
+                    ) : roles.slice((rolePage - 1) * settingsPerPage, rolePage * settingsPerPage).map(role => (
                       <tr key={role.id}>
                         <td className="font-medium text-on-surface">{role.name}</td>
                         <td className="hidden sm:table-cell text-muted-foreground">{role.description || '-'}</td>
@@ -582,6 +595,13 @@ export default function Settings() {
                   </tbody>
                 </table>
               </div>
+              {roles.length > 0 && (
+                <div className="flex justify-center items-center gap-2 py-3 border-t border-border/30">
+                  <button onClick={() => setRolePage(Math.max(1, rolePage - 1))} disabled={rolePage === 1} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Previous</button>
+                  <span className="px-4 py-2 text-muted-foreground text-sm">Page {rolePage} of {Math.ceil(roles.length / settingsPerPage) || 1} ({roles.length} total)</span>
+                  <button onClick={() => setRolePage(Math.min(Math.ceil(roles.length / settingsPerPage), rolePage + 1))} disabled={rolePage >= Math.ceil(roles.length / settingsPerPage)} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Next</button>
+                </div>
+              )}
             </div>
 
           ) : activeTab === 'eventCategories' ? (
@@ -659,7 +679,7 @@ export default function Settings() {
                   <tbody>
                     {eventCategories.length === 0 ? (
                       <tr><td colSpan={6} className="text-center text-muted-foreground py-8">No categories yet</td></tr>
-                    ) : eventCategories.map(cat => (
+                    ) : eventCategories.slice((catPage - 1) * settingsPerPage, catPage * settingsPerPage).map(cat => (
                       editingCategory === cat.id ? (
                         <tr key={cat.id}>
                           <td>
@@ -764,6 +784,13 @@ export default function Settings() {
                   </tbody>
                 </table>
               </div>
+              {eventCategories.length > 0 && (
+                <div className="flex justify-center items-center gap-2 py-3 border-t border-border/30">
+                  <button onClick={() => setCatPage(Math.max(1, catPage - 1))} disabled={catPage === 1} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Previous</button>
+                  <span className="px-4 py-2 text-muted-foreground text-sm">Page {catPage} of {Math.ceil(eventCategories.length / settingsPerPage) || 1} ({eventCategories.length} total)</span>
+                  <button onClick={() => setCatPage(Math.min(Math.ceil(eventCategories.length / settingsPerPage), catPage + 1))} disabled={catPage >= Math.ceil(eventCategories.length / settingsPerPage)} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Next</button>
+                </div>
+              )}
             </div>
 
           ) : activeTab === 'termsConditions' ? (

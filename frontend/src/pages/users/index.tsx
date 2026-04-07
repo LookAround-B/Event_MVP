@@ -6,6 +6,7 @@ import { Pencil, Trash2, Plus, Search, Check, Clock, Download, Shield, Filter, X
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ConfirmModal from '@/components/ConfirmModal';
+import AuditPagination from '@/components/AuditPagination';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 
@@ -530,29 +531,9 @@ export default function Users() {
                 </table>
               </div>
 
-              {pagination.pages > 1 && (
-                <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
-                  <p className="text-sm text-muted-foreground">
-                    Showing page {pagination.page} of {pagination.pages} ({pagination.total} total)
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      disabled={page === 1}
-                      onClick={() => setPage(page - 1)}
-                      className="btn-secondary disabled:opacity-50"
-                    >
-                      Previous
-                    </button>
-                    <button
-                      disabled={page >= pagination.pages}
-                      onClick={() => setPage(page + 1)}
-                      className="btn-secondary disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              )}
+              <div className="border-t border-border/10 bg-surface-container/20 p-3">
+                <AuditPagination page={page} totalPages={pagination.pages} onPageChange={setPage} className="mt-0" />
+              </div>
             </>
           )}
         </div>
