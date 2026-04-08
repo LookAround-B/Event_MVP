@@ -1,17 +1,41 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import Head from "next/head";
+import { useRouter } from "next/router";
 import {
-  Calendar, Users, DollarSign,
-  Box, Download, Filter, ChevronLeft, ChevronRight,
-  ArrowUpRight, Zap, Clock,
-} from 'lucide-react';
-import api from '@/lib/api';
-import ProtectedRoute from '@/lib/protected-route';
+  Calendar,
+  Users,
+  DollarSign,
+  Box,
+  Download,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpRight,
+  Zap,
+  Clock,
+  User,
+  Clipboard,
+} from "lucide-react";
+import api from "@/lib/api";
+import ProtectedRoute from "@/lib/protected-route";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell,
-} from 'recharts';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 /* ===================== TYPES ===================== */
 
@@ -69,7 +93,7 @@ interface FilterOption {
 
 function escapeCSVField(field: string | number): string {
   const s = String(field);
-  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
     return `"${s.replace(/"/g, '""')}"`;
   }
   return s;
@@ -77,33 +101,48 @@ function escapeCSVField(field: string | number): string {
 
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
 }
 
-function exportTableToCSV(headers: string[], rows: (string | number)[][], filename: string) {
+function exportTableToCSV(
+  headers: string[],
+  rows: (string | number)[][],
+  filename: string,
+) {
   const csv = [
-    headers.map(escapeCSVField).join(','),
-    ...rows.map(r => r.map(escapeCSVField).join(',')),
-  ].join('\n');
-  downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), filename);
+    headers.map(escapeCSVField).join(","),
+    ...rows.map((r) => r.map(escapeCSVField).join(",")),
+  ].join("\n");
+  downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), filename);
 }
 
-function exportTableToExcel(headers: string[], rows: (string | number)[][], filename: string) {
-  const esc = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('');
-  const dataRows = rows.map(r => {
-    const cells = r.map(c => {
-      const t = typeof c === 'number' ? 'Number' : 'String';
+function exportTableToExcel(
+  headers: string[],
+  rows: (string | number)[][],
+  filename: string,
+) {
+  const esc = (s: string | number) =>
+    String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  const headerRow = headers
+    .map((h) => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`)
+    .join("");
+  const dataRows = rows.map((r) => {
+    const cells = r.map((c) => {
+      const t = typeof c === "number" ? "Number" : "String";
       return `<Cell><Data ss:Type="${t}">${esc(c)}</Data></Cell>`;
     });
-    return `<Row>${cells.join('')}</Row>`;
+    return `<Row>${cells.join("")}</Row>`;
   });
-  const xml = `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Sheet1"><Table><Row>${headerRow}</Row>${dataRows.join('')}</Table></Worksheet></Workbook>`;
-  downloadBlob(new Blob([xml], { type: 'application/vnd.ms-excel' }), filename);
+  const xml = `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Sheet1"><Table><Row>${headerRow}</Row>${dataRows.join("")}</Table></Worksheet></Workbook>`;
+  downloadBlob(new Blob([xml], { type: "application/vnd.ms-excel" }), filename);
 }
 
 /* ===================== CUSTOM CHART TOOLTIP ===================== */
@@ -111,8 +150,13 @@ function exportTableToExcel(headers: string[], rows: (string | number)[][], file
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-on-surface"
-      style={{ background: "hsl(var(--surface-container))", border: "1px solid hsl(var(--border)/0.4)" }}>
+    <div
+      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-on-surface"
+      style={{
+        background: "hsl(var(--surface-container))",
+        border: "1px solid hsl(var(--border)/0.4)",
+      }}
+    >
       <p className="font-semibold text-sm mb-1">{label}</p>
       {payload.map((entry: any, i: number) => (
         <p key={i} className="text-xs" style={{ color: entry.color }}>
@@ -125,7 +169,13 @@ function CustomTooltip({ active, payload, label }: any) {
 
 /* ===================== BENTO CARD: Revenue Hero ===================== */
 
-function RevenueHeroCard({ value, loading }: { value: string; loading: boolean }) {
+function RevenueHeroCard({
+  value,
+  loading,
+}: {
+  value: string;
+  loading: boolean;
+}) {
   return (
     <div className="h-full rounded-2xl bg-primary p-5 flex flex-col justify-between relative overflow-hidden group primary-card-glow">
       {/* decorative rings */}
@@ -137,14 +187,18 @@ function RevenueHeroCard({ value, loading }: { value: string; loading: boolean }
         <div className="w-9 h-9 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
           <DollarSign className="w-4 h-4 text-primary-foreground" />
         </div>
-        <span className="text-sm font-bold text-primary-foreground/90">Total Revenue</span>
+        <span className="text-sm font-bold text-primary-foreground/90">
+          Total Revenue
+        </span>
       </div>
 
       <div className="relative mt-auto pt-4">
         <span className="text-4xl font-black text-primary-foreground tracking-tight leading-none">
-          {loading ? '...' : value}
+          {loading ? "..." : value}
         </span>
-        <p className="text-sm text-primary-foreground/65 mt-1.5">Platform Total</p>
+        <p className="text-sm text-primary-foreground/65 mt-1.5">
+          Platform Total
+        </p>
       </div>
     </div>
   );
@@ -153,7 +207,12 @@ function RevenueHeroCard({ value, loading }: { value: string; loading: boolean }
 /* ===================== BENTO CARD: Stat ===================== */
 
 function BentoStatCard({
-  icon: Icon, title, value, subtitle, loading, animClass,
+  icon: Icon,
+  title,
+  value,
+  subtitle,
+  loading,
+  animClass,
 }: {
   icon: React.ComponentType<any>;
   title: string;
@@ -163,7 +222,9 @@ function BentoStatCard({
   animClass?: string;
 }) {
   return (
-    <div className={`h-full bento-card p-5 flex flex-col justify-between group hover:border-primary/25 transition-colors duration-300 ${animClass || ''}`}>
+    <div
+      className={`h-full bento-card p-5 flex flex-col justify-between group hover:border-primary/25 transition-colors duration-300 ${animClass || ""}`}
+    >
       <div className="flex items-center gap-2.5">
         <div className="w-9 h-9 rounded-xl bg-surface-container flex items-center justify-center">
           <Icon className="w-4 h-4 text-muted-foreground" />
@@ -172,9 +233,11 @@ function BentoStatCard({
       </div>
       <div className="mt-auto pt-4">
         <span className="text-3xl font-black text-on-surface tracking-tight leading-none">
-          {loading ? '...' : value}
+          {loading ? "..." : value}
         </span>
-        {subtitle && <p className="text-xs text-muted-foreground mt-1.5">{subtitle}</p>}
+        {subtitle && (
+          <p className="text-xs text-muted-foreground mt-1.5">{subtitle}</p>
+        )}
       </div>
     </div>
   );
@@ -183,25 +246,62 @@ function BentoStatCard({
 /* ===================== BENTO CARD: Financial Insight (purple cosmic) ===================== */
 
 const STAR_POSITIONS = [
-  [8,12],[15,38],[25,60],[33,20],[44,75],[54,44],[65,8],[74,65],[20,85],
-  [30,30],[40,52],[50,70],[60,25],[70,48],[10,78],[80,15],[42,62],[58,35],
-  [88,58],[12,50],
+  [8, 12],
+  [15, 38],
+  [25, 60],
+  [33, 20],
+  [44, 75],
+  [54, 44],
+  [65, 8],
+  [74, 65],
+  [20, 85],
+  [30, 30],
+  [40, 52],
+  [50, 70],
+  [60, 25],
+  [70, 48],
+  [10, 78],
+  [80, 15],
+  [42, 62],
+  [58, 35],
+  [88, 58],
+  [12, 50],
 ];
 
-function FinancialInsightCard({ collectible, receivable, loading }: { collectible: string; receivable: string; loading: boolean }) {
+function FinancialInsightCard({
+  collectible,
+  receivable,
+  loading,
+}: {
+  collectible: string;
+  receivable: string;
+  loading: boolean;
+}) {
   return (
-    <div className="h-full rounded-2xl relative overflow-hidden flex flex-col p-5"
+    <div
+      className="h-full rounded-2xl relative overflow-hidden flex flex-col p-5"
       style={{
-        background: "linear-gradient(145deg, hsl(253,38%,16%) 0%, hsl(253,28%,11%) 55%, hsl(253,48%,9%) 100%)",
+        background:
+          "linear-gradient(145deg, hsl(253,38%,16%) 0%, hsl(253,28%,11%) 55%, hsl(253,48%,9%) 100%)",
         border: "1px solid hsl(253,45%,28%,0.4)",
         boxShadow: "0 0 40px -12px hsla(253,90%,73%,0.25)",
-      }}>
+      }}
+    >
       {/* Stripe overlay */}
       <div className="absolute inset-0 stripe-pattern opacity-[0.12] pointer-events-none" />
       {/* Stars */}
       {STAR_POSITIONS.map(([top, left], i) => (
-        <div key={i} className="absolute rounded-full bg-primary-foreground pointer-events-none"
-          style={{ top: `${top}%`, left: `${left}%`, width: i % 4 === 0 ? 3 : 2, height: i % 4 === 0 ? 3 : 2, opacity: 0.2 + (i % 3) * 0.15 }} />
+        <div
+          key={i}
+          className="absolute rounded-full bg-primary-foreground pointer-events-none"
+          style={{
+            top: `${top}%`,
+            left: `${left}%`,
+            width: i % 4 === 0 ? 3 : 2,
+            height: i % 4 === 0 ? 3 : 2,
+            opacity: 0.2 + (i % 3) * 0.15,
+          }}
+        />
       ))}
 
       <div className="relative z-10 flex flex-col h-full">
@@ -213,33 +313,56 @@ function FinancialInsightCard({ collectible, receivable, loading }: { collectibl
         </div>
 
         <div className="flex items-baseline gap-2">
-          <span className="text-4xl font-black tracking-tight leading-none" style={{ color: 'hsl(253,90%,73%)' }}>
-            {loading ? '...' : collectible}
+          <span
+            className="text-4xl font-black tracking-tight leading-none"
+            style={{ color: "hsl(253,90%,73%)" }}
+          >
+            {loading ? "..." : collectible}
           </span>
         </div>
         <p className="text-xs text-white/50 mt-1">Collectible</p>
 
-        <div className="mt-4 rounded-xl p-3"
-          style={{ background: "rgba(255,255,255,0.07)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
+        <div
+          className="mt-4 rounded-xl p-3"
+          style={{
+            background: "rgba(255,255,255,0.07)",
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
           <p className="text-[10px] text-white/40 mb-0.5">· Receivable</p>
           <span className="text-2xl font-black text-white tracking-tight">
-            {loading ? '...' : receivable}
+            {loading ? "..." : receivable}
           </span>
         </div>
 
         <div className="mt-4 flex-1 min-h-0">
           <div className="space-y-3">
             {[
-              { label: 'Collections', pct: 72, color: 'hsl(253,90%,73%)' },
-              { label: 'Outstanding', pct: 28, color: 'hsl(253,65%,58%)' },
-            ].map(d => (
+              { label: "Collections", pct: 72, color: "hsl(253,90%,73%)" },
+              { label: "Outstanding", pct: 28, color: "hsl(253,65%,58%)" },
+            ].map((d) => (
               <div key={d.label}>
                 <div className="flex justify-between mb-1.5">
-                  <span className="text-[11px] font-medium text-white/50">{d.label}</span>
-                  <span className="text-[11px] font-bold text-white/80">{d.pct}%</span>
+                  <span className="text-[11px] font-medium text-white/50">
+                    {d.label}
+                  </span>
+                  <span className="text-[11px] font-bold text-white/80">
+                    {d.pct}%
+                  </span>
                 </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                  <div className="h-full rounded-full transition-all duration-700" style={{ width: `${d.pct}%`, background: d.color, boxShadow: `0 0 8px ${d.color}` }} />
+                <div
+                  className="h-2 rounded-full overflow-hidden"
+                  style={{ background: "rgba(255,255,255,0.08)" }}
+                >
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${d.pct}%`,
+                      background: d.color,
+                      boxShadow: `0 0 8px ${d.color}`,
+                    }}
+                  />
                 </div>
               </div>
             ))}
@@ -252,7 +375,15 @@ function FinancialInsightCard({ collectible, receivable, loading }: { collectibl
 
 /* ===================== PAGINATION ===================== */
 
-function Pagination({ page, totalPages, onPageChange }: { page: number; totalPages: number; onPageChange: (p: number) => void }) {
+function Pagination({
+  page,
+  totalPages,
+  onPageChange,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (p: number) => void;
+}) {
   if (totalPages <= 1) return null;
   return (
     <div className="flex items-center justify-center gap-2 mt-4">
@@ -281,10 +412,24 @@ function Pagination({ page, totalPages, onPageChange }: { page: number; totalPag
 
 /* ===================== MULTI SELECT ===================== */
 
-function MultiSelect({ label, options, selected, onChange }: { label: string; options: { value: string; label: string }[]; selected: string[]; onChange: (v: string[]) => void }) {
+function MultiSelect({
+  label,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+  selected: string[];
+  onChange: (v: string[]) => void;
+}) {
   const [open, setOpen] = useState(false);
   const toggle = (val: string) => {
-    onChange(selected.includes(val) ? selected.filter(s => s !== val) : [...selected, val]);
+    onChange(
+      selected.includes(val)
+        ? selected.filter((s) => s !== val)
+        : [...selected, val],
+    );
   };
   return (
     <div className="relative">
@@ -293,15 +438,19 @@ function MultiSelect({ label, options, selected, onChange }: { label: string; op
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm bg-surface-container text-on-surface border border-border/50 hover:border-primary/40 transition-colors cursor-pointer"
       >
-        <span>{selected.length > 0 ? `${label} (${selected.length})` : label}</span>
+        <span>
+          {selected.length > 0 ? `${label} (${selected.length})` : label}
+        </span>
         <Filter size={14} className="text-muted-foreground" />
       </button>
       {open && (
         <div className="absolute z-50 mt-1.5 w-full max-h-48 overflow-y-auto rounded-xl shadow-2xl shadow-black/30 bg-surface-low border border-border/60">
           {options.length === 0 ? (
-            <div className="px-4 py-3 text-xs text-muted-foreground">No options</div>
+            <div className="px-4 py-3 text-xs text-muted-foreground">
+              No options
+            </div>
           ) : (
-            options.map(opt => (
+            options.map((opt) => (
               <label
                 key={opt.value}
                 className="flex items-center gap-2 px-4 py-2.5 cursor-pointer text-sm text-on-surface transition-colors hover:bg-surface-container"
@@ -319,7 +468,10 @@ function MultiSelect({ label, options, selected, onChange }: { label: string; op
           <div className="p-2 flex gap-2 border-t border-border/30">
             <button
               type="button"
-              onClick={() => { onChange([]); setOpen(false); }}
+              onClick={() => {
+                onChange([]);
+                setOpen(false);
+              }}
               className="text-xs text-muted-foreground hover:text-on-surface transition-colors"
             >
               Clear
@@ -357,14 +509,19 @@ function DashboardContent() {
   const router = useRouter();
 
   const [kpiCards, setKpiCards] = useState<KpiCards>({
-    totalEvents: 0, clubsRegistered: 0, ridersRegistered: 0, horseCount: 0,
-    totalRevenue: 0, collectibleAmount: 0, receivableAmount: 0,
+    totalEvents: 0,
+    clubsRegistered: 0,
+    ridersRegistered: 0,
+    horseCount: 0,
+    totalRevenue: 0,
+    collectibleAmount: 0,
+    receivableAmount: 0,
   });
   const [eventChartData, setEventChartData] = useState<EventChartData[]>([]);
-  const [selectedChartEvent, setSelectedChartEvent] = useState<string>('');
+  const [selectedChartEvent, setSelectedChartEvent] = useState<string>("");
 
   const [events, setEvents] = useState<EventListItem[]>([]);
-  const [eventTab, setEventTab] = useState<'current' | 'all'>('current');
+  const [eventTab, setEventTab] = useState<"current" | "all">("current");
   const [eventPage, setEventPage] = useState(1);
   const [eventTotalPages, setEventTotalPages] = useState(1);
   const [eventCount, setEventCount] = useState(0);
@@ -378,14 +535,16 @@ function DashboardContent() {
   const [filterEvents, setFilterEvents] = useState<string[]>([]);
   const [filterCategories, setFilterCategories] = useState<string[]>([]);
   const [filterPayment, setFilterPayment] = useState<string[]>([]);
-  const [participantSearch, setParticipantSearch] = useState('');
+  const [participantSearch, setParticipantSearch] = useState("");
 
-  const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(new Set());
+  const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(
+    new Set(),
+  );
 
   const [eventOptions, setEventOptions] = useState<FilterOption[]>([]);
   const [categoryOptions, setCategoryOptions] = useState<FilterOption[]>([]);
 
-  const [mainEventFilter, setMainEventFilter] = useState<string>('');
+  const [mainEventFilter, setMainEventFilter] = useState<string>("");
 
   const [kpiLoading, setKpiLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(true);
@@ -397,15 +556,15 @@ function DashboardContent() {
       setKpiLoading(true);
       const params: any = {};
       if (mainEventFilter) params.eventId = mainEventFilter;
-      const res = await api.get('/api/dashboard', { params });
+      const res = await api.get("/api/dashboard", { params });
       const data = res.data.data;
       setKpiCards(data.kpiCards);
       setEventChartData(data.charts.eventBreakdown || []);
       setEventOptions(data.filterOptions.events || []);
       setCategoryOptions(data.filterOptions.categories || []);
     } catch (err) {
-      console.error('Failed to fetch KPIs:', err);
-      setError('Failed to load dashboard KPIs');
+      console.error("Failed to fetch KPIs:", err);
+      setError("Failed to load dashboard KPIs");
     } finally {
       setKpiLoading(false);
     }
@@ -415,13 +574,13 @@ function DashboardContent() {
     try {
       setEventsLoading(true);
       const params: any = { tab: eventTab, page: eventPage, limit: 15 };
-      const res = await api.get('/api/dashboard/events', { params });
+      const res = await api.get("/api/dashboard/events", { params });
       const data = res.data.data;
       setEvents(data.events || []);
       setEventCount(data.count || 0);
       setEventTotalPages(data.pages || 1);
     } catch (err) {
-      console.error('Failed to fetch events:', err);
+      console.error("Failed to fetch events:", err);
     } finally {
       setEventsLoading(false);
     }
@@ -432,34 +591,52 @@ function DashboardContent() {
       setParticipantsLoading(true);
       const params: any = { page: participantPage, limit: 20 };
       if (mainEventFilter) params.eventId = mainEventFilter;
-      if (filterMonths.length) params.months = filterMonths.join(',');
-      if (filterEvents.length) params.events = filterEvents.join(',');
-      if (filterCategories.length) params.categories = filterCategories.join(',');
-      if (filterPayment.length) params.payment = filterPayment.join(',');
+      if (filterMonths.length) params.months = filterMonths.join(",");
+      if (filterEvents.length) params.events = filterEvents.join(",");
+      if (filterCategories.length)
+        params.categories = filterCategories.join(",");
+      if (filterPayment.length) params.payment = filterPayment.join(",");
       if (participantSearch.trim()) params.search = participantSearch.trim();
-      const res = await api.get('/api/dashboard/participants', { params });
+      const res = await api.get("/api/dashboard/participants", { params });
       const data = res.data.data;
       setParticipants(data.data || []);
       setParticipantCount(data.count || 0);
       setParticipantTotalPages(data.pages || 1);
     } catch (err) {
-      console.error('Failed to fetch participants:', err);
+      console.error("Failed to fetch participants:", err);
     } finally {
       setParticipantsLoading(false);
     }
-  }, [mainEventFilter, participantPage, filterMonths, filterEvents, filterCategories, filterPayment, participantSearch]);
+  }, [
+    mainEventFilter,
+    participantPage,
+    filterMonths,
+    filterEvents,
+    filterCategories,
+    filterPayment,
+    participantSearch,
+  ]);
 
-  useEffect(() => { fetchKpis(); }, [fetchKpis]);
-  useEffect(() => { fetchEvents(); }, [fetchEvents]);
-  useEffect(() => { fetchParticipants(); }, [fetchParticipants]);
+  useEffect(() => {
+    fetchKpis();
+  }, [fetchKpis]);
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+  useEffect(() => {
+    fetchParticipants();
+  }, [fetchParticipants]);
 
   const monthOptions = useMemo(() => {
     const opts = [];
     const now = new Date();
     for (let i = 0; i < 24; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const label = d.toLocaleString('en-US', { year: 'numeric', month: 'short' });
+      const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const label = d.toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+      });
       opts.push({ value: val, label });
     }
     return opts;
@@ -467,7 +644,7 @@ function DashboardContent() {
 
   const chartDisplayData = useMemo(() => {
     if (selectedChartEvent) {
-      return eventChartData.filter(e => e.eventId === selectedChartEvent);
+      return eventChartData.filter((e) => e.eventId === selectedChartEvent);
     }
     return eventChartData;
   }, [eventChartData, selectedChartEvent]);
@@ -476,12 +653,12 @@ function DashboardContent() {
     if (selectedParticipants.size === participants.length) {
       setSelectedParticipants(new Set());
     } else {
-      setSelectedParticipants(new Set(participants.map(p => p.id)));
+      setSelectedParticipants(new Set(participants.map((p) => p.id)));
     }
   };
 
   const toggleParticipant = (id: string) => {
-    setSelectedParticipants(prev => {
+    setSelectedParticipants((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -490,56 +667,115 @@ function DashboardContent() {
   };
 
   const handleExportParticipantsCSV = () => {
-    const headers = ['Event Name', 'Event Date', 'Rider Name', 'Club Name', 'Horse Name', 'Event Category', 'Price (₹)', 'Payment Method', 'Payment Status'];
-    const rows = participants.map(p => [
-      p.eventName, new Date(p.eventDate).toLocaleDateString(), p.riderName,
-      p.clubName, p.horseName, p.eventCategory, p.price, p.paymentMethod, p.paymentStatus,
+    const headers = [
+      "Event Name",
+      "Event Date",
+      "Rider Name",
+      "Club Name",
+      "Horse Name",
+      "Event Category",
+      "Price (₹)",
+      "Payment Method",
+      "Payment Status",
+    ];
+    const rows = participants.map((p) => [
+      p.eventName,
+      new Date(p.eventDate).toLocaleDateString(),
+      p.riderName,
+      p.clubName,
+      p.horseName,
+      p.eventCategory,
+      p.price,
+      p.paymentMethod,
+      p.paymentStatus,
     ]);
-    exportTableToCSV(headers, rows, 'participants.csv');
+    exportTableToCSV(headers, rows, "participants.csv");
   };
 
   const handleExportParticipantsExcel = () => {
-    const headers = ['Event Name', 'Event Date', 'Rider Name', 'Club Name', 'Horse Name', 'Event Category', 'Price (₹)', 'Payment Method', 'Payment Status'];
-    const rows = participants.map(p => [
-      p.eventName, new Date(p.eventDate).toLocaleDateString(), p.riderName,
-      p.clubName, p.horseName, p.eventCategory, p.price, p.paymentMethod, p.paymentStatus,
+    const headers = [
+      "Event Name",
+      "Event Date",
+      "Rider Name",
+      "Club Name",
+      "Horse Name",
+      "Event Category",
+      "Price (₹)",
+      "Payment Method",
+      "Payment Status",
+    ];
+    const rows = participants.map((p) => [
+      p.eventName,
+      new Date(p.eventDate).toLocaleDateString(),
+      p.riderName,
+      p.clubName,
+      p.horseName,
+      p.eventCategory,
+      p.price,
+      p.paymentMethod,
+      p.paymentStatus,
     ]);
-    exportTableToExcel(headers, rows, 'participants.xls');
+    exportTableToExcel(headers, rows, "participants.xls");
   };
 
   const handleExportEventsCSV = () => {
-    const headers = ['Event Name', 'Start Date', 'End Date', 'Venue', 'Address'];
-    const rows = events.map(e => [
-      e.name, new Date(e.startDate).toLocaleDateString(), new Date(e.endDate).toLocaleDateString(),
-      e.venueName || 'N/A', e.venueAddress || 'N/A',
+    const headers = [
+      "Event Name",
+      "Start Date",
+      "End Date",
+      "Venue",
+      "Address",
+    ];
+    const rows = events.map((e) => [
+      e.name,
+      new Date(e.startDate).toLocaleDateString(),
+      new Date(e.endDate).toLocaleDateString(),
+      e.venueName || "N/A",
+      e.venueAddress || "N/A",
     ]);
     exportTableToCSV(headers, rows, `events-${eventTab}.csv`);
   };
 
   const handleExportEventsExcel = () => {
-    const headers = ['Event Name', 'Start Date', 'End Date', 'Venue', 'Address'];
-    const rows = events.map(e => [
-      e.name, new Date(e.startDate).toLocaleDateString(), new Date(e.endDate).toLocaleDateString(),
-      e.venueName || 'N/A', e.venueAddress || 'N/A',
+    const headers = [
+      "Event Name",
+      "Start Date",
+      "End Date",
+      "Venue",
+      "Address",
+    ];
+    const rows = events.map((e) => [
+      e.name,
+      new Date(e.startDate).toLocaleDateString(),
+      new Date(e.endDate).toLocaleDateString(),
+      e.venueName || "N/A",
+      e.venueAddress || "N/A",
     ]);
     exportTableToExcel(headers, rows, `events-${eventTab}.xls`);
   };
 
-  const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
 
   const paymentBadge = (status: string) => {
     const map: Record<string, string> = {
-      PAID: 'badge-emerald',
-      PARTIAL: 'badge-warning',
-      CANCELLED: 'badge-danger',
-      UNPAID: 'badge-muted',
+      PAID: "badge-emerald",
+      PARTIAL: "badge-warning",
+      CANCELLED: "badge-danger",
+      UNPAID: "badge-muted",
     };
-    return map[status] || 'badge-muted';
+    return map[status] || "badge-muted";
   };
 
   return (
     <ProtectedRoute>
-      <Head><title>Dashboard | Equestrian Events</title></Head>
+      <Head>
+        <title>Dashboard | Equestrian Events</title>
+      </Head>
       <div className="space-y-6 max-w-[1600px] mx-auto animate-fade-in">
         {/* Header + Main Event Filter */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -547,17 +783,27 @@ function DashboardContent() {
             <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
               Command <span className="gradient-text">Center</span>
             </h1>
-            <p className="text-sm text-muted-foreground mt-2">Real-time platform analytics and event intelligence.</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Real-time platform analytics and event intelligence.
+            </p>
           </div>
           <div className="w-full md:w-72">
-            <Select value={mainEventFilter || '__all__'} onValueChange={(v) => { setMainEventFilter(v === '__all__' ? '' : v); setParticipantPage(1); }}>
+            <Select
+              value={mainEventFilter || "__all__"}
+              onValueChange={(v) => {
+                setMainEventFilter(v === "__all__" ? "" : v);
+                setParticipantPage(1);
+              }}
+            >
               <SelectTrigger className="bg-surface-container border-border/30">
                 <SelectValue placeholder="All Events" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all__">All Events</SelectItem>
-                {eventOptions.map(ev => (
-                  <SelectItem key={ev.id} value={ev.id}>{ev.name}</SelectItem>
+                {eventOptions.map((ev) => (
+                  <SelectItem key={ev.id} value={ev.id}>
+                    {ev.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -575,35 +821,50 @@ function DashboardContent() {
           {/* Col 1 Row 1 — Revenue Hero */}
           <div className="lg:col-start-1 lg:row-start-1 min-h-[160px] animate-slide-up-1 border-beam rounded-2xl">
             <RevenueHeroCard
-              value={`₹${kpiCards.totalRevenue.toLocaleString('en-IN')}`}
+              value={`₹${kpiCards.totalRevenue.toLocaleString("en-IN")}`}
               loading={kpiLoading}
             />
           </div>
 
           {/* Col 2 Row 1 — Total Events */}
           <div className="lg:col-start-2 lg:row-start-1 min-h-[160px] animate-slide-up-2">
-            <BentoStatCard icon={Calendar} title="Total Events" value={kpiCards.totalEvents} subtitle="Active & Completed" loading={kpiLoading} />
+            <BentoStatCard
+              icon={Calendar}
+              title="Total Events"
+              value={kpiCards.totalEvents}
+              subtitle="Active & Completed"
+              loading={kpiLoading}
+            />
           </div>
 
           {/* Col 3 Rows 1-2 — Event Stats Chart (row-span-2) */}
           <div className="lg:col-start-3 lg:row-start-1 lg:row-span-2 min-h-[340px] lg:min-h-0 animate-slide-up-3">
             <div className="h-full bento-card p-5 flex flex-col group hover:border-primary/25 transition-colors duration-300">
               <div className="flex items-center justify-between mb-1">
-                <h3 className="text-base font-bold text-on-surface">Event Stats</h3>
+                <h3 className="text-base font-bold text-on-surface">
+                  Event Stats
+                </h3>
                 <button className="w-8 h-8 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors">
                   <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
 
               <div className="mt-1 mb-3">
-                <Select value={selectedChartEvent || '__all__'} onValueChange={(v) => setSelectedChartEvent(v === '__all__' ? '' : v)}>
+                <Select
+                  value={selectedChartEvent || "__all__"}
+                  onValueChange={(v) =>
+                    setSelectedChartEvent(v === "__all__" ? "" : v)
+                  }
+                >
                   <SelectTrigger className="bg-surface-container/50 border-border/30 h-8 text-xs">
                     <SelectValue placeholder="All Events" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__all__">All Events</SelectItem>
-                    {eventChartData.map(ev => (
-                      <SelectItem key={ev.eventId} value={ev.eventId}>{ev.eventName}</SelectItem>
+                    {eventChartData.map((ev) => (
+                      <SelectItem key={ev.eventId} value={ev.eventId}>
+                        {ev.eventName}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -616,48 +877,120 @@ function DashboardContent() {
               ) : chartDisplayData.length > 0 ? (
                 <div className="flex-1 min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartDisplayData} barCategoryGap="25%" barSize={20}>
+                    <BarChart
+                      data={chartDisplayData}
+                      barCategoryGap="25%"
+                      barSize={20}
+                    >
                       <defs>
-                        <linearGradient id="gradUnpaid" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(0,85%,60%)" stopOpacity={1} />
-                          <stop offset="100%" stopColor="hsl(0,70%,45%)" stopOpacity={0.7} />
+                        <linearGradient
+                          id="gradUnpaid"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="hsl(0,85%,60%)"
+                            stopOpacity={1}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="hsl(0,70%,45%)"
+                            stopOpacity={0.7}
+                          />
                         </linearGradient>
-                        <linearGradient id="gradRiders" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(145,63%,55%)" stopOpacity={1} />
-                          <stop offset="100%" stopColor="hsl(145,50%,38%)" stopOpacity={0.7} />
+                        <linearGradient
+                          id="gradRiders"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="hsl(145,63%,55%)"
+                            stopOpacity={1}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="hsl(145,50%,38%)"
+                            stopOpacity={0.7}
+                          />
                         </linearGradient>
-                        <linearGradient id="gradHorses" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(253,90%,73%)" stopOpacity={0.95} />
-                          <stop offset="100%" stopColor="hsl(253,55%,48%)" stopOpacity={0.6} />
+                        <linearGradient
+                          id="gradHorses"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="hsl(253,90%,73%)"
+                            stopOpacity={0.95}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="hsl(253,55%,48%)"
+                            stopOpacity={0.6}
+                          />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsla(224,20%,30%,0.15)" vertical={false} />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="hsla(224,20%,30%,0.15)"
+                        vertical={false}
+                      />
                       <XAxis
                         dataKey="eventName"
                         angle={-35}
                         textAnchor="end"
                         height={60}
-                        tick={{ fill: 'hsl(224,15%,55%)', fontSize: 10, fontWeight: 500 }}
+                        tick={{
+                          fill: "hsl(224,15%,55%)",
+                          fontSize: 10,
+                          fontWeight: 500,
+                        }}
                         interval={0}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
-                        tick={{ fill: 'hsl(224,15%,55%)', fontSize: 10 }}
+                        tick={{ fill: "hsl(224,15%,55%)", fontSize: 10 }}
                         allowDecimals={false}
                         width={28}
                         axisLine={false}
                         tickLine={false}
                       />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+                      <Tooltip
+                        content={<CustomTooltip />}
+                        cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                      />
                       <Legend
                         wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
                         iconType="circle"
                         iconSize={8}
                       />
-                      <Bar dataKey="unpaidRegistrations" fill="url(#gradUnpaid)" name="Unpaid" radius={[6, 6, 0, 0]} />
-                      <Bar dataKey="totalRiders" fill="url(#gradRiders)" name="Riders" radius={[6, 6, 0, 0]} />
-                      <Bar dataKey="totalHorses" fill="url(#gradHorses)" name="Horses" radius={[6, 6, 0, 0]} />
+                      <Bar
+                        dataKey="unpaidRegistrations"
+                        fill="url(#gradUnpaid)"
+                        name="Unpaid"
+                        radius={[6, 6, 0, 0]}
+                      />
+                      <Bar
+                        dataKey="totalRiders"
+                        fill="url(#gradRiders)"
+                        name="Riders"
+                        radius={[6, 6, 0, 0]}
+                      />
+                      <Bar
+                        dataKey="totalHorses"
+                        fill="url(#gradHorses)"
+                        name="Horses"
+                        radius={[6, 6, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -672,20 +1005,32 @@ function DashboardContent() {
           {/* Col 4 Rows 1-2 — Financial Insight (purple cosmic) */}
           <div className="lg:col-start-4 lg:row-start-1 lg:row-span-2 min-h-[340px] lg:min-h-0 animate-slide-up-4">
             <FinancialInsightCard
-              collectible={`₹${kpiCards.collectibleAmount.toLocaleString('en-IN')}`}
-              receivable={`₹${kpiCards.receivableAmount.toLocaleString('en-IN')}`}
+              collectible={`₹${kpiCards.collectibleAmount.toLocaleString("en-IN")}`}
+              receivable={`₹${kpiCards.receivableAmount.toLocaleString("en-IN")}`}
               loading={kpiLoading}
             />
           </div>
 
           {/* Col 1 Row 2 — Clubs | Riders */}
           <div className="lg:col-start-1 lg:row-start-2 min-h-[120px] animate-slide-up-2">
-            <BentoStatCard icon={Users} title="Clubs | Riders" value={`${kpiCards.clubsRegistered} | ${kpiCards.ridersRegistered}`} subtitle="Registered entities" loading={kpiLoading} />
+            <BentoStatCard
+              icon={Users}
+              title="Clubs | Riders"
+              value={`${kpiCards.clubsRegistered} | ${kpiCards.ridersRegistered}`}
+              subtitle="Registered entities"
+              loading={kpiLoading}
+            />
           </div>
 
           {/* Col 2 Row 2 — Horse Count */}
           <div className="lg:col-start-2 lg:row-start-2 min-h-[120px] animate-slide-up-3">
-            <BentoStatCard icon={Box} title="Horse Count" value={kpiCards.horseCount} subtitle="Total registered horses" loading={kpiLoading} />
+            <BentoStatCard
+              icon={Box}
+              title="Horse Count"
+              value={kpiCards.horseCount}
+              subtitle="Total registered horses"
+              loading={kpiLoading}
+            />
           </div>
         </div>
 
@@ -697,7 +1042,10 @@ function DashboardContent() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-bold text-on-surface">Events</h3>
                 <div className="flex items-center gap-2">
-                  <button onClick={handleExportEventsCSV} className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors">
+                  <button
+                    onClick={handleExportEventsCSV}
+                    className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors"
+                  >
                     <Download className="w-3.5 h-3.5 text-muted-foreground" />
                   </button>
                 </div>
@@ -706,14 +1054,20 @@ function DashboardContent() {
               {/* Tab toggles */}
               <div className="flex gap-1 rounded-xl p-1 mb-4 bg-surface-container border border-border/30">
                 <button
-                  onClick={() => { setEventTab('current'); setEventPage(1); }}
-                  className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${eventTab === 'current' ? 'btn-cta shadow-none' : 'text-muted-foreground hover:text-on-surface hover:bg-surface-bright'}`}
+                  onClick={() => {
+                    setEventTab("current");
+                    setEventPage(1);
+                  }}
+                  className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${eventTab === "current" ? "btn-cta shadow-none" : "text-muted-foreground hover:text-on-surface hover:bg-surface-bright"}`}
                 >
                   Current
                 </button>
                 <button
-                  onClick={() => { setEventTab('all'); setEventPage(1); }}
-                  className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${eventTab === 'all' ? 'btn-cta shadow-none' : 'text-muted-foreground hover:text-on-surface hover:bg-surface-bright'}`}
+                  onClick={() => {
+                    setEventTab("all");
+                    setEventPage(1);
+                  }}
+                  className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${eventTab === "all" ? "btn-cta shadow-none" : "text-muted-foreground hover:text-on-surface hover:bg-surface-bright"}`}
                 >
                   All ({eventCount})
                 </button>
@@ -724,17 +1078,30 @@ function DashboardContent() {
                   <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" />
                 </div>
               ) : events.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">No events found</p>
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No events found
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {events.slice(0, 5).map(ev => (
-                    <div key={ev.id} onClick={() => router.push(`/events/${ev.id}`)} className="cursor-pointer group/item">
+                  {events.slice(0, 5).map((ev) => (
+                    <div
+                      key={ev.id}
+                      onClick={() => router.push(`/events/${ev.id}`)}
+                      className="cursor-pointer group/item"
+                    >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-semibold text-on-surface group-hover/item:text-primary transition-colors truncate">{ev.name}</span>
+                        <span className="text-sm font-semibold text-on-surface group-hover/item:text-primary transition-colors truncate">
+                          {ev.name}
+                        </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">{formatDate(ev.startDate)} — {formatDate(ev.endDate)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(ev.startDate)} — {formatDate(ev.endDate)}
+                      </p>
                       <div className="mt-2 h-1.5 rounded-full overflow-hidden bg-surface-container">
-                        <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: '100%' }} />
+                        <div
+                          className="h-full rounded-full bg-primary transition-all duration-700"
+                          style={{ width: "100%" }}
+                        />
                       </div>
                     </div>
                   ))}
@@ -744,10 +1111,14 @@ function DashboardContent() {
               {events.length > 0 && (
                 <div className="mt-4 inline-flex items-center gap-1.5 bg-primary/12 text-primary text-[11px] font-bold px-3 py-1.5 rounded-full">
                   <Clock className="w-3 h-3" />
-                  {events.length} event{events.length !== 1 ? 's' : ''}
+                  {events.length} event{events.length !== 1 ? "s" : ""}
                 </div>
               )}
-              <Pagination page={eventPage} totalPages={eventTotalPages} onPageChange={setEventPage} />
+              <Pagination
+                page={eventPage}
+                totalPages={eventTotalPages}
+                onPageChange={setEventPage}
+              />
             </div>
           </div>
 
@@ -755,10 +1126,17 @@ function DashboardContent() {
           <div className="animate-slide-up-4">
             <div className="bento-card p-5 group hover:border-primary/20 transition-colors duration-300">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-bold text-on-surface">Participants</h3>
+                <h3 className="text-base font-bold text-on-surface">
+                  Participants
+                </h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{participantCount} total</span>
-                  <button onClick={handleExportParticipantsCSV} className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors">
+                  <span className="text-xs text-muted-foreground">
+                    {participantCount} total
+                  </span>
+                  <button
+                    onClick={handleExportParticipantsCSV}
+                    className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors"
+                  >
                     <Download className="w-3.5 h-3.5 text-muted-foreground" />
                   </button>
                 </div>
@@ -769,26 +1147,43 @@ function DashboardContent() {
                   <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" />
                 </div>
               ) : participants.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">No participants found</p>
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No participants found
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {participants.slice(0, 6).map(p => (
-                    <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl transition-colors duration-200 bg-surface-container/50 hover:bg-surface-container">
+                  {participants.slice(0, 6).map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center gap-3 p-2.5 rounded-xl transition-colors duration-200 bg-surface-container/50 hover:bg-surface-container"
+                    >
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs flex-shrink-0 bg-surface-bright/50">
                         🏇
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-on-surface truncate">{p.riderName}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{p.eventName} · {p.horseName}</p>
+                        <p className="text-sm font-semibold text-on-surface truncate">
+                          {p.riderName}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {p.eventName} · {p.horseName}
+                        </p>
                       </div>
                       <div className="flex-shrink-0">
-                        <span className={`badge text-[10px] ${paymentBadge(p.paymentStatus)}`}>{p.paymentStatus}</span>
+                        <span
+                          className={`badge text-[10px] ${paymentBadge(p.paymentStatus)}`}
+                        >
+                          {p.paymentStatus}
+                        </span>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-              <Pagination page={participantPage} totalPages={participantTotalPages} onPageChange={setParticipantPage} />
+              <Pagination
+                page={participantPage}
+                totalPages={participantTotalPages}
+                onPageChange={setParticipantPage}
+              />
             </div>
           </div>
 
@@ -796,20 +1191,30 @@ function DashboardContent() {
           <div className="space-y-3 lg:space-y-4 animate-slide-up-5">
             {/* AI Tip */}
             <div className="bento-card p-4 flex items-center gap-3 group hover:border-secondary/30 transition-colors duration-300">
-              <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-300"
-                style={{ background: 'linear-gradient(135deg,hsl(253,90%,73%,0.35),hsl(253,50%,50%,0.2))' }}>
+              <div
+                className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-300"
+                style={{
+                  background:
+                    "linear-gradient(135deg,hsl(253,90%,73%,0.35),hsl(253,50%,50%,0.2))",
+                }}
+              >
                 <Zap className="w-5 h-5 text-secondary" />
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Manage your platform from the{' '}
-                <span className="text-on-surface font-semibold">Command Center</span>.
+                Manage your platform from the{" "}
+                <span className="text-on-surface font-semibold">
+                  Command Center
+                </span>
+                .
               </p>
             </div>
 
             {/* Quick Actions / Continue */}
             <div className="bento-card p-5 group hover:border-primary/20 transition-colors duration-300">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-bold text-on-surface">Continue Actions</h3>
+                <h3 className="text-base font-bold text-on-surface">
+                  Continue Actions
+                </h3>
                 <button className="w-8 h-8 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors">
                   <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
                 </button>
@@ -817,25 +1222,54 @@ function DashboardContent() {
 
               <div className="space-y-2.5">
                 {[
-                  { name: 'Manage Events', sub: `${kpiCards.totalEvents} events registered`, pct: 100, icon: '📅', href: '/events' },
-                  { name: 'Review Registrations', sub: 'Pending approvals', pct: 60, icon: '📋', href: '/registrations/approvals' },
-                  { name: 'Financial Reports', sub: 'Revenue tracking', pct: 45, icon: '💰', href: '/reports' },
+                  {
+                    name: "Manage Events",
+                    sub: `${kpiCards.totalEvents} events registered`,
+                    pct: 100,
+                    icon: Calendar,
+                    href: "/events",
+                  },
+                  {
+                    name: "Review Registrations",
+                    sub: "Pending approvals",
+                    pct: 60,
+                    icon: Clipboard,
+                    href: "/registrations/approvals",
+                  },
+                  {
+                    name: "Financial Reports",
+                    sub: "Revenue tracking",
+                    pct: 45,
+                    icon: DollarSign,
+                    href: "/reports",
+                  },
                 ].map((item) => (
-                  <div key={item.name}
+                  <div
+                    key={item.name}
                     onClick={() => router.push(item.href)}
-                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group/item transition-colors duration-200 bg-surface-container/50 hover:bg-surface-container">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 group-hover/item:scale-110 transition-transform duration-200 bg-surface-bright/50">
-                      {item.icon}
+                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer group/item transition-colors duration-200 bg-surface-container/50 hover:bg-surface-container"
+                  >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover/item:scale-110 transition-transform duration-200 bg-surface-bright/50">
+                      <item.icon className="w-5 h-5 text-secondary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-on-surface truncate group-hover/item:text-primary transition-colors">{item.name}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{item.sub}</p>
+                      <p className="text-sm font-semibold text-on-surface truncate group-hover/item:text-primary transition-colors">
+                        {item.name}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {item.sub}
+                      </p>
                       <div className="mt-2 h-1 rounded-full overflow-hidden bg-surface-bright/60">
-                        <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${item.pct}%` }} />
+                        <div
+                          className="h-full rounded-full bg-primary transition-all duration-700"
+                          style={{ width: `${item.pct}%` }}
+                        />
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                      <span className="text-[10px] text-muted-foreground">{item.pct}%</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {item.pct}%
+                      </span>
                       <button className="btn-cta text-[10px] px-2.5 py-1 rounded-full font-bold flex items-center gap-0.5">
                         Go <ChevronRight className="w-3 h-3" />
                       </button>
