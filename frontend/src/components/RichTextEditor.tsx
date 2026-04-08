@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import UnderlineExt from '@tiptap/extension-underline';
@@ -219,6 +219,8 @@ function Toolbar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
 }
 
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+  const isInternalUpdate = useRef(false);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -243,19 +245,35 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     ],
     content: value,
     onUpdate: ({ editor }) => {
+      isInternalUpdate.current = true;
       onChange(editor.getHTML());
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-invert max-w-none min-h-[200px] px-4 py-3 outline-none text-on-surface focus:outline-none',
+        class: 'prose prose-invert max-w-none min-h-[200px] px-4 py-3 outline-none focus:outline-none',
+        style: 'color: hsl(var(--on-surface)); cursor: text;',
       },
     },
   });
 
+  // Sync external value changes into the editor (e.g. when loading data)
+  useEffect(() => {
+    if (editor && !isInternalUpdate.current && value !== editor.getHTML()) {
+      editor.commands.setContent(value || '', { emitUpdate: false });
+    }
+    isInternalUpdate.current = false;
+  }, [value, editor]);
+
   return (
-    <div className="rounded-lg overflow-hidden transition-all" style={{ border: '1px solid hsl(var(--border) / 0.5)', background: 'hsl(var(--surface-card))' }}>
+    <div
+      className="rounded-lg overflow-hidden transition-all"
+      style={{ border: '1px solid hsl(var(--border) / 0.5)', background: 'hsl(var(--surface-card))' }}
+      onClick={() => editor?.chain().focus().run()}
+    >
       <Toolbar editor={editor} />
-      <EditorContent editor={editor} />
+      <div className="[&_.tiptap]:min-h-[200px] [&_.tiptap]:px-4 [&_.tiptap]:py-3 [&_.tiptap]:outline-none [&_.tiptap.ProseMirror-focused]:outline-none [&_.tiptap_p.is-editor-empty:first-child::before]:text-[hsl(var(--muted-foreground))] [&_.tiptap_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.tiptap_p.is-editor-empty:first-child::before]:float-left [&_.tiptap_p.is-editor-empty:first-child::before]:h-0 [&_.tiptap_p.is-editor-empty:first-child::before]:pointer-events-none">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 }

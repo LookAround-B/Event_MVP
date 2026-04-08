@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Filter, Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,17 +19,34 @@ interface FilterDropdownProps {
 export function FilterDropdown({ label = "Filters", options, selected, onChange, align = "left" }: FilterDropdownProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        dropdownRef.current && !dropdownRef.current.contains(target)
+      ) {
         setOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => {
+    if (open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 8,
+        left: align === "right" ? rect.right - 256 : rect.left,
+      });
+    }
+  }, [open, align]);
 
   const filtered = options.filter(o => o.label.toLowerCase().includes(query.toLowerCase()));
 
@@ -38,8 +56,9 @@ export function FilterDropdown({ label = "Filters", options, selected, onChange,
   };
 
   return (
-    <div ref={ref} className="relative z-20">
+    <div ref={containerRef} className="relative z-20">
       <button
+        ref={buttonRef}
         onClick={() => { setOpen(!open); setQuery(""); }}
         className={cn(
           "flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm transition-colors border",
@@ -57,21 +76,22 @@ export function FilterDropdown({ label = "Filters", options, selected, onChange,
         )}
       </button>
 
-      {open && (
-        <div className={cn(
-          "absolute mt-2 z-50 w-[85vw] sm:w-64 max-w-[280px] rounded-2xl border border-border/60 bg-surface-low shadow-2xl animate-fade-in overflow-hidden flex flex-col",
-          align === "right" ? "right-0" : "left-0"
-        )}>
+      {open && dropdownPos && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[9998] w-64 max-w-[280px] rounded-2xl border border-border/60 bg-surface-low shadow-2xl animate-fade-in overflow-hidden flex flex-col"
+          style={{ top: dropdownPos.top, left: dropdownPos.left }}
+        >
           <div className="p-2 border-b border-border/40">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <input
                 autoFocus
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search filters..."
-                className="w-full pl-9 pr-3 py-2 text-sm bg-surface-container rounded-lg border border-border/40 text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+                className="w-full pl-11 pr-3 py-2.5 text-sm bg-surface-container rounded-lg border border-border/40 text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
               />
             </div>
           </div>
@@ -111,7 +131,8 @@ export function FilterDropdown({ label = "Filters", options, selected, onChange,
               </button>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

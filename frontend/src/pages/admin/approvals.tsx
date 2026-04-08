@@ -201,7 +201,7 @@ export default function AdminApprovals() {
                           <span className="text-[10px] text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</span>
                         </td>
                         <td className="p-3 sm:p-4 text-right">
-                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => handleApproveUser(user.id, `${user.firstName} ${user.lastName}`)}
                               disabled={approving === user.id}
@@ -271,7 +271,7 @@ export default function AdminApprovals() {
                           <span className="text-on-surface font-bold">₹{reg.totalAmount.toLocaleString('en-IN')}</span>
                         </td>
                         <td className="p-3 sm:p-4 text-right">
-                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center justify-end gap-1">
                             <button onClick={() => handleApproveReg(reg.id)} title="Approve" className="p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all active:scale-90"><CheckCircle className="w-4 h-4" /></button>
                             <button onClick={() => handleRejectReg(reg.id)} title="Reject" className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all active:scale-90"><XCircle className="w-4 h-4" /></button>
                           </div>

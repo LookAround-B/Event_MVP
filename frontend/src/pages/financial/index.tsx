@@ -415,11 +415,11 @@ export default function Financial() {
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <div className="relative flex-1 sm:flex-initial">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-64 border border-border/30 transition-all focus:bg-surface-container"
+                  className="pl-11 pr-4 py-3 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-64 border border-border/30 transition-all focus:bg-surface-container"
                   placeholder="Find ledger entry..."
                 />
               </div>
@@ -569,7 +569,7 @@ export default function Financial() {
                           </span>
                         </td>
                         <td className="p-3 sm:p-4 text-right">
-                          <button onClick={() => openEditModal(txn)} className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all opacity-0 group-hover:opacity-100 active:scale-95" title="Edit">
+                          <button onClick={() => openEditModal(txn)} className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95" title="Edit">
                             <Pencil className="w-4 h-4" />
                           </button>
                         </td>

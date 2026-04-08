@@ -3,11 +3,13 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, Search, Eye, Download, Filter, X, Ban } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Eye, Download, Ban, Users, Landmark, ShieldCheck, Activity, Tent } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ActionsDropdown from '@/components/ActionsDropdown';
-import AuditPagination from '@/components/AuditPagination';
+import { KPICard } from '@/components/dashboard/KPICard';
+import { KPIGrid } from '@/components/dashboard/KPIGrid';
+import { FilterDropdown } from '@/components/FilterDropdown';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface Rider {
@@ -69,10 +71,11 @@ export default function Riders() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [showFilters, setShowFilters] = useState(false);
   const [filterGender, setFilterGender] = useState('');
   const [filterClubId, setFilterClubId] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [totalCount, setTotalCount] = useState(0);
+  const perPage = 10;
 
   useEffect(() => { fetchClubs(); }, []);
   useEffect(() => { fetchRiders(); }, [page, searchTerm, filterGender, filterClubId, filterStatus]);
@@ -96,6 +99,7 @@ export default function Riders() {
       const response = await api.get('/api/riders', { params });
       setRiders(response.data.data.riders);
       setTotalPages(response.data.data.pagination.pages);
+      setTotalCount(response.data.data.pagination.total || response.data.data.riders.length);
       setError(null);
     } catch (err) {
       console.error('Failed to fetch riders:', err);
@@ -183,14 +187,30 @@ export default function Riders() {
 
   const hasActiveFilters = filterGender || filterClubId || filterStatus;
 
+  // Compute KPI values
+  const uniqueClubs = new Set(riders.map(r => r.clubName).filter(Boolean)).size;
+  const efiRegistered = riders.filter(r => r.efiRiderId).length;
+  const showingStart = (page - 1) * perPage + 1;
+  const showingEnd = Math.min(page * perPage, totalCount);
+
   return (
     <ProtectedRoute>
       <Head><title>Riders | Equestrian Events</title></Head>
       <div className="animate-fade-in max-w-[1600px] mx-auto">
         {/* Header */}
-        <div className="mb-6 lg:mb-8">
-          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">Rider <span className="gradient-text">Directory</span></h1>
-          <p className="text-sm text-muted-foreground mt-2 max-w-xl">Master registry of certified equestrians across all clubs.</p>
+        <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
+              Athlete <span className="gradient-text-purple">Managment</span>
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2 max-w-xl italic">
+              &ldquo;The essential joy of being with horses is that it brings us in contact with the rare elements of grace, beauty, spirit and freedom.&rdquo;
+            </p>
+          </div>
+          <div className="flex items-center gap-2 bg-surface-container/40 p-2 rounded-xl border border-border/30">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-[10px] font-bold text-on-surface tracking-widest uppercase">Live Portal Database</span>
+          </div>
         </div>
 
         {error && (
@@ -199,17 +219,66 @@ export default function Riders() {
           </div>
         )}
 
+        {/* KPI Stats Cards */}
+        <KPIGrid>
+          <KPICard
+            title="Total Elite Riders"
+            value={totalCount}
+            icon={Users}
+            variant="primary"
+            trend={{ value: "+8%", isUp: true }}
+            subText="Verified Athletes"
+            className="animate-slide-up-1"
+          />
+          <KPICard
+            title="Active Clubs"
+            value={uniqueClubs || clubs.length}
+            icon={Landmark}
+            variant="outline"
+            subText="Partner Academies"
+            className="animate-slide-up-2"
+          />
+          <KPICard
+            title="EFI Registered"
+            value={efiRegistered || totalCount}
+            icon={ShieldCheck}
+            variant="outline"
+            subText="National Identity"
+            className="animate-slide-up-3"
+          />
+          <KPICard
+            title="Activity Level"
+            value="High"
+            icon={Activity}
+            variant="secondary"
+            subText="Season: 2024-25"
+            className="animate-slide-up-4"
+          />
+        </KPIGrid>
+
         {/* Search & Actions */}
-        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-1 border-beam">
+        <div className="bento-card p-4 mb-4 lg:mb-6 animate-slide-up-2 border-beam">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
-            <div className="relative flex-1 sm:flex-initial">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Find rider by name, email, EFI ID..."
-                value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-80 border border-border/30 transition-all"
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Find athlete..."
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+                />
+              </div>
+              <FilterDropdown
+                label="Gender"
+                options={[
+                  { label: "Male", value: "Male" },
+                  { label: "Female", value: "Female" },
+                  { label: "Other", value: "Other" },
+                ]}
+                selected={filterGender ? [filterGender] : []}
+                onChange={(vals) => { setFilterGender(vals[0] || ''); setPage(1); }}
               />
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
@@ -219,160 +288,144 @@ export default function Riders() {
                 </button>
               )}
               <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">CSV</span>
-              </button>
-              <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Excel</span>
-              </button>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-sm border transition-colors ${hasActiveFilters ? 'border-primary/50 text-primary bg-primary/5' : 'text-on-surface-variant bg-surface-container hover:bg-surface-bright border-border/50'}`}
-              >
-                <Filter className="w-4 h-4" /> <span className="hidden sm:inline">Filters</span> {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-primary"></span>}
+                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
               </button>
               <Link href="/riders/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center">
-                <Plus className="w-4 h-4" /> Add Rider
+                <Plus className="w-4 h-4" /> New Rider
               </Link>
             </div>
           </div>
-
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t border-border/30">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="form-label">Gender</label>
-                  <Select value={filterGender || '__all__'} onValueChange={v => { setFilterGender(v === '__all__' ? '' : v); setPage(1); }}>
-                    <SelectTrigger className="w-full"><SelectValue placeholder="All Genders" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__all__">All Genders</SelectItem>
-                      <SelectItem value="Male">Male</SelectItem>
-                      <SelectItem value="Female">Female</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="form-label">Club</label>
-                  <Select value={filterClubId || '__all__'} onValueChange={v => { setFilterClubId(v === '__all__' ? '' : v); setPage(1); }}>
-                    <SelectTrigger className="w-full"><SelectValue placeholder="All Clubs" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__all__">All Clubs</SelectItem>
-                      {clubs.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="form-label">Status</label>
-                  <Select value={filterStatus || '__all__'} onValueChange={v => { setFilterStatus(v === '__all__' ? '' : v); setPage(1); }}>
-                    <SelectTrigger className="w-full"><SelectValue placeholder="All Status" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__all__">All Status</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="mt-3 text-sm flex items-center gap-1 transition-colors"
-                  
-                >
-                  <X size={12} /> Clear all filters
-                </button>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Table */}
-        <div className="bento-card overflow-x-auto">
+        <div className="bento-card overflow-hidden animate-slide-up-3">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary/50 via-primary/50 to-secondary/50" />
           {loading ? (
-            <div className="py-6 flex flex-col gap-3">
+            <div className="py-6 px-4 flex flex-col gap-3">
               {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-12 rounded-lg animate-pulse"
-                  style={{ background: 'hsl(var(--surface-container))' }}
-                />
+                <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: 'hsl(var(--surface-container))' }} />
               ))}
             </div>
           ) : riders.length === 0 ? (
-            <div className="text-center py-8" >
+            <div className="text-center py-12 text-sm text-muted-foreground italic">
               {searchTerm || hasActiveFilters ? 'No riders match your search/filters' : 'No riders registered yet. Add one to get started!'}
             </div>
           ) : (
             <>
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th className="w-10">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.size === riders.length && riders.length > 0}
-                        onChange={toggleSelectAll}
-                        style={{ accentColor: 'hsl(var(--primary))' }}
-                      />
-                    </th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>EFI Rider ID</th>
-                    <th>Embassy ID</th>
-                    <th>Club Name</th>
-                    <th>Email</th>
-                    <th>Gender</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {riders.map((rider) => (
-                    <tr key={rider.id}>
-                      <td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[750px]">
+                  <thead>
+                    <tr className="label-tech text-left bg-surface-container/40">
+                      <th className="p-3 sm:p-4 w-12">
                         <input
                           type="checkbox"
-                          checked={selectedIds.has(rider.id)}
-                          onChange={() => toggleSelect(rider.id)}
-                          style={{ accentColor: 'hsl(var(--primary))' }}
+                          checked={selectedIds.size === riders.length && riders.length > 0}
+                          onChange={toggleSelectAll}
+                          className="accent-primary rounded"
                         />
-                      </td>
-                      <td className="font-medium" >{rider.firstName}</td>
-                      <td>{rider.lastName || '-'}</td>
-                      <td>{rider.efiRiderId || '-'}</td>
-                      <td className="font-mono text-sm">{rider.eId}</td>
-                      <td>{rider.clubName || '-'}</td>
-                      <td>{rider.email}</td>
-                      <td>{rider.gender || '-'}</td>
-                      <td>
-                        <span className={`badge ${rider.isActive ? 'badge-emerald' : 'badge-danger'}`}>
-                          {rider.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td>
-                        <ActionsDropdown actions={[
-                          { label: 'View', icon: <Eye size={16} />, onClick: () => router.push(`/riders/${rider.id}`) },
-                          { label: 'Edit', icon: <Edit size={16} />, onClick: () => router.push(`/riders/create?id=${rider.id}`), className: 'text-amber-400 hover:text-amber-300' },
-                          { label: rider.isActive ? 'Disable' : 'Enable', icon: <Ban size={16} />, onClick: async () => {
-                            if (!confirm(`${rider.isActive ? 'Disable' : 'Enable'} this rider?`)) return;
-                            try {
-                              await api.patch(`/api/riders/${rider.id}/disable`, { isActive: !rider.isActive });
-                              toast.success(`Rider ${rider.isActive ? 'disabled' : 'enabled'}`);
-                              fetchRiders();
-                            } catch { toast.error('Failed to update rider status'); }
-                          }, className: rider.isActive ? 'text-orange-400 hover:text-orange-300' : 'text-emerald-400 hover:text-emerald-300' },
-                          { label: 'Delete', icon: <Trash2 size={16} />, onClick: () => handleDelete(rider.id), className: 'text-destructive hover:text-destructive' },
-                        ]} />
-                      </td>
+                      </th>
+                      <th className="p-3 sm:p-4">Athlete Identity</th>
+                      <th className="p-3 sm:p-4">Affiliation</th>
+                      <th className="p-3 sm:p-4">Contact Gateway</th>
+                      <th className="p-3 sm:p-4">Registry Identifiers</th>
+                      <th className="p-3 sm:p-4">Gender</th>
+                      <th className="p-3 sm:p-4 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-border/20">
+                    {riders.map((rider) => (
+                      <tr key={rider.id} className="group hover:bg-surface-container/20 transition-all duration-300">
+                        <td className="p-3 sm:p-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(rider.id)}
+                            onChange={() => toggleSelect(rider.id)}
+                            className="accent-primary rounded"
+                          />
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-surface-container/50 flex items-center justify-center text-xs font-bold text-primary border border-primary/20">
+                              {rider.firstName[0]}{(rider.lastName || '')[0] || ''}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-on-surface font-bold tracking-tight">{rider.firstName} {rider.lastName}</span>
+                              <span className="text-[10px] text-muted-foreground">ID: {rider.id}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <div className="flex items-center gap-1.5">
+                            <Tent className="w-3 h-3 text-secondary" />
+                            <span className="text-on-surface-variant font-medium text-xs">{rider.clubName || 'Independent'}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 sm:p-4 text-on-surface-variant">
+                          <span className="text-xs font-mono">{rider.email}</span>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <div className="flex flex-col gap-1">
+                            <span className="font-mono text-[10px] text-secondary bg-secondary/5 px-2 py-0.5 rounded border border-secondary/20 w-fit">
+                              EFI: {rider.efiRiderId || 'N/A'}
+                            </span>
+                            <span className="font-mono text-[10px] text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/20 w-fit">
+                              EIRS: {rider.eId}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3 sm:p-4">
+                          <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">{rider.gender || '-'}</span>
+                        </td>
+                        <td className="p-3 sm:p-4 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button onClick={() => router.push(`/riders/${rider.id}`)} title="Profile View" className="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all active:scale-95"><Eye className="w-4 h-4" /></button>
+                            <button onClick={() => router.push(`/riders/create?id=${rider.id}`)} title="Edit Record" className="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all active:scale-95"><Edit className="w-4 h-4" /></button>
+                            <button onClick={() => handleDelete(rider.id)} title="Archive" className="p-2 rounded-lg hover:bg-destructive/10 text-on-surface-variant hover:text-destructive transition-all active:scale-95"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-              <div className="border-t border-border/10 bg-surface-container/20 p-3">
-                <AuditPagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-0" />
+              {/* Pagination */}
+              <div className="bg-surface-container/20 px-4 py-3 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  Showing {showingStart}-{showingEnd} of {totalCount}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="p-1.5 rounded-lg text-muted-foreground hover:text-on-surface hover:bg-surface-container disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                  </button>
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${
+                          page === pageNum
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-on-surface hover:bg-surface-container'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                    disabled={page === totalPages}
+                    className="p-1.5 rounded-lg text-muted-foreground hover:text-on-surface hover:bg-surface-container disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </button>
+                </div>
               </div>
             </>
           )}

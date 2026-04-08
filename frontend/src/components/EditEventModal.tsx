@@ -28,19 +28,22 @@ interface CategorySelection {
   date: string;
 }
 
-interface CreateEventModalProps {
+interface EditEventModalProps {
   open: boolean;
+  eventId: string | null;
   onClose: () => void;
-  onCreated: () => void;
+  onUpdated: () => void;
 }
 
-export default function CreateEventModal({ open, onClose, onCreated }: CreateEventModalProps) {
+export default function EditEventModal({ open, eventId, onClose, onUpdated }: EditEventModalProps) {
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [fileUrl, setFileUrl] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<CategorySelection[]>([]);
+  const [editorReady, setEditorReady] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
@@ -63,24 +66,58 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    if (open) {
-      // reset form
-      setFormData({
-        eventType: 'KSEC', name: '', description: '',
-        startDate: '', startTime: '06:00', startEndTime: '18:00',
-        endDate: '', endStartTime: '06:00', endTime: '18:00',
-        venueName: '', venueAddress: '', venueLat: '', venueLng: '',
-        termsAndConditions: '',
-      });
-      setFileUrl('');
-      setSelectedCategories([]);
-      fetchCategories();
+    if (open && eventId) {
+      setEditorReady(false);
+      setLoading(true);
       document.body.style.overflow = 'hidden';
-    } else {
+      Promise.all([fetchEvent(), fetchCategories()]).finally(() => {
+        setLoading(false);
+        // Delay editor mount to ensure value is loaded
+        setTimeout(() => setEditorReady(true), 100);
+      });
+    } else if (!open) {
       document.body.style.overflow = '';
+      setEditorReady(false);
     }
     return () => { document.body.style.overflow = ''; };
-  }, [open]);
+  }, [open, eventId]);
+
+  const fetchEvent = async () => {
+    try {
+      const response = await api.get(`/api/events/${eventId}`);
+      if (!response.data.success) {
+        toast.error(response.data.message || 'Failed to load event');
+        return;
+      }
+      const event = response.data.data;
+      setFormData({
+        eventType: event.eventType || 'KSEC',
+        name: event.name,
+        description: event.description || '',
+        startDate: event.startDate?.split('T')[0] || '',
+        startTime: event.startTime || '06:00',
+        startEndTime: event.startEndTime || '18:00',
+        endDate: event.endDate?.split('T')[0] || '',
+        endStartTime: event.endStartTime || '06:00',
+        endTime: event.endTime || '18:00',
+        venueName: event.venueName || '',
+        venueAddress: event.venueAddress || '',
+        venueLat: event.venueLat?.toString() || '',
+        venueLng: event.venueLng?.toString() || '',
+        termsAndConditions: event.termsAndConditions || '',
+      });
+      setFileUrl(event.fileUrl || '');
+      if (event.categories?.length > 0) {
+        setSelectedCategories(
+          event.categories.map((c: any) => ({ categoryId: c.id, date: '' }))
+        );
+      } else {
+        setSelectedCategories([]);
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to load event');
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -135,17 +172,17 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
 
     setSubmitting(true);
     try {
-      const res = await api.post('/api/events', { ...formData, fileUrl, categoryIds });
-      if (res.data && !res.data.success) { toast.error(res.data.message || 'Failed to create event'); return; }
-      toast.success('Event created successfully!');
-      onCreated();
+      const res = await api.put(`/api/events/${eventId}`, { ...formData, fileUrl, categoryIds });
+      if (res.data && !res.data.success) { toast.error(res.data.message || 'Failed to update event'); return; }
+      toast.success('Event updated successfully!');
+      onUpdated();
       onClose();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to create event');
+      toast.error(err.response?.data?.message || 'Failed to update event');
     } finally { setSubmitting(false); }
   };
 
-  if (!mounted || !open) return null;
+  if (!mounted || !open || !eventId) return null;
 
   const modal = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -159,7 +196,7 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
       <div className="relative z-10 w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border border-border/50 bg-surface-low shadow-2xl shadow-black/50 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border/30 flex-shrink-0">
-          <h2 className="text-lg font-bold text-on-surface">Create New Event</h2>
+          <h2 className="text-lg font-bold text-on-surface">Edit Event</h2>
           <button
             type="button"
             onClick={onClose}
@@ -171,7 +208,15 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
 
         {/* Scrollable body */}
         <div ref={bodyRef} className="overflow-y-auto flex-1 px-6 py-5 space-y-6 scrollbar-none">
-          <form id="create-event-form" onSubmit={handleSubmit}>
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
+                <p className="text-muted-foreground mt-2 text-sm">Loading event...</p>
+              </div>
+            </div>
+          ) : (
+          <form id="edit-event-form" onSubmit={handleSubmit}>
 
             {/* ─── Event Information ─────────────────────────── */}
             <div className="space-y-4">
@@ -179,7 +224,6 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
                 <FileText className="w-4 h-4" /> Event Information
               </h3>
 
-              {/* Row: Name + Type */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="label-tech mb-1.5 block">Event Name <span className="text-destructive">*</span></label>
@@ -204,7 +248,6 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
                 </div>
               </div>
 
-              {/* Description */}
               <div>
                 <label className="label-tech mb-1.5 block">Description <span className="text-[10px] text-muted-foreground normal-case font-normal">(optional)</span></label>
                 <textarea
@@ -214,7 +257,6 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
                 />
               </div>
 
-              {/* File Upload */}
               <div>
                 <label className="label-tech mb-1.5 block">Event File / Banner <span className="text-[10px] text-muted-foreground normal-case font-normal">(optional)</span></label>
                 <div className="flex items-center gap-3">
@@ -235,7 +277,6 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
                 <Calendar className="w-4 h-4" /> Schedule
               </h3>
 
-              {/* Start Date */}
               <div>
                 <label className="text-xs font-semibold text-on-surface mb-2 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-emerald-400" /> Start Date <span className="text-destructive">*</span>
@@ -258,7 +299,6 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
                 </div>
               </div>
 
-              {/* End Date */}
               <div>
                 <label className="text-xs font-semibold text-on-surface mb-2 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-destructive" /> End Date <span className="text-destructive">*</span>
@@ -320,11 +360,21 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
               <h3 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-primary/70">
                 <FileText className="w-4 h-4" /> Terms & Conditions
               </h3>
-              <RichTextEditor
-                value={formData.termsAndConditions}
-                onChange={handleEditorChange}
-                placeholder="Enter event terms and conditions..."
-              />
+              {editorReady ? (
+                <RichTextEditor
+                  key={`editor-${eventId}`}
+                  value={formData.termsAndConditions}
+                  onChange={handleEditorChange}
+                  placeholder="Enter event terms and conditions..."
+                />
+              ) : (
+                <div className="rounded-lg border border-white/[0.12] min-h-[160px] flex items-center justify-center text-muted-foreground text-sm bg-white/[0.02]">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    Loading editor...
+                  </div>
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">Use the toolbar to format your terms & conditions.</p>
             </div>
 
@@ -347,7 +397,7 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
               {categories.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No categories available. Create categories in Settings first.</p>
               ) : selectedCategories.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No categories added. Click "Add Category" to add one.</p>
+                <p className="text-xs text-muted-foreground">No categories added. Click &quot;Add Category&quot; to add one.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedCategories.map((sel, idx) => (
@@ -383,18 +433,19 @@ export default function CreateEventModal({ open, onClose, onCreated }: CreateEve
             </div>
 
           </form>
+          )}
         </div>
 
         {/* Footer */}
         <div className="flex items-center gap-3 px-6 py-4 border-t border-border/30 flex-shrink-0">
           <button
-            form="create-event-form"
+            form="edit-event-form"
             type="submit"
-            disabled={submitting}
+            disabled={submitting || loading}
             className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
           >
             <Save className="w-4 h-4" />
-            {submitting ? 'Creating...' : 'Create Event'}
+            {submitting ? 'Saving...' : 'Save Changes'}
           </button>
           <button
             type="button"

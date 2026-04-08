@@ -1,5 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SearchSelect } from "@/components/SearchSelect";
@@ -42,6 +43,9 @@ export function DatePicker({
   const [viewYear, setViewYear] = useState(initDate.getFullYear());
   const [viewMonth, setViewMonth] = useState(initDate.getMonth());
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
 
   // Sync view when opened
   useEffect(() => {
@@ -54,11 +58,31 @@ export function DatePicker({
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (
+        ref.current && !ref.current.contains(target) &&
+        dropdownRef.current && !dropdownRef.current.contains(target)
+      ) {
+        setOpen(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Update dropdown position when opened
+  useEffect(() => {
+    if (open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const dropdownHeight = 400; // approximate
+      const top = spaceBelow > dropdownHeight ? rect.bottom + 6 : rect.top - dropdownHeight - 6;
+      setDropdownPos({
+        top: Math.max(8, top),
+        left: Math.max(8, Math.min(rect.left, window.innerWidth - 328)),
+      });
+    }
+  }, [open]);
 
   // Build calendar grid
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
@@ -89,6 +113,7 @@ export function DatePicker({
   return (
     <div ref={ref} className={cn("relative", className)}>
       <button
+        ref={triggerRef}
         type="button"
         disabled={disabled}
         onClick={() => setOpen(!open)}
@@ -104,11 +129,12 @@ export function DatePicker({
         <Calendar className="w-4 h-4 text-muted-foreground" />
       </button>
 
-      {open && (
-        <div className={cn(
-          "absolute top-full mt-1.5 z-50 w-[90vw] sm:w-[320px] max-w-[320px] rounded-2xl border border-border/60 bg-surface-low shadow-2xl shadow-black/30 p-4",
-          "left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0"
-        )}>
+      {open && dropdownPos && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[9999] w-[320px] max-w-[320px] rounded-2xl border border-border/60 bg-surface-low shadow-2xl shadow-black/30 p-4"
+          style={{ top: dropdownPos.top, left: dropdownPos.left }}
+        >
           {/* Controls logic with proper searchable dropdowns */}
           <div className="flex items-center gap-2 mb-3">
             <button type="button" onClick={prevMonth} className="w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-colors border border-border/40">
@@ -185,7 +211,8 @@ export function DatePicker({
               </button>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

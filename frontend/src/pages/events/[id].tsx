@@ -327,7 +327,7 @@ export default function EventDetail() {
                   placeholder="Search rider, horse, or club..."
                   value={filterSearch}
                   onChange={e => { setFilterSearch(e.target.value); setPage(1); }}
-                  className="w-full pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/30"
+                  className="w-full pl-10 pr-4 py-3 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/30"
                 />
               </div>
               <Select value={filterPaymentStatus || '__all__'} onValueChange={v => { setFilterPaymentStatus(v === '__all__' ? '' : v); setPage(1); }}>
@@ -397,7 +397,7 @@ export default function EventDetail() {
                           </span>
                         </td>
                         <td className="p-3 text-right">
-                          <button onClick={() => setActionModal({ isOpen: true, registration: reg })} className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface opacity-0 group-hover:opacity-100 transition-all">
+                          <button onClick={() => setActionModal({ isOpen: true, registration: reg })} className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all">
                             <Eye className="w-4 h-4" />
                           </button>
                         </td>

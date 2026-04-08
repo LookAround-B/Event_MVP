@@ -1233,3 +1233,142 @@ option {
   --shadow-eq: 0 2px 12px rgba(0,0,0,0.4);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
 }
+
+/* ══════════════════════════════════════════════════════════
+   TIPTAP / PROSEMIRROR EDITOR STYLES
+   ══════════════════════════════════════════════════════════ */
+
+.tiptap {
+  min-height: 200px;
+  padding: 0.75rem 1rem;
+  outline: none;
+  color: hsl(var(--on-surface));
+  cursor: text;
+}
+
+.tiptap:focus {
+  outline: none;
+}
+
+.tiptap p {
+  margin: 0.25em 0;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap h1 {
+  font-size: 1.75em;
+  font-weight: 700;
+  margin: 0.5em 0 0.25em;
+}
+
+.tiptap h2 {
+  font-size: 1.4em;
+  font-weight: 700;
+  margin: 0.5em 0 0.25em;
+}
+
+.tiptap h3 {
+  font-size: 1.15em;
+  font-weight: 600;
+  margin: 0.5em 0 0.25em;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.tiptap ul {
+  list-style: disc;
+}
+
+.tiptap ol {
+  list-style: decimal;
+}
+
+.tiptap li {
+  margin: 0.15em 0;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid hsl(var(--primary) / 0.5);
+  padding-left: 1em;
+  margin: 0.5em 0;
+  color: hsl(var(--on-surface-variant));
+}
+
+.tiptap code {
+  background: hsl(var(--surface-container));
+  border-radius: 4px;
+  padding: 0.15em 0.3em;
+  font-size: 0.9em;
+  font-family: monospace;
+}
+
+.tiptap pre {
+  background: hsl(var(--surface-container));
+  border-radius: 8px;
+  padding: 0.75em 1em;
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+
+.tiptap pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.tiptap a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border) / 0.5);
+  margin: 1em 0;
+}
+
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5em 0;
+}
+
+.tiptap th,
+.tiptap td {
+  border: 1px solid hsl(var(--border) / 0.5);
+  padding: 0.4em 0.6em;
+  text-align: left;
+}
+
+.tiptap th {
+  background: hsl(var(--surface-container));
+  font-weight: 600;
+}
+
+.tiptap mark {
+  background-color: hsl(60 100% 50% / 0.3);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.tiptap sub {
+  vertical-align: sub;
+  font-size: 0.8em;
+}
+
+.tiptap sup {
+  vertical-align: super;
+  font-size: 0.8em;
+}

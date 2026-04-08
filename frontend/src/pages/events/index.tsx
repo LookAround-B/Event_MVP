@@ -11,7 +11,7 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { CalendarView } from '@/components/CalendarView';
-import { cn } from '@/lib/utils';import CreateEventModal from '@/components/CreateEventModal';import { ActionItem } from '@/components/ActionsDropdown';
+import { cn } from '@/lib/utils';import CreateEventModal from '@/components/CreateEventModal';import EditEventModal from '@/components/EditEventModal';import { ActionItem } from '@/components/ActionsDropdown';
 
 interface Event {
   id: string;
@@ -67,6 +67,7 @@ export default function Events() {
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
   const [activeTab, setActiveTab] = useState<'current' | 'all'>('all');
   const [createOpen, setCreateOpen] = useState(false);
+  const [editEventId, setEditEventId] = useState<string | null>(null);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -219,7 +220,7 @@ export default function Events() {
                   placeholder="Find championship..."
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+                  className="pl-10 pr-4 py-3 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
                 />
               </div>
               <FilterDropdown
@@ -355,9 +356,9 @@ export default function Events() {
                         </div>
                       </td>
                       <td className="p-3 sm:p-4 text-right">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div className="flex items-center justify-end gap-1">
                           <button onClick={() => router.push(`/events/${event.id}`)} title="View" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95"><Eye className="w-4 h-4" /></button>
-                          <button onClick={() => router.push(`/events/create?id=${event.id}`)} title="Edit" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => setEditEventId(event.id)} title="Edit" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95"><Edit className="w-4 h-4" /></button>
                           <button onClick={() => handleDelete(event.id)} title="Delete" className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all active:scale-95"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
@@ -377,6 +378,7 @@ export default function Events() {
       </div>
 
       <CreateEventModal open={createOpen} onClose={() => setCreateOpen(false)} onCreated={fetchEvents} />
+      <EditEventModal open={!!editEventId} eventId={editEventId} onClose={() => setEditEventId(null)} onUpdated={fetchEvents} />
     </ProtectedRoute>
   );
 }

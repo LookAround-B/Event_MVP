@@ -323,7 +323,7 @@ export default function Registrations() {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 pr-4 py-2.5 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+                  className="pl-10 pr-4 py-3 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
                   placeholder="Find entry..."
                 />
               </div>
@@ -434,11 +434,11 @@ export default function Registrations() {
                         </span>
                       </td>
                       <td className="p-3 sm:p-4 text-right">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <button onClick={() => setViewItem(reg)} title="Inspect" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95">
+                        <div className="flex items-center justify-end gap-1">
+                          <button onClick={() => setViewItem(reg)} title="Inspect" className="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-all active:scale-95">
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button onClick={() => setDeleteItem(reg)} title="Cancel" className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all active:scale-95">
+                          <button onClick={() => setDeleteItem(reg)} title="Cancel" className="p-2 rounded-lg hover:bg-destructive/10 text-on-surface-variant hover:text-destructive transition-all active:scale-95">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
