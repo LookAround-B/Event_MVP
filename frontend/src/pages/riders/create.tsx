@@ -32,7 +32,6 @@ export default function CreateRider() {
     lastName: '',
     email: '',
     efiRiderId: '',
-    designation: '',
     gender: '',
     dob: '',
     mobile: '',
@@ -66,7 +65,6 @@ export default function CreateRider() {
         lastName: rider.lastName || '',
         email: rider.email || '',
         efiRiderId: rider.efiRiderId || '',
-        designation: rider.designation || '',
         gender: rider.gender || '',
         dob: rider.dob ? rider.dob.split('T')[0] : '',
         mobile: rider.mobile || '',
@@ -140,7 +138,6 @@ export default function CreateRider() {
         lastName: formData.lastName,
         email: formData.email,
         efiRiderId: formData.efiRiderId,
-        designation: formData.designation,
         gender: formData.gender,
         dob: formData.dob,
         mobile: formData.mobile,
@@ -405,17 +402,6 @@ export default function CreateRider() {
                       placeholder="EFI identifier (required)"
                       className={inputClass}
                       required
-                    />
-                  </div>
-                  <div>
-                    <label className="label-tech block mb-1.5">Designation</label>
-                    <input
-                      type="text"
-                      name="designation"
-                      value={formData.designation}
-                      onChange={handleInputChange}
-                      placeholder="e.g., Professional, Amateur, Youth"
-                      className={inputClass}
                     />
                   </div>
                 </div>

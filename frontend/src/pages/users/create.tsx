@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -12,19 +12,23 @@ interface Role {
   description?: string;
 }
 
+const EMPTY_FORM_DATA = {
+  email: '',
+  password: '',
+  firstName: '',
+  lastName: '',
+  gender: '',
+  roleId: '',
+};
+
 export default function CreateUser() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    designation: '',
-    roleId: '',
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM_DATA);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -36,6 +40,16 @@ export default function CreateUser() {
       }
     };
     fetchRoles();
+  }, []);
+
+  useEffect(() => {
+    const resetAutofill = window.setTimeout(() => {
+      setFormData(EMPTY_FORM_DATA);
+      if (emailInputRef.current) emailInputRef.current.value = '';
+      if (passwordInputRef.current) passwordInputRef.current.value = '';
+    }, 150);
+
+    return () => window.clearTimeout(resetAutofill);
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -93,15 +107,23 @@ export default function CreateUser() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
+            <div className="absolute -z-10 h-0 w-0 overflow-hidden opacity-0 pointer-events-none" aria-hidden="true">
+              <input type="text" name="fake-username" autoComplete="username" tabIndex={-1} />
+              <input type="password" name="fake-password" autoComplete="current-password" tabIndex={-1} />
+            </div>
             <div>
               <label className="label-tech block mb-1.5">Email</label>
               <input
+                ref={emailInputRef}
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 className={inputClass}
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
                 required
               />
             </div>
@@ -109,11 +131,13 @@ export default function CreateUser() {
             <div>
               <label className="label-tech block mb-1.5">Password</label>
               <input
+                ref={passwordInputRef}
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 className={inputClass}
+                autoComplete="new-password"
                 required
                 minLength={8}
               />
@@ -146,14 +170,18 @@ export default function CreateUser() {
             </div>
 
             <div>
-              <label className="label-tech block mb-1.5">Designation</label>
-              <input
-                type="text"
-                name="designation"
-                value={formData.designation}
-                onChange={handleChange}
-                className={inputClass}
-              />
+              <label className="label-tech block mb-1.5">Gender</label>
+              <Select value={formData.gender || '__none__'} onValueChange={(v) => setFormData({ ...formData, gender: v === '__none__' ? '' : v })}>
+                <SelectTrigger className={selectClass}>
+                  <SelectValue placeholder="Select Gender (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Select Gender (optional)</SelectItem>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

@@ -328,11 +328,11 @@ export default function Layout({ children }: LayoutProps) {
           {/* Right: search + actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Search className="search-input-icon pointer-events-none absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search..."
-                className="pl-9 pr-4 py-2 text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 w-36 lg:w-52 transition-all rounded-xl border border-border/50"
+                className="search-input-with-icon pr-4 py-2 text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 w-36 lg:w-52 transition-all rounded-xl border border-border/50"
                 style={{ background: 'hsl(var(--surface-container))' }}
               />
             </div>

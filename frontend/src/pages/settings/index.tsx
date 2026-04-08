@@ -302,6 +302,8 @@ export default function Settings() {
     { key: 'termsConditions', label: 'T&C' },
   ];
 
+  const settingsActionButtonClass = "btn-primary inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold shadow-lg shadow-primary/20 disabled:opacity-50";
+
   return (
     <div className="p-4 sm:p-6">
       <Head><title>Settings | Equestrian Events</title></Head>
@@ -371,7 +373,7 @@ export default function Settings() {
               <button
                 onClick={saveVenue}
                 disabled={saving}
-                className="btn-primary flex items-center gap-2 disabled:opacity-50"
+                className={settingsActionButtonClass}
               >
                 <Save /> {saving ? 'Saving...' : 'Save Venue'}
               </button>
@@ -407,7 +409,7 @@ export default function Settings() {
               <button
                 onClick={saveStablesSettings}
                 disabled={saving}
-                className="btn-primary flex items-center gap-2 disabled:opacity-50"
+                className={settingsActionButtonClass}
               >
                 <Save /> {saving ? 'Saving...' : 'Save Stable Settings'}
               </button>
@@ -462,7 +464,7 @@ export default function Settings() {
               <button
                 onClick={saveTimingsSettings}
                 disabled={saving}
-                className="btn-primary flex items-center gap-2 disabled:opacity-50"
+                className={settingsActionButtonClass}
               >
                 <Save /> {saving ? 'Saving...' : 'Save Timings'}
               </button>
@@ -492,7 +494,7 @@ export default function Settings() {
                     maxLength={20}
                   />
                 </div>
-                <button onClick={addEventType} className="btn-primary flex items-center gap-2 text-sm">
+                <button onClick={addEventType} className={settingsActionButtonClass}>
                   <Plus /> Add Event Type
                 </button>
               </div>
@@ -553,14 +555,14 @@ export default function Settings() {
                   />
                   <input
                     type="text"
-                    placeholder="Designation (optional)"
+                    placeholder="Description (optional)"
                     value={newRole.description}
                     onChange={e => setNewRole({ ...newRole, description: e.target.value })}
                     className="input"
                     maxLength={200}
                   />
                 </div>
-                <button onClick={addRole} className="btn-primary flex items-center gap-2 text-sm">
+                <button onClick={addRole} className={settingsActionButtonClass}>
                   <Plus /> Add User Role
                 </button>
               </div>
@@ -570,7 +572,7 @@ export default function Settings() {
                   <thead>
                     <tr>
                       <th>User Role</th>
-                      <th className="hidden sm:table-cell">Designation</th>
+                      <th className="hidden sm:table-cell">Description</th>
                       <th className="w-24">Actions</th>
                     </tr>
                   </thead>
@@ -659,7 +661,7 @@ export default function Settings() {
                     className="input"
                   />
                 </div>
-                <button onClick={addEventCategory} className="btn-primary flex items-center gap-2 text-sm">
+                <button onClick={addEventCategory} className={settingsActionButtonClass}>
                   <Plus /> Add Event Category
                 </button>
               </div>
@@ -810,7 +812,7 @@ export default function Settings() {
               <button
                 onClick={saveTermsConditions}
                 disabled={saving}
-                className="btn-primary flex items-center gap-2 disabled:opacity-50"
+                className={settingsActionButtonClass}
               >
                 <Save /> {saving ? 'Saving...' : 'Save Terms & Conditions'}
               </button>

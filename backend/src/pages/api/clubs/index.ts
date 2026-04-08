@@ -161,7 +161,6 @@ async function handler(
               lastName: primaryContactLastName,
               email: primaryContactEmail,
               password: 'default', // To be set later
-              designation: 'Club Contact',
               gender: primaryContactGender,
               phone: primaryContactMobile,
               dob: primaryContactDob ? new Date(primaryContactDob) : undefined,

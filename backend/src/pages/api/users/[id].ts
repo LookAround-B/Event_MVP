@@ -8,7 +8,7 @@ interface User {
   email: string;
   firstName: string;
   lastName: string;
-  designation: string;
+  gender?: string;
   createdAt: string;
 }
 
@@ -49,6 +49,7 @@ async function handler(
           email: true,
           firstName: true,
           lastName: true,
+          gender: true,
           createdAt: true,
         },
       });
@@ -91,7 +92,7 @@ async function handler(
         });
       }
 
-      const { firstName, lastName, designation } = req.body;
+      const { firstName, lastName, gender } = req.body;
 
       const existingUser = await prisma.user.findUnique({
         where: { id: userId },
@@ -110,13 +111,14 @@ async function handler(
         data: {
           ...(firstName && { firstName }),
           ...(lastName && { lastName }),
-          ...(designation && { designation }),
+          ...(gender !== undefined ? { gender: gender || null } : {}),
         },
         select: {
           id: true,
           email: true,
           firstName: true,
           lastName: true,
+          gender: true,
           createdAt: true,
         },
       });

@@ -10,6 +10,7 @@ interface User {
   firstName: string;
   lastName: string;
   phone: string;
+  gender?: string;
   isApproved: boolean;
   profileComplete: boolean;
   createdAt: string;
@@ -149,7 +150,7 @@ async function handler(
 
   if (method === 'POST') {
     try {
-      const { email, password, firstName, lastName, designation, roleId } = req.body;
+      const { email, password, firstName, lastName, gender, roleId } = req.body;
 
       if (!email || !password || !firstName || !lastName) {
         return res.status(400).json({
@@ -187,7 +188,7 @@ async function handler(
           password: hashedPassword,
           firstName,
           lastName,
-          designation: designation || '',
+          ...(gender !== undefined ? { gender: gender || null } : {}),
           ...(roleId && typeof roleId === 'string' ? { roles: { connect: { id: roleId } } } : {}),
         },
         select: {
@@ -195,6 +196,7 @@ async function handler(
           email: true,
           firstName: true,
           lastName: true,
+          gender: true,
           createdAt: true,
           roles: { select: { id: true, name: true } },
         },

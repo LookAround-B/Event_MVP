@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { Pencil, Trash2, Plus, Search, Check, Clock, Download, Shield, Filter, X, ChevronDown, UserCog, Users as UsersIcon, Activity } from 'lucide-react';
+import { Pencil, Trash2, Plus, Search, Check, Clock, Download, Shield, ShieldCheck, Filter, X, ChevronDown, UserCog, Users as UsersIcon, Activity } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -57,6 +57,7 @@ export default function Users() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [bulkRoleId, setBulkRoleId] = useState('');
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [approveTarget, setApproveTarget] = useState<User | null>(null);
 
   useEffect(() => {
     const token = Cookies.get('authToken');
@@ -128,20 +129,22 @@ export default function Users() {
     }
   };
 
-  const handleApprove = async (userId: string, userName: string) => {
-    if (!window.confirm(`Approve user ${userName}?`)) return;
-
+  const handleApprove = async () => {
+    if (!approveTarget) return;
     try {
-      setApproving(userId);
-      await api.post(`/api/admin/approve-user`, { userId });
-      setUsers(users.map(u => 
-        u.id === userId ? { ...u, isApproved: true } : u
-      ));
-      setApproving(null);
+      setApproving(approveTarget.id);
+      await api.post(`/api/admin/approve-user`, { userId: approveTarget.id });
+      setUsers((currentUsers) =>
+        currentUsers.map((user) =>
+          user.id === approveTarget.id ? { ...user, isApproved: true } : user
+        )
+      );
     } catch (err: any) {
       console.error('Failed to approve user:', err);
       alert(err.response?.data?.message || 'Failed to approve user');
+    } finally {
       setApproving(null);
+      setApproveTarget(null);
     }
   };
 
@@ -248,11 +251,11 @@ export default function Users() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <div className="relative flex-1 sm:flex-initial">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="search-input-icon pointer-events-none absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search users..."
-                  className="pl-10 pr-4 py-3 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
+                  className="search-input-with-icon pr-4 py-3 bg-surface-container/50 rounded-xl text-sm text-on-surface placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 w-full sm:w-72 border border-border/30 transition-all focus:bg-surface-container"
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 />
@@ -472,7 +475,7 @@ export default function Users() {
                           <div className="flex gap-2">
                             {isAdmin && !user.isApproved && (
                               <button 
-                                onClick={() => handleApprove(user.id, user.name)}
+                                onClick={() => setApproveTarget(user)}
                                 disabled={approving === user.id}
                                 className="btn-primary p-2 flex items-center gap-1 text-sm disabled:opacity-50"
                               >
@@ -521,6 +524,21 @@ export default function Users() {
           )}
         </div>
         </div>
+
+        <ConfirmModal
+          open={!!approveTarget}
+          onClose={() => setApproveTarget(null)}
+          onConfirm={handleApprove}
+          variant="success"
+          icon={ShieldCheck}
+          title="Approve User Access"
+          description={
+            approveTarget
+              ? `Approve ${approveTarget.name || approveTarget.email} and allow this account to access the platform dashboard.`
+              : ''
+          }
+          confirmLabel="Approve User"
+        />
       </div>
     </ProtectedRoute>
   );

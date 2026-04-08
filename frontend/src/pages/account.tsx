@@ -14,7 +14,6 @@ interface UserProfile {
   email: string;
   firstName: string;
   lastName: string;
-  designation?: string;
   phone?: string;
   optionalPhone?: string;
   gender?: string;

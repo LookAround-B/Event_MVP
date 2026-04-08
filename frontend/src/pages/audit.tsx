@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import api from '@/lib/api';
-import { Filter, Search } from 'lucide-react';
 import ProtectedRoute from '@/lib/protected-route';
 import AuditPagination from '@/components/AuditPagination';
 
@@ -113,7 +112,7 @@ export default function AuditLogs() {
                 setAction('');
                 setPage(1);
               }}
-              className="btn-secondary w-full"
+              className="inline-flex h-[42px] items-center justify-center rounded-lg border border-border/50 bg-surface-container px-4 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-bright"
             >
               Clear Filters
             </button>

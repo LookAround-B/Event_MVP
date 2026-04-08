@@ -18,7 +18,6 @@ model User {
   password        String
   firstName       String
   lastName        String
-  designation     String?
   gender          String?
   phone           String?
   optionalPhone   String?

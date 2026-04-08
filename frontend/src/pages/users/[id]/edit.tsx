@@ -4,13 +4,14 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface User {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  designation?: string;
+  gender?: string;
 }
 
 export default function EditUser() {
@@ -56,7 +57,7 @@ export default function EditUser() {
       await api.put(`/api/users/${id}`, {
         firstName: formData.firstName,
         lastName: formData.lastName,
-        designation: formData.designation,
+        gender: formData.gender,
       });
       router.push('/users');
     } catch (err: any) {
@@ -81,6 +82,7 @@ export default function EditUser() {
   }
 
   const inputClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground";
+  const selectClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground appearance-none";
 
   return (
     <ProtectedRoute>
@@ -150,16 +152,19 @@ export default function EditUser() {
             </div>
 
             <div>
-              <label className="label-tech block mb-1.5">Designation</label>
-              <input
-                type="text"
-                name="designation"
-                value={formData.designation || ''}
-                onChange={handleChange}
-                className={inputClass}
-              />
+              <label className="label-tech block mb-1.5">Gender</label>
+              <Select value={formData.gender || '__none__'} onValueChange={(v) => setFormData({ ...formData, gender: v === '__none__' ? '' : v })}>
+                <SelectTrigger className={selectClass}>
+                  <SelectValue placeholder="Select Gender (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Select Gender (optional)</SelectItem>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-
           </form>
           </div>
           

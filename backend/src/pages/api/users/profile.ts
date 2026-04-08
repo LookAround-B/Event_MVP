@@ -29,7 +29,6 @@ async function handler(
             email: true,
             firstName: true,
             lastName: true,
-            designation: true,
             phone: true,
             optionalPhone: true,
             gender: true,
@@ -79,7 +78,7 @@ async function handler(
     return withAuth(async (authReq, authRes) => {
       try {
         const userId = authReq.user?.id;
-        const { firstName, lastName, designation, phone, optionalPhone, gender, address, dob, efiRiderId, imageUrl } = authReq.body;
+        const { firstName, lastName, phone, optionalPhone, gender, address, dob, efiRiderId, imageUrl } = authReq.body;
 
         if (!userId) {
           return authRes.status(401).json({
@@ -95,7 +94,6 @@ async function handler(
           data: {
             ...(firstName && { firstName }),
             ...(lastName && { lastName }),
-            ...(designation !== undefined && { designation }),
             ...(phone !== undefined && { phone }),
             ...(optionalPhone !== undefined && { optionalPhone }),
             ...(gender !== undefined && { gender }),
@@ -110,7 +108,6 @@ async function handler(
             email: true,
             firstName: true,
             lastName: true,
-            designation: true,
             phone: true,
             optionalPhone: true,
             gender: true,

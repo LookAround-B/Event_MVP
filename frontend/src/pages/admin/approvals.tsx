@@ -5,7 +5,7 @@ import Head from 'next/head';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import apiClient from '@/lib/api';
-import { Check, X, RefreshCw, Users, FileText, Search, Clock, UserCheck, Zap, ShieldCheck, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { Check, X, RefreshCw, Users, FileText, Search, Clock, UserCheck, Zap, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import AuditPagination from '@/components/AuditPagination';
@@ -145,7 +145,6 @@ export default function AdminApprovals() {
           <KPICard title="Awaiting Review" value={pendingUsers.length} icon={Clock} variant="primary" subText="Pending validation" className="animate-slide-up-1" />
           <KPICard title="Pending Regs" value={regCounts.pending} icon={UserCheck} variant="outline" subText="Registration queue" className="animate-slide-up-2" />
           <KPICard title="Approved Regs" value={regCounts.approved} icon={Zap} variant="outline" subText="Access granted" className="animate-slide-up-3" />
-          <KPICard title="Compliance" value="Strict" icon={ShieldCheck} variant="secondary" subText="Policy active" className="animate-slide-up-4" />
         </KPIGrid>
 
         {/* Tabs */}

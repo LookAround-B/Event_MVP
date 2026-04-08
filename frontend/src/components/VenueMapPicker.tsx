@@ -63,9 +63,9 @@ export default function VenueMapPicker({ lat, lng, onLocationChange }: VenueMapP
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Search location (e.g., Mumbai, India)"
-            className="input pl-9"
+            className="input search-input-with-icon"
           />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Search className="search-input-icon pointer-events-none absolute top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
         </div>
         <button
           type="button"
