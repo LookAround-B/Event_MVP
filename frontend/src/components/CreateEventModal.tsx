@@ -9,15 +9,16 @@ import VenueMapPicker from '@/components/VenueMapPicker';
 import { X, MapPin, Upload, Plus, Trash2, Calendar, Clock, FileText, Tag, Save } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
-import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
   ssr: false,
   loading: () => (
     <div className="rounded-lg border border-white/[0.12] min-h-[160px] flex items-center justify-center text-muted-foreground text-sm bg-white/[0.02]">
-      <div className="flex flex-col items-center gap-2">
-        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        Loading editor...
+      <div className="w-full space-y-3 p-4">
+        <Skeleton className="h-8 w-40 bg-border/20" />
+        <Skeleton className="h-24 w-full rounded-xl bg-border/15" />
+        <Skeleton className="h-24 w-full rounded-xl bg-border/15" />
       </div>
     </div>
   ),

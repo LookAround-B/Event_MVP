@@ -16,6 +16,7 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /* ─── Types (preserved) ─── */
 interface Registration {
@@ -366,8 +367,8 @@ export default function Registrations() {
           <div className="overflow-x-auto">
             {loading ? (
               <div className="p-6 space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full rounded-xl bg-border/20" />
                 ))}
               </div>
             ) : displayed.length === 0 ? (
@@ -497,8 +498,8 @@ export default function Registrations() {
 
             {createDataLoading ? (
               <div className="space-y-4 py-2">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-14 rounded-xl bg-surface-container/40 animate-pulse" />
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 w-full rounded-xl bg-border/20" />
                 ))}
               </div>
             ) : (

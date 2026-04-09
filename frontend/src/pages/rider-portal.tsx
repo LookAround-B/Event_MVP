@@ -6,6 +6,8 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
+import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface DashboardWidgets {
   horseCount: number;
@@ -34,6 +36,43 @@ interface Horse {
   name: string;
   color: string;
   gender: string;
+}
+
+function RiderListSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: rows }).map((_, index) => (
+        <div key={index} className="bento-card p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-4 w-40 bg-border/20" />
+              <Skeleton className="h-3 w-28 bg-border/15" />
+            </div>
+            <Skeleton className="h-8 w-24 rounded-lg bg-border/20" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RiderGridSkeleton({ cards = 4 }: { cards?: number }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {Array.from({ length: cards }).map((_, index) => (
+        <div key={index} className="bento-card p-4 space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-4 w-32 bg-border/20" />
+              <Skeleton className="h-3 w-24 bg-border/15" />
+              <Skeleton className="h-3 w-20 bg-border/15" />
+            </div>
+            <Skeleton className="h-10 w-10 rounded-xl bg-border/20" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function RiderPortal() {
@@ -190,51 +229,55 @@ export default function RiderPortal() {
 
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-6">
-            <KPIGrid>
-              <KPICard title="Total Horses" value={widgets.horseCount} icon={Box} variant="primary" subText="Your stable" className="animate-slide-up-1" />
-              <KPICard title="Events on Platform" value={widgets.eventsCount} icon={Calendar} variant="outline" subText="Available now" className="animate-slide-up-2" />
-              <KPICard title="Participated" value={widgets.eventsParticipated} icon={TrendingUp} variant="outline" subText="Your history" className="animate-slide-up-3" />
-              <KPICard title="Registered" value={widgets.registeredEvents} icon={Award} variant="secondary" subText="Current season" className="animate-slide-up-4" />
-            </KPIGrid>
+          loading ? (
+            <PageSkeleton variant="dashboard" />
+          ) : (
+            <div className="space-y-6">
+              <KPIGrid>
+                <KPICard title="Total Horses" value={widgets.horseCount} icon={Box} variant="primary" subText="Your stable" className="animate-slide-up-1" />
+                <KPICard title="Events on Platform" value={widgets.eventsCount} icon={Calendar} variant="outline" subText="Available now" className="animate-slide-up-2" />
+                <KPICard title="Participated" value={widgets.eventsParticipated} icon={TrendingUp} variant="outline" subText="Your history" className="animate-slide-up-3" />
+                <KPICard title="Registered" value={widgets.registeredEvents} icon={Award} variant="secondary" subText="Current season" className="animate-slide-up-4" />
+              </KPIGrid>
 
-            <div className="bento-card p-6 animate-slide-up-3">
-              <h2 className="text-lg font-bold text-on-surface mb-4">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Link
-                  href="/horses/create"
-                  className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:bg-surface-container/50 transition group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Plus className="w-5 h-5 text-primary" />
+              <div className="bento-card p-6 animate-slide-up-3">
+                <h2 className="text-lg font-bold text-on-surface mb-4">Quick Actions</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Link
+                    href="/horses/create"
+                    className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:bg-surface-container/50 transition group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Plus className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-on-surface text-sm">Add New Horse</p>
+                        <p className="text-xs text-muted-foreground">Register your horse</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-on-surface text-sm">Add New Horse</p>
-                      <p className="text-xs text-muted-foreground">Register your horse</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </Link>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </Link>
 
-                <Link
-                  href="/events"
-                  className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:bg-surface-container/50 transition group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Calendar className="w-5 h-5 text-secondary" />
+                  <Link
+                    href="/events"
+                    className="flex items-center justify-between p-4 rounded-xl border border-border/30 hover:bg-surface-container/50 transition group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Calendar className="w-5 h-5 text-secondary" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-on-surface text-sm">Browse Events</p>
+                        <p className="text-xs text-muted-foreground">Find upcoming events</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-on-surface text-sm">Browse Events</p>
-                      <p className="text-xs text-muted-foreground">Find upcoming events</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </Link>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
+          )
         )}
 
         {/* My Events Tab */}
@@ -246,8 +289,8 @@ export default function RiderPortal() {
                 <h2 className="text-lg font-bold text-on-surface mb-4">My Event Registrations</h2>
               </div>
               {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
+                <div className="p-4 pt-0">
+                  <RiderListSkeleton rows={4} />
                 </div>
               ) : myEvents.length === 0 ? (
                 <div className="p-12 text-center text-sm text-muted-foreground italic">
@@ -295,9 +338,7 @@ export default function RiderPortal() {
               </Link>
             </div>
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
-              </div>
+              <RiderGridSkeleton cards={4} />
             ) : horses.length === 0 ? (
               <div className="bento-card p-12 text-center text-sm text-muted-foreground italic">
                 No horses registered yet. Add your first horse to get started!
@@ -328,9 +369,7 @@ export default function RiderPortal() {
           <div className="space-y-4 animate-slide-up-2">
             <h2 className="text-lg font-bold text-on-surface">All Available Events</h2>
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
-              </div>
+              <RiderListSkeleton rows={5} />
             ) : allEvents.length === 0 ? (
               <div className="bento-card p-12 text-center text-sm text-muted-foreground italic">
                 No events available at this time.
@@ -367,8 +406,19 @@ export default function RiderPortal() {
           <div className="space-y-6 animate-slide-up-2">
             <h2 className="text-lg font-bold text-on-surface">Featured Events</h2>
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }} />
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="bento-card overflow-hidden">
+                    <div className="px-6 py-4 border-b border-border/10 space-y-2">
+                      <Skeleton className="h-5 w-56 bg-border/20" />
+                      <Skeleton className="h-4 w-72 max-w-full bg-border/15" />
+                    </div>
+                    <div className="p-6 flex items-center justify-between gap-4">
+                      <Skeleton className="h-4 w-40 bg-border/15" />
+                      <Skeleton className="h-10 w-32 rounded-xl bg-border/20" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : featuredEvents.length === 0 ? (
               <div className="bento-card p-12 text-center text-sm text-muted-foreground italic">

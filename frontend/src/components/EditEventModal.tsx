@@ -9,15 +9,16 @@ import VenueMapPicker from '@/components/VenueMapPicker';
 import { X, MapPin, Upload, Plus, Trash2, Calendar, Clock, FileText, Tag, Save } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
-import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
   ssr: false,
   loading: () => (
     <div className="rounded-lg border border-white/[0.12] min-h-[160px] flex items-center justify-center text-muted-foreground text-sm bg-white/[0.02]">
-      <div className="flex flex-col items-center gap-2">
-        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        Loading editor...
+      <div className="w-full space-y-3 p-4">
+        <Skeleton className="h-8 w-40 bg-border/20" />
+        <Skeleton className="h-24 w-full rounded-xl bg-border/15" />
+        <Skeleton className="h-24 w-full rounded-xl bg-border/15" />
       </div>
     </div>
   ),
@@ -209,11 +210,22 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
         {/* Scrollable body */}
         <div ref={bodyRef} className="overflow-y-auto flex-1 px-6 py-5 space-y-6 scrollbar-none">
           {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
-                <p className="text-muted-foreground mt-2 text-sm">Loading event...</p>
+            <div className="space-y-5 py-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Skeleton className="h-11 w-full rounded-xl bg-border/20" />
+                <Skeleton className="h-11 w-full rounded-xl bg-border/20" />
               </div>
+              <Skeleton className="h-24 w-full rounded-xl bg-border/15" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Skeleton className="h-11 w-full rounded-xl bg-border/20" />
+                <Skeleton className="h-11 w-full rounded-xl bg-border/20" />
+                <Skeleton className="h-11 w-full rounded-xl bg-border/20" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Skeleton className="h-11 w-full rounded-xl bg-border/20" />
+                <Skeleton className="h-11 w-full rounded-xl bg-border/20" />
+              </div>
+              <Skeleton className="h-48 w-full rounded-2xl bg-border/15" />
             </div>
           ) : (
           <form id="edit-event-form" onSubmit={handleSubmit}>
@@ -369,9 +381,10 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
                 />
               ) : (
                 <div className="rounded-lg border border-white/[0.12] min-h-[160px] flex items-center justify-center text-muted-foreground text-sm bg-white/[0.02]">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    Loading editor...
+                  <div className="w-full space-y-3 p-4">
+                    <Skeleton className="h-8 w-40 bg-border/20" />
+                    <Skeleton className="h-24 w-full rounded-xl bg-border/15" />
+                    <Skeleton className="h-24 w-full rounded-xl bg-border/15" />
                   </div>
                 </div>
               )}

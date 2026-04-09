@@ -7,6 +7,7 @@ import { Pencil, Save, X, Camera, Check, Mail, Phone, MapPin, User, Calendar, Sh
 import Cropper, { Area } from 'react-easy-crop';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface UserProfile {
   id: string;
@@ -331,9 +332,7 @@ export default function AccountPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-        </div>
+        <PageSkeleton variant="detail" />
       </ProtectedRoute>
     );
   }

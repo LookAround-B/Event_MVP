@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
+import { AppShellSkeleton } from '@/components/AppShellSkeleton';
 
 interface DecodedToken {
   id: string;
@@ -75,7 +76,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Show nothing during SSR
   if (!isClient || isAuthorized === null) {
-    return null;
+    return <AppShellSkeleton />;
   }
 
   if (!isAuthorized) {

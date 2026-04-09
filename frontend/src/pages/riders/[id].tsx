@@ -10,6 +10,7 @@ import ProtectedRoute from '@/lib/protected-route';
 import AddressMapPicker from '@/components/AddressMapPicker';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface SocialLinks {
   instagram?: string;
@@ -217,11 +218,7 @@ export default function RiderDetail() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {[...Array(5)].map((_, i) => (
-            <div key={i} style={{ height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
-          ))}
-        </div>
+        <PageSkeleton variant="detail" />
       </ProtectedRoute>
     );
   }

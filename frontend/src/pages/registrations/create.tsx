@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, ClipboardCheck, Check, X } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Event { id: string; name: string; }
 interface Rider { id: string; firstName: string; lastName: string; }
@@ -129,8 +130,8 @@ export default function CreateRegistration() {
 
           {dataLoading ? (
             <div className="p-6 space-y-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-14 rounded-xl bg-surface-container/40 animate-pulse" />
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-14 w-full rounded-xl bg-border/20" />
               ))}
             </div>
           ) : (

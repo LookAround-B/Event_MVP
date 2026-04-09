@@ -4,6 +4,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface Horse {
   id: string;
@@ -62,11 +63,7 @@ export default function HorseDetail() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {[...Array(5)].map((_, i) => (
-            <div key={i} style={{ height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
-          ))}
-        </div>
+        <PageSkeleton variant="detail" />
       </ProtectedRoute>
     );
   }

@@ -36,6 +36,8 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { PageSkeleton } from "@/components/PageSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /* ===================== TYPES ===================== */
 
@@ -493,12 +495,51 @@ function MultiSelect({
 /* ===================== SECTION SPINNER ===================== */
 
 function SectionSpinner({ label }: { label?: string }) {
-  return (
-    <div className="flex items-center justify-center py-12">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto mb-3" />
-        {label && <p className="text-sm text-muted-foreground">{label}</p>}
+  if (label === "events") {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="space-y-2">
+            <Skeleton className="h-4 w-44 bg-border/20" />
+            <Skeleton className="h-3 w-28 bg-border/15" />
+            <Skeleton className="h-1.5 w-full rounded-full bg-border/15" />
+          </div>
+        ))}
       </div>
+    );
+  }
+
+  if (label === "participants") {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="flex items-center gap-3 rounded-xl bg-surface-container/50 p-2.5"
+          >
+            <Skeleton className="h-8 w-8 rounded-lg bg-border/20" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-32 bg-border/20" />
+              <Skeleton className="h-3 w-44 bg-border/15" />
+            </div>
+            <Skeleton className="h-5 w-16 rounded-full bg-border/20" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 flex items-end gap-3 pt-6">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index} className="flex-1 space-y-2">
+          <Skeleton
+            className="w-full rounded-t-2xl bg-border/20"
+            style={{ height: `${120 + (index % 3) * 45}px` }}
+          />
+          <Skeleton className="mx-auto h-3 w-16 bg-border/15" />
+        </div>
+      ))}
     </div>
   );
 }
@@ -771,6 +812,26 @@ function DashboardContent() {
     return map[status] || "badge-muted";
   };
 
+  const isInitialPageLoading =
+    kpiLoading &&
+    eventsLoading &&
+    participantsLoading &&
+    eventChartData.length === 0 &&
+    events.length === 0 &&
+    participants.length === 0 &&
+    !error;
+
+  if (isInitialPageLoading) {
+    return (
+      <ProtectedRoute>
+        <Head>
+          <title>Dashboard | Equestrian Events</title>
+        </Head>
+        <PageSkeleton variant="dashboard" />
+      </ProtectedRoute>
+    );
+  }
+
   return (
     <ProtectedRoute>
       <Head>
@@ -871,9 +932,7 @@ function DashboardContent() {
               </div>
 
               {kpiLoading ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" />
-                </div>
+                <SectionSpinner />
               ) : chartDisplayData.length > 0 ? (
                 <div className="flex-1 min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
@@ -1074,9 +1133,7 @@ function DashboardContent() {
               </div>
 
               {eventsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" />
-                </div>
+                <SectionSpinner label="events" />
               ) : events.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   No events found
@@ -1108,17 +1165,19 @@ function DashboardContent() {
                 </div>
               )}
 
-              {events.length > 0 && (
+              {!eventsLoading && events.length > 0 && (
                 <div className="mt-4 inline-flex items-center gap-1.5 bg-primary/12 text-primary text-[11px] font-bold px-3 py-1.5 rounded-full">
                   <Clock className="w-3 h-3" />
                   {events.length} event{events.length !== 1 ? "s" : ""}
                 </div>
               )}
-              <Pagination
-                page={eventPage}
-                totalPages={eventTotalPages}
-                onPageChange={setEventPage}
-              />
+              {!eventsLoading && (
+                <Pagination
+                  page={eventPage}
+                  totalPages={eventTotalPages}
+                  onPageChange={setEventPage}
+                />
+              )}
             </div>
           </div>
 
@@ -1143,9 +1202,7 @@ function DashboardContent() {
               </div>
 
               {participantsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary" />
-                </div>
+                <SectionSpinner label="participants" />
               ) : participants.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   No participants found
@@ -1179,11 +1236,13 @@ function DashboardContent() {
                   ))}
                 </div>
               )}
-              <Pagination
-                page={participantPage}
-                totalPages={participantTotalPages}
-                onPageChange={setParticipantPage}
-              />
+              {!participantsLoading && (
+                <Pagination
+                  page={participantPage}
+                  totalPages={participantTotalPages}
+                  onPageChange={setParticipantPage}
+                />
+              )}
             </div>
           </div>
 

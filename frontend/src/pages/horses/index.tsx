@@ -10,6 +10,7 @@ import ActionsDropdown from '@/components/ActionsDropdown';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { FilterDropdown } from '@/components/FilterDropdown';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Horse {
   id: string;
@@ -333,8 +334,8 @@ export default function Horses() {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary/40 via-primary/40 to-secondary/40" />
           {loading ? (
             <div className="p-6 space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-xl bg-border/20" />
               ))}
             </div>
           ) : horses.length === 0 ? (

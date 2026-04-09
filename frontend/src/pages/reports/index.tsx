@@ -6,6 +6,8 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { DatePicker } from '@/components/DatePicker';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TableSkeleton } from '@/components/TableSkeleton';
 
 interface EventSummary {
   id: string;
@@ -139,11 +141,74 @@ export default function Reports() {
         </div>
 
         {loading && (
-          <div className="bento-card p-6 space-y-3 animate-slide-up-3">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
-            ))}
-          </div>
+          tab === 'financial' ? (
+            <div className="space-y-4 animate-slide-up-3">
+              <div className="bento-card p-4 flex flex-wrap gap-4 items-end">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24 bg-border/20" />
+                  <Skeleton className="h-11 w-40 rounded-xl bg-border/20" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24 bg-border/20" />
+                  <Skeleton className="h-11 w-40 rounded-xl bg-border/20" />
+                </div>
+                <Skeleton className="h-11 w-28 rounded-xl bg-border/20" />
+                <Skeleton className="h-11 w-32 rounded-xl bg-border/15" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="bento-card space-y-3">
+                    <Skeleton className="h-4 w-28 bg-border/20" />
+                    <Skeleton className="h-8 w-24 bg-border/15" />
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="bento-card space-y-3">
+                    <Skeleton className="h-5 w-32 bg-border/20" />
+                    {Array.from({ length: 4 }).map((__, j) => (
+                      <Skeleton key={j} className="h-10 w-full rounded-xl bg-border/15" />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : tab === 'attendance' ? (
+            <div className="space-y-4 animate-slide-up-3">
+              <div className="bento-card p-4 flex flex-wrap gap-4 items-end">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-28 bg-border/20" />
+                  <Skeleton className="h-11 w-56 rounded-xl bg-border/20" />
+                </div>
+                <Skeleton className="h-11 w-24 rounded-xl bg-border/20" />
+              </div>
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="bento-card space-y-4">
+                  <div className="border-b border-border/20 pb-4">
+                    <Skeleton className="h-5 w-56 bg-border/20" />
+                    <Skeleton className="mt-2 h-4 w-80 max-w-full bg-border/15" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-24 bg-border/20" />
+                      {Array.from({ length: 4 }).map((__, j) => (
+                        <Skeleton key={j} className="h-9 w-full rounded-xl bg-border/15" />
+                      ))}
+                    </div>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-28 bg-border/20" />
+                      {Array.from({ length: 4 }).map((__, j) => (
+                        <Skeleton key={j} className="h-9 w-full rounded-xl bg-border/15" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <TableSkeleton rows={6} cols={7} />
+          )
         )}
 
         {/* Event Summary Report */}

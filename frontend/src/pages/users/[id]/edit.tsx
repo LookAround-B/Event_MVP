@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface User {
   id: string;
@@ -70,13 +71,7 @@ export default function EditUser() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-md animate-fade-in" />
-          <div className="relative z-10 w-full max-w-sm flex flex-col items-center justify-center rounded-2xl border border-border/60 bg-surface-low shadow-2xl p-8 animate-fade-in">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground text-center">Loading user...</p>
-          </div>
-        </div>
+        <PageSkeleton variant="modal" />
       </ProtectedRoute>
     );
   }

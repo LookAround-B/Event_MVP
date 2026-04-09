@@ -11,6 +11,7 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Rider {
   id: string;
@@ -302,8 +303,8 @@ export default function Riders() {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary/50 via-primary/50 to-secondary/50" />
           {loading ? (
             <div className="py-6 px-4 flex flex-col gap-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: 'hsl(var(--surface-container))' }} />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-xl bg-border/20" />
               ))}
             </div>
           ) : riders.length === 0 ? (

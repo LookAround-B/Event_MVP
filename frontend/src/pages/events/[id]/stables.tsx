@@ -4,6 +4,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Plus, Pencil, Trash2, Check, X } from 'lucide-react';
+import { TableSkeleton } from '@/components/TableSkeleton';
 
 interface Stable {
   id: string;
@@ -203,10 +204,7 @@ export default function EventStables() {
         {/* Stables Table */}
         <div className="bento-card table-container">
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="text-muted-foreground mt-2">Loading stables...</p>
-            </div>
+            <TableSkeleton rows={6} cols={6} />
           ) : stables.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               No stables configured for this event. Click &quot;Add Stable&quot; to get started.

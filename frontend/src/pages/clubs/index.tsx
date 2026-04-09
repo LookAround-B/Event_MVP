@@ -17,6 +17,7 @@ import Pagination from '@/components/Pagination';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
+import { Skeleton } from '@/components/ui/skeleton';
 import { exportToCSV, exportToExcel } from '@/utils/exportData';
 
 interface Club {
@@ -288,7 +289,7 @@ export default function ClubsList() {
                   [...Array(5)].map((_, i) => (
                     <tr key={i}>
                       <td colSpan={5} className="p-4">
-                        <div style={{ height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.08)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                        <Skeleton className="h-12 w-full rounded-xl bg-border/20" />
                       </td>
                     </tr>
                   ))

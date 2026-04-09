@@ -3,6 +3,7 @@ import Head from 'next/head';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import AuditPagination from '@/components/AuditPagination';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface AuditLog {
   id: string;
@@ -74,112 +75,111 @@ export default function AuditLogs() {
   return (
     <ProtectedRoute>
       <Head><title>Audit Logs | Equestrian Events</title></Head>
-      <div>
-        <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl mb-8">Audit <span className="gradient-text">Trail</span></h1>
+      {loading ? (
+        <PageSkeleton variant="table" rows={7} />
+      ) : (
+        <div>
+          <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl mb-8">Audit <span className="gradient-text">Trail</span></h1>
 
-        {/* Filters */}
-        <div className="bento-card mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="form-label">Entity</label>
-            <input
-              type="text"
-              value={entity}
-              onChange={(e) => {
-                setEntity(e.target.value);
-                setPage(1);
-              }}
-              placeholder="e.g., User, Event, Club"
-              className="input"
-            />
-          </div>
-          <div>
-            <label className="form-label">Action</label>
-            <input
-              type="text"
-              value={action}
-              onChange={(e) => {
-                setAction(e.target.value);
-                setPage(1);
-              }}
-              placeholder="e.g., CREATE, UPDATE, DELETE"
-              className="input"
-            />
-          </div>
-          <div className="flex items-end">
-            <button
-              onClick={() => {
-                setEntity('');
-                setAction('');
-                setPage(1);
-              }}
-              className="inline-flex h-[42px] items-center justify-center rounded-lg border border-border/50 bg-surface-container px-4 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-bright"
-            >
-              Clear Filters
-            </button>
-          </div>
-        </div>
-
-        {/* Logs Table */}
-        <div className="bento-card table-container">
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto"></div>
-              <p className="text-muted-foreground mt-2">Loading audit logs...</p>
+          {/* Filters */}
+          <div className="bento-card mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="form-label">Entity</label>
+              <input
+                type="text"
+                value={entity}
+                onChange={(e) => {
+                  setEntity(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="e.g., User, Event, Club"
+                className="input"
+              />
             </div>
-          ) : logs.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">No audit logs found.</div>
-          ) : (
-            <>
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Date & Time</th>
-                    <th>User</th>
-                    <th>Entity</th>
-                    <th>Action</th>
-                    <th>Changes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {logs.map((log) => (
-                    <tr key={log.id}>
-                      <td className="text-sm">{formatDate(log.createdAt)}</td>
-                      <td className="text-sm">
-                        <div className="font-medium">{log.user.firstName} {log.user.lastName}</div>
-                        <div className="text-muted-foreground text-xs">{log.user.email}</div>
-                      </td>
-                      <td className="text-sm">
-                        <span className="badge badge-info">{log.entity}</span>
-                      </td>
-                      <td className="text-sm">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            log.action.includes('CREATED') || log.action.includes('CREATE')
-                              ? 'bg-green-500/20 text-green-300'
-                              : log.action.includes('UPDATED') || log.action.includes('UPDATE')
-                              ? 'bg-yellow-500/20 text-yellow-300'
-                              : log.action.includes('DELETED') || log.action.includes('DELETE')
-                              ? 'bg-red-500/20 text-destructive'
-                              : 'bg-surface-lowest0/20 text-muted-foreground'
-                          }`}
-                        >
-                          {log.action}
-                        </span>
-                      </td>
-                      <td className="text-sm text-muted-foreground max-w-xs truncate">
-                        {getChangesSummary(log)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div>
+              <label className="form-label">Action</label>
+              <input
+                type="text"
+                value={action}
+                onChange={(e) => {
+                  setAction(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="e.g., CREATE, UPDATE, DELETE"
+                className="input"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={() => {
+                  setEntity('');
+                  setAction('');
+                  setPage(1);
+                }}
+                className="inline-flex h-[42px] items-center justify-center rounded-lg border border-border/50 bg-surface-container px-4 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-bright"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
 
-              {/* Pagination */}
-              <AuditPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-            </>
-          )}
+          {/* Logs Table */}
+          <div className="bento-card table-container">
+            {logs.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No audit logs found.</div>
+            ) : (
+              <>
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Date & Time</th>
+                      <th>User</th>
+                      <th>Entity</th>
+                      <th>Action</th>
+                      <th>Changes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {logs.map((log) => (
+                      <tr key={log.id}>
+                        <td className="text-sm">{formatDate(log.createdAt)}</td>
+                        <td className="text-sm">
+                          <div className="font-medium">{log.user.firstName} {log.user.lastName}</div>
+                          <div className="text-muted-foreground text-xs">{log.user.email}</div>
+                        </td>
+                        <td className="text-sm">
+                          <span className="badge badge-info">{log.entity}</span>
+                        </td>
+                        <td className="text-sm">
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                              log.action.includes('CREATED') || log.action.includes('CREATE')
+                                ? 'bg-green-500/20 text-green-300'
+                                : log.action.includes('UPDATED') || log.action.includes('UPDATE')
+                                ? 'bg-yellow-500/20 text-yellow-300'
+                                : log.action.includes('DELETED') || log.action.includes('DELETE')
+                                ? 'bg-red-500/20 text-destructive'
+                                : 'bg-surface-lowest0/20 text-muted-foreground'
+                            }`}
+                          >
+                            {log.action}
+                          </span>
+                        </td>
+                        <td className="text-sm text-muted-foreground max-w-xs truncate">
+                          {getChangesSummary(log)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Pagination */}
+                <AuditPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </ProtectedRoute>
   );
 }

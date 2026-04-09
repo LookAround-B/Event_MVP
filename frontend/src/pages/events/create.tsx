@@ -10,15 +10,18 @@ import VenueMapPicker from '@/components/VenueMapPicker';
 import { ArrowLeft, MapPin, Upload, Plus, Trash2, Calendar, Clock, FileText, Tag, Save } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
+import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Dynamic import — TipTap uses browser APIs (document/window) for editor DOM
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
   ssr: false,
   loading: () => (
     <div className="rounded-lg border border-border/30 min-h-[260px] flex items-center justify-center text-muted-foreground text-sm bg-surface-container/30">
-      <div className="flex flex-col items-center gap-2">
-        <div className="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
-        Loading editor...
+      <div className="w-full space-y-3 p-4">
+        <Skeleton className="h-8 w-40 bg-border/20" />
+        <Skeleton className="h-24 w-full rounded-xl bg-border/15" />
+        <Skeleton className="h-24 w-full rounded-xl bg-border/15" />
       </div>
     </div>
   ),
@@ -253,12 +256,7 @@ export default function CreateEventPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-            <p className="text-muted-foreground mt-2">Loading...</p>
-          </div>
-        </div>
+        <PageSkeleton variant="form" />
       </ProtectedRoute>
     );
   }

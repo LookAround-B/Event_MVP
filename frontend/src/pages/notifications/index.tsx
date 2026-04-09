@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { Bell, Check, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface Notification {
   id: string;
@@ -112,7 +113,7 @@ export default function Notifications() {
         </div>
 
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading notifications...</div>
+          <PageSkeleton variant="list" rows={6} />
         ) : notifications.length === 0 ? (
           <div className="bento-card p-8 text-center">
             <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />

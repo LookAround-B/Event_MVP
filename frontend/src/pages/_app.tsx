@@ -1,7 +1,7 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
@@ -9,6 +9,8 @@ import { AppearanceProvider } from '@/contexts/AppearanceContext';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/lib/protected-route';
 import ToastProvider from '@/components/ToastProvider';
+import { AppShellSkeleton } from '@/components/AppShellSkeleton';
+import { PageSkeleton } from '@/components/PageSkeleton';
 import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
 import '@fontsource/manrope/600.css';
@@ -30,17 +32,60 @@ const PUBLIC_ROUTES = ['/auth/login', '/auth/signup', '/pending-approval', '/com
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const [isRouteLoading, setIsRouteLoading] = useState(false);
+  const routeLoadingStartedAt = useRef<number | null>(null);
+  const routeLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clientId = '244506553129-rbtnjflpop9gtcfpjs0gbesdvnos5hro.apps.googleusercontent.com';
+  const isPublicRoute = PUBLIC_ROUTES.includes(router.pathname);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  if (!isClient) {
-    return null;
-  }
+  useEffect(() => {
+    const clearPendingTimeout = () => {
+      if (routeLoadingTimeout.current) {
+        clearTimeout(routeLoadingTimeout.current);
+        routeLoadingTimeout.current = null;
+      }
+    };
 
-  const clientId = '244506553129-rbtnjflpop9gtcfpjs0gbesdvnos5hro.apps.googleusercontent.com';
-  const isPublicRoute = PUBLIC_ROUTES.includes(router.pathname);
+    const handleStart = (url: string) => {
+      if (url !== router.asPath) {
+        clearPendingTimeout();
+        routeLoadingStartedAt.current = Date.now();
+        setIsRouteLoading(true);
+      }
+    };
+    const handleStop = () => {
+      clearPendingTimeout();
+      const startedAt = routeLoadingStartedAt.current;
+      const minVisibleMs = 180;
+      const elapsed = startedAt ? Date.now() - startedAt : minVisibleMs;
+      const remaining = Math.max(0, minVisibleMs - elapsed);
+
+      routeLoadingTimeout.current = setTimeout(() => {
+        setIsRouteLoading(false);
+        routeLoadingStartedAt.current = null;
+        routeLoadingTimeout.current = null;
+      }, remaining);
+    };
+
+    router.events.on('routeChangeStart', handleStart);
+    router.events.on('routeChangeComplete', handleStop);
+    router.events.on('routeChangeError', handleStop);
+
+    return () => {
+      clearPendingTimeout();
+      router.events.off('routeChangeStart', handleStart);
+      router.events.off('routeChangeComplete', handleStop);
+      router.events.off('routeChangeError', handleStop);
+    };
+  }, [router]);
+
+  if (!isClient) {
+    return isPublicRoute ? <PageSkeleton variant="public" /> : <AppShellSkeleton />;
+  }
 
   if (isPublicRoute) {
     return (
@@ -50,7 +95,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <GoogleOAuthProvider clientId={clientId}>
               <ToastProvider />
               <Head><title>Equestrian Events</title></Head>
-              <Component {...pageProps} />
+              {isRouteLoading ? <PageSkeleton variant="public" /> : <Component {...pageProps} />}
             </GoogleOAuthProvider>
           </AppearanceProvider>
         </ThemeProvider>
@@ -66,9 +111,13 @@ export default function App({ Component, pageProps }: AppProps) {
             <ToastProvider />
             <Head><title>Equestrian Events</title></Head>
             <ProtectedRoute>
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
+              {isRouteLoading ? (
+                <AppShellSkeleton />
+              ) : (
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
+              )}
             </ProtectedRoute>
           </GoogleOAuthProvider>
         </AppearanceProvider>

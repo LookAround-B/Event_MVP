@@ -10,6 +10,7 @@ import AuditPagination from '@/components/AuditPagination';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface User {
   id: string;
@@ -390,8 +391,8 @@ export default function Users() {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/30 via-primary to-primary/30" />
           {loading ? (
             <div className="p-6 space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 rounded-xl bg-surface-container/40 animate-pulse" />
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-xl bg-border/20" />
               ))}
             </div>
           ) : users.length === 0 ? (

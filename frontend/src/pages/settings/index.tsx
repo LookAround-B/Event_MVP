@@ -4,6 +4,7 @@ import api from '@/lib/api';
 import { Plus, Pencil, Trash2, Save, X, MapPin } from 'lucide-react';
 import AddressMapPicker from '@/components/AddressMapPicker';
 import dynamic from 'next/dynamic';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false });
 
@@ -330,9 +331,7 @@ export default function Settings() {
 
         <div className="p-4 sm:p-6">
           {loading ? (
-            <div className="flex items-center justify-center h-48">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2" style={{ borderColor: 'hsl(var(--primary))' }}></div>
-            </div>
+            <PageSkeleton variant="form" />
           ) : activeTab === 'venue' ? (
             /* ───── VENUE TAB ───── */
             <div>

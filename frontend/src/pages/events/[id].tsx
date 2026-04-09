@@ -8,6 +8,7 @@ import { ArrowLeft, Download, ChevronLeft, ChevronRight, Calendar, MapPin, Clock
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface EventDetail {
   id: string;
@@ -197,12 +198,7 @@ export default function EventDetail() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mx-auto" />
-            <p className="text-muted-foreground mt-2">Loading event...</p>
-          </div>
-        </div>
+        <PageSkeleton variant="detail" />
       </ProtectedRoute>
     );
   }

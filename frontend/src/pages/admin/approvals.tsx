@@ -9,6 +9,7 @@ import { Check, X, RefreshCw, Users, FileText, Search, Clock, UserCheck, Zap, Ey
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import AuditPagination from '@/components/AuditPagination';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface PendingUser {
   id: string;
@@ -120,11 +121,7 @@ export default function AdminApprovals() {
   };
 
   if (!isAdmin || loading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <RefreshCw className="w-8 h-8 text-primary animate-spin" />
-      </div>
-    );
+    return <PageSkeleton variant="table" rows={6} />;
   }
 
   return (

@@ -11,6 +11,7 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { CalendarView } from '@/components/CalendarView';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';import CreateEventModal from '@/components/CreateEventModal';import EditEventModal from '@/components/EditEventModal';import { ActionItem } from '@/components/ActionsDropdown';
 
 interface Event {
@@ -282,16 +283,10 @@ export default function Events() {
         <div className="bento-card overflow-hidden animate-slide-up-3">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary/40 via-primary/40 to-secondary/40" />
           {loading ? (
-            <div className="py-8">
-              <div className="flex flex-col gap-3">
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-12 rounded-lg animate-pulse"
-                    style={{ background: 'hsl(var(--surface-container))' }}
-                  />
-                ))}
-              </div>
+            <div className="p-4 sm:p-6 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-xl bg-border/20" />
+              ))}
             </div>
           ) : displayEvents.length === 0 ? (
             <div className="text-center py-8 text-sm text-muted-foreground italic">

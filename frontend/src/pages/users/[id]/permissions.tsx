@@ -4,6 +4,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Save, Check, X } from 'lucide-react';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface Permission {
   action: string;
@@ -133,9 +134,7 @@ export default function UserPermissions() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="p-6 flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
+        <PageSkeleton variant="detail" />
       </ProtectedRoute>
     );
   }

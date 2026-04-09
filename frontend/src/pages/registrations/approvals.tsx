@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import toast from 'react-hot-toast';
-import { Check, X, Filter, ChevronDown } from 'lucide-react';
+import { Check, X, Filter } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { PageSkeleton } from '@/components/PageSkeleton';
+import { TableSkeleton } from '@/components/TableSkeleton';
 
 interface Registration {
   id: string;
@@ -134,6 +136,22 @@ export default function RegistrationApprovals() {
     );
   };
 
+  const isInitialLoading =
+    loading &&
+    registrations.length === 0 &&
+    counts.pending === 0 &&
+    counts.approved === 0 &&
+    counts.rejected === 0;
+
+  if (isInitialLoading) {
+    return (
+      <ProtectedRoute>
+        <Head><title>Registration Approvals | Equestrian</title></Head>
+        <PageSkeleton variant="table" rows={8} />
+      </ProtectedRoute>
+    );
+  }
+
   return (
     <ProtectedRoute>
       <Head><title>Registration Approvals | Equestrian</title></Head>
@@ -184,72 +202,74 @@ export default function RegistrationApprovals() {
         </div>
 
         {/* Table */}
-        <div className="bento-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-surface-container border-b">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Rider</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Event</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Horse</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Category</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Amount</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Payment</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Approval</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {loading ? (
-                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Loading...</td></tr>
-                ) : registrations.length === 0 ? (
-                  <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No registrations found</td></tr>
-                ) : (
-                  registrations.slice((page - 1) * perPage, page * perPage).map(reg => (
-                    <tr key={reg.id} className="hover:bg-surface-lowest">
-                      <td className="px-4 py-3 text-sm">
-                        <p className="font-medium text-on-surface">{reg.rider.firstName} {reg.rider.lastName}</p>
-                        <p className="text-xs text-muted-foreground">{reg.rider.email}</p>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-on-surface">{reg.event.name}</td>
-                      <td className="px-4 py-3 text-sm text-on-surface">{reg.horse.name}</td>
-                      <td className="px-4 py-3 text-sm text-on-surface">{reg.category?.name || '-'}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-on-surface">₹{reg.totalAmount}</td>
-                      <td className="px-4 py-3 text-sm">{statusBadge(reg.paymentStatus)}</td>
-                      <td className="px-4 py-3 text-sm">{statusBadge(reg.approvalStatus)}</td>
-                      <td className="px-4 py-3 text-sm">
-                        <div className="flex gap-2">
-                          {reg.approvalStatus === 'PENDING' && (
-                            <>
-                              <button onClick={() => handleApprove(reg.id)} className="p-1.5 bg-emerald-500/15 text-emerald-400 rounded-lg hover:bg-emerald-500/25 transition-colors" title="Approve">
-                                <Check size={16} />
+        {loading ? (
+          <TableSkeleton rows={8} cols={8} />
+        ) : (
+          <div className="bento-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-surface-container border-b">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Rider</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Event</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Horse</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Category</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Amount</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Payment</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Approval</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-on-surface">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {registrations.length === 0 ? (
+                    <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No registrations found</td></tr>
+                  ) : (
+                    registrations.slice((page - 1) * perPage, page * perPage).map(reg => (
+                      <tr key={reg.id} className="hover:bg-surface-lowest">
+                        <td className="px-4 py-3 text-sm">
+                          <p className="font-medium text-on-surface">{reg.rider.firstName} {reg.rider.lastName}</p>
+                          <p className="text-xs text-muted-foreground">{reg.rider.email}</p>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-on-surface">{reg.event.name}</td>
+                        <td className="px-4 py-3 text-sm text-on-surface">{reg.horse.name}</td>
+                        <td className="px-4 py-3 text-sm text-on-surface">{reg.category?.name || '-'}</td>
+                        <td className="px-4 py-3 text-sm font-semibold text-on-surface">₹{reg.totalAmount}</td>
+                        <td className="px-4 py-3 text-sm">{statusBadge(reg.paymentStatus)}</td>
+                        <td className="px-4 py-3 text-sm">{statusBadge(reg.approvalStatus)}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <div className="flex gap-2">
+                            {reg.approvalStatus === 'PENDING' && (
+                              <>
+                                <button onClick={() => handleApprove(reg.id)} className="p-1.5 bg-emerald-500/15 text-emerald-400 rounded-lg hover:bg-emerald-500/25 transition-colors" title="Approve">
+                                  <Check size={16} />
+                                </button>
+                                <button onClick={() => setRejectionModal({ isOpen: true, regId: reg.id })} className="p-1.5 bg-red-500/15 text-red-400 rounded-lg hover:bg-red-500/25 transition-colors" title="Reject">
+                                  <X size={16} />
+                                </button>
+                              </>
+                            )}
+                            {reg.approvalStatus === 'APPROVED' && reg.paymentStatus !== 'PAID' && (
+                              <button onClick={() => { setPaymentModal({ isOpen: true, reg }); setPaymentForm({ ...paymentForm, amount: String(reg.totalAmount) }); }} className="px-2 py-1 bg-blue-500/15 text-blue-400 rounded-lg text-xs hover:bg-blue-500/25 transition-colors">
+                                Record Payment
                               </button>
-                              <button onClick={() => setRejectionModal({ isOpen: true, regId: reg.id })} className="p-1.5 bg-red-500/15 text-red-400 rounded-lg hover:bg-red-500/25 transition-colors" title="Reject">
-                                <X size={16} />
-                              </button>
-                            </>
-                          )}
-                          {reg.approvalStatus === 'APPROVED' && reg.paymentStatus !== 'PAID' && (
-                            <button onClick={() => { setPaymentModal({ isOpen: true, reg }); setPaymentForm({ ...paymentForm, amount: String(reg.totalAmount) }); }} className="px-2 py-1 bg-blue-500/15 text-blue-400 rounded-lg text-xs hover:bg-blue-500/25 transition-colors">
-                              Record Payment
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          {registrations.length > 0 && (
-            <div className="flex justify-center items-center gap-2 py-3 border-t border-border/30">
-              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Previous</button>
-              <span className="px-4 py-2 text-muted-foreground text-sm">Page {page} of {Math.ceil(registrations.length / perPage) || 1} ({registrations.length} total)</span>
-              <button onClick={() => setPage(Math.min(Math.ceil(registrations.length / perPage), page + 1))} disabled={page >= Math.ceil(registrations.length / perPage)} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Next</button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
+            {registrations.length > 0 && (
+              <div className="flex justify-center items-center gap-2 py-3 border-t border-border/30">
+                <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Previous</button>
+                <span className="px-4 py-2 text-muted-foreground text-sm">Page {page} of {Math.ceil(registrations.length / perPage) || 1} ({registrations.length} total)</span>
+                <button onClick={() => setPage(Math.min(Math.ceil(registrations.length / perPage), page + 1))} disabled={page >= Math.ceil(registrations.length / perPage)} className="btn-secondary disabled:opacity-50 text-sm px-3 py-1.5">Next</button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Rejection Modal */}
         {rejectionModal.isOpen && (
