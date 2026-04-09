@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import VenueMapPicker from '@/components/VenueMapPicker';
-import { X, MapPin, Upload, Plus, Trash2, Calendar, Clock, FileText, Tag, Save } from 'lucide-react';
+import { X, MapPin, Upload, Plus, Trash2, Calendar, Clock, FileText, Tag, Save, Download } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -157,6 +157,174 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
     setSelectedCategories(prev => prev.map((c, i) => i === idx ? { ...c, [field]: value } : c));
   };
   const usedCategoryIds = selectedCategories.map(c => c.categoryId).filter(Boolean);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportManifest = async () => {
+    if (!eventId) return;
+    setExporting(true);
+    try {
+      // Fetch registrations for this event
+      const regRes = await api.get(`/api/registrations?eventId=${eventId}&limit=500`);
+      const registrations = regRes.data.data?.registrations || [];
+      if (registrations.length === 0) {
+        toast.error('No registrations found for this event');
+        return;
+      }
+
+      const ExcelJS = (await import('exceljs')).default;
+      const wb = new ExcelJS.Workbook();
+
+      const formatDateLabel = (rawDate: string) => {
+        if (!rawDate) return '';
+        const date = new Date(rawDate);
+        if (isNaN(date.getTime())) return '';
+        const day = date.getDate();
+        const suffix = day % 10 === 1 && day !== 11 ? 'st'
+          : day % 10 === 2 && day !== 12 ? 'nd'
+          : day % 10 === 3 && day !== 13 ? 'rd' : 'th';
+        const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase();
+        const month = date.toLocaleDateString('en-GB', { month: 'long' }).toUpperCase();
+        return `${weekday},${day}${suffix} ${month}-${date.getFullYear()}`;
+      };
+
+      const startDateLabel = formatDateLabel(formData.startDate);
+      const eventName = (formData.name || 'START LIST').toUpperCase();
+
+      // Group registrations by category
+      const grouped: Record<string, { categoryName: string; entries: typeof registrations }> = {};
+      for (const reg of registrations) {
+        const catName = reg.category?.name || 'Uncategorized';
+        const catId = reg.category?.id || 'uncategorized';
+        if (!grouped[catId]) grouped[catId] = { categoryName: catName, entries: [] };
+        grouped[catId].entries.push(reg);
+      }
+
+      const categoryKeys = Object.keys(grouped);
+
+      for (const catKey of categoryKeys) {
+        const { categoryName, entries } = grouped[catKey];
+        const sheetName = categoryName.substring(0, 31); // Excel sheet name max 31 chars
+        const ws = wb.addWorksheet(sheetName);
+
+        // Column widths (B through H)
+        ws.getColumn(1).width = 3;  // A - spacer
+        ws.getColumn(2).width = 12; // B - Time
+        ws.getColumn(3).width = 8;  // C - Sr.No
+        ws.getColumn(4).width = 28; // D - Rider Name
+        ws.getColumn(5).width = 24; // E - Horse
+        ws.getColumn(6).width = 28; // F - Rider Category
+        ws.getColumn(7).width = 22; // G - Club
+        ws.getColumn(8).width = 8;  // H - HC
+
+        // Row 1: Event title (merged B1:H1)
+        ws.mergeCells('B1:H1');
+        const titleCell = ws.getCell('B1');
+        titleCell.value = eventName;
+        titleCell.font = { name: 'Arial', size: 18, bold: true };
+        titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        ws.getRow(1).height = 35;
+
+        // Row 2: Date + Category info (merged B2:H2)
+        ws.mergeCells('B2:H2');
+        const subtitleCell = ws.getCell('B2');
+        const eventTypeLabel = (formData.eventType || 'SHOW').toUpperCase();
+        subtitleCell.value = `${startDateLabel}  -    ${categoryName.toUpperCase()}                                              CLASS : ${categoryName.toUpperCase()},OPEN`;
+        subtitleCell.font = { name: 'Arial', size: 14, bold: true };
+        subtitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        ws.getRow(2).height = 28;
+
+        // Row 3: Course walk info (merged B3:H3)
+        ws.mergeCells('B3:H3');
+        const infoCell = ws.getCell('B3');
+        infoCell.value = 'Course Walk - 13:30Hrs   First Rider - 1400 HRS';
+        infoCell.font = { name: 'Arial', size: 14, bold: true };
+        infoCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        ws.getRow(3).height = 28;
+
+        // Row 4: Headers
+        const headers = ['Time', 'Sr.No', 'Rider Name', 'Horse ', 'Rider Category', 'Club ', 'HC'];
+        headers.forEach((h, i) => {
+          const cell = ws.getCell(4, i + 2); // B4 through H4
+          cell.value = h;
+          cell.font = { name: 'Arial', size: 14, bold: true };
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        });
+        ws.getRow(4).height = 24;
+
+        // Data rows starting at row 5
+        const startHour = 14;
+        const startMinute = 0;
+        const intervalMinutes = 3;
+
+        entries.forEach((reg: any, index: number) => {
+          const rowNum = 5 + index;
+          const totalMinutes = startHour * 60 + startMinute + index * intervalMinutes;
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = totalMinutes % 60;
+
+          // B: Time
+          const timeCell = ws.getCell(rowNum, 2);
+          timeCell.value = new Date(1899, 11, 30, hours, minutes);
+          timeCell.numFmt = 'HH:MM';
+          timeCell.font = { name: 'Arial', size: 14 };
+          timeCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+          // C: Sr.No
+          const srCell = ws.getCell(rowNum, 3);
+          srCell.value = index + 1;
+          srCell.font = { name: 'Arial', size: 11 };
+          srCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+          // D: Rider Name
+          const riderCell = ws.getCell(rowNum, 4);
+          riderCell.value = `${reg.rider?.firstName || ''} ${reg.rider?.lastName || ''}`.trim();
+          riderCell.font = { name: 'Arial', size: 11 };
+          riderCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+          // E: Horse
+          const horseCell = ws.getCell(rowNum, 5);
+          horseCell.value = reg.horse?.name || '';
+          horseCell.font = { name: 'Arial', size: 11 };
+          horseCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+          // F: Rider Category
+          const catCell = ws.getCell(rowNum, 6);
+          catCell.value = reg.category?.name || '-';
+          catCell.font = { name: 'Arial', size: 11 };
+
+          // G: Club
+          const clubCell = ws.getCell(rowNum, 7);
+          clubCell.value = reg.club?.name || '-';
+          clubCell.font = { name: 'Arial', size: 11 };
+
+          // H: HC
+          const hcCell = ws.getCell(rowNum, 8);
+          hcCell.value = 'No';
+          hcCell.font = { name: 'Arial', size: 11 };
+          hcCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        });
+      }
+
+      // Generate and download
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      a.download = `Start List ${formData.name || 'Event'}-${stamp}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Manifest exported successfully!');
+    } catch (err: any) {
+      console.error('Export failed:', err);
+      toast.error(err.response?.data?.message || 'Failed to export manifest');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -462,8 +630,17 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
           </button>
           <button
             type="button"
+            onClick={handleExportManifest}
+            disabled={exporting || loading}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Download className="w-4 h-4" />
+            {exporting ? 'Exporting...' : 'Export Manifest'}
+          </button>
+          <button
+            type="button"
             onClick={onClose}
-            className="flex-1 px-5 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30"
+            className="px-5 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30"
           >
             Cancel
           </button>
