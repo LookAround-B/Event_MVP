@@ -36,15 +36,26 @@ async function handler(
         const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
         const skip = (pageNum - 1) * limitNum;
 
-        const where = search
-          ? {
+        const where: any = {
+          AND: [
+            {
               OR: [
-                { name: { contains: search as string, mode: 'insensitive' as const } },
-                { email: { contains: search as string, mode: 'insensitive' as const } },
-                { shortCode: { contains: search as string, mode: 'insensitive' as const } },
+                { primaryContact: { isApproved: true } },
+                { primaryContact: { roles: { none: { name: 'club' } } } },
               ],
-            }
-          : {};
+            },
+          ],
+        };
+
+        if (search) {
+          where.AND.push({
+            OR: [
+              { name: { contains: search as string, mode: 'insensitive' as const } },
+              { email: { contains: search as string, mode: 'insensitive' as const } },
+              { shortCode: { contains: search as string, mode: 'insensitive' as const } },
+            ],
+          });
+        }
 
         if (format === 'csv') {
           const allClubs = await prisma.club.findMany({

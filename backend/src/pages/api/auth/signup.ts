@@ -10,12 +10,12 @@ import bcrypt from 'bcryptjs';
 const signupSchema = {
   email: commonSchemas.email,
   firstName: {
-    required: true,
+    required: false,
     type: 'string',
     message: 'First name is required',
   },
   lastName: {
-    required: true,
+    required: false,
     type: 'string',
     message: 'Last name is required',
   },
@@ -31,7 +31,7 @@ const signupSchema = {
   role: {
     required: false,
     type: 'string',
-    message: 'Role must be admin, club, or rider',
+    message: 'Role must be club or rider',
   },
 };
 
@@ -50,9 +50,19 @@ async function handleSignup(
     signupSchema
   );
 
-  // Validate role
-  if (!['admin', 'club', 'rider'].includes(role)) {
-    validationErrors.role = ['Role must be admin, club, or rider'];
+  // Public signup is only for rider and club accounts.
+  if (!['club', 'rider'].includes(role)) {
+    validationErrors.role = ['Role must be club or rider'];
+  }
+
+  if (role === 'rider') {
+    if (!firstName || typeof firstName !== 'string' || !firstName.trim()) {
+      validationErrors.firstName = ['First name is required'];
+    }
+
+    if (!lastName || typeof lastName !== 'string' || !lastName.trim()) {
+      validationErrors.lastName = ['Last name is required'];
+    }
   }
   
   if (password !== confirmPassword) {
@@ -98,12 +108,17 @@ async function handleSignup(
     const nextNum = lastUser?.eId ? parseInt(lastUser.eId.replace('EIRSD', ''), 10) + 1 : 1;
     const eId = `EIRSD${String(nextNum).padStart(5, '0')}`;
 
+    const derivedClubName =
+      role === 'club'
+        ? (typeof email === 'string' && email.includes('@') ? email.split('@')[0] : 'Club')
+        : '';
+
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-        firstName,
-        lastName,
+        firstName: role === 'club' ? derivedClubName : firstName,
+        lastName: role === 'club' ? '' : lastName,
         eId,
         isActive: true,
         isApproved: false,

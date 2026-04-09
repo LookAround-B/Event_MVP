@@ -17,7 +17,15 @@ async function handler(
       const skip = (pageNum - 1) * limitNum;
 
       const where: any = {};
-      const conditions: any[] = [];
+      const conditions: any[] = [
+        {
+          OR: [
+            { userId: null },
+            { user: { isApproved: true } },
+            { user: { roles: { none: { name: 'rider' } } } },
+          ],
+        },
+      ];
 
       if (search) {
         conditions.push({

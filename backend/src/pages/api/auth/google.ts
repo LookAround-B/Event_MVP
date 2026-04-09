@@ -36,10 +36,14 @@ async function handleGoogleAuth(
   }
 
   try {
-    const { token } = req.body;
+    const { token, role = 'rider' } = req.body;
 
     if (!token) {
       return sendErrorResponse(res, 400, 'Google token is required', ErrorCode.VALIDATION_ERROR);
+    }
+
+    if (!['club', 'rider'].includes(role)) {
+      return sendErrorResponse(res, 400, 'Role must be club or rider', ErrorCode.VALIDATION_ERROR);
     }
 
     // Verify the token
@@ -83,16 +87,15 @@ async function handleGoogleAuth(
       // Generate a random password for OAuth users
       const randomPassword = await bcrypt.hash(Math.random().toString(36), 10);
 
-      // Get or create the 'rider' role
-      let riderRole = await prisma.role.findUnique({
-        where: { name: 'rider' },
+      let userRole = await prisma.role.findUnique({
+        where: { name: role },
       });
 
-      if (!riderRole) {
-        riderRole = await prisma.role.create({
+      if (!userRole) {
+        userRole = await prisma.role.create({
           data: {
-            name: 'rider',
-            description: 'Rider role',
+            name: role,
+            description: `${role.charAt(0).toUpperCase() + role.slice(1)} role`,
             isActive: true,
           },
         });
@@ -109,7 +112,7 @@ async function handleGoogleAuth(
           profileComplete: false,
           isGoogleAuth: true,
           roles: {
-            connect: [{ id: riderRole.id }],
+            connect: [{ id: userRole.id }],
           },
         },
         select: {

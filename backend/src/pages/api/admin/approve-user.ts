@@ -12,6 +12,7 @@ async function handler(
       const pendingUsers = await prisma.user.findMany({
         where: {
           isApproved: false,
+          profileComplete: true,
         },
         select: {
           id: true,
@@ -20,7 +21,27 @@ async function handler(
           lastName: true,
           gender: true,
           phone: true,
+          profileComplete: true,
           createdAt: true,
+          roles: {
+            select: {
+              name: true,
+            },
+            take: 1,
+          },
+          clubs: {
+            select: {
+              name: true,
+              shortCode: true,
+            },
+            take: 1,
+          },
+          riders: {
+            select: {
+              efiRiderId: true,
+            },
+            take: 1,
+          },
         },
         orderBy: { createdAt: 'asc' },
       });
@@ -29,7 +50,20 @@ async function handler(
         success: true,
         statusCode: 200,
         message: 'Pending users retrieved successfully',
-        data: pendingUsers,
+        data: pendingUsers.map((user) => ({
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          gender: user.gender,
+          phone: user.phone,
+          profileComplete: user.profileComplete,
+          createdAt: user.createdAt,
+          role: user.roles?.[0]?.name || 'rider',
+          clubName: user.clubs?.[0]?.name || null,
+          clubShortCode: user.clubs?.[0]?.shortCode || null,
+          efiRiderId: user.riders?.[0]?.efiRiderId || null,
+        })),
       });
     } catch (error) {
       console.error('GET pending users error:', error);
@@ -55,6 +89,11 @@ async function handler(
 
       const user = await prisma.user.findUnique({
         where: { id: userId },
+        select: {
+          id: true,
+          isApproved: true,
+          profileComplete: true,
+        },
       });
 
       if (!user) {
@@ -70,6 +109,14 @@ async function handler(
           success: false,
           statusCode: 400,
           message: 'User is already approved',
+        });
+      }
+
+      if (!user.profileComplete) {
+        return res.status(400).json({
+          success: false,
+          statusCode: 400,
+          message: 'User must complete their rider or club profile before approval',
         });
       }
 

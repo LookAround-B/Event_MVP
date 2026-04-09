@@ -142,7 +142,12 @@ export default function Users() {
       );
     } catch (err: any) {
       console.error('Failed to approve user:', err);
-      alert(err.response?.data?.message || 'Failed to approve user');
+      if (err.response?.data?.message === 'User is already approved') {
+        fetchUsers();
+        alert('This user was already approved. The list has been refreshed.');
+      } else {
+        alert(err.response?.data?.message || 'Failed to approve user');
+      }
     } finally {
       setApproving(null);
       setApproveTarget(null);
@@ -474,7 +479,7 @@ export default function Users() {
                         <td className="hidden lg:table-cell">{new Date(user.createdAt).toLocaleDateString()}</td>
                         <td>
                           <div className="flex gap-2">
-                            {isAdmin && !user.isApproved && (
+                            {isAdmin && !user.isApproved && user.profileComplete && (
                               <button 
                                 onClick={() => setApproveTarget(user)}
                                 disabled={approving === user.id}
@@ -488,6 +493,11 @@ export default function Users() {
                                   </>
                                 )}
                               </button>
+                            )}
+                            {isAdmin && !user.isApproved && !user.profileComplete && (
+                              <span className="inline-flex items-center rounded-full border border-yellow-500/20 bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-400">
+                                Profile Incomplete
+                              </span>
                             )}
                             {isAdmin && (
                               <Link

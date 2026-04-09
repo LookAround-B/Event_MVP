@@ -16,8 +16,13 @@ interface PendingUser {
   email: string;
   firstName: string;
   lastName: string;
+  role: 'rider' | 'club' | 'admin';
   gender?: string;
   phone?: string;
+  profileComplete: boolean;
+  clubName?: string | null;
+  clubShortCode?: string | null;
+  efiRiderId?: string | null;
   createdAt: string;
 }
 
@@ -98,7 +103,14 @@ export default function AdminApprovals() {
       await apiClient.post('/api/admin/approve-user', { userId });
       toast.success(`${userName} approved`);
       fetchPendingUsers();
-    } catch { toast.error('Failed to approve user'); }
+    } catch (err: any) {
+      if (err.response?.data?.message === 'User is already approved') {
+        toast('User was already approved. Refreshing queue.');
+        fetchPendingUsers();
+      } else {
+        toast.error('Failed to approve user');
+      }
+    }
     finally { setApproving(null); }
   };
 
@@ -185,7 +197,27 @@ export default function AdminApprovals() {
                     {pendingUsers.slice((userPage - 1) * perPage, userPage * perPage).map(user => (
                       <tr key={user.id} className="group hover:bg-surface-container/20 transition-all duration-300">
                         <td className="p-3 sm:p-4">
-                          <span className="text-on-surface font-bold tracking-tight">{user.firstName} {user.lastName}</span>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-on-surface font-bold tracking-tight">
+                              {user.firstName} {user.lastName}
+                            </span>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                                {user.role}
+                              </span>
+                              {user.role === 'club' && user.clubName && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  {user.clubName}
+                                  {user.clubShortCode ? ` (${user.clubShortCode})` : ''}
+                                </span>
+                              )}
+                              {user.role === 'rider' && user.efiRiderId && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  EFI: {user.efiRiderId}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </td>
                         <td className="p-3 sm:p-4">
                           <span className="text-on-surface-variant font-medium text-xs">{user.email}</span>

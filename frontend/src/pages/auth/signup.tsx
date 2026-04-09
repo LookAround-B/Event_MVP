@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 export default function Signup() {
   const router = useRouter();
+  const [signupRole, setSignupRole] = useState<'rider' | 'club'>('rider');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -25,6 +26,8 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const isClubSignup = signupRole === 'club';
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -35,9 +38,20 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const response = await apiClient.post('/api/auth/signup', formData);
+      const response = await apiClient.post('/api/auth/signup', {
+        ...formData,
+        role: signupRole,
+      });
       Cookies.set('authToken', response.data.data.token, { expires: 7 });
-      router.push('/dashboard');
+      const user = response.data.data.user;
+
+      if (!user?.profileComplete && user?.isApproved === false) {
+        router.push('/complete-profile');
+      } else if (user?.isApproved === false) {
+        router.push('/pending-approval');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed. Please try again.');
     } finally {
@@ -79,39 +93,70 @@ export default function Signup() {
         >
           <CardContent className="p-6 sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Name fields */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="label-tech">First Name</Label>
-                  <Input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
-                    style={{ background: 'rgba(255,255,255,0.07)' }}
-                    placeholder="First name"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="label-tech">Last Name</Label>
-                  <Input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
-                    style={{ background: 'rgba(255,255,255,0.07)' }}
-                    placeholder="Last name"
-                    required
-                  />
+              <div className="space-y-2">
+                <Label className="label-tech">Account Type</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setSignupRole('rider')}
+                    className={`rounded-xl py-3 text-xs font-bold uppercase tracking-widest transition-all ${
+                      signupRole === 'rider'
+                        ? 'bg-white/10 text-primary border-primary/30 hover:bg-white/15'
+                        : 'text-white/40 hover:text-white/70 border-white/10 hover:bg-white/5'
+                    }`}
+                  >
+                    Rider
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setSignupRole('club')}
+                    className={`rounded-xl py-3 text-xs font-bold uppercase tracking-widest transition-all ${
+                      signupRole === 'club'
+                        ? 'bg-white/10 text-primary border-primary/30 hover:bg-white/15'
+                        : 'text-white/40 hover:text-white/70 border-white/10 hover:bg-white/5'
+                    }`}
+                  >
+                    Club
+                  </Button>
                 </div>
               </div>
 
-              {/* Email */}
+              {!isClubSignup && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="label-tech">First Name</Label>
+                    <Input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
+                      style={{ background: 'rgba(255,255,255,0.07)' }}
+                      placeholder="First name"
+                      required={!isClubSignup}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="label-tech">Last Name</Label>
+                    <Input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
+                      style={{ background: 'rgba(255,255,255,0.07)' }}
+                      placeholder="Last name"
+                      required={!isClubSignup}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Account Identifier */}
               <div className="space-y-2">
-                <Label className="label-tech">Email</Label>
+                <Label className="label-tech">{isClubSignup ? 'Username' : 'Email'}</Label>
                 <Input
                   type="email"
                   name="email"
@@ -119,7 +164,7 @@ export default function Signup() {
                   onChange={handleChange}
                   className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
                   style={{ background: 'rgba(255,255,255,0.07)' }}
-                  placeholder="your@email.com"
+                  placeholder={isClubSignup ? 'club@email.com' : 'your@email.com'}
                   required
                 />
               </div>
@@ -217,9 +262,13 @@ export default function Signup() {
                   try {
                     const response = await apiClient.post('/api/auth/google', {
                       token: credentialResponse.credential,
+                      role: signupRole,
                     });
                     Cookies.set('authToken', response.data.data.token, { expires: 7 });
-                    if (response.data.data.user?.isApproved === false) {
+                    const user = response.data.data.user;
+                    if (!user?.profileComplete && user?.isApproved === false) {
+                      router.push('/complete-profile');
+                    } else if (user?.isApproved === false) {
                       router.push('/pending-approval');
                     } else {
                       router.push('/dashboard');

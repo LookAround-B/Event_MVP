@@ -42,7 +42,11 @@ export default function Login() {
       const response = await apiClient.post('/api/auth/login', formData);
       Cookies.set('authToken', response.data.data.token, { expires: 7 });
 
-      if (response.data.data.user?.isApproved === false) {
+      const user = response.data.data.user;
+
+      if (!user?.profileComplete && user?.isApproved === false) {
+        router.push('/complete-profile');
+      } else if (user?.isApproved === false) {
         router.push('/pending-approval');
       } else {
         router.push('/dashboard');
@@ -234,46 +238,52 @@ export default function Login() {
                 </Button>
               </form>
 
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="px-3 text-xs font-medium text-muted-foreground" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                    Or continue with
-                  </span>
-                </div>
-              </div>
+              {activeTab === 'rider-club' && (
+                <>
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-white/10" />
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="px-3 text-xs font-medium text-muted-foreground" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                        Or continue with
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Google Login */}
-              <div className="flex justify-center">
-                <GoogleLogin
-                  onSuccess={async (credentialResponse) => {
-                    setError('');
-                    setLoading(true);
-                    try {
-                      const response = await apiClient.post('/api/auth/google', {
-                        token: credentialResponse.credential,
-                      });
-                      Cookies.set('authToken', response.data.data.token, { expires: 7 });
+                  <div className="flex justify-center">
+                    <GoogleLogin
+                      onSuccess={async (credentialResponse) => {
+                        setError('');
+                        setLoading(true);
+                        try {
+                          const response = await apiClient.post('/api/auth/google', {
+                            token: credentialResponse.credential,
+                            role: loginType,
+                          });
+                          Cookies.set('authToken', response.data.data.token, { expires: 7 });
 
-                      if (response.data.data.user?.isApproved === false) {
-                        router.push('/pending-approval');
-                      } else {
-                        router.push('/dashboard');
-                      }
-                    } catch (err: any) {
-                      setError(err.response?.data?.message || 'Google login failed. Please try again.');
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  onError={() => {
-                    setError('Google login failed. Please try again.');
-                  }}
-                />
-              </div>
+                          const user = response.data.data.user;
+                          if (!user?.profileComplete && user?.isApproved === false) {
+                            router.push('/complete-profile');
+                          } else if (user?.isApproved === false) {
+                            router.push('/pending-approval');
+                          } else {
+                            router.push('/dashboard');
+                          }
+                        } catch (err: any) {
+                          setError(err.response?.data?.message || 'Google login failed. Please try again.');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      onError={() => {
+                        setError('Google login failed. Please try again.');
+                      }}
+                    />
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </Tabs>
