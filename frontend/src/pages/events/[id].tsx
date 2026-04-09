@@ -55,6 +55,13 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+function buildTimestampedFileName(prefix: string, extension: string) {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  return `${prefix}-${stamp}.${extension}`;
+}
+
 export default function EventDetail() {
   const router = useRouter();
   const { id } = router.query;
@@ -156,41 +163,90 @@ export default function EventDetail() {
 
   // Export CSV
   const exportToCSV = () => {
-    const headers = ['Rider Name', 'Email', 'Club Name', 'Horse Name', 'Category', 'Event Amount (₹)', 'Stable Amount (₹)', 'GST Amount (₹)', 'Total Amount (₹)', 'Payment Method', 'Payment Status', 'Registration Date'];
-    const rows = registrations.map(r => [
-      `${r.rider.firstName} ${r.rider.lastName}`, r.rider.email, r.club?.name || '-',
-      r.horse.name, r.category?.name || '-', r.eventAmount, r.stableAmount,
-      r.gstAmount, r.totalAmount, r.paymentMethod || '-', r.paymentStatus,
-      r.registeredAt ? new Date(r.registeredAt).toLocaleDateString() : '-',
+    const headers = ['Time', 'Sr.No', 'Rider Name', 'Horse', 'Rider Category', 'Club', 'HC'];
+    const rows = registrations.map((r, index) => [
+      '',
+      index + 1,
+      `${r.rider.firstName} ${r.rider.lastName}`,
+      r.horse.name,
+      r.category?.name || '-',
+      r.club?.name || '-',
+      'No',
     ]);
     const csv = [headers.map(escapeCSVField).join(','), ...rows.map(r => r.map(escapeCSVField).join(','))].join('\n');
-    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `${event?.name || 'event'}-registrations.csv`);
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), buildTimestampedFileName(`${event?.name || 'event'}-start-list`, 'csv'));
   };
 
   // Export Excel
   const exportToExcel = () => {
     const esc = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const headers = ['Rider Name', 'Email', 'Club Name', 'Horse Name', 'Category', 'Event Amount (₹)', 'Stable Amount (₹)', 'GST Amount (₹)', 'Total Amount (₹)', 'Payment Method', 'Payment Status', 'Registration Date'];
-    const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('');
-    const dataRows = registrations.map(r => {
+    const headers = ['Time', 'Sr.No', 'Rider Name', 'Horse', 'Rider Category', 'Club', 'HC'];
+    const colWidths = [80, 55, 200, 180, 190, 150, 60];
+
+    const formatTemplateDate = (rawDate?: string) => {
+      if (!rawDate) return '';
+      const date = new Date(rawDate);
+      if (Number.isNaN(date.getTime())) return '';
+      const day = date.getDate();
+      const suffix = day % 10 === 1 && day !== 11 ? 'st'
+        : day % 10 === 2 && day !== 12 ? 'nd'
+        : day % 10 === 3 && day !== 13 ? 'rd'
+        : 'th';
+      const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase();
+      const month = date.toLocaleDateString('en-GB', { month: 'long' }).toUpperCase();
+      return `${weekday},${day}${suffix} ${month}-${date.getFullYear()}`;
+    };
+
+    const startDateLabel = formatTemplateDate(event?.startDate);
+    const endDateLabel = formatTemplateDate(event?.endDate);
+    const classLabel = (event?.categories || []).map(c => c.name.toUpperCase()).join(',') || 'OPEN';
+    const eventTypeLabel = event?.eventType?.toUpperCase() || 'SHOW JUMPING';
+    const dateLine = endDateLabel
+      ? `${startDateLabel} - ${endDateLabel}  -  ${eventTypeLabel}    CLASS : ${classLabel}`
+      : `${startDateLabel}  -  ${eventTypeLabel}    CLASS : ${classLabel}`;
+
+    const darkBg = '#1B1A0E';
+    const cellStyle = (bg: string, color: string, size: number, bold: boolean, border = true) =>
+      `background-color:${bg};color:${color};font-size:${size}pt;font-weight:${bold ? 'bold' : 'normal'};font-family:Arial,sans-serif;text-align:center;vertical-align:middle;padding:6px 8px;${border ? 'border:1px solid #ccc;' : ''}`;
+
+    const titleStyle = cellStyle(darkBg, '#FFFFFF', 16, true);
+    const subtitleStyle = cellStyle(darkBg, '#FFFFFF', 12, true);
+    const headerStyle = cellStyle('#000000', '#FFFFFF', 11, true);
+    const dataStyle = cellStyle('#FFFFFF', '#000000', 10, false);
+    const dataAltStyle = cellStyle('#F5F5F5', '#000000', 10, false);
+
+    const colGroup = colWidths.map(w => `<col width="${w}"/>`).join('');
+
+    const titleRow = `<tr><td colspan="7" style="${titleStyle};height:40px;">${esc((event?.name || 'START LIST').toUpperCase())}</td></tr>`;
+    const subtitleRow = `<tr><td colspan="7" style="${subtitleStyle};height:30px;">${esc(dateLine)}</td></tr>`;
+    const noteRow = `<tr><td colspan="7" style="${subtitleStyle};height:28px;">${esc('Course Walk - 13:30Hrs   First Rider - 1400 HRS')}</td></tr>`;
+    const headerRow = `<tr>${headers.map(h => `<td style="${headerStyle};height:28px;">${esc(h)}</td>`).join('')}</tr>`;
+    const dataRows = registrations.map((r, index) => {
+      const style = index % 2 === 0 ? dataStyle : dataAltStyle;
       const cells = [
-        { v: `${r.rider.firstName} ${r.rider.lastName}`, t: 'String' },
-        { v: r.rider.email, t: 'String' },
-        { v: r.club?.name || '-', t: 'String' },
-        { v: r.horse.name, t: 'String' },
-        { v: r.category?.name || '-', t: 'String' },
-        { v: r.eventAmount, t: 'Number' },
-        { v: r.stableAmount, t: 'Number' },
-        { v: r.gstAmount, t: 'Number' },
-        { v: r.totalAmount, t: 'Number' },
-        { v: r.paymentMethod || '-', t: 'String' },
-        { v: r.paymentStatus, t: 'String' },
-        { v: r.registeredAt ? new Date(r.registeredAt).toLocaleDateString() : '-', t: 'String' },
+        '',
+        index + 1,
+        `${r.rider.firstName} ${r.rider.lastName}`,
+        r.horse.name,
+        r.category?.name || '-',
+        r.club?.name || '-',
+        'No',
       ];
-      return `<Row>${cells.map(c => `<Cell><Data ss:Type="${c.t}">${esc(c.v)}</Data></Cell>`).join('')}</Row>`;
+      return `<tr>${cells.map(c => `<td style="${style};height:22px;">${esc(c)}</td>`).join('')}</tr>`;
     });
-    const xml = `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Registrations"><Table><Row>${headerRow}</Row>${dataRows.join('')}</Table></Worksheet></Workbook>`;
-    downloadBlob(new Blob([xml], { type: 'application/vnd.ms-excel' }), `${event?.name || 'event'}-registrations.xls`);
+
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Start List</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">
+<colgroup>${colGroup}</colgroup>
+${titleRow}${subtitleRow}${noteRow}${headerRow}${dataRows.join('')}
+</table>
+</body></html>`;
+
+    downloadBlob(new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' }), buildTimestampedFileName(`${event?.name || 'event'}-start-list`, 'xls'));
   };
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });

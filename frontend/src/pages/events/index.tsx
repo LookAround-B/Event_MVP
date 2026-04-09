@@ -42,6 +42,13 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+function buildTimestampedFileName(prefix: string, extension: string) {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  return `${prefix}-${stamp}.${extension}`;
+}
+
 function exportToExcel(headers: string[], rows: (string | number)[][], filename: string) {
   const esc = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('');
@@ -156,13 +163,13 @@ export default function Events() {
       headers.map(escapeCSVField).join(','),
       ...rows.map(r => r.map(escapeCSVField).join(',')),
     ].join('\n');
-    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'events.csv');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), buildTimestampedFileName('events', 'csv'));
     toast.success('Events exported as CSV');
   };
 
   const handleExportExcel = () => {
     const { headers, rows } = getExportData();
-    exportToExcel(headers, rows, 'events.xls');
+    exportToExcel(headers, rows, buildTimestampedFileName('events-manifest', 'xls'));
     toast.success('Events exported as Excel');
   };
 
@@ -252,7 +259,7 @@ export default function Events() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+              <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
                 <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export Manifest</span>
               </button>
               <button onClick={() => setCreateOpen(true)} className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center transition-all active:scale-95">
