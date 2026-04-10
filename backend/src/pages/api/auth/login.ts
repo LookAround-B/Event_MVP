@@ -24,7 +24,7 @@ async function handleLogin(
     return sendErrorResponse(res, 405, 'Method not allowed', ErrorCode.INTERNAL_SERVER_ERROR);
   }
 
-  const { email, password } = req.body || {};
+  const { email, password, role: requestedRole } = req.body || {};
 
   const validationErrors = validateInput({ email, password }, loginSchema);
   if (Object.keys(validationErrors).length > 0) {
@@ -65,6 +65,22 @@ async function handleLogin(
 
     // Get user role - use first role or default to 'rider'
     const userRole = user.roles?.[0]?.name || 'rider';
+
+    // Validate role matches the login portal
+    if (requestedRole) {
+      if (requestedRole === 'admin' && userRole !== 'admin') {
+        return sendErrorResponse(res, 403, 'This account is not an admin. Please use the Rider/Club login.', ErrorCode.INVALID_CREDENTIALS);
+      }
+      if (['rider', 'club'].includes(requestedRole) && userRole === 'admin') {
+        return sendErrorResponse(res, 403, 'Admin accounts cannot login from the Rider/Club portal. Please use the Admin login.', ErrorCode.INVALID_CREDENTIALS);
+      }
+      if (requestedRole === 'rider' && userRole === 'club') {
+        return sendErrorResponse(res, 403, 'This is a Club account. Please select the Club login option.', ErrorCode.INVALID_CREDENTIALS);
+      }
+      if (requestedRole === 'club' && userRole === 'rider') {
+        return sendErrorResponse(res, 403, 'This is a Rider account. Please select the Rider login option.', ErrorCode.INVALID_CREDENTIALS);
+      }
+    }
 
     const token = generateToken({
       id: user.id,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ExcelJS from 'exceljs';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
@@ -178,11 +179,7 @@ export default function EventDetail() {
   };
 
   // Export Excel
-  const exportToExcel = () => {
-    const esc = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const headers = ['Time', 'Sr.No', 'Rider Name', 'Horse', 'Rider Category', 'Club', 'HC'];
-    const colWidths = [80, 55, 200, 180, 190, 150, 60];
-
+  const exportToExcel = async () => {
     const formatTemplateDate = (rawDate?: string) => {
       if (!rawDate) return '';
       const date = new Date(rawDate);
@@ -198,55 +195,116 @@ export default function EventDetail() {
     };
 
     const startDateLabel = formatTemplateDate(event?.startDate);
-    const endDateLabel = formatTemplateDate(event?.endDate);
     const classLabel = (event?.categories || []).map(c => c.name.toUpperCase()).join(',') || 'OPEN';
     const eventTypeLabel = event?.eventType?.toUpperCase() || 'SHOW JUMPING';
-    const dateLine = endDateLabel
-      ? `${startDateLabel} - ${endDateLabel}  -  ${eventTypeLabel}    CLASS : ${classLabel}`
-      : `${startDateLabel}  -  ${eventTypeLabel}    CLASS : ${classLabel}`;
+    const dateText = startDateLabel ? `${startDateLabel}  -  ${eventTypeLabel}` : eventTypeLabel;
+    const classText = `CLASS : ${classLabel}`;
 
-    const darkBg = '#1B1A0E';
-    const cellStyle = (bg: string, color: string, size: number, bold: boolean, border = true) =>
-      `background-color:${bg};color:${color};font-size:${size}pt;font-weight:${bold ? 'bold' : 'normal'};font-family:Arial,sans-serif;text-align:center;vertical-align:middle;padding:6px 8px;${border ? 'border:1px solid #ccc;' : ''}`;
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Event MVP';
+    const sheet = workbook.addWorksheet('Start List');
 
-    const titleStyle = cellStyle(darkBg, '#FFFFFF', 16, true);
-    const subtitleStyle = cellStyle(darkBg, '#FFFFFF', 12, true);
-    const headerStyle = cellStyle('#000000', '#FFFFFF', 11, true);
-    const dataStyle = cellStyle('#FFFFFF', '#000000', 10, false);
-    const dataAltStyle = cellStyle('#F5F5F5', '#000000', 10, false);
+    // Column widths (A–G)
+    sheet.columns = [
+      { key: 'time',     width: 10 },
+      { key: 'srno',     width: 7  },
+      { key: 'rider',    width: 28 },
+      { key: 'horse',    width: 22 },
+      { key: 'category', width: 26 },
+      { key: 'club',     width: 22 },
+      { key: 'hc',       width: 7  },
+    ];
 
-    const colGroup = colWidths.map(w => `<col width="${w}"/>`).join('');
+    const orangeFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF08C00' } };
+    const whiteFill:  ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    const headerFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F1F1F' } };
+    const altFill:    ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
 
-    const titleRow = `<tr><td colspan="7" style="${titleStyle};height:40px;">${esc((event?.name || 'START LIST').toUpperCase())}</td></tr>`;
-    const subtitleRow = `<tr><td colspan="7" style="${subtitleStyle};height:30px;">${esc(dateLine)}</td></tr>`;
-    const noteRow = `<tr><td colspan="7" style="${subtitleStyle};height:28px;">${esc('Course Walk - 13:30Hrs   First Rider - 1400 HRS')}</td></tr>`;
-    const headerRow = `<tr>${headers.map(h => `<td style="${headerStyle};height:28px;">${esc(h)}</td>`).join('')}</tr>`;
-    const dataRows = registrations.map((r, index) => {
-      const style = index % 2 === 0 ? dataStyle : dataAltStyle;
-      const cells = [
+    const thinBorder: ExcelJS.Borders = {
+      top:    { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      left:   { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      right:  { style: 'thin', color: { argb: 'FFCCCCCC' } },
+    };
+
+    const applyToRow = (row: ExcelJS.Row, fill: ExcelJS.Fill, fontColor: string, fontSize: number, bold: boolean, align: ExcelJS.Alignment['horizontal'] = 'center') => {
+      row.eachCell({ includeEmpty: true }, cell => {
+        cell.fill = fill;
+        cell.font = { name: 'Arial', size: fontSize, bold, color: { argb: fontColor } };
+        cell.alignment = { horizontal: align, vertical: 'middle', wrapText: false };
+        cell.border = thinBorder;
+      });
+    };
+
+    // Row 1 — Orange title (merged A1:G1)
+    sheet.addRow(['', '', '', '', '', '', '']);
+    sheet.mergeCells('A1:G1');
+    const titleCell = sheet.getCell('A1');
+    titleCell.value = (event?.name || 'START LIST').toUpperCase();
+    titleCell.fill = orangeFill;
+    titleCell.font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    titleCell.border = thinBorder;
+    sheet.getRow(1).height = 45;
+
+    // Row 2 — Date left (A2:D2) + Class right (E2:G2)
+    sheet.addRow(['', '', '', '', '', '', '']);
+    sheet.mergeCells('A2:D2');
+    sheet.mergeCells('E2:G2');
+    const dateCell  = sheet.getCell('A2');
+    const classCell = sheet.getCell('E2');
+    dateCell.value  = dateText;
+    classCell.value = classText;
+    [dateCell, classCell].forEach(cell => {
+      cell.fill = whiteFill;
+      cell.font = { name: 'Arial', size: 12, bold: true, color: { argb: 'FF000000' } };
+      cell.border = thinBorder;
+    });
+    dateCell.alignment  = { horizontal: 'left',  vertical: 'middle', indent: 1 };
+    classCell.alignment = { horizontal: 'right', vertical: 'middle', indent: 1 };
+    sheet.getRow(2).height = 28;
+
+    // Row 3 — Course Walk note (merged A3:G3)
+    sheet.addRow(['', '', '', '', '', '', '']);
+    sheet.mergeCells('A3:G3');
+    const noteCell = sheet.getCell('A3');
+    noteCell.value = 'Course Walk - 13:30Hrs     First Rider - 1400 HRS';
+    noteCell.fill = whiteFill;
+    noteCell.font = { name: 'Arial', size: 11, bold: false, color: { argb: 'FF000000' } };
+    noteCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    noteCell.border = thinBorder;
+    sheet.getRow(3).height = 24;
+
+    // Row 4 — Column headers
+    const headerLabels = ['Time', 'Sr.No', 'Rider Name', 'Horse', 'Rider Category', 'Club', 'HC'];
+    const headerRow = sheet.addRow(headerLabels);
+    applyToRow(headerRow, headerFill, 'FFFFFFFF', 11, true, 'center');
+    headerRow.height = 26;
+
+    // Data rows
+    registrations.forEach((r, index) => {
+      const fill = index % 2 === 0 ? whiteFill : altFill;
+      const row = sheet.addRow([
         '',
         index + 1,
         `${r.rider.firstName} ${r.rider.lastName}`,
         r.horse.name,
         r.category?.name || '-',
         r.club?.name || '-',
-        'No',
-      ];
-      return `<tr>${cells.map(c => `<td style="${style};height:22px;">${esc(c)}</td>`).join('')}</tr>`;
+        r.paymentStatus === 'paid' ? 'Yes' : 'No',
+      ]);
+      applyToRow(row, fill, 'FF000000', 10, false, 'center');
+      row.height = 20;
+      // Sr.No — bold and centered
+      const srCell = row.getCell(2);
+      srCell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF000000' } };
     });
 
-    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8">
-<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Start List</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-</head>
-<body>
-<table border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">
-<colgroup>${colGroup}</colgroup>
-${titleRow}${subtitleRow}${noteRow}${headerRow}${dataRows.join('')}
-</table>
-</body></html>`;
-
-    downloadBlob(new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' }), buildTimestampedFileName(`${event?.name || 'event'}-start-list`, 'xls'));
+    const buffer = await workbook.xlsx.writeBuffer();
+    downloadBlob(
+      new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+      buildTimestampedFileName(`${event?.name || 'event'}-start-list`, 'xlsx')
+    );
   };
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -361,7 +419,7 @@ ${titleRow}${subtitleRow}${noteRow}${headerRow}${dataRows.join('')}
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">{registeredCount} Athletes</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={exportToExcel} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright border border-border/30 transition-colors">
+                <button onClick={() => void exportToExcel()} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright border border-border/30 transition-colors">
                   <Download className="w-4 h-4" /> Excel
                 </button>
                 <button onClick={exportToCSV} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright border border-border/30 transition-colors">

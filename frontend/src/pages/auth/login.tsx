@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import apiClient from '@/lib/api';
@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import SplashScreen from '@/components/SplashScreen';
 
 type PortalTab = 'rider-club' | 'admin';
 type LoginRole = 'rider' | 'club';
@@ -20,7 +19,6 @@ type GoogleAuthRole = LoginRole | 'admin';
 
 export default function Login() {
   const router = useRouter();
-  const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<PortalTab>('rider-club');
   const [loginType, setLoginType] = useState<LoginRole>('rider');
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -28,10 +26,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-
-  const handleSplashFinish = () => {
-    setShowSplash(false);
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -108,15 +102,11 @@ export default function Login() {
   };
 
   return (
-    <>
-    {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
     <div className="relative min-h-[100dvh] overflow-x-hidden bg-black">
       {/* Shader background */}
-      {!showSplash && (
-        <div className="pointer-events-none fixed inset-0 z-0 shadow-[inset_0_0_100px_rgba(var(--primary-rgb),0.05)]">
-          <ShaderAnimation />
-        </div>
-      )}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <ShaderAnimation />
+      </div>
       {/* Dark overlay */}
       <div className="pointer-events-none fixed inset-0 z-[1] bg-black/55" />
 
@@ -137,7 +127,7 @@ export default function Login() {
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as PortalTab)} className="mb-6 sm:mb-8">
           <TabsList
             className="w-full h-auto rounded-2xl p-1.5 gap-1 border border-white/10 bg-transparent"
-            style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)' }}
+            style={{ background: 'rgb(14, 14, 14)' }}
           >
             <TabsTrigger
               value="rider-club"
@@ -155,12 +145,10 @@ export default function Login() {
 
           {/* Login Card */}
           <Card
-            className="mt-6 sm:mt-8 rounded-2xl border-white/10 bg-transparent shadow-none"
+            className="mt-6 sm:mt-8 rounded-2xl border-white/10 shadow-none"
             style={{
-              background: 'rgba(255,255,255,0.06)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
+              background: 'rgb(14, 14, 14)',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)',
             }}
           >
             <CardContent className="p-6 sm:p-8">
@@ -319,6 +307,5 @@ export default function Login() {
         </div>
       </div>
     </div>
-    </>
   );
 }

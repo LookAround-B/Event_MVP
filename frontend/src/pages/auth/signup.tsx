@@ -83,12 +83,10 @@ export default function Signup() {
 
         {/* Signup Card */}
         <Card
-          className="rounded-2xl border-white/10 bg-transparent shadow-none"
+          className="rounded-2xl border-white/10 shadow-none"
           style={{
-            background: 'rgba(255,255,255,0.06)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
+            background: 'rgb(14, 14, 14)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)',
           }}
         >
           <CardContent className="p-6 sm:p-8">
