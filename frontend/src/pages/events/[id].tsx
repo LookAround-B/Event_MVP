@@ -5,9 +5,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { ArrowLeft, Download, ChevronLeft, ChevronRight, Calendar, MapPin, Clock, Users, Search, X, Eye } from 'lucide-react';
-import { KPIGrid } from '@/components/dashboard/KPIGrid';
-import { KPICard } from '@/components/dashboard/KPICard';
+import { ArrowLeft, Download, ChevronLeft, ChevronRight, MapPin, Clock, Search, X, Eye } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { PageSkeleton } from '@/components/PageSkeleton';
 
@@ -221,10 +219,11 @@ export default function EventDetail() {
     const altFill:    ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
 
     const thinBorder: ExcelJS.Borders = {
-      top:    { style: 'thin', color: { argb: 'FFCCCCCC' } },
-      left:   { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      top: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
       bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
-      right:  { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      right: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      diagonal: { style: 'thin', color: { argb: 'FFCCCCCC' } }
     };
 
     const applyToRow = (row: ExcelJS.Row, fill: ExcelJS.Fill, fontColor: string, fontSize: number, bold: boolean, align: ExcelJS.Alignment['horizontal'] = 'center') => {
