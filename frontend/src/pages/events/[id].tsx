@@ -39,12 +39,6 @@ interface Registration {
 }
 
 /* ===================== Utility: Export ===================== */
-function escapeCSVField(field: string | number): string {
-  const s = String(field);
-  if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
-  return s;
-}
-
 function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -59,6 +53,20 @@ function buildTimestampedFileName(prefix: string, extension: string) {
   const pad = (n: number) => String(n).padStart(2, '0');
   const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
   return `${prefix}-${stamp}.${extension}`;
+}
+
+async function fetchLogoBase64(): Promise<string | null> {
+  try {
+    const res = await fetch('/images/embassy-logo.png');
+    if (!res.ok) return null;
+    const buf = await res.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    bytes.forEach(b => { bin += String.fromCharCode(b); });
+    return btoa(bin);
+  } catch {
+    return null;
+  }
 }
 
 export default function EventDetail() {
@@ -172,8 +180,8 @@ export default function EventDetail() {
       r.club?.name || '-',
       'No',
     ]);
-    const csv = [headers.map(escapeCSVField).join(','), ...rows.map(r => r.map(escapeCSVField).join(','))].join('\n');
-    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), buildTimestampedFileName(`${event?.name || 'event'}-start-list`, 'csv'));
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    downloadBlob(new Blob([csvContent], { type: 'text/csv;charset=utf-8' }), buildTimestampedFileName(`${event?.name || 'event'}-start-list`, 'csv'));
   };
 
   // Export Excel
@@ -235,16 +243,39 @@ export default function EventDetail() {
       });
     };
 
-    // Row 1 — Orange title (merged A1:G1)
+    // Row 1 — Logo (A1:B1, white) + Orange title (C1:G1)
+    const logoBase64 = await fetchLogoBase64();
     sheet.addRow(['', '', '', '', '', '', '']);
     sheet.mergeCells('A1:G1');
-    const titleCell = sheet.getCell('A1');
-    titleCell.value = (event?.name || 'START LIST').toUpperCase();
-    titleCell.fill = orangeFill;
-    titleCell.font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
-    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-    titleCell.border = thinBorder;
-    sheet.getRow(1).height = 45;
+    sheet.getRow(1).height = 60;
+    if (logoBase64) {
+      const logoId = workbook.addImage({ base64: logoBase64, extension: 'png' });
+      sheet.unMergeCells('A1:G1');
+      sheet.mergeCells('A1:B1');
+      sheet.mergeCells('C1:G1');
+      // Fix logo column widths so logo renders at the right size
+      sheet.getColumn(1).width = 14;
+      sheet.getColumn(2).width = 14;
+      // Logo cell — white background, merged A1:B1
+      sheet.getCell('A1').fill = whiteFill;
+      sheet.getCell('A1').border = thinBorder;
+      sheet.getCell('B1').fill = whiteFill;
+      sheet.getCell('B1').border = thinBorder;
+      sheet.addImage(logoId, { tl: { col: 0.1, row: 0.08 } as ExcelJS.Anchor, br: { col: 1.9, row: 0.92 } as ExcelJS.Anchor, editAs: 'oneCell' });
+      const t = sheet.getCell('C1');
+      t.value = 'EQUESTRIAN PREMIER LEAGUE';
+      t.fill = orangeFill;
+      t.font = { name: 'Arial', size: 20, bold: true, color: { argb: 'FFFFFFFF' } };
+      t.alignment = { horizontal: 'center', vertical: 'middle' };
+      t.border = thinBorder;
+    } else {
+      const titleCell = sheet.getCell('A1');
+      titleCell.value = (event?.name || 'START LIST').toUpperCase();
+      titleCell.fill = orangeFill;
+      titleCell.font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
+      titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      titleCell.border = thinBorder;
+    }
 
     // Row 2 — Date left (A2:D2) + Class right (E2:G2)
     sheet.addRow(['', '', '', '', '', '', '']);

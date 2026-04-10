@@ -52,6 +52,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const [routeLoadingPath, setRouteLoadingPath] = useState(router.pathname);
   const routeLoadingStartedAt = useRef<number | null>(null);
   const routeLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
   const isPublicRoute = PUBLIC_ROUTES.includes(router.pathname);
 
@@ -70,15 +71,29 @@ export default function App({ Component, pageProps }: AppProps) {
     const handleStart = (url: string) => {
       if (url !== router.asPath) {
         clearPendingTimeout();
+        if (maxLoadingTimeout.current) {
+          clearTimeout(maxLoadingTimeout.current);
+        }
         routeLoadingStartedAt.current = Date.now();
         setRouteLoadingPath(normalizeRoutePath(url));
         setIsRouteLoading(true);
+        // Safety net: force-clear skeleton after 8s if routeChangeComplete never fires
+        maxLoadingTimeout.current = setTimeout(() => {
+          setIsRouteLoading(false);
+          setRouteLoadingPath(router.pathname);
+          routeLoadingStartedAt.current = null;
+          maxLoadingTimeout.current = null;
+        }, 8000);
       }
     };
     const handleStop = () => {
+      if (maxLoadingTimeout.current) {
+        clearTimeout(maxLoadingTimeout.current);
+        maxLoadingTimeout.current = null;
+      }
       clearPendingTimeout();
       const startedAt = routeLoadingStartedAt.current;
-      const minVisibleMs = 180;
+      const minVisibleMs = 50;
       const elapsed = startedAt ? Date.now() - startedAt : minVisibleMs;
       const remaining = Math.max(0, minVisibleMs - elapsed);
 
@@ -96,6 +111,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
     return () => {
       clearPendingTimeout();
+      if (maxLoadingTimeout.current) {
+        clearTimeout(maxLoadingTimeout.current);
+      }
       router.events.off('routeChangeStart', handleStart);
       router.events.off('routeChangeComplete', handleStop);
       router.events.off('routeChangeError', handleStop);

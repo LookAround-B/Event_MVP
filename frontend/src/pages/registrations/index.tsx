@@ -6,6 +6,7 @@ import {
   ClipboardCheck, Activity, CreditCard, AlertCircle, Calendar, Trophy, Check,
 } from 'lucide-react';
 import api from '@/lib/api';
+import { exportBrandedExcel, exportCSV } from '@/utils/brandedExcel';
 import ProtectedRoute from '@/lib/protected-route';
 import ExportModal from '@/components/ExportModal';
 import ViewModal from '@/components/ViewModal';
@@ -33,34 +34,7 @@ interface Registration {
 }
 
 /* ─── CSV/Excel utilities (preserved) ─── */
-function escapeCSVField(field: string | number): string {
-  const s = String(field);
-  if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
-  return s;
-}
 
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function exportToExcel(headers: string[], rows: (string | number)[][], filename: string) {
-  const esc = (s: string | number) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const headerRow = headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('');
-  const dataRows = rows.map(r => {
-    const cells = r.map(c => {
-      const t = typeof c === 'number' ? 'Number' : 'String';
-      return `<Cell><Data ss:Type="${t}">${esc(c)}</Data></Cell>`;
-    });
-    return `<Row>${cells.join('')}</Row>`;
-  });
-  const xml = `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Sheet1"><Table><Row>${headerRow}</Row>${dataRows.join('')}</Table></Worksheet></Workbook>`;
-  downloadBlob(new Blob([xml], { type: 'application/vnd.ms-excel' }), filename);
-}
 
 /* ─── Badge helpers ─── */
 const paymentBadge = (s: string) => {
@@ -218,14 +192,20 @@ export default function Registrations() {
   const handleExport = (type: 'csv' | 'excel') => {
     const { headers, rows } = getExportData();
     if (type === 'csv') {
-      const csv = [headers.map(escapeCSVField).join(','), ...rows.map(r => r.map(escapeCSVField).join(','))].join('\n');
-      downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), 'registrations.csv');
+      exportCSV(headers, rows, 'registrations');
       toast.success('Registrations exported as CSV');
+      setExportOpen(false);
     } else {
-      exportToExcel(headers, rows, 'registrations.xls');
-      toast.success('Registrations exported as Excel');
+      void exportBrandedExcel({
+        sheetTitle: 'Registrations',
+        subtitle: 'Registrations Report',
+        headers,
+        rows,
+        filename: 'registrations',
+        columnWidths: [26, 22, 26, 14, 16],
+      }).then(() => toast.success('Registrations exported as Excel'));
+      setExportOpen(false);
     }
-    setExportOpen(false);
   };
 
   /* ─── Delete (preserved) ─── */

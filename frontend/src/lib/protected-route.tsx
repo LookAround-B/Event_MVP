@@ -32,6 +32,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const token = Cookies.get('authToken');
     
     if (!token) {
+      setIsAuthorized(false);
       router.push('/auth/login');
       return;
     }
@@ -51,18 +52,21 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       // Check if token is expired
       if (payload.exp && payload.exp * 1000 < Date.now()) {
         Cookies.remove('authToken');
+        setIsAuthorized(false);
         router.push('/auth/login');
         return;
       }
 
       // Check if profile is complete (but skip if user is already approved)
       if (!payload.profileComplete && !payload.isApproved) {
+        setIsAuthorized(false);
         router.push('/complete-profile');
         return;
       }
 
       // Check if user is approved
       if (!payload.isApproved) {
+        setIsAuthorized(false);
         router.push('/pending-approval');
         return;
       }
@@ -70,6 +74,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       setIsAuthorized(true);
     } catch (error) {
       Cookies.remove('authToken');
+      setIsAuthorized(false);
       router.push('/auth/login');
     }
   }, [isClient, router]);

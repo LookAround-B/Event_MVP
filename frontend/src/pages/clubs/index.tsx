@@ -18,7 +18,7 @@ import { FilterDropdown } from '@/components/FilterDropdown';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { Skeleton } from '@/components/ui/skeleton';
-import { exportToCSV, exportToExcel } from '@/utils/exportData';
+import { exportBrandedExcel, exportCSV } from '@/utils/brandedExcel';
 
 interface Club {
   id: string;
@@ -169,17 +169,29 @@ export default function ClubsList() {
   };
 
   const handleExport = (type: "csv" | "excel") => {
-    const rows = clubs.map(c => ({
-      name: c.name,
-      eId: c.eId || '',
-      shortCode: c.shortCode || '',
-      firstName: c.primaryContact?.firstName || '',
-      lastName: c.primaryContact?.lastName || '',
-      email: c.email || c.primaryContact?.email || '',
-      city: c.city || '',
-      state: c.state || '',
-    }));
-    type === "csv" ? exportToCSV(rows, "clubs") : exportToExcel(rows, "clubs");
+    const headers = ['Name', 'Embassy ID', 'Short Code', 'First Name', 'Last Name', 'Email', 'City', 'State'];
+    const rows = clubs.map(c => [
+      c.name,
+      c.eId || '',
+      c.shortCode || '',
+      c.primaryContact?.firstName || '',
+      c.primaryContact?.lastName || '',
+      c.email || c.primaryContact?.email || '',
+      c.city || '',
+      c.state || '',
+    ]);
+    if (type === 'csv') {
+      exportCSV(headers, rows, 'clubs');
+    } else {
+      void exportBrandedExcel({
+        sheetTitle: 'Clubs',
+        subtitle: 'Clubs Report',
+        headers,
+        rows,
+        filename: 'clubs',
+        columnWidths: [22, 16, 14, 16, 16, 26, 14, 14],
+      });
+    }
     setExportOpen(false);
     toast.success(`Clubs exported as ${type.toUpperCase()}`);
   };

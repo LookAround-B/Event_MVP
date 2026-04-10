@@ -17,6 +17,7 @@ import {
   Clipboard,
 } from "lucide-react";
 import api from "@/lib/api";
+import { exportBrandedExcel, exportCSV } from '@/utils/brandedExcel';
 import ProtectedRoute from "@/lib/protected-route";
 import {
   BarChart,
@@ -93,59 +94,6 @@ interface FilterOption {
 
 /* ===================== UTILITY: Export helpers ===================== */
 
-function escapeCSVField(field: string | number): string {
-  const s = String(field);
-  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
-    return `"${s.replace(/"/g, '""')}"`;
-  }
-  return s;
-}
-
-function downloadBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function exportTableToCSV(
-  headers: string[],
-  rows: (string | number)[][],
-  filename: string,
-) {
-  const csv = [
-    headers.map(escapeCSVField).join(","),
-    ...rows.map((r) => r.map(escapeCSVField).join(",")),
-  ].join("\n");
-  downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), filename);
-}
-
-function exportTableToExcel(
-  headers: string[],
-  rows: (string | number)[][],
-  filename: string,
-) {
-  const esc = (s: string | number) =>
-    String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  const headerRow = headers
-    .map((h) => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`)
-    .join("");
-  const dataRows = rows.map((r) => {
-    const cells = r.map((c) => {
-      const t = typeof c === "number" ? "Number" : "String";
-      return `<Cell><Data ss:Type="${t}">${esc(c)}</Data></Cell>`;
-    });
-    return `<Row>${cells.join("")}</Row>`;
-  });
-  const xml = `<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Sheet1"><Table><Row>${headerRow}</Row>${dataRows.join("")}</Table></Worksheet></Workbook>`;
-  downloadBlob(new Blob([xml], { type: "application/vnd.ms-excel" }), filename);
-}
 
 /* ===================== CUSTOM CHART TOOLTIP ===================== */
 
@@ -730,7 +678,7 @@ function DashboardContent() {
       p.paymentMethod,
       p.paymentStatus,
     ]);
-    exportTableToCSV(headers, rows, "participants.csv");
+    exportCSV(headers, rows, 'participants');
   };
 
   const handleExportParticipantsExcel = () => {
@@ -756,7 +704,14 @@ function DashboardContent() {
       p.paymentMethod,
       p.paymentStatus,
     ]);
-    exportTableToExcel(headers, rows, "participants.xls");
+    void exportBrandedExcel({
+      sheetTitle: 'Participants',
+      subtitle: 'Participants Report',
+      headers,
+      rows,
+      filename: 'participants',
+      columnWidths: [26, 14, 22, 18, 18, 18, 12, 16, 14],
+    });
   };
 
   const handleExportEventsCSV = () => {
@@ -774,7 +729,7 @@ function DashboardContent() {
       e.venueName || "N/A",
       e.venueAddress || "N/A",
     ]);
-    exportTableToCSV(headers, rows, `events-${eventTab}.csv`);
+    exportCSV(headers, rows, `events-${eventTab}`);
   };
 
   const handleExportEventsExcel = () => {
@@ -792,7 +747,14 @@ function DashboardContent() {
       e.venueName || "N/A",
       e.venueAddress || "N/A",
     ]);
-    exportTableToExcel(headers, rows, `events-${eventTab}.xls`);
+    void exportBrandedExcel({
+      sheetTitle: 'Events',
+      subtitle: 'Events Report',
+      headers,
+      rows,
+      filename: `events-${eventTab}`,
+      columnWidths: [28, 14, 14, 20, 28],
+    });
   };
 
   const formatDate = (d: string) =>
