@@ -37,13 +37,14 @@ async function handleGoogleAuth(
 
   try {
     const { token, role = 'rider' } = req.body;
+    const requestedRole = typeof role === 'string' ? role : 'rider';
 
     if (!token) {
       return sendErrorResponse(res, 400, 'Google token is required', ErrorCode.VALIDATION_ERROR);
     }
 
-    if (!['club', 'rider'].includes(role)) {
-      return sendErrorResponse(res, 400, 'Role must be club or rider', ErrorCode.VALIDATION_ERROR);
+    if (!['admin', 'club', 'rider'].includes(requestedRole)) {
+      return sendErrorResponse(res, 400, 'Role must be admin, club, or rider', ErrorCode.VALIDATION_ERROR);
     }
 
     // Verify the token
@@ -82,20 +83,41 @@ async function handleGoogleAuth(
       },
     });
 
+    const userRoles = user?.roles?.map((userRole) => userRole.name) || [];
+    const isAdminLogin = requestedRole === 'admin';
+
+    if (isAdminLogin && !user) {
+      return sendErrorResponse(
+        res,
+        403,
+        'Admin Google sign-in is only available for existing admin accounts.',
+        ErrorCode.FORBIDDEN
+      );
+    }
+
+    if (isAdminLogin && !userRoles.includes('admin')) {
+      return sendErrorResponse(
+        res,
+        403,
+        'This Google account is not authorized for admin access.',
+        ErrorCode.FORBIDDEN
+      );
+    }
+
     // If user doesn't exist, create one
     if (!user) {
       // Generate a random password for OAuth users
       const randomPassword = await bcrypt.hash(Math.random().toString(36), 10);
 
       let userRole = await prisma.role.findUnique({
-        where: { name: role },
+        where: { name: requestedRole },
       });
 
       if (!userRole) {
         userRole = await prisma.role.create({
           data: {
-            name: role,
-            description: `${role.charAt(0).toUpperCase() + role.slice(1)} role`,
+            name: requestedRole,
+            description: `${requestedRole.charAt(0).toUpperCase() + requestedRole.slice(1)} role`,
             isActive: true,
           },
         });
@@ -135,8 +157,10 @@ async function handleGoogleAuth(
       return sendErrorResponse(res, 403, 'User account is disabled', ErrorCode.USER_DISABLED);
     }
 
-    // Get user role
-    const userRole = user.roles?.[0]?.name || 'rider';
+    const assignedRoles = user.roles?.map((userRole) => userRole.name) || [];
+    const userRole = assignedRoles.includes(requestedRole)
+      ? requestedRole
+      : assignedRoles[0] || requestedRole;
 
     const authToken = generateToken({
       id: user.id,

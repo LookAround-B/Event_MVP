@@ -14,11 +14,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import SplashScreen from '@/components/SplashScreen';
 
+type PortalTab = 'rider-club' | 'admin';
+type LoginRole = 'rider' | 'club';
+type GoogleAuthRole = LoginRole | 'admin';
+
 export default function Login() {
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(true);
-  const [activeTab, setActiveTab] = useState<'rider-club' | 'admin'>('rider-club');
-  const [loginType, setLoginType] = useState<'rider' | 'club'>('rider');
+  const [activeTab, setActiveTab] = useState<PortalTab>('rider-club');
+  const [loginType, setLoginType] = useState<LoginRole>('rider');
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -70,6 +74,39 @@ export default function Login() {
       ? 'Admin Sign In'
       : `Sign In as ${loginType === 'rider' ? 'Rider' : 'Club'}`;
 
+  const googleRole: GoogleAuthRole = activeTab === 'admin' ? 'admin' : loginType;
+
+  const handleGoogleLogin = async (credential?: string) => {
+    if (!credential) {
+      setError('Google login failed. Please try again.');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await apiClient.post('/api/auth/google', {
+        token: credential,
+        role: googleRole,
+      });
+      Cookies.set('authToken', response.data.data.token, { expires: 7 });
+
+      const user = response.data.data.user;
+      if (!user?.profileComplete && user?.isApproved === false) {
+        router.push('/complete-profile');
+      } else if (user?.isApproved === false) {
+        router.push('/pending-approval');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Google login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
     {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
@@ -97,7 +134,7 @@ export default function Login() {
         </div>
 
         {/* Portal Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'rider-club' | 'admin')} className="mb-6 sm:mb-8">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as PortalTab)} className="mb-6 sm:mb-8">
           <TabsList
             className="w-full h-auto rounded-2xl p-1.5 gap-1 border border-white/10 bg-transparent"
             style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)' }}
@@ -238,52 +275,27 @@ export default function Login() {
                 </Button>
               </form>
 
-              {activeTab === 'rider-club' && (
-                <>
-                  <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/10" />
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="px-3 text-xs font-medium text-muted-foreground" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                        Or continue with
-                      </span>
-                    </div>
-                  </div>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10" />
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="px-3 text-xs font-medium text-muted-foreground" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    Or continue with
+                  </span>
+                </div>
+              </div>
 
-                  <div className="flex justify-center">
-                    <GoogleLogin
-                      onSuccess={async (credentialResponse) => {
-                        setError('');
-                        setLoading(true);
-                        try {
-                          const response = await apiClient.post('/api/auth/google', {
-                            token: credentialResponse.credential,
-                            role: loginType,
-                          });
-                          Cookies.set('authToken', response.data.data.token, { expires: 7 });
-
-                          const user = response.data.data.user;
-                          if (!user?.profileComplete && user?.isApproved === false) {
-                            router.push('/complete-profile');
-                          } else if (user?.isApproved === false) {
-                            router.push('/pending-approval');
-                          } else {
-                            router.push('/dashboard');
-                          }
-                        } catch (err: any) {
-                          setError(err.response?.data?.message || 'Google login failed. Please try again.');
-                        } finally {
-                          setLoading(false);
-                        }
-                      }}
-                      onError={() => {
-                        setError('Google login failed. Please try again.');
-                      }}
-                    />
-                  </div>
-                </>
-              )}
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={(credentialResponse) => {
+                    void handleGoogleLogin(credentialResponse.credential);
+                  }}
+                  onError={() => {
+                    setError('Google login failed. Please try again.');
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
         </Tabs>
