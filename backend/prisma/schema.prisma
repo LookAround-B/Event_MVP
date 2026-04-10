@@ -275,6 +275,8 @@ model Registration {
   gstAmount    Float @default(0)
   totalAmount  Float @default(0)
 
+  startNumber  Int?     // Position in the category start list (unique per event+category)
+
   registeredAt DateTime @default(now())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -292,6 +294,7 @@ model Registration {
   transactions   Transaction[]   @relation("RegistrationTransactions")
 
   @@unique([eventId, riderId, horseId])
+  @@unique([eventId, categoryId, startNumber])
   @@index([eventId])
   @@index([riderId])
   @@index([paymentStatus])

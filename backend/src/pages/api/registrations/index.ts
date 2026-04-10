@@ -152,6 +152,51 @@ async function handler(
         });
       }
 
+      // Rule: a rider can have at most 3 horses in the same event category
+      const riderCategoryEntries = await prisma.registration.findMany({
+        where: { eventId, riderId, categoryId },
+        select: { id: true, startNumber: true },
+      });
+
+      if (riderCategoryEntries.length >= 3) {
+        return res.status(400).json({
+          success: false,
+          message: 'A rider can compete on a maximum of 3 horses in the same event category',
+          error: 'MAX_HORSES_PER_CATEGORY_EXCEEDED',
+          statusCode: 400,
+        });
+      }
+
+      // Assign a start number that is at least 7 apart from the same rider's other
+      // entries in this category (round-robin gap rule)
+      const MIN_GAP = 7;
+      const allCategoryEntries = await prisma.registration.findMany({
+        where: { eventId, categoryId },
+        select: { startNumber: true },
+      });
+      const takenNumbers = new Set(
+        allCategoryEntries.map((e) => e.startNumber).filter((n): n is number => n !== null)
+      );
+      const riderNumbers = riderCategoryEntries
+        .map((e) => e.startNumber)
+        .filter((n): n is number => n !== null);
+
+      // Find the smallest available start number that satisfies the gap constraint
+      let assignedStartNumber = 1;
+      while (true) {
+        if (takenNumbers.has(assignedStartNumber)) {
+          assignedStartNumber++;
+          continue;
+        }
+        const gapOk = riderNumbers.every(
+          (n) => Math.abs(assignedStartNumber - n) >= MIN_GAP
+        );
+        if (gapOk) break;
+        assignedStartNumber++;
+        // Safety cap to prevent infinite loop
+        if (assignedStartNumber > 10000) break;
+      }
+
       // Fetch category to get price and GST rates
       const category = await prisma.eventCategory.findUnique({
         where: { id: categoryId },
@@ -233,6 +278,7 @@ async function handler(
           stableAmount,
           gstAmount,
           totalAmount,
+          startNumber: assignedStartNumber,
         },
         include: {
           rider: true,
