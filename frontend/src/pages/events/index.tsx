@@ -35,8 +35,9 @@ export default function Events() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectAllAcrossPages, setSelectAllAcrossPages] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
   const [activeTab, setActiveTab] = useState<'current' | 'all'>('all');
@@ -53,8 +54,8 @@ export default function Events() {
         toast.error(response.data.message || 'Failed to load events');
         return;
       }
-      setEvents(response.data.data.events);
-      setTotalPages(response.data.data.pagination.pages);
+      setEvents(response.data.data.events || []);
+      setTotalCount(response.data.data.pagination.total || 0);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to load events');
     } finally {
@@ -64,7 +65,13 @@ export default function Events() {
 
   useEffect(() => { fetchEvents(); }, [fetchEvents]);
 
+  useEffect(() => {
+    setSelectedIds(new Set());
+    setSelectAllAcrossPages(false);
+  }, [searchTerm, activeTab, selectedTypes]);
+
   const toggleSelect = (id: string) => {
+    setSelectAllAcrossPages(false);
     setSelectedIds(prev => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -73,16 +80,64 @@ export default function Events() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === events.length) {
+    if (selectAllAcrossPages) {
       setSelectedIds(new Set());
+      setSelectAllAcrossPages(false);
     } else {
-      setSelectedIds(new Set(events.map(e => e.id)));
+      // Global select-all for export across every paginated result.
+      setSelectedIds(new Set());
+      setSelectAllAcrossPages(true);
     }
   };
 
-  const getExportData = () => {
+  const fetchAllFilteredEvents = useCallback(async (): Promise<Event[]> => {
+    const limit = 200;
+    const firstRes = await api.get('/api/events', {
+      params: { page: 1, limit, search: searchTerm },
+    });
+
+    if (!firstRes.data?.success) {
+      throw new Error(firstRes.data?.message || 'Failed to load events for export');
+    }
+
+    const firstEvents: Event[] = firstRes.data.data.events || [];
+    const pages: number = firstRes.data.data.pagination?.pages || 1;
+    let allEvents: Event[] = [...firstEvents];
+
+    if (pages > 1) {
+      const requests: Promise<any>[] = [];
+      for (let p = 2; p <= pages; p++) {
+        requests.push(api.get('/api/events', { params: { page: p, limit, search: searchTerm } }));
+      }
+      const responses = await Promise.all(requests);
+      for (const res of responses) {
+        if (res.data?.success) {
+          allEvents = allEvents.concat(res.data.data.events || []);
+        }
+      }
+    }
+
+    if (activeTab === 'current') {
+      allEvents = allEvents.filter(e => e.isPublished);
+    }
+    if (selectedTypes.length > 0) {
+      allEvents = allEvents.filter(e => selectedTypes.includes(e.eventType || ''));
+    }
+
+    return allEvents;
+  }, [searchTerm, activeTab, selectedTypes]);
+
+  const getExportData = async () => {
     const headers = ['Event Name', 'Venue Name', 'Event Start Date', 'Event End Date', 'Published', 'Registrations'];
-    const source = selectedIds.size > 0 ? events.filter(e => selectedIds.has(e.id)) : events;
+    let source: Event[];
+    const shouldExportAllForTab = activeTab === 'all' && selectedIds.size === 0;
+
+    if (selectAllAcrossPages || shouldExportAllForTab) {
+      source = await fetchAllFilteredEvents();
+    } else {
+      source = selectedIds.size > 0 ? events.filter(e => selectedIds.has(e.id)) : events;
+    }
+
     const rows = source.map(e => [
       e.name, e.venueName || 'N/A',
       new Date(e.startDate).toLocaleDateString(),
@@ -123,22 +178,31 @@ export default function Events() {
     }
   };
 
-  const handleExportCSV = () => {
-    const { headers, rows } = getExportData();
-    exportCSV(headers, rows, 'events');
-    toast.success('Events exported as CSV');
+  const handleExportCSV = async () => {
+    try {
+      const { headers, rows } = await getExportData();
+      exportCSV(headers, rows, 'events');
+      toast.success('Events exported as CSV');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || 'Failed to export CSV');
+    }
   };
 
-  const handleExportExcel = () => {
-    const { headers, rows } = getExportData();
-    void exportBrandedExcel({
-      sheetTitle: 'Events',
-      subtitle: 'Events Manifest',
-      headers,
-      rows,
-      filename: 'events-manifest',
-      columnWidths: [28, 18, 18, 18, 12, 14],
-    }).then(() => toast.success('Events exported as Excel'));
+  const handleExportExcel = async () => {
+    try {
+      const { headers, rows } = await getExportData();
+      await exportBrandedExcel({
+        sheetTitle: 'Events',
+        subtitle: 'Events Manifest',
+        headers,
+        rows,
+        filename: 'events-manifest',
+        columnWidths: [28, 18, 18, 18, 12, 14],
+      });
+      toast.success('Events exported as Excel');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || 'Failed to export Excel');
+    }
   };
 
   const handleTogglePublish = async (id: string, currentStatus: boolean) => {
@@ -273,7 +337,7 @@ export default function Events() {
               <table className="w-full min-w-[900px] text-sm">
                 <thead>
                   <tr className="label-tech text-left bg-surface-container/40">
-                    <th className="p-3 sm:p-4 w-12"><input type="checkbox" checked={selectedIds.size === displayEvents.length && displayEvents.length > 0} onChange={toggleSelectAll} className="accent-primary rounded" /></th>
+                    <th className="p-3 sm:p-4 w-12"><input type="checkbox" checked={selectAllAcrossPages || (selectedIds.size === displayEvents.length && displayEvents.length > 0)} onChange={toggleSelectAll} className="accent-primary rounded" /></th>
                     <th className="p-3 sm:p-4">Championship Manifest</th>
                     <th className="p-3 sm:p-4">Timeline Alpha</th>
                     <th className="p-3 sm:p-4">Operational Node</th>
@@ -284,7 +348,7 @@ export default function Events() {
                 <tbody className="divide-y divide-border/10">
                   {displayEvents.map((event) => (
                     <tr key={event.id} className="group hover:bg-surface-container/20 transition-all duration-300">
-                      <td className="p-3 sm:p-4"><input type="checkbox" checked={selectedIds.has(event.id)} onChange={() => toggleSelect(event.id)} className="accent-primary rounded" /></td>
+                      <td className="p-3 sm:p-4"><input type="checkbox" checked={selectAllAcrossPages || selectedIds.has(event.id)} onChange={() => toggleSelect(event.id)} className="accent-primary rounded" /></td>
                       <td className="p-3 sm:p-4">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-border/30 shadow-inner group-hover:scale-110 transition-transform ${event.isPublished ? 'bg-primary/10 text-primary' : 'bg-surface-container text-muted-foreground'}`}>
@@ -339,7 +403,7 @@ export default function Events() {
               </div>
 
               <div className="bg-surface-container/20 p-2 border-t border-border/10">
-                <Pagination total={displayEvents.length} page={page} perPage={10} onChange={setPage} />
+                <Pagination total={totalCount} page={page} perPage={10} onChange={setPage} />
               </div>
             </>
           )}
