@@ -4,6 +4,18 @@ import { withAuth } from '@/lib/auth-middleware';
 import { sendRegistrationConfirmation } from '@/lib/email';
 import { ApiResponse } from '@/types';
 
+function isMissingStartNumberColumn(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: string }).code === 'P2022' &&
+    'meta' in error &&
+    typeof (error as { meta?: { column?: string } }).meta?.column === 'string' &&
+    (error as { meta?: { column?: string } }).meta?.column?.includes('Registration.startNumber')
+  );
+}
+
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse>
@@ -27,8 +39,10 @@ async function handler(
           where,
           include: {
             rider: { select: { firstName: true, lastName: true, email: true } },
-            horse: { select: { name: true } },
+            horse: { select: { name: true, horseCode: true } },
             event: { select: { name: true } },
+            category: { select: { name: true } },
+            club: { select: { name: true } },
           },
           orderBy: { createdAt: 'desc' },
         });
@@ -43,26 +57,92 @@ async function handler(
         return res.end();
       }
 
-      const [registrations, total] = await Promise.all([
-        prisma.registration.findMany({
-          where,
-          skip,
-          take: limitNum,
-          include: {
-            rider: {
-              select: { id: true, firstName: true, lastName: true, email: true },
+      let registrations;
+      let total;
+
+      try {
+        [registrations, total] = await Promise.all([
+          prisma.registration.findMany({
+            where,
+            skip,
+            take: limitNum,
+            select: {
+              id: true,
+              startNumber: true,
+              paymentStatus: true,
+              paymentMethod: true,
+              eventAmount: true,
+              stableAmount: true,
+              gstAmount: true,
+              totalAmount: true,
+              registeredAt: true,
+              createdAt: true,
+              rider: {
+                select: { id: true, firstName: true, lastName: true, email: true },
+              },
+              horse: {
+                select: { id: true, name: true, color: true, gender: true, horseCode: true },
+              },
+              event: {
+                select: { id: true, name: true, startDate: true, endDate: true },
+              },
+              club: {
+                select: { id: true, name: true },
+              },
+              category: {
+                select: { id: true, name: true, price: true },
+              },
             },
-            horse: {
-              select: { id: true, name: true, color: true, gender: true },
+            orderBy: { createdAt: 'desc' },
+          }),
+          prisma.registration.count({ where }),
+        ]);
+      } catch (error) {
+        if (!isMissingStartNumberColumn(error)) {
+          throw error;
+        }
+
+        [registrations, total] = await Promise.all([
+          prisma.registration.findMany({
+            where,
+            skip,
+            take: limitNum,
+            select: {
+              id: true,
+              paymentStatus: true,
+              paymentMethod: true,
+              eventAmount: true,
+              stableAmount: true,
+              gstAmount: true,
+              totalAmount: true,
+              registeredAt: true,
+              createdAt: true,
+              rider: {
+                select: { id: true, firstName: true, lastName: true, email: true },
+              },
+              horse: {
+                select: { id: true, name: true, color: true, gender: true, horseCode: true },
+              },
+              event: {
+                select: { id: true, name: true, startDate: true, endDate: true },
+              },
+              club: {
+                select: { id: true, name: true },
+              },
+              category: {
+                select: { id: true, name: true, price: true },
+              },
             },
-            event: {
-              select: { id: true, name: true, startDate: true, endDate: true },
-            },
-          },
-          orderBy: { createdAt: 'desc' },
-        }),
-        prisma.registration.count({ where }),
-      ]);
+            orderBy: { createdAt: 'desc' },
+          }),
+          prisma.registration.count({ where }),
+        ]);
+
+        registrations = registrations.map((registration) => ({
+          ...registration,
+          startNumber: null,
+        }));
+      }
 
       return res.status(200).json({
         success: true,

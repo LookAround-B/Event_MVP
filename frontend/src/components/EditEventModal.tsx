@@ -36,6 +36,158 @@ interface EditEventModalProps {
   onUpdated: () => void;
 }
 
+interface ManifestRegistration {
+  id: string;
+  startNumber?: number | null;
+  paymentStatus?: string;
+  rider?: {
+    id?: string;
+    firstName?: string;
+    lastName?: string;
+  };
+  horse?: {
+    name?: string;
+    horseCode?: string | null;
+  };
+  category?: {
+    id?: string;
+    name?: string;
+  };
+  club?: {
+    name?: string;
+  };
+}
+
+const ROUND_ROBIN_GAP = 7;
+const MANIFEST_START_HOUR = 14;
+const MANIFEST_START_MINUTE = 0;
+const MANIFEST_INTERVAL_MINUTES = 3;
+const BLUE_ACCENT_LIGHT_80 = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDDEBF7' } } as const;
+const BLUE_ACCENT_LIGHT_60 = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB4C6E7' } } as const;
+
+function getOrdinalSuffix(day: number) {
+  if (day % 100 >= 11 && day % 100 <= 13) return 'th';
+  if (day % 10 === 1) return 'st';
+  if (day % 10 === 2) return 'nd';
+  if (day % 10 === 3) return 'rd';
+  return 'th';
+}
+
+function formatManifestHeaderDate(rawDate: string) {
+  if (!rawDate) return '';
+  const date = new Date(rawDate);
+  if (Number.isNaN(date.getTime())) return '';
+  const day = date.getDate();
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase();
+  const month = date.toLocaleDateString('en-GB', { month: 'long' }).toUpperCase();
+  return `${weekday},${day}${getOrdinalSuffix(day)} ${month}`;
+}
+
+function formatManifestFileDate(rawDate: string) {
+  const date = rawDate ? new Date(rawDate) : new Date();
+  if (Number.isNaN(date.getTime())) return 'Unknown Date';
+  const day = date.getDate();
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' });
+  const month = date.toLocaleDateString('en-GB', { month: 'long' });
+  return `${weekday} ${day}${getOrdinalSuffix(day)} ${month}-${date.getFullYear()}`;
+}
+
+function getManifestYear(rawDate: string) {
+  const date = rawDate ? new Date(rawDate) : new Date();
+  return Number.isNaN(date.getTime()) ? new Date().getFullYear() : date.getFullYear();
+}
+
+function getRiderDisplayName(entry: ManifestRegistration) {
+  return `${entry.rider?.firstName || ''} ${entry.rider?.lastName || ''}`.trim() || 'Unknown Rider';
+}
+
+function getFirstGroupedRiderName(entries: ManifestRegistration[] | undefined, fallbackKey: string) {
+  if (!entries || entries.length === 0) return fallbackKey;
+  return getRiderDisplayName(entries[0]);
+}
+
+function getRiderKey(entry: ManifestRegistration) {
+  return entry.rider?.id || getRiderDisplayName(entry).toLowerCase();
+}
+
+function getHcValue(entry: ManifestRegistration) {
+  return entry.horse?.horseCode ? 'Yes' : 'No';
+}
+
+async function fetchLogoBase64() {
+  try {
+    const response = await fetch('/images/embassy-logo.png');
+    if (!response.ok) return null;
+    const buffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+    return btoa(binary);
+  } catch {
+    return null;
+  }
+}
+
+function buildManifestRows(entries: ManifestRegistration[]) {
+  const sortedByStartNumber = [...entries].sort((a, b) => {
+    const aStart = typeof a.startNumber === 'number' ? a.startNumber : Number.MAX_SAFE_INTEGER;
+    const bStart = typeof b.startNumber === 'number' ? b.startNumber : Number.MAX_SAFE_INTEGER;
+    if (aStart !== bStart) return aStart - bStart;
+    return getRiderDisplayName(a).localeCompare(getRiderDisplayName(b));
+  });
+
+  if (sortedByStartNumber.length > 0 && sortedByStartNumber.every((entry) => typeof entry.startNumber === 'number')) {
+    return sortedByStartNumber;
+  }
+
+  const grouped = new Map<string, ManifestRegistration[]>();
+  for (const entry of entries) {
+    const key = getRiderKey(entry);
+    const bucket = grouped.get(key) || [];
+    bucket.push(entry);
+    grouped.set(key, bucket);
+  }
+
+  const riderOrder = Array.from(grouped.keys()).sort((a, b) => {
+    return getFirstGroupedRiderName(grouped.get(a), a).localeCompare(getFirstGroupedRiderName(grouped.get(b), b));
+  });
+
+  const recentRiders: string[] = [];
+  const ordered: ManifestRegistration[] = [];
+
+  while (ordered.length < entries.length) {
+    const candidates = riderOrder.filter((key) => {
+      const remaining = grouped.get(key);
+      return remaining && remaining.length > 0 && !recentRiders.includes(key);
+    });
+
+    const pool = candidates.length > 0
+      ? candidates
+      : riderOrder.filter((key) => (grouped.get(key)?.length || 0) > 0);
+
+    if (pool.length === 0) break;
+
+    pool.sort((a, b) => {
+      const aRemaining = grouped.get(a)?.length || 0;
+      const bRemaining = grouped.get(b)?.length || 0;
+      if (aRemaining !== bRemaining) return bRemaining - aRemaining;
+      return getFirstGroupedRiderName(grouped.get(a), a).localeCompare(getFirstGroupedRiderName(grouped.get(b), b));
+    });
+
+    const chosenKey = pool[0];
+    const nextEntry = grouped.get(chosenKey)?.shift();
+    if (!nextEntry) continue;
+
+    ordered.push(nextEntry);
+    recentRiders.push(chosenKey);
+    if (recentRiders.length > ROUND_ROBIN_GAP) {
+      recentRiders.shift();
+    }
+  }
+
+  return ordered;
+}
+
 export default function EditEventModal({ open, eventId, onClose, onUpdated }: EditEventModalProps) {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -165,7 +317,7 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
     try {
       // Fetch registrations for this event
       const regRes = await api.get(`/api/registrations?eventId=${eventId}&limit=500`);
-      const registrations = regRes.data.data?.registrations || [];
+      const registrations: ManifestRegistration[] = regRes.data.data?.registrations || [];
       if (registrations.length === 0) {
         toast.error('No registrations found for this event');
         return;
@@ -173,25 +325,12 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
 
       const ExcelJS = (await import('exceljs')).default;
       const wb = new ExcelJS.Workbook();
-
-      const formatDateLabel = (rawDate: string) => {
-        if (!rawDate) return '';
-        const date = new Date(rawDate);
-        if (isNaN(date.getTime())) return '';
-        const day = date.getDate();
-        const suffix = day % 10 === 1 && day !== 11 ? 'st'
-          : day % 10 === 2 && day !== 12 ? 'nd'
-          : day % 10 === 3 && day !== 13 ? 'rd' : 'th';
-        const weekday = date.toLocaleDateString('en-GB', { weekday: 'long' }).toUpperCase();
-        const month = date.toLocaleDateString('en-GB', { month: 'long' }).toUpperCase();
-        return `${weekday},${day}${suffix} ${month}-${date.getFullYear()}`;
-      };
-
-      const startDateLabel = formatDateLabel(formData.startDate);
-      const eventName = (formData.name || 'START LIST').toUpperCase();
+      const startDateLabel = formatManifestHeaderDate(formData.startDate);
+      const bannerTitle = `EQUESTRIAN PREMIER LEAGUE-${getManifestYear(formData.startDate)}`;
+      const logoBase64 = await fetchLogoBase64();
 
       // Group registrations by category
-      const grouped: Record<string, { categoryName: string; entries: typeof registrations }> = {};
+      const grouped: Record<string, { categoryName: string; entries: ManifestRegistration[] }> = {};
       for (const reg of registrations) {
         const catName = reg.category?.name || 'Uncategorized';
         const catId = reg.category?.id || 'uncategorized';
@@ -203,105 +342,140 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
 
       for (const catKey of categoryKeys) {
         const { categoryName, entries } = grouped[catKey];
+        const orderedEntries = buildManifestRows(entries);
         const sheetName = categoryName.substring(0, 31); // Excel sheet name max 31 chars
         const ws = wb.addWorksheet(sheetName);
 
-        // Column widths (B through H)
-        ws.getColumn(1).width = 3;  // A - spacer
-        ws.getColumn(2).width = 12; // B - Time
-        ws.getColumn(3).width = 8;  // C - Sr.No
-        ws.getColumn(4).width = 28; // D - Rider Name
-        ws.getColumn(5).width = 24; // E - Horse
-        ws.getColumn(6).width = 28; // F - Rider Category
-        ws.getColumn(7).width = 22; // G - Club
-        ws.getColumn(8).width = 8;  // H - HC
+        // Column widths (A through G)
+        ws.getColumn(1).width = 11.8; // A - Time / logo square
+        ws.getColumn(2).width = 5.8;  // B - Sr.No
+        ws.getColumn(3).width = 26.5; // C - Rider Name
+        ws.getColumn(4).width = 20.5; // D - Horse
+        ws.getColumn(5).width = 27.7; // E - Rider Category
+        ws.getColumn(6).width = 16.9; // F - Club
+        ws.getColumn(7).width = 8.5;  // G - HC
 
-        // Row 1: Event title (merged B1:H1)
-        ws.mergeCells('B1:H1');
+        const thinBorder = {
+          top: { style: 'thin', color: { argb: 'FF000000' } },
+          left: { style: 'thin', color: { argb: 'FF000000' } },
+          bottom: { style: 'thin', color: { argb: 'FF000000' } },
+          right: { style: 'thin', color: { argb: 'FF000000' } },
+        } as const;
+        const orangeFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF08C00' } } as const;
+
+        // Row 1: Logo in A1 and title banner in B1:G1
+        ws.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+        ws.getCell('A1').border = thinBorder;
+        ws.mergeCells('B1:G1');
         const titleCell = ws.getCell('B1');
-        titleCell.value = eventName;
-        titleCell.font = { name: 'Arial', size: 18, bold: true };
+        titleCell.value = bannerTitle;
+        titleCell.font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
         titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
-        ws.getRow(1).height = 35;
+        titleCell.fill = orangeFill;
+        titleCell.border = thinBorder;
+        ws.getRow(1).height = 78;
+        for (let col = 2; col <= 7; col++) {
+          ws.getCell(1, col).fill = orangeFill;
+          ws.getCell(1, col).border = thinBorder;
+        }
 
-        // Row 2: Date + Category info (merged B2:H2)
-        ws.mergeCells('B2:H2');
-        const subtitleCell = ws.getCell('B2');
-        const eventTypeLabel = (formData.eventType || 'SHOW').toUpperCase();
+        if (logoBase64) {
+          const imageId = wb.addImage({
+            base64: logoBase64,
+            extension: 'png',
+          });
+          ws.addImage(imageId, {
+            tl: { col: 0.08, row: 0.1 } as any,
+            ext: { width: 76, height: 58 },
+            editAs: 'oneCell',
+          });
+        }
+
+        // Row 2: Date + Category info (merged A2:G2)
+        ws.mergeCells('A2:G2');
+        const subtitleCell = ws.getCell('A2');
         subtitleCell.value = `${startDateLabel}  -    ${categoryName.toUpperCase()}                                              CLASS : ${categoryName.toUpperCase()},OPEN`;
         subtitleCell.font = { name: 'Arial', size: 14, bold: true };
         subtitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        subtitleCell.fill = BLUE_ACCENT_LIGHT_80;
+        subtitleCell.border = thinBorder;
         ws.getRow(2).height = 28;
 
-        // Row 3: Course walk info (merged B3:H3)
-        ws.mergeCells('B3:H3');
-        const infoCell = ws.getCell('B3');
+        // Row 3: Course walk info (merged A3:G3)
+        ws.mergeCells('A3:G3');
+        const infoCell = ws.getCell('A3');
         infoCell.value = 'Course Walk - 13:30Hrs   First Rider - 1400 HRS';
         infoCell.font = { name: 'Arial', size: 14, bold: true };
         infoCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        infoCell.fill = BLUE_ACCENT_LIGHT_60;
+        infoCell.border = thinBorder;
         ws.getRow(3).height = 28;
 
         // Row 4: Headers
         const headers = ['Time', 'Sr.No', 'Rider Name', 'Horse ', 'Rider Category', 'Club ', 'HC'];
         headers.forEach((h, i) => {
-          const cell = ws.getCell(4, i + 2); // B4 through H4
+          const cell = ws.getCell(4, i + 1); // A4 through G4
           cell.value = h;
           cell.font = { name: 'Arial', size: 14, bold: true };
           cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          cell.border = thinBorder;
         });
-        ws.getRow(4).height = 24;
+        ws.getRow(4).height = 26;
 
         // Data rows starting at row 5
-        const startHour = 14;
-        const startMinute = 0;
-        const intervalMinutes = 3;
-
-        entries.forEach((reg: any, index: number) => {
+        orderedEntries.forEach((reg, index) => {
           const rowNum = 5 + index;
-          const totalMinutes = startHour * 60 + startMinute + index * intervalMinutes;
+          const totalMinutes = MANIFEST_START_HOUR * 60 + MANIFEST_START_MINUTE + index * MANIFEST_INTERVAL_MINUTES;
           const hours = Math.floor(totalMinutes / 60);
           const minutes = totalMinutes % 60;
 
           // B: Time
-          const timeCell = ws.getCell(rowNum, 2);
+          const timeCell = ws.getCell(rowNum, 1);
           timeCell.value = new Date(1899, 11, 30, hours, minutes);
           timeCell.numFmt = 'HH:MM';
           timeCell.font = { name: 'Arial', size: 14 };
           timeCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-          // C: Sr.No
-          const srCell = ws.getCell(rowNum, 3);
+          // B: Sr.No
+          const srCell = ws.getCell(rowNum, 2);
           srCell.value = index + 1;
           srCell.font = { name: 'Arial', size: 11 };
           srCell.alignment = { horizontal: 'center', vertical: 'middle' };
-
-          // D: Rider Name
-          const riderCell = ws.getCell(rowNum, 4);
-          riderCell.value = `${reg.rider?.firstName || ''} ${reg.rider?.lastName || ''}`.trim();
+          // C: Rider Name
+          const riderCell = ws.getCell(rowNum, 3);
+          riderCell.value = getRiderDisplayName(reg);
           riderCell.font = { name: 'Arial', size: 11 };
           riderCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-          // E: Horse
-          const horseCell = ws.getCell(rowNum, 5);
+          // D: Horse
+          const horseCell = ws.getCell(rowNum, 4);
           horseCell.value = reg.horse?.name || '';
           horseCell.font = { name: 'Arial', size: 11 };
           horseCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-          // F: Rider Category
-          const catCell = ws.getCell(rowNum, 6);
+          // E: Rider Category
+          const catCell = ws.getCell(rowNum, 5);
           catCell.value = reg.category?.name || '-';
           catCell.font = { name: 'Arial', size: 11 };
+          catCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-          // G: Club
-          const clubCell = ws.getCell(rowNum, 7);
+          // F: Club
+          const clubCell = ws.getCell(rowNum, 6);
           clubCell.value = reg.club?.name || '-';
           clubCell.font = { name: 'Arial', size: 11 };
+          clubCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-          // H: HC
-          const hcCell = ws.getCell(rowNum, 8);
-          hcCell.value = 'No';
+          // G: HC
+          const hcCell = ws.getCell(rowNum, 7);
+          hcCell.value = getHcValue(reg);
           hcCell.font = { name: 'Arial', size: 11 };
           hcCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+          for (let col = 1; col <= 7; col++) {
+            const cell = ws.getCell(rowNum, col);
+            cell.border = thinBorder;
+          }
+          ws.getRow(rowNum).height = 26;
         });
       }
 
@@ -311,10 +485,7 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const now = new Date();
-      const pad = (n: number) => String(n).padStart(2, '0');
-      const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-      a.download = `Start List ${formData.name || 'Event'}-${stamp}.xlsx`;
+      a.download = `Start List  ${formData.name || 'Event'}- ${formatManifestFileDate(formData.startDate)}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success('Manifest exported successfully!');
