@@ -51,7 +51,9 @@ export default function App({ Component, pageProps }: AppProps) {
   const [isRouteLoading, setIsRouteLoading] = useState(false);
   const [routeLoadingPath, setRouteLoadingPath] = useState(router.pathname);
   const routeLoadingStartedAt = useRef<number | null>(null);
+  const routeLoadingVisibleAt = useRef<number | null>(null);
   const routeLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const routeLoadingDelayTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
   const isPublicRoute = PUBLIC_ROUTES.includes(router.pathname);
@@ -66,6 +68,17 @@ export default function App({ Component, pageProps }: AppProps) {
         clearTimeout(routeLoadingTimeout.current);
         routeLoadingTimeout.current = null;
       }
+      if (routeLoadingDelayTimeout.current) {
+        clearTimeout(routeLoadingDelayTimeout.current);
+        routeLoadingDelayTimeout.current = null;
+      }
+    };
+
+    const resetRouteLoading = () => {
+      setIsRouteLoading(false);
+      setRouteLoadingPath(router.pathname);
+      routeLoadingStartedAt.current = null;
+      routeLoadingVisibleAt.current = null;
     };
 
     const handleStart = (url: string) => {
@@ -76,12 +89,15 @@ export default function App({ Component, pageProps }: AppProps) {
         }
         routeLoadingStartedAt.current = Date.now();
         setRouteLoadingPath(normalizeRoutePath(url));
-        setIsRouteLoading(true);
+        routeLoadingVisibleAt.current = null;
+        routeLoadingDelayTimeout.current = setTimeout(() => {
+          routeLoadingVisibleAt.current = Date.now();
+          setIsRouteLoading(true);
+          routeLoadingDelayTimeout.current = null;
+        }, 180);
         // Safety net: force-clear skeleton after 8s if routeChangeComplete never fires
         maxLoadingTimeout.current = setTimeout(() => {
-          setIsRouteLoading(false);
-          setRouteLoadingPath(router.pathname);
-          routeLoadingStartedAt.current = null;
+          resetRouteLoading();
           maxLoadingTimeout.current = null;
         }, 8000);
       }
@@ -92,15 +108,18 @@ export default function App({ Component, pageProps }: AppProps) {
         maxLoadingTimeout.current = null;
       }
       clearPendingTimeout();
-      const startedAt = routeLoadingStartedAt.current;
-      const minVisibleMs = 50;
-      const elapsed = startedAt ? Date.now() - startedAt : minVisibleMs;
+
+      if (!routeLoadingVisibleAt.current) {
+        resetRouteLoading();
+        return;
+      }
+
+      const minVisibleMs = 90;
+      const elapsed = Date.now() - routeLoadingVisibleAt.current;
       const remaining = Math.max(0, minVisibleMs - elapsed);
 
       routeLoadingTimeout.current = setTimeout(() => {
-        setIsRouteLoading(false);
-        setRouteLoadingPath(router.pathname);
-        routeLoadingStartedAt.current = null;
+        resetRouteLoading();
         routeLoadingTimeout.current = null;
       }, remaining);
     };
