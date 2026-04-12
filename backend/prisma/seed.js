@@ -93,6 +93,21 @@ async function main() {
     console.log('✓ Created rider role');
   }
 
+  let clubRole = await prisma.role.findUnique({
+    where: { name: 'club' },
+  });
+
+  if (!clubRole) {
+    clubRole = await prisma.role.create({
+      data: {
+        name: 'club',
+        description: 'Club role',
+        isActive: true,
+      },
+    });
+    console.log('✓ Created club role');
+  }
+
   // ===== ADMIN USER =====
   let adminUser = await prisma.user.findUnique({
     where: { email: 'admin@test.com' },
@@ -143,6 +158,8 @@ async function main() {
   console.log('✓ Created event types');
 
   // ===== CLUBS (20) =====
+  const clubPassword = await bcrypt.hash('club123', 12);
+
   const clubData = [
     { name: 'Bangalore Equestrian Club', shortCode: 'BEC' },
     { name: 'Delhi Horse Trials', shortCode: 'DHT' },
@@ -170,6 +187,28 @@ async function main() {
   for (let i = 0; i < clubData.length; i++) {
     const club = clubData[i];
     const loc = indianCities[i % indianCities.length];
+    const clubEmail = `contact@${club.shortCode.toLowerCase()}.in`;
+
+    // Create a user account for the club if it doesn't exist
+    let clubUser = await prisma.user.findUnique({ where: { email: clubEmail } });
+    if (!clubUser) {
+      clubUser = await prisma.user.create({
+        data: {
+          email: clubEmail,
+          password: clubPassword,
+          firstName: club.name,
+          lastName: 'Admin',
+          gender: 'Other',
+          phone: randPhone(),
+          isActive: true,
+          isApproved: true,
+          profileComplete: true,
+          isGoogleAuth: false,
+          roles: { connect: [{ id: clubRole.id }] },
+        },
+      });
+    }
+
     let existing = await prisma.club.findUnique({
       where: { shortCode: club.shortCode },
     });
@@ -178,7 +217,7 @@ async function main() {
         data: {
           name: club.name,
           shortCode: club.shortCode,
-          email: `contact@${club.shortCode.toLowerCase()}.in`,
+          email: clubEmail,
           registrationNumber: `REG-${club.shortCode}-2026`,
           contactNumber: randPhone(),
           address: `${randInt(1, 500)} ${pick(['MG Road', 'Station Road', 'Race Course Road', 'Cantonment Area', 'Ring Road', 'Lake View Road'])}`,
@@ -189,7 +228,7 @@ async function main() {
           gstNumber: `GST-${club.shortCode}-2026`,
           description: `${club.name} - Premier equestrian facility in ${loc.city}`,
           isActive: true,
-          primaryContact: { connect: { id: adminUser.id } },
+          primaryContact: { connect: { id: clubUser.id } },
         },
       });
     }
@@ -510,7 +549,8 @@ async function main() {
   console.log(`   Transactions: ${createdRegistrations.length}`);
   console.log('');
   console.log('🔐 Test Credentials:');
-  console.log('   Admin - Email: admin@test.com / Password: password123');
+  console.log('   Admin  - Email: admin@test.com / Password: password123');
+  console.log('   Clubs  - Email: contact@{shortcode}.in / Password: club123');
   console.log('   Riders - Email: {firstname}.{lastname}{n}@test.com / Password: rider123');
 }
 
