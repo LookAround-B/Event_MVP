@@ -276,6 +276,8 @@ model Registration {
   totalAmount  Float @default(0)
 
   startNumber  Int?     // Position in the category start list (unique per event+category)
+  startPosition Int?
+  isScheduled  Boolean  @default(false)
 
   registeredAt DateTime @default(now())
   createdAt    DateTime @default(now())

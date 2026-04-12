@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
-import { ArrowLeft, Download, ChevronLeft, ChevronRight, MapPin, Clock, Search, X, Eye } from 'lucide-react';
+import { ArrowLeft, Download, ChevronLeft, ChevronRight, MapPin, Clock, Search, X, Eye, ListOrdered, Zap, Loader2 } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { PageSkeleton } from '@/components/PageSkeleton';
 
@@ -36,6 +36,15 @@ interface Registration {
   gstAmount: number;
   totalAmount: number;
   registeredAt: string;
+}
+
+interface ScheduleEntry {
+  id: string;
+  startPosition: number | null;
+  riderId: string;
+  horseId: string;
+  rider: { firstName: string; lastName: string };
+  horse: { name: string };
 }
 
 /* ===================== Utility: Export ===================== */
@@ -93,6 +102,13 @@ export default function EventDetail() {
   // Action modal
   const [actionModal, setActionModal] = useState<{ isOpen: boolean; registration?: Registration }>({ isOpen: false });
 
+  // Start list / schedule
+  const [scheduleCategory, setScheduleCategory] = useState<string>('');
+  const [scheduleData, setScheduleData] = useState<ScheduleEntry[]>([]);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+
   useEffect(() => {
     if (id) {
       Promise.all([fetchEventDetail(), fetchRegistrations()]);
@@ -121,6 +137,41 @@ export default function EventDetail() {
     } catch (err) {
       console.error('Failed to fetch registrations:', err);
     }
+  };
+
+  const fetchSchedule = async (categoryId: string) => {
+    if (!categoryId || !id) return;
+    setScheduleLoading(true);
+    setScheduleError(null);
+    try {
+      const response = await api.get(`/api/schedules/${categoryId}?eventId=${id}`);
+      setScheduleData(response.data.data || []);
+    } catch {
+      setScheduleError('Failed to load start list');
+    } finally {
+      setScheduleLoading(false);
+    }
+  };
+
+  const generateSchedule = async () => {
+    if (!scheduleCategory || !id) return;
+    setGenerating(true);
+    setScheduleError(null);
+    try {
+      await api.post('/api/schedules/generate', { eventId: id, categoryId: scheduleCategory });
+      await fetchSchedule(scheduleCategory);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || 'Failed to generate schedule';
+      setScheduleError(msg);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleScheduleCategoryChange = (categoryId: string) => {
+    setScheduleCategory(categoryId);
+    setScheduleData([]);
+    if (categoryId) fetchSchedule(categoryId);
   };
 
   // Filtered and paginated registrations
@@ -334,6 +385,98 @@ export default function EventDetail() {
     downloadBlob(
       new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
       buildTimestampedFileName(`${event?.name || 'event'}-start-list`, 'xlsx')
+    );
+  };
+
+  const exportStartListToExcel = async () => {
+    if (scheduleData.length === 0 || !event) return;
+    const catName = (event.categories || []).find(c => c.id === scheduleCategory)?.name || 'Category';
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Event MVP';
+    const sheet = workbook.addWorksheet('Start List');
+
+    sheet.columns = [
+      { key: 'pos',   width: 8  },
+      { key: 'rider', width: 32 },
+      { key: 'horse', width: 26 },
+    ];
+
+    const orangeFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF08C00' } };
+    const whiteFill:  ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
+    const headerFill: ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F1F1F' } };
+    const altFill:    ExcelJS.Fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
+    const thinBorder: ExcelJS.Borders = {
+      top:    { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      left:   { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      right:  { style: 'thin', color: { argb: 'FFCCCCCC' } },
+      diagonal: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+    };
+    const applyRow = (row: ExcelJS.Row, fill: ExcelJS.Fill, fontColor: string, size: number, bold: boolean) => {
+      row.eachCell({ includeEmpty: true }, cell => {
+        cell.fill = fill;
+        cell.font = { name: 'Arial', size, bold, color: { argb: fontColor } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = thinBorder;
+      });
+    };
+
+    // Row 1 — title
+    const logoBase64 = await fetchLogoBase64();
+    sheet.addRow(['', '', '']);
+    sheet.mergeCells('A1:C1');
+    sheet.getRow(1).height = 54;
+    if (logoBase64) {
+      sheet.unMergeCells('A1:C1');
+      sheet.mergeCells('B1:C1');
+      sheet.getColumn(1).width = 14;
+      const logoId = workbook.addImage({ base64: logoBase64, extension: 'png' });
+      sheet.addImage(logoId, { tl: { col: 0.1, row: 0.08 } as ExcelJS.Anchor, br: { col: 0.9, row: 0.92 } as ExcelJS.Anchor, editAs: 'oneCell' });
+      sheet.getCell('A1').fill = whiteFill; sheet.getCell('A1').border = thinBorder;
+      const t = sheet.getCell('B1');
+      t.value = 'EQUESTRIAN PREMIER LEAGUE'; t.fill = orangeFill;
+      t.font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
+      t.alignment = { horizontal: 'center', vertical: 'middle' }; t.border = thinBorder;
+    } else {
+      const t = sheet.getCell('A1');
+      t.value = (event.name || 'START LIST').toUpperCase(); t.fill = orangeFill;
+      t.font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+      t.alignment = { horizontal: 'center', vertical: 'middle' }; t.border = thinBorder;
+    }
+
+    // Row 2 — event name + category
+    sheet.addRow(['', '', '']);
+    sheet.mergeCells('A2:C2');
+    const r2 = sheet.getCell('A2');
+    r2.value = `${event.name}  |  ${catName}`;
+    r2.fill = whiteFill; r2.border = thinBorder;
+    r2.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF000000' } };
+    r2.alignment = { horizontal: 'center', vertical: 'middle' };
+    sheet.getRow(2).height = 26;
+
+    // Row 3 — column headers
+    const hdr = sheet.addRow(['Start #', 'Rider Name', 'Horse']);
+    applyRow(hdr, headerFill, 'FFFFFFFF', 11, true);
+    hdr.height = 26;
+
+    // Data rows
+    scheduleData.forEach((entry, idx) => {
+      const fill = idx % 2 === 0 ? whiteFill : altFill;
+      const row = sheet.addRow([
+        entry.startPosition ?? idx + 1,
+        `${entry.rider.firstName} ${entry.rider.lastName}`,
+        entry.horse.name,
+      ]);
+      applyRow(row, fill, 'FF000000', 10, false);
+      row.height = 20;
+      row.getCell(1).font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF000000' } };
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    downloadBlob(
+      new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+      buildTimestampedFileName(`${event.name}-${catName}-start-order`, 'xlsx')
     );
   };
 
@@ -561,6 +704,104 @@ export default function EventDetail() {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Start List Section */}
+        <div className="bento-card overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/40 via-secondary/60 to-primary/40" />
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+              <div>
+                <h2 className="text-lg font-bold text-on-surface flex items-center gap-2">
+                  <ListOrdered className="w-5 h-5 text-primary" /> Start List
+                </h2>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">
+                  Rider entry spacing &amp; start order
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Select
+                  value={scheduleCategory || '__none__'}
+                  onValueChange={v => handleScheduleCategoryChange(v === '__none__' ? '' : v)}
+                >
+                  <SelectTrigger className="w-52">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Select category</SelectItem>
+                    {(event.categories || []).map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <button
+                  onClick={generateSchedule}
+                  disabled={!scheduleCategory || generating}
+                  className="flex items-center gap-2 px-4 py-2.5 btn-cta rounded-xl text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  {generating
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <Zap className="w-4 h-4" />}
+                  {generating ? 'Generating…' : 'Generate'}
+                </button>
+                {scheduleData.length > 0 && (
+                  <button
+                    onClick={() => void exportStartListToExcel()}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright border border-border/30 transition-colors"
+                  >
+                    <Download className="w-4 h-4" /> Excel
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {scheduleError && (
+              <p className="text-sm text-destructive mb-4">{scheduleError}</p>
+            )}
+
+            {scheduleLoading ? (
+              <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="text-sm">Loading start list…</span>
+              </div>
+            ) : scheduleData.length === 0 ? (
+              <div className="py-10 text-center">
+                <ListOrdered className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  {scheduleCategory
+                    ? 'No start list yet. Click Generate to assign start positions.'
+                    : 'Select a category to view or generate the start list.'}
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[500px]">
+                  <thead>
+                    <tr className="label-tech text-left bg-surface-container/40">
+                      <th className="p-3 w-16">#</th>
+                      <th className="p-3">Rider</th>
+                      <th className="p-3">Horse</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/10">
+                    {scheduleData.map((entry, idx) => (
+                      <tr key={entry.id} className={`hover:bg-surface-container/20 transition-all ${idx % 2 === 0 ? '' : 'bg-surface-container/10'}`}>
+                        <td className="p-3">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-black text-xs">
+                            {entry.startPosition ?? idx + 1}
+                          </span>
+                        </td>
+                        <td className="p-3 font-semibold text-on-surface">
+                          {entry.rider.firstName} {entry.rider.lastName}
+                        </td>
+                        <td className="p-3 text-on-surface-variant">{entry.horse.name}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Prospectus Section */}

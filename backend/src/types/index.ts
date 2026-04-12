@@ -20,6 +20,15 @@ export type AuthToken = {
   };
 };
 
+export interface ScheduleEntry {
+  id: string;
+  startPosition: number;
+  riderId: string;
+  horseId: string;
+  rider: { firstName: string; lastName: string };
+  horse: { name: string };
+}
+
 export type DecodedToken = {
   id: string;
   email: string;
