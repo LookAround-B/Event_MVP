@@ -44,6 +44,7 @@ interface ManifestRegistration {
     id?: string;
     firstName?: string;
     lastName?: string;
+    dob?: string | Date | null;
   };
   horse?: {
     name?: string;
@@ -101,6 +102,10 @@ function getRiderDisplayName(entry: ManifestRegistration) {
   return `${entry.rider?.firstName || ''} ${entry.rider?.lastName || ''}`.trim() || 'Unknown Rider';
 }
 
+function toUpperDisplay(value: string | null | undefined) {
+  return String(value || '').trim().toUpperCase();
+}
+
 function getFirstGroupedRiderName(entries: ManifestRegistration[] | undefined, fallbackKey: string) {
   if (!entries || entries.length === 0) return fallbackKey;
   return getRiderDisplayName(entries[0]);
@@ -112,6 +117,23 @@ function getRiderKey(entry: ManifestRegistration) {
 
 function getHcValue(entry: ManifestRegistration) {
   return entry.horse?.horseCode ? 'Yes' : 'No';
+}
+
+function getRiderCategoryLabel(entry: ManifestRegistration, referenceDateRaw: string) {
+  const dob = entry.rider?.dob ? new Date(entry.rider.dob) : null;
+  if (!dob || Number.isNaN(dob.getTime()) || !referenceDateRaw) return entry.category?.name || '-';
+  const referenceDate = new Date(referenceDateRaw);
+  if (Number.isNaN(referenceDate.getTime())) return entry.category?.name || '-';
+
+  let age = referenceDate.getFullYear() - dob.getFullYear();
+  const beforeBirthday =
+    referenceDate.getMonth() < dob.getMonth() ||
+    (referenceDate.getMonth() === dob.getMonth() && referenceDate.getDate() < dob.getDate());
+  if (beforeBirthday) age -= 1;
+
+  if (age <= 14) return 'SUB-JUNIOR (Age 14 and Below)';
+  if (age <= 18) return 'JUNIOR (Age 15 to 18)';
+  return 'OPEN (Age 19 and Above)';
 }
 
 async function fetchLogoBase64() {
@@ -348,11 +370,11 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
 
         // Column widths (A through G)
         ws.getColumn(1).width = 11.8; // A - Time / logo square
-        ws.getColumn(2).width = 5.8;  // B - Sr.No
+        ws.getColumn(2).width = 7.2;  // B - Sr.No
         ws.getColumn(3).width = 26.5; // C - Rider Name
         ws.getColumn(4).width = 20.5; // D - Horse
-        ws.getColumn(5).width = 27.7; // E - Rider Category
-        ws.getColumn(6).width = 16.9; // F - Club
+        ws.getColumn(5).width = 30.5; // E - Rider Category
+        ws.getColumn(6).width = 19.5; // F - Club
         ws.getColumn(7).width = 8.5;  // G - HC
 
         const thinBorder = {
@@ -443,25 +465,25 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
           srCell.alignment = { horizontal: 'center', vertical: 'middle' };
           // C: Rider Name
           const riderCell = ws.getCell(rowNum, 3);
-          riderCell.value = getRiderDisplayName(reg);
+          riderCell.value = toUpperDisplay(getRiderDisplayName(reg));
           riderCell.font = { name: 'Arial', size: 11 };
           riderCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
           // D: Horse
           const horseCell = ws.getCell(rowNum, 4);
-          horseCell.value = reg.horse?.name || '';
+          horseCell.value = toUpperDisplay(reg.horse?.name);
           horseCell.font = { name: 'Arial', size: 11 };
           horseCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
           // E: Rider Category
           const catCell = ws.getCell(rowNum, 5);
-          catCell.value = reg.category?.name || '-';
+          catCell.value = getRiderCategoryLabel(reg, formData.startDate);
           catCell.font = { name: 'Arial', size: 11 };
           catCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
           // F: Club
           const clubCell = ws.getCell(rowNum, 6);
-          clubCell.value = reg.club?.name || '-';
+          clubCell.value = toUpperDisplay(reg.club?.name || '-');
           clubCell.font = { name: 'Arial', size: 11 };
           clubCell.alignment = { horizontal: 'center', vertical: 'middle' };
 

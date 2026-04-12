@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import {
@@ -496,6 +496,23 @@ function SectionSpinner({ label }: { label?: string }) {
 
 function DashboardContent() {
   const router = useRouter();
+  const eventsCacheRef = useRef(
+    new Map<string, { events: EventListItem[]; count: number; pages: number }>(),
+  );
+  const participantsCacheRef = useRef(
+    new Map<string, { data: ParticipantRow[]; count: number; pages: number }>(),
+  );
+  const kpiCacheRef = useRef(
+    new Map<
+      string,
+      {
+        kpiCards: KpiCards;
+        eventBreakdown: EventChartData[];
+        events: FilterOption[];
+        categories: FilterOption[];
+      }
+    >(),
+  );
 
   const [kpiCards, setKpiCards] = useState<KpiCards>({
     totalEvents: 0,
@@ -541,6 +558,17 @@ function DashboardContent() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchKpis = useCallback(async () => {
+    const cacheKey = mainEventFilter || "__all__";
+    const cached = kpiCacheRef.current.get(cacheKey);
+    if (cached) {
+      setKpiCards(cached.kpiCards);
+      setEventChartData(cached.eventBreakdown);
+      setEventOptions(cached.events);
+      setCategoryOptions(cached.categories);
+      setKpiLoading(false);
+      return;
+    }
+
     try {
       setKpiLoading(true);
       const params: any = {};
@@ -551,6 +579,12 @@ function DashboardContent() {
       setEventChartData(data.charts.eventBreakdown || []);
       setEventOptions(data.filterOptions.events || []);
       setCategoryOptions(data.filterOptions.categories || []);
+      kpiCacheRef.current.set(cacheKey, {
+        kpiCards: data.kpiCards,
+        eventBreakdown: data.charts.eventBreakdown || [],
+        events: data.filterOptions.events || [],
+        categories: data.filterOptions.categories || [],
+      });
     } catch (err) {
       console.error("Failed to fetch KPIs:", err);
       setError("Failed to load dashboard KPIs");
@@ -560,6 +594,16 @@ function DashboardContent() {
   }, [mainEventFilter]);
 
   const fetchEvents = useCallback(async () => {
+    const cacheKey = `${eventTab}:${eventPage}`;
+    const cached = eventsCacheRef.current.get(cacheKey);
+    if (cached) {
+      setEvents(cached.events);
+      setEventCount(cached.count);
+      setEventTotalPages(cached.pages);
+      setEventsLoading(false);
+      return;
+    }
+
     try {
       setEventsLoading(true);
       const params: any = { tab: eventTab, page: eventPage, limit: 15 };
@@ -568,6 +612,11 @@ function DashboardContent() {
       setEvents(data.events || []);
       setEventCount(data.count || 0);
       setEventTotalPages(data.pages || 1);
+      eventsCacheRef.current.set(cacheKey, {
+        events: data.events || [],
+        count: data.count || 0,
+        pages: data.pages || 1,
+      });
     } catch (err) {
       console.error("Failed to fetch events:", err);
     } finally {
@@ -576,6 +625,24 @@ function DashboardContent() {
   }, [eventTab, eventPage]);
 
   const fetchParticipants = useCallback(async () => {
+    const cacheKey = JSON.stringify({
+      mainEventFilter,
+      participantPage,
+      filterMonths,
+      filterEvents,
+      filterCategories,
+      filterPayment,
+      participantSearch: participantSearch.trim(),
+    });
+    const cached = participantsCacheRef.current.get(cacheKey);
+    if (cached) {
+      setParticipants(cached.data);
+      setParticipantCount(cached.count);
+      setParticipantTotalPages(cached.pages);
+      setParticipantsLoading(false);
+      return;
+    }
+
     try {
       setParticipantsLoading(true);
       const params: any = { page: participantPage, limit: 20 };
@@ -591,6 +658,11 @@ function DashboardContent() {
       setParticipants(data.data || []);
       setParticipantCount(data.count || 0);
       setParticipantTotalPages(data.pages || 1);
+      participantsCacheRef.current.set(cacheKey, {
+        data: data.data || [],
+        count: data.count || 0,
+        pages: data.pages || 1,
+      });
     } catch (err) {
       console.error("Failed to fetch participants:", err);
     } finally {
@@ -966,15 +1038,7 @@ function DashboardContent() {
                       />
                       <XAxis
                         dataKey="eventName"
-                        angle={-35}
-                        textAnchor="end"
-                        height={60}
-                        tick={{
-                          fill: "hsl(224,15%,55%)",
-                          fontSize: 10,
-                          fontWeight: 500,
-                        }}
-                        interval={0}
+                        hide
                         axisLine={false}
                         tickLine={false}
                       />

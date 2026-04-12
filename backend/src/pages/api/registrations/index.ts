@@ -78,7 +78,7 @@ async function handler(
               registeredAt: true,
               createdAt: true,
               rider: {
-                select: { id: true, firstName: true, lastName: true, email: true },
+                select: { id: true, firstName: true, lastName: true, email: true, dob: true },
               },
               horse: {
                 select: { id: true, name: true, color: true, gender: true, horseCode: true },
@@ -118,7 +118,7 @@ async function handler(
               registeredAt: true,
               createdAt: true,
               rider: {
-                select: { id: true, firstName: true, lastName: true, email: true },
+                select: { id: true, firstName: true, lastName: true, email: true, dob: true },
               },
               horse: {
                 select: { id: true, name: true, color: true, gender: true, horseCode: true },
