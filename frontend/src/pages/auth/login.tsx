@@ -195,7 +195,7 @@ export default function Login() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
+                    className="auth-input h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
                     style={{ background: 'rgba(255,255,255,0.07)' }}
                     placeholder="Enter your email"
                     required
@@ -211,7 +211,7 @@ export default function Login() {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10 pr-12"
+                      className="auth-input h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10 pr-12"
                       style={{ background: 'rgba(255,255,255,0.07)' }}
                       placeholder="Enter your password"
                       required

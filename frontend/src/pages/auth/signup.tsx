@@ -130,7 +130,7 @@ export default function Signup() {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
-                      className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
+                      className="auth-input h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
                       style={{ background: 'rgba(255,255,255,0.07)' }}
                       placeholder="First name"
                       required={!isClubSignup}
@@ -143,7 +143,7 @@ export default function Signup() {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
-                      className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
+                      className="auth-input h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
                       style={{ background: 'rgba(255,255,255,0.07)' }}
                       placeholder="Last name"
                       required={!isClubSignup}
@@ -160,7 +160,7 @@ export default function Signup() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
+                  className="auth-input h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10"
                   style={{ background: 'rgba(255,255,255,0.07)' }}
                   placeholder={isClubSignup ? 'club@email.com' : 'your@email.com'}
                   required
@@ -176,7 +176,7 @@ export default function Signup() {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10 pr-12"
+                    className="auth-input h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10 pr-12"
                     style={{ background: 'rgba(255,255,255,0.07)' }}
                     placeholder="Enter your password"
                     required
@@ -203,7 +203,7 @@ export default function Signup() {
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10 pr-12"
+                    className="auth-input h-12 rounded-xl text-white placeholder:text-white/30 text-sm focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:ring-offset-0 border-white/10 pr-12"
                     style={{ background: 'rgba(255,255,255,0.07)' }}
                     placeholder="Confirm your password"
                     required
