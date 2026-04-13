@@ -9,7 +9,7 @@ export default function MyClub() {
   useEffect(() => {
     api.get('/api/clubs/my')
       .then((res) => {
-        const clubId = res.data?.data?.clubId;
+        const clubId = res.data?.data?.id;
         if (clubId) {
           router.replace(`/clubs/${clubId}`);
         } else {

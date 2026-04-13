@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth } from '@/lib/auth-middleware';
+import { withAuth, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { ApiResponse } from '@/types';
 
 async function handler(
@@ -22,9 +22,35 @@ async function handler(
   const clubId = typeof id === 'string' ? id : id?.[0];
 
   if (req.method === 'GET') {
-    return withAuth(async (authReq, authRes) => {
+    return withAuth(async (authReq: AuthenticatedRequest, authRes) => {
       try {
-        if (!clubId) {
+        // Resolve "my" → the current user's club based on their role
+        let resolvedClubId = clubId;
+        if (clubId === 'my') {
+          const userId = authReq.user?.id;
+          const role = authReq.user?.role;
+          if (role === 'club') {
+            const club = await prisma.club.findFirst({
+              where: { primaryContactId: userId },
+              select: { id: true },
+            });
+            resolvedClubId = club?.id ?? undefined;
+          } else if (role === 'rider') {
+            const rider = await prisma.rider.findFirst({
+              where: { userId },
+              select: { clubId: true },
+            });
+            resolvedClubId = rider?.clubId ?? undefined;
+          }
+          if (!resolvedClubId) {
+            return authRes.status(404).json({
+              statusCode: 404,
+              message: 'No club associated with this account',
+            });
+          }
+        }
+
+        if (!resolvedClubId) {
           return authRes.status(400).json({
             statusCode: 400,
             message: 'Club ID is required',
@@ -32,7 +58,7 @@ async function handler(
         }
 
         const club = await prisma.club.findUnique({
-          where: { id: clubId },
+          where: { id: resolvedClubId },
           select: {
             id: true,
             eId: true,

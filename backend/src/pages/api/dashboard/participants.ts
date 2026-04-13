@@ -150,4 +150,4 @@ async function handler(
   }
 }
 
-export default withApiHandler(withRole('admin', 'rider')(handler), { allowedMethods: ['GET'] })
+export default withApiHandler(withRole('admin', 'club', 'rider')(handler), { allowedMethods: ['GET'] })
