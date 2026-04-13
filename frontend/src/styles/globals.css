@@ -349,17 +349,26 @@
     color: hsl(var(--muted-foreground));
   }
 
-  .auth-input,
+  .auth-input {
+    background-color: rgba(255, 255, 255, 0.07) !important;
+  }
+
   .auth-input:-webkit-autofill,
   .auth-input:-webkit-autofill:hover,
   .auth-input:-webkit-autofill:focus,
   .auth-input:-webkit-autofill:active {
+    background-color: rgba(255, 255, 255, 0.07) !important;
     -webkit-text-fill-color: #ffffff;
     caret-color: #ffffff;
     border-color: rgba(255, 255, 255, 0.1);
     -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.07) inset;
     box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.07) inset;
     transition: background-color 9999s ease-in-out 0s;
+  }
+
+  .auth-input:focus,
+  .auth-input:focus-visible {
+    background-color: rgba(255, 255, 255, 0.1) !important;
   }
 }
 
