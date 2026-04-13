@@ -116,7 +116,7 @@ async function handler(
           skip,
           take: limitNum,
           select: userSelect,
-          orderBy: { createdAt: 'desc' },
+          orderBy: [{ isApproved: 'asc' }, { createdAt: 'desc' }],
         }),
         prisma.user.count({ where }),
       ]);

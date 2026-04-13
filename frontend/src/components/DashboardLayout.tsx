@@ -5,7 +5,7 @@ import { Bell, Search } from "lucide-react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 const pageTitles: Record<string, string> = {
   "/dashboard":        "Dashboard",
@@ -33,8 +33,7 @@ const pageTitles: Record<string, string> = {
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const title = pageTitles[router.pathname] || "Dashboard";
-  const { user } = useAuth();
-  const initial = (user?.email ?? "U").charAt(0).toUpperCase();
+  const { imageUrl, initial } = useUserProfile();
 
   return (
     <SidebarProvider>
@@ -87,9 +86,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               </Link>
 
               {/* Avatar */}
-              <Link href="/account" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-sm font-bold border border-primary/30 shimmer-card hover:opacity-80 transition-opacity"
+              <Link href="/account" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden border border-primary/30 shimmer-card hover:opacity-80 transition-opacity flex items-center justify-center text-sm font-bold"
                 style={{ background: "hsl(var(--primary)/0.15)", color: "hsl(var(--primary))" }}>
-                {initial}
+                {imageUrl ? (
+                  <img src={imageUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  initial
+                )}
               </Link>
             </div>
           </header>

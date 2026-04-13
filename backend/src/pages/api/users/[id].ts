@@ -92,7 +92,7 @@ async function handler(
         });
       }
 
-      const { firstName, lastName, gender } = req.body;
+      const { firstName, lastName, gender, phone, isApproved, isActive } = req.body;
 
       const existingUser = await prisma.user.findUnique({
         where: { id: userId },
@@ -112,6 +112,9 @@ async function handler(
           ...(firstName && { firstName }),
           ...(lastName && { lastName }),
           ...(gender !== undefined ? { gender: gender || null } : {}),
+          ...(phone !== undefined ? { phone: phone || null } : {}),
+          ...(isApproved !== undefined ? { isApproved: Boolean(isApproved) } : {}),
+          ...(isActive !== undefined ? { isActive: Boolean(isActive) } : {}),
         },
         select: {
           id: true,

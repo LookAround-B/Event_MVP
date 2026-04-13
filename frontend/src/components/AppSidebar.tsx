@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAppearance } from "@/contexts/AppearanceContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
 type NavGroup = { label: string; items: NavItem[] };
@@ -136,14 +137,13 @@ export function AppSidebar() {
   const pathname = router.pathname;
   useAppearance();
   const { user, role, logout } = useAuth();
+  const { imageUrl, displayName, initial } = useUserProfile();
 
   const navGroups =
     role === "admin" ? adminNavGroups :
     role === "club"  ? clubNavGroups  :
     riderNavGroups;
 
-  const displayName = user?.email ?? "User";
-  const initial = displayName.charAt(0).toUpperCase();
   const roleLabel = ROLE_LABEL[role ?? "rider"] ?? "User";
 
   // Prefetch all nav routes on mount for instant navigation
@@ -291,10 +291,16 @@ export function AppSidebar() {
           <div className="rounded-xl p-3 sidebar-user-card">
             <div className="flex items-center gap-2.5">
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black flex-shrink-0 border border-primary/30 text-primary"
+                className="w-8 h-8 rounded-lg flex-shrink-0 border border-primary/30 overflow-hidden"
                 style={{ background: "hsl(var(--primary)/0.12)" }}
               >
-                {initial}
+                {imageUrl ? (
+                  <img src={imageUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-sm font-black text-primary">
+                    {initial}
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-on-surface truncate">{displayName}</p>
