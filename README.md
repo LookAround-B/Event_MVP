@@ -1,464 +1,323 @@
+<div align="center">
+
 # Equestrian Event Management Platform
 
-A comprehensive Next.js + Prisma ORM backend API for managing equestrian events, clubs, riders, horses, and financial transactions at production scale.
+**The all-in-one platform for organising, managing, and running equestrian competitions at scale.**
 
-## 🎯 Project Overview
+Built for event organisers, club managers, and riders — from registration to results, scheduling to payments.
 
-This is a production-ready backend API built with:
-- **Framework**: Next.js 14.0.0 with TypeScript 5.3.3
-- **ORM**: Prisma 5.8.0 with PostgreSQL
-- **Authentication**: JWT-based with bcryptjs password hashing
-- **Security**: CORS, Security Headers, Input Validation, Role-Based Access Control (RBAC)
-- **Database**: 20+ models covering Events, Clubs, Riders, Horses, Registrations, Financial Tracking, Audit Logs
+<br/>
 
-## ✨ Production-Ready Features
+![Next.js](https://img.shields.io/badge/Next.js-14_|_16-black?style=flat-square&logo=nextdotjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript)
+![Prisma](https://img.shields.io/badge/Prisma-5.8-2D3748?style=flat-square&logo=prisma)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3-06B6D4?style=flat-square&logo=tailwindcss)
 
-### Security & Error Handling
-- ✅ **CORS Configuration**: Serverless-compatible CORS handling for Vercel
-- ✅ **Security Headers**: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection
-- ✅ **Input Validation**: Schema-based validation at API entry points
-- ✅ **Error Codes**: Typed error codes for consistent client-side error handling
-- ✅ **Audit Logging**: Track all CREATE, UPDATE, DELETE operations for compliance
-- ✅ **RBAC**: Role-based access control with permission checking
+</div>
 
-### Architecture Patterns
-- ✅ **API Handler Wrapper**: Consistent request/response handling with automatic error catching
-- ✅ **Middleware Chain**: CORS → Security Headers → Error Handling → Handler
-- ✅ **Prisma Singleton**: Production-grade connection pooling for Vercel Functions
-- ✅ **Environment Configuration**: Flexible env-based settings for dev/prod/staging
+---
 
-## 🚀 Quick Start
+## Overview
 
-### 1. Installation
+The Equestrian Event Management Platform is a full-stack monorepo application that handles the complete lifecycle of equestrian competitions — from event creation and club management through rider/horse registration, automated schedule generation, stable bookings, financial tracking, and compliance audit logging.
 
-```bash
-# Install dependencies
-npm install
+The platform is structured as two independent Next.js applications sharing a single Prisma schema, designed for deployment on Vercel.
 
-# Set up environment variables
+---
+
+## Features
+
+### Event Management
+- Create and publish events with venue details, categories, and terms & conditions
+- Interactive map-based venue picker with GPS coordinates
+- Rich text editor for event descriptions and announcements
+- Auto-generate competition schedules by category with email distribution
+
+### Club, Rider & Horse Management
+- Full CRUD for clubs, riders, and horses with profile photos
+- Club manager portal with scoped access to own club's data
+- Rider self-service portal for profile updates and registration history
+- Horse ownership tracking with competition history
+
+### Registration & Approvals
+- Online event registration with fee and GST capture
+- Multi-stage approval workflow with admin and club manager gates
+- Pending approval queue with bulk approve/reject actions
+- Real-time registration status notifications
+
+### Financial Tracking
+- Transaction recording with multiple payment methods
+- Per-event and per-registration financial summaries
+- Exportable financial reports (Excel, PDF)
+
+### Scheduling
+- Automated schedule generation from registration data
+- Per-category schedule management
+- One-click email dispatch of schedules to registered participants
+
+### Stable Booking
+- Stable availability management per event
+- Stable booking linked to registrations
+
+### Administration
+- Role-based access control (ADMIN, CLUB_MANAGER, RIDER, VIEWER)
+- Granular per-user permissions (Can Edit Event, Can View Financial, Can Export, etc.)
+- Full audit log of all CREATE / UPDATE / DELETE operations
+- System settings management
+- User approval workflow for new accounts
+
+### Platform
+- Google OAuth + email/password authentication
+- Dark/light theme with smooth transitions
+- Responsive design for desktop and tablet
+- Dashboard with live KPIs and charts
+- In-app notification centre
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Frontend Framework** | Next.js 14, TypeScript 5.3 |
+| **Backend Framework** | Next.js 16, TypeScript 5.3 |
+| **Database** | PostgreSQL 16 |
+| **ORM** | Prisma 5.8 |
+| **Authentication** | JWT + bcryptjs, Google OAuth |
+| **UI Components** | Radix UI, shadcn/ui |
+| **Styling** | Tailwind CSS, Framer Motion |
+| **Rich Text** | Tiptap |
+| **Charts** | Recharts |
+| **Maps** | Leaflet |
+| **State Management** | Zustand, TanStack Query |
+| **Forms** | React Hook Form |
+| **Exports** | ExcelJS, jsPDF, html2canvas |
+| **Email** | Nodemailer |
+| **Deployment** | Vercel |
+
+---
+
+## Repository Structure
 
 ```
+Event_MVP/
+├── backend/                  # Next.js API server — runs on port 4000
+│   ├── src/
+│   │   ├── pages/api/        # REST API routes
+│   │   ├── lib/              # Auth, CORS, validation, email, scheduling
+│   │   └── types/            # Shared TypeScript types
+│   └── package.json
+│
+├── frontend/                 # Next.js UI — runs on port 4001
+│   ├── src/
+│   │   ├── pages/            # Application pages
+│   │   ├── components/       # UI components (Radix + shadcn/ui)
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── contexts/         # React context providers
+│   │   ├── lib/              # API client, utilities
+│   │   └── types/            # TypeScript types
+│   └── package.json
+│
+├── prisma/
+│   ├── schema.prisma         # Shared database schema (16 models)
+│   └── migrations/           # Migration history
+│
+└── package.json              # Root — runs both apps concurrently
+```
 
-### 2. Environment Configuration
+---
 
-Create `.env.local` with:
+## Database Schema
+
+16 models across 6 domains:
+
+| Domain | Models |
+|--------|--------|
+| Auth & Access | `User`, `Role`, `Permission` |
+| Events | `Event`, `EventCategory`, `EventType` |
+| Participants | `Club`, `Rider`, `Horse` |
+| Registrations | `Registration` |
+| Venue & Infrastructure | `Venue`, `Stable`, `StableBooking` |
+| Finance & System | `Transaction`, `AuditLog`, `Settings` |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL 14+ (local or hosted)
+- npm 9+
+
+### 1. Clone & Install
+
+```bash
+git clone <repository-url>
+cd Event_MVP
+
+npm run install-all
+```
+
+> `install-all` installs dependencies for the root, backend, and frontend in one command.
+
+### 2. Configure Environment
+
+**`backend/.env.local`**
 
 ```env
-# Database
-DATABASE_URL="postgresql://user:password@host:5432/equestrian_db"
-
-# JWT
-JWT_SECRET="your-secret-key-min-32-characters-long"
-
-# CORS (comma-separated origins)
-ALLOWED_ORIGINS="http://localhost:3000,https://yourdomain.com"
-
-# Environment
+DATABASE_URL="postgresql://user:password@localhost:5432/equestrian_db"
+JWT_SECRET="your-secret-key-minimum-32-characters-long"
+ALLOWED_ORIGINS="http://localhost:4001"
 NODE_ENV="development"
+
+# Email (optional — required for schedule dispatch)
+SMTP_HOST="smtp.example.com"
+SMTP_PORT="587"
+SMTP_USER="user@example.com"
+SMTP_PASS="password"
 ```
 
-⚠️ **In Production (Vercel)**:
-- `JWT_SECRET` is **required** - will error if missing
-- `DATABASE_URL` must connect to PostgreSQL (not SQLite)
-- `ALLOWED_ORIGINS` must be set to your domain
+**`frontend/.env.local`**
 
-### 3. Database Setup
+```env
+NEXT_PUBLIC_API_URL="http://localhost:4000"
+NEXT_PUBLIC_GOOGLE_CLIENT_ID="your-google-oauth-client-id"
+```
+
+### 3. Set Up the Database
 
 ```bash
-# Create PostgreSQL database
-createdb equestrian_db
-
 # Run migrations
-npx prisma migrate dev --name init
+npx prisma migrate dev --name init --schema=prisma/schema.prisma
 
-# Seed (optional)
-npx prisma db seed
+# Seed with initial data
+cd backend && npm run prisma:seed
 ```
 
-### 4. Development Server
+### 4. Start Development
 
 ```bash
+# From root — starts both servers concurrently
 npm run dev
 ```
 
-Server runs on `http://localhost:3000`
+| App | URL |
+|-----|-----|
+| Frontend | http://localhost:4001 |
+| Backend API | http://localhost:4000/api |
+| Prisma Studio | `cd backend && npm run prisma:studio` |
 
-### 5. Production Deployment (Vercel)
+---
+
+## Access & Roles
+
+| Role | Capabilities |
+|------|-------------|
+| **Admin** | Full access — users, settings, approvals, all data |
+| **Club Manager** | Manage own club's riders, horses, registrations, and financials |
+| **Rider** | Self-service portal — own profile, registrations, and results |
+| **Viewer** | Read-only access to published events and public data |
+
+New accounts go through an admin approval step before gaining platform access.
+
+---
+
+## Deployment
+
+The platform deploys as two independent Vercel projects.
+
+### Pre-deployment Checklist
+
+- [ ] PostgreSQL database provisioned (recommended: [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Railway](https://railway.app))
+- [ ] Production migrations applied: `npx prisma migrate deploy`
+- [ ] `JWT_SECRET` is a strong random string (min 32 characters)
+- [ ] `ALLOWED_ORIGINS` is set to the live frontend URL
+- [ ] `NEXT_PUBLIC_API_URL` is set to the live backend URL
+- [ ] Google OAuth credentials configured for the production domain
+
+### Deploy Backend
 
 ```bash
-# Install Vercel CLI
-npm install -g vercel
-
-# Deploy
-vercel
-
-# Set environment variables in Vercel dashboard or via CLI:
+cd backend
 vercel env add DATABASE_URL
 vercel env add JWT_SECRET
 vercel env add ALLOWED_ORIGINS
+vercel --prod
 ```
 
-## 📁 Project Structure
-
-```
-src/
-├── pages/api/
-│   ├── auth/
-│   │   ├── login.ts          # User authentication
-│   │   └── signup.ts         # User registration
-│   ├── events/
-│   │   ├── index.ts          # List & create events
-│   │   └── [id].ts           # Get, update, delete event
-│   ├── clubs/
-│   │   └── index.ts          # Club management
-│   ├── riders/
-│   │   ├── index.ts          # List & create riders
-│   │   └── [id].ts           # Get, update, delete rider
-│   ├── horses/
-│   │   ├── index.ts          # List & create horses
-│   │   └── [id].ts           # Get, update, delete horse
-│   ├── registrations/
-│   │   └── index.ts          # Event registration management
-│   ├── financial/
-│   │   └── index.ts          # Payment transactions
-│   ├── users/
-│   │   ├── index.ts          # User management
-│   │   └── [id].ts           # Get, update, delete user
-│   ├── settings/
-│   │   └── index.ts          # System configuration
-│   └── audit/
-│       └── index.ts          # Audit logs
-├── lib/
-│   ├── prisma/client.ts      # Prisma singleton for serverless
-│   ├── cors.ts               # CORS & security headers
-│   ├── errors.ts             # Error handling & codes
-│   ├── api-handler.ts        # Request/response wrapper
-│   ├── auth.ts               # JWT token handling
-│   ├── auth-middleware.ts    # Authentication & RBAC
-│   ├── validation.ts         # Input validation
-│   └── audit.ts              # Audit logging helpers
-├── types/
-│   └── index.ts              # TypeScript type definitions
-└── pages/
-    └── _app.tsx              # Next.js app initialization
-
-prisma/
-└── schema.prisma             # Database schema (20+ models)
-```
-
-## 🔑 API Overview
-
-### Authentication
-
-**POST `/api/auth/signup`**
-```json
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john@example.com",
-  "password": "SecurePass123"
-}
-```
-
-**POST `/api/auth/login`**
-```json
-{
-  "email": "john@example.com",
-  "password": "SecurePass123"
-}
-```
-
-Response: `{ token: "jwt_token", user: {...} }`
-
-### Events
-
-**GET `/api/events?page=1&pageSize=10&search=query&eventType=KSEC`**
-
-**POST `/api/events`**
-```json
-{
-  "eventType": "KSEC",
-  "name": "Spring Championship 2024",
-  "startDate": "2024-05-01",
-  "endDate": "2024-05-03",
-  "venueName": "Equestrian Club",
-  "categoryIds": ["cat-1", "cat-2"]
-}
-```
-
-**GET `/api/events/[id]`** - Get event details with registrations
-
-**PUT `/api/events/[id]`** - Update event
-
-**DELETE `/api/events/[id]`** - Delete event (if no registrations)
-
-### Riders
-
-**GET `/api/riders?page=1&clubId=club-1&search=query`**
-
-**POST `/api/riders`**
-```json
-{
-  "firstName": "Jane",
-  "lastName": "Smith",
-  "email": "jane@example.com",
-  "phone": "+1234567890",
-  "competitionLevel": "ADVANCED",
-  "clubId": "club-1"
-}
-```
-
-**GET `/api/riders/[id]`**
-
-**PUT `/api/riders/[id]`**
-
-**DELETE `/api/riders/[id]`** (if no registrations)
-
-### Horses
-
-**GET `/api/horses?page=1&breed=Arabian`**
-
-**POST `/api/horses`**
-```json
-{
-  "name": "Thunder",
-  "breed": "Arabian",
-  "color": "Bay",
-  "registrationNumber": "REG-123",
-  "riderId": "rider-1"
-}
-```
-
-**GET `/api/horses/[id]`**
-
-**PUT `/api/horses/[id]`**
-
-**DELETE `/api/horses/[id]`** (if no registrations)
-
-### Event Registrations
-
-**GET `/api/registrations?eventId=event-1&paymentStatus=PENDING`**
-
-**POST `/api/registrations`**
-```json
-{
-  "eventId": "event-1",
-  "riderId": "rider-1",
-  "horseId": "horse-1",
-  "categoryId": "category-1",
-  "fee": 250,
-  "gst": 45
-}
-```
-
-### Financial Transactions
-
-**GET `/api/financial?registrationId=reg-1&paymentMethod=CARD`**
-
-**POST `/api/financial`**
-```json
-{
-  "registrationId": "reg-1",
-  "amount": 295,
-  "paymentMethod": "CARD",
-  "referenceNumber": "TXN-123"
-}
-```
-
-### Users (Admin Only)
-
-**GET `/api/users?page=1&isActive=true`**
-
-**POST `/api/users`**
-```json
-{
-  "email": "admin@example.com",
-  "firstName": "Admin",
-  "lastName": "User",
-  "roleIds": ["role-admin"]
-}
-```
-
-### Settings (Admin Only)
-
-**GET `/api/settings`** - Get all system settings
-
-**POST `/api/settings`**
-```json
-{
-  "key": "PLATFORM_NAME",
-  "value": "\"Equestrian Event Manager\""
-}
-```
-
-### Audit Logs (Admin Only)
-
-**GET `/api/audit?userId=user-1&startDate=2024-01-01&action=UPDATE`**
-
-## 🔐 Authentication & Authorization
-
-All protected endpoints require:
-1. **JWT Token** in `Authorization: Bearer <token>` header
-2. **Role-Based Access** based on user's assigned roles
-
-### Default Roles
-
-- **ADMIN**: Full platform access
-- **CLUB_MANAGER**: Manage own club's riders, horses, registrations
-- **RIDER**: Can view own profile and event results
-- **VIEWER**: Read-only access to public information
-
-### Protected Route Example
-
-```typescript
-export default withApiHandler(
-  withRoleMiddleware(['ADMIN', 'CLUB_MANAGER'])(handler),
-  { allowedMethods: ['GET', 'POST', 'OPTIONS'] }
-);
-```
-
-## 🚨 Error Handling
-
-All API errors follow a consistent format:
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid input parameters",
-    "details": {
-      "email": ["Invalid email format"]
-    }
-  }
-}
-```
-
-### Error Codes
-
-| Code | HTTP | Description |
-|------|------|-------------|
-| `BAD_REQUEST` | 400 | Invalid input or request |
-| `UNAUTHORIZED` | 401 | Missing or invalid authentication |
-| `FORBIDDEN` | 403 | User lacks required permissions |
-| `NOT_FOUND` | 404 | Resource not found |
-| `DUPLICATE_EMAIL` | 400 | Email already registered |
-| `INTERNAL_SERVER_ERROR` | 500 | Server error (safe to retry) |
-
-## 🛡️ CORS & Security
-
-### How CORS Works in Production
-
-1. **Preflight Handling**: OPTIONS requests bypass handlers, return CORS headers immediately
-2. **Security Headers**: All responses include `X-Content-Type-Options`, `X-Frame-Options`, etc.
-3. **Origin Validation**: Only requests from `ALLOWED_ORIGINS` are accepted
-
-### Vercel Deployment CORS Checklist
-
-✅ CORS handled in `src/lib/cors.ts` (no global middleware causing timeouts)
-✅ OPTIONS method handled at API route level
-✅ Security headers applied to all responses
-✅ Environment-based `ALLOWED_ORIGINS`
-✅ No blocking middleware in serverless functions
-✅ Prisma connection pooling configured for Vercel
-
-## 📊 Database Schema
-
-20+ Prisma models including:
-
-- **Auth**: User, Role, Permission
-- **Events**: Event, EventCategory, EventType, Venue
-- **Participants**: Rider, Horse, Club
-- **Registrations**: Registration
-- **Financial**: Transaction
-- **Infrastructure**: StableBooking, Stable
-- **System**: AuditLog, Settings
-
-## 🧪 Testing the API
-
-### Using cURL
+### Deploy Frontend
 
 ```bash
-# Authentication
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"password"}'
-
-# Get Events (with token)
-curl -X GET http://localhost:3000/api/events \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-
-# Create Event
-curl -X POST http://localhost:3000/api/events \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{"eventType":"KSEC","name":"My Event","startDate":"2024-05-01","endDate":"2024-05-03"}'
+cd frontend
+vercel env add NEXT_PUBLIC_API_URL
+vercel env add NEXT_PUBLIC_GOOGLE_CLIENT_ID
+vercel --prod
 ```
 
-### Using Postman
+---
 
-1. Create new Collection "Equestrian API"
-2. Add Authorization header: `Authorization: Bearer {{token}}`
-3. Set variables: `base_url=http://localhost:3000`
-4. Create requests for each endpoint
+## Scripts Reference
 
-## 🚀 Deployment Checklist
-
-### Before Deployment to Vercel
-
-- [ ] Update `ALLOWED_ORIGINS` to your domain
-- [ ] Generate strong `JWT_SECRET` (min 32 characters)
-- [ ] Set up PostgreSQL database (not SQLite)
-- [ ] Run `npx prisma migrate deploy`
-- [ ] Test all endpoints locally
-- [ ] Set environment variables in Vercel dashboard
-- [ ] No hardcoded secrets in code
-
-### Post-Deployment Verification
+### Root
 
 ```bash
-# Test production endpoint
-curl -X GET https://yourdomain.vercel.app/api/health
-
-# Check CORS headers
-curl -X OPTIONS https://yourdomain.vercel.app/api/events \
-  -H "Origin: https://yourdomain.com" \
-  -v
+npm run dev           # Start backend + frontend concurrently
+npm run build         # Build both apps
+npm run install-all   # Install all dependencies
 ```
 
-## 🐛 Troubleshooting
+### Backend
 
-### CORS Errors in Production
+```bash
+npm run dev               # Start API server (port 4000)
+npm run build             # Production build
+npm run prisma:generate   # Regenerate Prisma client after schema changes
+npm run prisma:migrate    # Create and apply a new migration
+npm run prisma:studio     # Open Prisma Studio database GUI
+npm run prisma:seed       # Seed database with initial data
+npm run prisma:seed-demo  # Seed demo schedule data
+```
 
-**Issue**: `OPTIONS 405` or `CORS error` on Vercel
-**Solution**: CORS is handled directly in each API route via `withApiHandler`. Check `src/lib/cors.ts` and ensure `ALLOWED_ORIGINS` env var is set.
+### Frontend
 
-### Prisma Connection Errors
+```bash
+npm run dev     # Start UI (port 4001)
+npm run build   # Production build
+npm run lint    # ESLint check
+```
 
-**Issue**: `too many connections` on Vercel
-**Solution**: Using Prisma singleton pattern in `src/lib/prisma/client.ts`. Ensure `DATABASE_URL` uses connection pooling.
+---
 
-### JWT Errors in Production
+## Troubleshooting
 
-**Issue**: `JWT_SECRET not found` error
-**Solution**: Set `JWT_SECRET` env var in Vercel dashboard. Must be min 32 characters.
+<details>
+<summary><strong>CORS errors in production</strong></summary>
 
-### 404 on API Routes
+Ensure `ALLOWED_ORIGINS` is set to your exact frontend domain (no trailing slash). CORS is applied per-route via the `withApiHandler` wrapper in the backend.
+</details>
 
-**Issue**: Routes return 404 in production
-**Solution**: Ensure routes are in `/src/pages/api/` directory (not `/api/`). Vercel uses file-based routing.
+<details>
+<summary><strong>Too many database connections on Vercel</strong></summary>
 
-## 📚 Documentation
+The backend uses a Prisma singleton to reuse connections across serverless invocations. For high traffic, configure a connection pooler such as [PgBouncer](https://www.pgbouncer.org/) or use [Prisma Accelerate](https://www.prisma.io/data-platform/accelerate).
+</details>
 
-- [Next.js Docs](https://nextjs.org/docs)
-- [Prisma Docs](https://www.prisma.io/docs)
-- [PostgreSQL Docs](https://www.postgresql.org/docs)
-- [Vercel Docs](https://vercel.com/docs)
+<details>
+<summary><strong>JWT_SECRET missing in production</strong></summary>
 
-## 📝 License
+Set `JWT_SECRET` via `vercel env add JWT_SECRET` or in the Vercel dashboard under Project → Settings → Environment Variables. The value must be at least 32 characters.
+</details>
 
-Proprietary - All rights reserved
+<details>
+<summary><strong>Prisma client out of sync after schema changes</strong></summary>
 
-## 👥 Support
+Run `npm run prisma:generate` inside the `backend/` directory, then restart the dev server.
+</details>
 
-For issues, contact: admin@equestrian-events.app
+---
+
+## License
+
+Proprietary — All rights reserved.
