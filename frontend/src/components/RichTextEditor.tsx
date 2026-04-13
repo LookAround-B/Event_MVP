@@ -574,7 +574,7 @@ export default function RichTextEditor({
     }
     const incoming = value ?? '';
     if (incoming !== editor.getHTML()) {
-      editor.commands.setContent(incoming, false);
+      editor.commands.setContent(incoming, { emitUpdate: false });
       setLiveHtml(incoming);
       setIsDirty(false);
       const storage = (editor as any).storage?.characterCount;

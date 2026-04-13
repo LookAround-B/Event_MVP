@@ -131,7 +131,7 @@ const STARS = [
 ];
 
 export function AppSidebar() {
-  const { state, isMobile } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed" && !isMobile;
   const router = useRouter();
   const pathname = router.pathname;
@@ -231,6 +231,7 @@ export function AppSidebar() {
                         <Link
                           href={item.url}
                           title={collapsed ? item.title : undefined}
+                          onClick={() => isMobile && setOpenMobile(false)}
                           className={cn(
                             "relative flex items-center gap-3 rounded-xl overflow-hidden",
                             collapsed && "justify-center",
