@@ -813,6 +813,7 @@ export default function Settings() {
           ) : null}
         </div>
       </div>
+      </div>
     </ProtectedRoute>
   );
 }
