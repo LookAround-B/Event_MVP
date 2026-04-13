@@ -150,7 +150,10 @@ export default function App({ Component, pageProps }: AppProps) {
           <AppearanceProvider>
             <GoogleOAuthProvider clientId={clientId}>
               <ToastProvider />
-              <Head><title>Equestrian Events</title></Head>
+              <Head>
+                <title>Equestrian Events</title>
+                <link rel="icon" type="image/png" href="/favicon.png" />
+              </Head>
               {isRouteLoading ? <PageSkeleton variant="public" /> : <Component {...pageProps} />}
             </GoogleOAuthProvider>
           </AppearanceProvider>
@@ -165,7 +168,10 @@ export default function App({ Component, pageProps }: AppProps) {
         <AppearanceProvider>
           <GoogleOAuthProvider clientId={clientId}>
             <ToastProvider />
-            <Head><title>Equestrian Events</title></Head>
+            <Head>
+              <title>Equestrian Events</title>
+              <link rel="icon" type="image/png" href="/favicon.png" />
+            </Head>
             <ProtectedRoute>
               <Layout>
                 {isRouteLoading ? (
