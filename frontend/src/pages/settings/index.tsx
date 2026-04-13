@@ -805,6 +805,7 @@ export default function Settings() {
                 onChange={(data: string) => setTermsConditions(data)}
                 onSave={saveTermsConditions}
                 placeholder="Enter default terms and conditions..."
+                allowFullscreen={false}
               />
             </div>
           ) : null}

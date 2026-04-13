@@ -365,7 +365,7 @@ function DashboardContent() {
   const [eventTab, setEventTab] = useState<"current" | "all">("current");
   const [eventPage, setEventPage] = useState(1);
   const [eventTotalPages, setEventTotalPages] = useState(1);
-  const [eventCount, setEventCount] = useState(0);
+  const [allEventCount, setAllEventCount] = useState<number | null>(null);
 
   const [participants, setParticipants] = useState<ParticipantRow[]>([]);
   const [participantPage, setParticipantPage] = useState(1);
@@ -428,13 +428,26 @@ function DashboardContent() {
     }
   }, [mainEventFilter]);
 
+  const fetchAllEventCount = useCallback(async () => {
+    if (allEventCount !== null) return;
+
+    try {
+      const res = await api.get("/api/dashboard/events", {
+        params: { tab: "all", page: 1, limit: 1 },
+      });
+      setAllEventCount(res.data.data?.count || 0);
+    } catch (err) {
+      console.error("Failed to fetch all events count:", err);
+    }
+  }, [allEventCount]);
+
   const fetchEvents = useCallback(async () => {
     const cacheKey = `${eventTab}:${eventPage}`;
     const cached = eventsCacheRef.current.get(cacheKey);
     if (cached) {
       setEvents(cached.events);
-      setEventCount(cached.count);
       setEventTotalPages(cached.pages);
+      if (eventTab === "all") setAllEventCount(cached.count);
       setEventsLoading(false);
       return;
     }
@@ -445,8 +458,8 @@ function DashboardContent() {
       const res = await api.get("/api/dashboard/events", { params });
       const data = res.data.data;
       setEvents(data.events || []);
-      setEventCount(data.count || 0);
       setEventTotalPages(data.pages || 1);
+      if (eventTab === "all") setAllEventCount(data.count || 0);
       eventsCacheRef.current.set(cacheKey, {
         events: data.events || [],
         count: data.count || 0,
@@ -519,6 +532,9 @@ function DashboardContent() {
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
+  useEffect(() => {
+    void fetchAllEventCount();
+  }, [fetchAllEventCount]);
   useEffect(() => {
     fetchParticipants();
   }, [fetchParticipants]);
@@ -972,7 +988,7 @@ function DashboardContent() {
                   }}
                   className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${eventTab === "all" ? "btn-cta shadow-none" : "text-muted-foreground hover:text-on-surface hover:bg-surface-bright"}`}
                 >
-                  All ({eventCount})
+                  All{allEventCount !== null ? ` (${allEventCount})` : ""}
                 </button>
               </div>
 

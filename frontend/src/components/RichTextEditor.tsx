@@ -35,6 +35,7 @@ export interface RichTextEditorProps {
   onSave?: () => Promise<void> | void;
   placeholder?: string;
   minHeight?: number;
+  allowFullscreen?: boolean;
 }
 
 // ─── Toolbar Button ───────────────────────────────────────────────────────────
@@ -157,12 +158,14 @@ function Toolbar({
   setFullscreen,
   showPreview,
   setShowPreview,
+  allowFullscreen,
 }: {
   editor: ReturnType<typeof useEditor> | null;
   isFullscreen: boolean;
   setFullscreen: (v: boolean) => void;
   showPreview: boolean;
   setShowPreview: (v: boolean) => void;
+  allowFullscreen: boolean;
 }) {
   const [showLinkPopover, setShowLinkPopover] = useState(false);
 
@@ -361,9 +364,11 @@ function Toolbar({
       <TBtn onClick={() => setShowPreview(!showPreview)} active={showPreview} title={showPreview ? 'Hide Preview' : 'Show Preview'}>
         {showPreview ? <EyeOff size={13} /> : <Eye size={13} />}
       </TBtn>
-      <TBtn onClick={() => setFullscreen(!isFullscreen)} title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen (F11)'}>
-        {isFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
-      </TBtn>
+      {allowFullscreen && (
+        <TBtn onClick={() => setFullscreen(!isFullscreen)} title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen (F11)'}>
+          {isFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+        </TBtn>
+      )}
     </div>
   );
 }
@@ -482,6 +487,7 @@ export default function RichTextEditor({
   onSave,
   placeholder,
   minHeight = 380,
+  allowFullscreen = true,
 }: RichTextEditorProps) {
   // Prevent the external-value useEffect from re-syncing content we just produced
   const skipSync      = useRef(false);
@@ -604,7 +610,7 @@ export default function RichTextEditor({
   // F11 + Escape for fullscreen
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'F11' && containerRef.current?.contains(document.activeElement)) {
+      if (allowFullscreen && e.key === 'F11' && containerRef.current?.contains(document.activeElement)) {
         e.preventDefault();
         setIsFullscreen(f => !f);
       }
@@ -614,7 +620,7 @@ export default function RichTextEditor({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isFullscreen]);
+  }, [allowFullscreen, isFullscreen]);
 
   // Clean up editor on unmount
   useEffect(() => () => { editor?.destroy(); }, [editor]);
@@ -655,6 +661,7 @@ export default function RichTextEditor({
         setFullscreen={setIsFullscreen}
         showPreview={showPreview}
         setShowPreview={setShowPreview}
+        allowFullscreen={allowFullscreen}
       />
 
       {/* Editor + optional preview */}

@@ -59,9 +59,17 @@ async function getAttendanceReport(
 
   const events = await prisma.event.findMany({
     where: eventId ? { id: eventId } : {},
-    include: {
+    select: {
+      id: true,
+      name: true,
+      eventType: true,
+      startDate: true,
+      endDate: true,
       registrations: {
-        include: {
+        select: {
+          approvalStatus: true,
+          paymentStatus: true,
+          totalAmount: true,
           rider: { select: { firstName: true, lastName: true, email: true } },
           horse: { select: { name: true } },
           club: { select: { name: true } },
@@ -144,9 +152,17 @@ async function getFinancialReconciliation(
   const [transactions, registrationTotals, summary] = await Promise.all([
     prisma.transaction.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        transactionDate: true,
+        amount: true,
+        gstAmount: true,
+        totalAmount: true,
+        paymentMethod: true,
+        referenceNumber: true,
+        status: true,
         registration: {
-          include: {
+          select: {
             event: { select: { name: true } },
             rider: { select: { firstName: true, lastName: true } },
           },
@@ -226,9 +242,17 @@ async function getRiderStatistics(
 ) {
   const riders = await prisma.rider.findMany({
     where: { isActive: true },
-    include: {
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
       registrations: {
-        include: {
+        select: {
+          eventId: true,
+          totalAmount: true,
+          approvalStatus: true,
+          paymentStatus: true,
           event: { select: { name: true, eventType: true } },
           category: { select: { name: true } },
         },
