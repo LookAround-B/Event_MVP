@@ -119,41 +119,6 @@ function CustomTooltip({ active, payload, label }: any) {
 
 /* ===================== BENTO CARD: Revenue Hero ===================== */
 
-function RevenueHeroCard({
-  value,
-  loading,
-}: {
-  value: string;
-  loading: boolean;
-}) {
-  return (
-    <div className="h-full rounded-2xl bg-primary p-5 flex flex-col justify-between relative overflow-hidden group primary-card-glow">
-      {/* decorative rings */}
-      <div className="absolute -right-5 -top-5 w-28 h-28 rounded-full border-2 border-primary-foreground/10 group-hover:scale-110 transition-transform duration-500" />
-      <div className="absolute -right-1 top-10 w-14 h-14 rounded-full border border-primary-foreground/10 group-hover:scale-125 transition-transform duration-700" />
-      <div className="absolute right-4 -bottom-4 w-20 h-20 rounded-full bg-primary-foreground/10 group-hover:scale-110 transition-transform duration-600" />
-
-      <div className="relative flex items-center gap-2.5">
-        <div className="w-9 h-9 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
-          <DollarSign className="w-4 h-4 text-primary-foreground" />
-        </div>
-        <span className="text-sm font-bold text-primary-foreground/90">
-          Total Revenue
-        </span>
-      </div>
-
-      <div className="relative mt-auto pt-4">
-        <span className="text-4xl font-black text-primary-foreground tracking-tight leading-none">
-          {loading ? "..." : value}
-        </span>
-        <p className="text-sm text-primary-foreground/65 mt-1.5">
-          Platform Total
-        </p>
-      </div>
-    </div>
-  );
-}
-
 /* ===================== BENTO CARD: Stat ===================== */
 
 function BentoStatCard({
@@ -188,136 +153,6 @@ function BentoStatCard({
         {subtitle && (
           <p className="text-xs text-muted-foreground mt-1.5">{subtitle}</p>
         )}
-      </div>
-    </div>
-  );
-}
-
-/* ===================== BENTO CARD: Financial Insight (purple cosmic) ===================== */
-
-const STAR_POSITIONS = [
-  [8, 12],
-  [15, 38],
-  [25, 60],
-  [33, 20],
-  [44, 75],
-  [54, 44],
-  [65, 8],
-  [74, 65],
-  [20, 85],
-  [30, 30],
-  [40, 52],
-  [50, 70],
-  [60, 25],
-  [70, 48],
-  [10, 78],
-  [80, 15],
-  [42, 62],
-  [58, 35],
-  [88, 58],
-  [12, 50],
-];
-
-function FinancialInsightCard({
-  collectible,
-  receivable,
-  loading,
-}: {
-  collectible: string;
-  receivable: string;
-  loading: boolean;
-}) {
-  return (
-    <div
-      className="h-full rounded-2xl relative overflow-hidden flex flex-col p-5"
-      style={{
-        background:
-          "linear-gradient(145deg, hsl(253,38%,16%) 0%, hsl(253,28%,11%) 55%, hsl(253,48%,9%) 100%)",
-        border: "1px solid hsl(253,45%,28%,0.4)",
-        boxShadow: "0 0 40px -12px hsla(253,90%,73%,0.25)",
-      }}
-    >
-      {/* Stripe overlay */}
-      <div className="absolute inset-0 stripe-pattern opacity-[0.12] pointer-events-none" />
-      {/* Stars */}
-      {STAR_POSITIONS.map(([top, left], i) => (
-        <div
-          key={i}
-          className="absolute rounded-full bg-primary-foreground pointer-events-none"
-          style={{
-            top: `${top}%`,
-            left: `${left}%`,
-            width: i % 4 === 0 ? 3 : 2,
-            height: i % 4 === 0 ? 3 : 2,
-            opacity: 0.2 + (i % 3) * 0.15,
-          }}
-        />
-      ))}
-
-      <div className="relative z-10 flex flex-col h-full">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-bold text-white">Financial Insight</h3>
-          <div className="text-[10px] text-muted-foreground bg-surface-container/60 rounded-full px-3 py-1 border border-border/30">
-            Overview
-          </div>
-        </div>
-
-        <div className="flex items-baseline gap-2">
-          <span
-            className="text-4xl font-black tracking-tight leading-none"
-            style={{ color: "hsl(253,90%,73%)" }}
-          >
-            {loading ? "..." : collectible}
-          </span>
-        </div>
-        <p className="text-xs text-white/50 mt-1">Collectible</p>
-
-        <div
-          className="mt-4 rounded-xl p-3"
-          style={{
-            background: "rgba(255,255,255,0.07)",
-            backdropFilter: "blur(8px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
-          <p className="text-[10px] text-white/40 mb-0.5">· Receivable</p>
-          <span className="text-2xl font-black text-white tracking-tight">
-            {loading ? "..." : receivable}
-          </span>
-        </div>
-
-        <div className="mt-4 flex-1 min-h-0">
-          <div className="space-y-3">
-            {[
-              { label: "Collections", pct: 72, color: "hsl(253,90%,73%)" },
-              { label: "Outstanding", pct: 28, color: "hsl(253,65%,58%)" },
-            ].map((d) => (
-              <div key={d.label}>
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-[11px] font-medium text-white/50">
-                    {d.label}
-                  </span>
-                  <span className="text-[11px] font-bold text-white/80">
-                    {d.pct}%
-                  </span>
-                </div>
-                <div
-                  className="h-2 rounded-full overflow-hidden"
-                  style={{ background: "rgba(255,255,255,0.08)" }}
-                >
-                  <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${d.pct}%`,
-                      background: d.color,
-                      boxShadow: `0 0 8px ${d.color}`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -912,22 +747,25 @@ function DashboardContent() {
         )}
 
         {/* ═══════ BENTO GRID: TOP SECTION ═══════ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-          {/* Col 1 Row 1 — Revenue Hero */}
-          <div className="lg:col-start-1 lg:row-start-1 min-h-[160px] animate-slide-up-1 border-beam rounded-2xl">
-            <RevenueHeroCard
-              value={`₹${kpiCards.totalRevenue.toLocaleString("en-IN")}`}
-              loading={kpiLoading}
-            />
-          </div>
-
-          {/* Col 2 Row 1 — Total Events */}
-          <div className="lg:col-start-2 lg:row-start-1 min-h-[160px] animate-slide-up-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+          {/* Col 1 Row 1 — Total Events */}
+          <div className="lg:col-start-1 lg:row-start-1 min-h-[160px] animate-slide-up-2">
             <BentoStatCard
               icon={Calendar}
               title="Total Events"
               value={kpiCards.totalEvents}
               subtitle="Active & Completed"
+              loading={kpiLoading}
+            />
+          </div>
+
+          {/* Col 2 Row 1 — Horse Count */}
+          <div className="lg:col-start-2 lg:row-start-1 min-h-[160px] animate-slide-up-3">
+            <BentoStatCard
+              icon={Box}
+              title="Horse Count"
+              value={kpiCards.horseCount}
+              subtitle="Total registered horses"
               loading={kpiLoading}
             />
           </div>
@@ -1087,33 +925,13 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* Col 4 Rows 1-2 — Financial Insight (purple cosmic) */}
-          <div className="lg:col-start-4 lg:row-start-1 lg:row-span-2 min-h-[340px] lg:min-h-0 animate-slide-up-4">
-            <FinancialInsightCard
-              collectible={`₹${kpiCards.collectibleAmount.toLocaleString("en-IN")}`}
-              receivable={`₹${kpiCards.receivableAmount.toLocaleString("en-IN")}`}
-              loading={kpiLoading}
-            />
-          </div>
-
-          {/* Col 1 Row 2 — Clubs | Riders */}
-          <div className="lg:col-start-1 lg:row-start-2 min-h-[120px] animate-slide-up-2">
+          {/* Cols 1-2 Row 2 — Clubs | Riders */}
+          <div className="lg:col-start-1 lg:col-span-2 lg:row-start-2 min-h-[120px] animate-slide-up-2">
             <BentoStatCard
               icon={Users}
               title="Clubs | Riders"
               value={`${kpiCards.clubsRegistered} | ${kpiCards.ridersRegistered}`}
               subtitle="Registered entities"
-              loading={kpiLoading}
-            />
-          </div>
-
-          {/* Col 2 Row 2 — Horse Count */}
-          <div className="lg:col-start-2 lg:row-start-2 min-h-[120px] animate-slide-up-3">
-            <BentoStatCard
-              icon={Box}
-              title="Horse Count"
-              value={kpiCards.horseCount}
-              subtitle="Total registered horses"
               loading={kpiLoading}
             />
           </div>

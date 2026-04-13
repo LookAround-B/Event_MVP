@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, Save, X, MapPin } from 'lucide-react';
 import AddressMapPicker from '@/components/AddressMapPicker';
 import dynamic from 'next/dynamic';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import toast from 'react-hot-toast';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false });
 
@@ -126,16 +127,16 @@ export default function Settings() {
 
   const saveVenue = async () => {
     if (!venue.name.trim()) {
-      alert('Venue name is required');
+      toast.error('Venue name is required');
       return;
     }
     try {
       setSaving(true);
       await api.put('/api/settings/venue', venue);
-      alert('Venue saved successfully');
+      toast.success('Venue saved successfully');
     } catch (error) {
       console.error('Failed to save venue:', error);
-      alert('Failed to save venue');
+      toast.error('Failed to save venue');
     } finally {
       setSaving(false);
     }
@@ -145,10 +146,10 @@ export default function Settings() {
     try {
       setSaving(true);
       await api.put('/api/settings', stablesSettings);
-      alert('Stable settings saved successfully');
+      toast.success('Stable settings saved successfully');
     } catch (error) {
       console.error('Failed to save settings:', error);
-      alert('Failed to save settings');
+      toast.error('Failed to save settings');
     } finally {
       setSaving(false);
     }
@@ -158,32 +159,30 @@ export default function Settings() {
     try {
       setSaving(true);
       await api.put('/api/settings', timingsSettings);
-      alert('Timing settings saved successfully');
+      toast.success('Timing settings saved successfully');
     } catch (error) {
       console.error('Failed to save timings:', error);
-      alert('Failed to save timings');
+      toast.error('Failed to save timings');
     } finally {
       setSaving(false);
     }
   };
 
   const saveTermsConditions = async () => {
-    try {
-      setSaving(true);
-      await api.put('/api/settings', { terms_and_conditions: termsConditions });
-      alert('Terms & Conditions saved successfully');
-    } catch (error) {
-      console.error('Failed to save T&C:', error);
-      alert('Failed to save T&C');
-    } finally {
-      setSaving(false);
-    }
+    await toast.promise(
+      api.put('/api/settings', { terms_and_conditions: termsConditions }),
+      {
+        loading: 'Saving Terms & Conditions...',
+        success: 'Terms & Conditions saved!',
+        error: 'Failed to save Terms & Conditions',
+      }
+    );
   };
 
   // Event Types CRUD
   const addEventType = async () => {
     if (!newEventType.name.trim() || !newEventType.shortCode.trim()) {
-      alert('Name and short code are required');
+      toast.error('Name and short code are required');
       return;
     }
     try {
@@ -191,7 +190,7 @@ export default function Settings() {
       setNewEventType({ name: '', shortCode: '' });
       fetchSettings();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to add event type');
+      toast.error(error.response?.data?.message || 'Failed to add event type');
     }
   };
 
@@ -202,14 +201,14 @@ export default function Settings() {
       fetchSettings();
     } catch (error) {
       console.error('Failed to delete:', error);
-      alert('Failed to delete event type');
+      toast.error('Failed to delete event type');
     }
   };
 
   // Event Categories CRUD
   const addEventCategory = async () => {
     if (!newCategory.name.trim() || !newCategory.price) {
-      alert('Name and price are required');
+      toast.error('Name and price are required');
       return;
     }
     try {
@@ -223,7 +222,7 @@ export default function Settings() {
       setNewCategory({ name: '', price: '', cgst: '', sgst: '', igst: '' });
       fetchSettings();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to add category');
+      toast.error(error.response?.data?.message || 'Failed to add category');
     }
   };
 
@@ -252,7 +251,7 @@ export default function Settings() {
       setEditingCategory(null);
       fetchSettings();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to update category');
+      toast.error(error.response?.data?.message || 'Failed to update category');
     }
   };
 
@@ -263,14 +262,14 @@ export default function Settings() {
       fetchSettings();
     } catch (error) {
       console.error('Failed to delete:', error);
-      alert('Failed to delete category');
+      toast.error('Failed to delete category');
     }
   };
 
   // Roles CRUD
   const addRole = async () => {
     if (!newRole.name.trim()) {
-      alert('Role name is required');
+      toast.error('Role name is required');
       return;
     }
     try {
@@ -278,7 +277,7 @@ export default function Settings() {
       setNewRole({ name: '', description: '' });
       fetchSettings();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to add role');
+      toast.error(error.response?.data?.message || 'Failed to add role');
     }
   };
 
@@ -289,7 +288,7 @@ export default function Settings() {
       fetchSettings();
     } catch (error) {
       console.error('Failed to delete role:', error);
-      alert('Failed to delete role');
+      toast.error('Failed to delete role');
     }
   };
 
@@ -799,22 +798,14 @@ export default function Settings() {
             <div>
               <h2 className="text-xl font-bold mb-4 text-on-surface">Terms & Conditions</h2>
               <p className="text-muted-foreground text-sm mb-4">
-                Default terms & conditions applied to new events. Supports rich text formatting.
+                Default terms & conditions applied to new events. Supports rich text formatting. Use Ctrl+S or the save button in the editor to save.
               </p>
-              <div className="mb-4">
-                <RichTextEditor
-                  value={termsConditions}
-                  onChange={(data: string) => setTermsConditions(data)}
-                  placeholder="Enter default terms and conditions..."
-                />
-              </div>
-              <button
-                onClick={saveTermsConditions}
-                disabled={saving}
-                className={settingsActionButtonClass}
-              >
-                <Save /> {saving ? 'Saving...' : 'Save Terms & Conditions'}
-              </button>
+              <RichTextEditor
+                value={termsConditions}
+                onChange={(data: string) => setTermsConditions(data)}
+                onSave={saveTermsConditions}
+                placeholder="Enter default terms and conditions..."
+              />
             </div>
           ) : null}
         </div>
