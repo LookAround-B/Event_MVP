@@ -32,9 +32,9 @@ interface Event {
 
 export default function Events() {
   const router = useRouter();
-  const { isAdmin, isRider } = useAuth();
+  const { isAdmin } = useAuth();
   const canManageEvents = isAdmin;
-  const canDownloadEvents = !isRider;
+  const canDownloadEvents = isAdmin;
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

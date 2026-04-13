@@ -81,9 +81,9 @@ async function fetchLogoBase64(): Promise<string | null> {
 
 export default function EventDetail() {
   const router = useRouter();
-  const { isAdmin, isRider } = useAuth();
+  const { isAdmin } = useAuth();
   const canManageEvent = isAdmin;
-  const canDownload = !isRider;
+  const canDownload = isAdmin;
   const { id } = router.query;
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [registrations, setRegistrations] = useState<Registration[]>([]);

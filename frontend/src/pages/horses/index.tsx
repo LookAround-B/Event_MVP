@@ -45,7 +45,7 @@ interface Rider {
 
 export default function Horses() {
   const router = useRouter();
-  const { isRider } = useAuth();
+  const { isAdmin } = useAuth();
   const [horses, setHorses] = useState<Horse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -296,7 +296,7 @@ export default function Horses() {
                   <Trash2 className="w-4 h-4" /> Delete ({selectedIds.size})
                 </button>
               )}
-              {!isRider && (
+              {isAdmin && (
                 <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
                   <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export Registry</span>
                 </button>

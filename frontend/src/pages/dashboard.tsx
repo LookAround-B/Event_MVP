@@ -332,7 +332,7 @@ function SectionSpinner({ label }: { label?: string }) {
 
 function DashboardContent() {
   const router = useRouter();
-  const { isRider } = useAuth();
+  const { isAdmin } = useAuth();
   const eventsCacheRef = useRef(
     new Map<string, { events: EventListItem[]; count: number; pages: number }>(),
   );
@@ -962,7 +962,7 @@ function DashboardContent() {
             <div className="bento-card p-5 group hover:border-primary/20 transition-colors duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-bold text-on-surface">Events</h3>
-                {!isRider && (
+                {isAdmin && (
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleExportEventsCSV}
@@ -1056,7 +1056,7 @@ function DashboardContent() {
                   <span className="text-xs text-muted-foreground">
                     {participantCount} total
                   </span>
-                  {!isRider && (
+                  {isAdmin && (
                     <button
                       onClick={handleExportParticipantsCSV}
                       className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors"

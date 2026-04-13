@@ -19,6 +19,7 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { exportBrandedExcel, exportCSV } from '@/utils/brandedExcel';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Club {
   id: string;
@@ -63,6 +64,7 @@ const PER_PAGE = 5;
 
 export default function ClubsList() {
   const router = useRouter();
+  const { isAdmin } = useAuth();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -272,9 +274,11 @@ export default function ClubsList() {
               />
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <button onClick={() => setExportOpen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export Registry</span>
-              </button>
+              {isAdmin && (
+                <button onClick={() => setExportOpen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                  <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export Registry</span>
+                </button>
+              )}
               <button onClick={() => setFormOpen(true)} className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center transition-all active:scale-95">
                 <Plus className="w-4 h-4" /> Onboard Club
               </button>

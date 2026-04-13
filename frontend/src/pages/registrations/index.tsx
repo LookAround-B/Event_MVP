@@ -18,6 +18,7 @@ import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/hooks/useAuth';
 
 /* ─── Types (preserved) ─── */
 interface Registration {
@@ -49,6 +50,7 @@ const paymentBadge = (s: string) => {
 const PER_PAGE = 10;
 
 export default function Registrations() {
+  const { isAdmin } = useAuth();
   /* ─── State (all backend state preserved) ─── */
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
@@ -325,9 +327,11 @@ export default function Registrations() {
               />
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <button onClick={() => setExportOpen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
-              </button>
+              {isAdmin && (
+                <button onClick={() => setExportOpen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                  <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
+                </button>
+              )}
               <button onClick={openCreateModal} className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold flex-1 sm:flex-initial justify-center shadow-lg shadow-primary/20">
                 <Plus className="w-4 h-4" /> New Entry
               </button>

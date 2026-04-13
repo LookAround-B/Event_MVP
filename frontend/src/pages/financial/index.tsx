@@ -17,6 +17,7 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/hooks/useAuth';
 
 /* ─── Types (preserved) ─── */
 interface FinanceRegistration {
@@ -77,6 +78,7 @@ const paymentBadge = (status: string) => {
 
 /* ─── Component ─── */
 export default function Financial() {
+  const { isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('finance');
 
   // Finance tab state (preserved)
@@ -402,9 +404,11 @@ export default function Financial() {
                   placeholder="Find ledger entry..."
                 />
               </div>
-              <button onClick={() => setExportOpen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
-              </button>
+              {isAdmin && (
+                <button onClick={() => setExportOpen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                  <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
+                </button>
+              )}
               {activeTab === 'transactions' && (
                 <Link href="/financial/transactions/create" className="flex items-center gap-2 px-4 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20">
                   <Plus className="w-4 h-4" /> Record

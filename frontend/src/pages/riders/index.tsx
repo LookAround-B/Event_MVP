@@ -38,7 +38,7 @@ interface Club {
 
 export default function Riders() {
   const router = useRouter();
-  const { isRider } = useAuth();
+  const { isAdmin } = useAuth();
   const [riders, setRiders] = useState<Rider[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
@@ -265,7 +265,7 @@ export default function Riders() {
                   <Trash2 className="w-4 h-4" /> Delete ({selectedIds.size})
                 </button>
               )}
-              {!isRider && (
+              {isAdmin && (
                 <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
                   <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
                 </button>
