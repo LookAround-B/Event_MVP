@@ -115,7 +115,7 @@ export default function EventStables() {
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['admin']}>
       <div>
         <div className="flex items-center gap-4 mb-8">
           <Link href={`/events/${eventId}`} className="text-muted-foreground hover:text-on-surface">

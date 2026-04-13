@@ -81,7 +81,6 @@ const clubNavGroups: NavGroup[] = [
   {
     label: "Account",
     items: [
-      { title: "Settings", url: "/settings", icon: Settings },
       { title: "Profile", url: "/account", icon: User },
     ],
   },
@@ -113,7 +112,6 @@ const riderNavGroups: NavGroup[] = [
   {
     label: "Account",
     items: [
-      { title: "Settings", url: "/settings", icon: Settings },
       { title: "Profile", url: "/account", icon: User },
     ],
   },

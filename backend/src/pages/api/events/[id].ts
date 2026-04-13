@@ -70,6 +70,15 @@ async function handler(
     }
   }
 
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Only admins can modify events',
+      error: 'FORBIDDEN',
+      statusCode: 403,
+    });
+  }
+
   if (req.method === 'PUT') {
     try {
       const { name, startDate, startTime, startEndTime, endDate, endStartTime, endTime, venueName, venueAddress, venueLat, venueLng, description, eventType, isPublished, termsAndConditions, fileUrl, categoryIds } = req.body;

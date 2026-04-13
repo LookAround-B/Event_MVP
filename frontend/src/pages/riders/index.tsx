@@ -13,6 +13,7 @@ import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Rider {
   id: string;
@@ -37,6 +38,7 @@ interface Club {
 
 export default function Riders() {
   const router = useRouter();
+  const { isRider } = useAuth();
   const [riders, setRiders] = useState<Rider[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
@@ -263,9 +265,11 @@ export default function Riders() {
                   <Trash2 className="w-4 h-4" /> Delete ({selectedIds.size})
                 </button>
               )}
-              <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
-              </button>
+              {!isRider && (
+                <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                  <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
+                </button>
+              )}
               <Link href="/riders/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center">
                 <Plus className="w-4 h-4" /> New Rider
               </Link>

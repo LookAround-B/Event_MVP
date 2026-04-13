@@ -1,11 +1,46 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth } from '@/lib/auth-middleware';
+import { withAuth, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { validateInput } from '@/lib/validation';
 import { ApiResponse } from '@/types';
 
+async function canAccessHorse(req: AuthenticatedRequest, horseId: string) {
+  if (!req.user?.id || !req.user.role || req.user.role === 'admin') {
+    return true;
+  }
+
+  const horse = await prisma.horse.findUnique({
+    where: { id: horseId },
+    select: { riderId: true, clubId: true, ownerId: true },
+  });
+
+  if (!horse) return false;
+
+  if (horse.ownerId === req.user.id) {
+    return true;
+  }
+
+  if (req.user.role === 'rider') {
+    const rider = await prisma.rider.findFirst({
+      where: { userId: req.user.id },
+      select: { id: true },
+    });
+    return horse.riderId === rider?.id;
+  }
+
+  if (req.user.role === 'club') {
+    const club = await prisma.club.findFirst({
+      where: { primaryContactId: req.user.id },
+      select: { id: true },
+    });
+    return horse.clubId === club?.id;
+  }
+
+  return false;
+}
+
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse>
 ) {
   const { id } = req.query;
@@ -13,6 +48,15 @@ async function handler(
 
   if (req.method === 'GET') {
     try {
+      if (!(await canAccessHorse(req, horseId))) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden',
+          error: 'FORBIDDEN',
+          statusCode: 403,
+        });
+      }
+
       const horse = await prisma.horse.findUnique({
         where: { id: horseId },
         include: {
@@ -53,6 +97,15 @@ async function handler(
 
   if (req.method === 'PUT') {
     try {
+      if (!(await canAccessHorse(req, horseId))) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden',
+          error: 'FORBIDDEN',
+          statusCode: 403,
+        });
+      }
+
       const { name, breed, color, height, gender, yearOfBirth, passportNumber, horseCode, riderId, embassyId } = req.body;
 
       // Check if horse exists
@@ -127,6 +180,15 @@ async function handler(
 
   if (req.method === 'DELETE') {
     try {
+      if (!(await canAccessHorse(req, horseId))) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden',
+          error: 'FORBIDDEN',
+          statusCode: 403,
+        });
+      }
+
       await prisma.horse.delete({
         where: { id: horseId },
       });

@@ -8,6 +8,7 @@ import { DatePicker } from '@/components/DatePicker';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TableSkeleton } from '@/components/TableSkeleton';
+import { useAuth } from '@/hooks/useAuth';
 
 interface EventSummary {
   id: string;
@@ -52,6 +53,7 @@ interface FinancialReport {
 }
 
 export default function Reports() {
+  const { isRider } = useAuth();
   const [tab, setTab] = useState<'events' | 'financial' | 'riders' | 'attendance'>('events');
   const [loading, setLoading] = useState(false);
   const [eventSummaries, setEventSummaries] = useState<EventSummary[]>([]);
@@ -280,9 +282,11 @@ export default function Reports() {
                 <DatePicker value={dateRange.end} onChange={(v) => setDateRange({ ...dateRange, end: v })} placeholder="End date" />
               </div>
               <button onClick={loadReport} className="px-4 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20">Apply</button>
-              <button onClick={downloadFinancialCSV} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> Export CSV
-              </button>
+              {!isRider && (
+                <button onClick={downloadFinancialCSV} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                  <Download className="w-4 h-4" /> Export CSV
+                </button>
+              )}
             </div>
 
             {financialReport && (

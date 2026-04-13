@@ -6,6 +6,7 @@ import AddressMapPicker from '@/components/AddressMapPicker';
 import dynamic from 'next/dynamic';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import toast from 'react-hot-toast';
+import ProtectedRoute from '@/lib/protected-route';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false });
 
@@ -305,9 +306,10 @@ export default function Settings() {
   const settingsActionButtonClass = "btn-primary inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold shadow-lg shadow-primary/20 disabled:opacity-50";
 
   return (
-    <div className="p-4 sm:p-6">
-      <Head><title>Settings | Equestrian Events</title></Head>
-      <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl mb-6">System <span className="gradient-text">Settings</span></h1>
+    <ProtectedRoute allowedRoles={['admin']}>
+      <div className="p-4 sm:p-6">
+        <Head><title>Settings | Equestrian Events</title></Head>
+        <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl mb-6">System <span className="gradient-text">Settings</span></h1>
 
       {/* Tabs */}
       <div className="bento-card">
@@ -811,6 +813,6 @@ export default function Settings() {
           ) : null}
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

@@ -12,6 +12,7 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Horse {
   id: string;
@@ -44,6 +45,7 @@ interface Rider {
 
 export default function Horses() {
   const router = useRouter();
+  const { isRider } = useAuth();
   const [horses, setHorses] = useState<Horse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -294,9 +296,11 @@ export default function Horses() {
                   <Trash2 className="w-4 h-4" /> Delete ({selectedIds.size})
                 </button>
               )}
-              <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export Registry</span>
-              </button>
+              {!isRider && (
+                <button onClick={handleExportCSV} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                  <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export Registry</span>
+                </button>
+              )}
               <Link href="/horses/create" className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold flex-1 sm:flex-initial justify-center shadow-lg shadow-primary/20">
                 <Plus className="w-4 h-4" /> Onboard Asset
               </Link>

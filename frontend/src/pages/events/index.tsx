@@ -14,6 +14,7 @@ import { FilterDropdown } from '@/components/FilterDropdown';
 import { CalendarView } from '@/components/CalendarView';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';import CreateEventModal from '@/components/CreateEventModal';import EditEventModal from '@/components/EditEventModal';import { ActionItem } from '@/components/ActionsDropdown';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Event {
   id: string;
@@ -31,6 +32,9 @@ interface Event {
 
 export default function Events() {
   const router = useRouter();
+  const { isAdmin, isRider } = useAuth();
+  const canManageEvents = isAdmin;
+  const canDownloadEvents = !isRider;
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -291,12 +295,16 @@ export default function Events() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
-                <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export Manifest</span>
-              </button>
-              <button onClick={() => setCreateOpen(true)} className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center transition-all active:scale-95">
-                <Plus className="w-4 h-4" /> Define Event
-              </button>
+              {canDownloadEvents && (
+                <button onClick={handleExportExcel} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright transition-colors border border-border/30">
+                  <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export Manifest</span>
+                </button>
+              )}
+              {canManageEvents && (
+                <button onClick={() => setCreateOpen(true)} className="flex items-center gap-2 px-4 sm:px-5 py-2.5 btn-cta rounded-xl text-sm font-bold shadow-lg shadow-primary/20 flex-1 sm:flex-initial justify-center transition-all active:scale-95">
+                  <Plus className="w-4 h-4" /> Define Event
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -392,8 +400,12 @@ export default function Events() {
                       <td className="p-3 sm:p-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => router.push(`/events/${event.id}`)} title="View" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95"><Eye className="w-4 h-4" /></button>
-                          <button onClick={() => setEditEventId(event.id)} title="Edit" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95"><Edit className="w-4 h-4" /></button>
-                          <button onClick={() => handleDelete(event.id)} title="Delete" className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all active:scale-95"><Trash2 className="w-4 h-4" /></button>
+                          {canManageEvents && (
+                            <button onClick={() => setEditEventId(event.id)} title="Edit" className="p-2 rounded-lg hover:bg-surface-container text-muted-foreground hover:text-on-surface transition-all active:scale-95"><Edit className="w-4 h-4" /></button>
+                          )}
+                          {canManageEvents && (
+                            <button onClick={() => handleDelete(event.id)} title="Delete" className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all active:scale-95"><Trash2 className="w-4 h-4" /></button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -411,8 +423,8 @@ export default function Events() {
         )}
       </div>
 
-      <CreateEventModal open={createOpen} onClose={() => setCreateOpen(false)} onCreated={fetchEvents} />
-      <EditEventModal open={!!editEventId} eventId={editEventId} onClose={() => setEditEventId(null)} onUpdated={fetchEvents} />
+      {canManageEvents && <CreateEventModal open={createOpen} onClose={() => setCreateOpen(false)} onCreated={fetchEvents} />}
+      {canManageEvents && <EditEventModal open={!!editEventId} eventId={editEventId} onClose={() => setEditEventId(null)} onUpdated={fetchEvents} />}
     </ProtectedRoute>
   );
 }

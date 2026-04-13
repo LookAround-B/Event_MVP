@@ -15,11 +15,12 @@ interface DecodedToken {
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  allowedRoles?: Array<'admin' | 'club' | 'rider'>;
 }
 
 let authCache: boolean | null = null;
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(() => {
     if (typeof window === 'undefined') {
@@ -84,13 +85,18 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
         return;
       }
 
+      if (allowedRoles && (!payload.role || !allowedRoles.includes(payload.role as 'admin' | 'club' | 'rider'))) {
+        rejectAccess('/dashboard');
+        return;
+      }
+
       authCache = true;
       setIsAuthorized(true);
     } catch (error) {
       Cookies.remove('authToken');
       rejectAccess('/auth/login');
     }
-  }, [isClient, router, router.asPath]);
+  }, [allowedRoles, isClient, router, router.asPath]);
 
   // Show nothing during SSR
   if (!isClient || isAuthorized === null) {

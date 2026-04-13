@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/select";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/useAuth";
 
 /* ===================== TYPES ===================== */
 
@@ -331,6 +332,7 @@ function SectionSpinner({ label }: { label?: string }) {
 
 function DashboardContent() {
   const router = useRouter();
+  const { isRider } = useAuth();
   const eventsCacheRef = useRef(
     new Map<string, { events: EventListItem[]; count: number; pages: number }>(),
   );
@@ -960,14 +962,16 @@ function DashboardContent() {
             <div className="bento-card p-5 group hover:border-primary/20 transition-colors duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-bold text-on-surface">Events</h3>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleExportEventsCSV}
-                    className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors"
-                  >
-                    <Download className="w-3.5 h-3.5 text-muted-foreground" />
-                  </button>
-                </div>
+                {!isRider && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleExportEventsCSV}
+                      className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Tab toggles */}
@@ -1052,12 +1056,14 @@ function DashboardContent() {
                   <span className="text-xs text-muted-foreground">
                     {participantCount} total
                   </span>
-                  <button
-                    onClick={handleExportParticipantsCSV}
-                    className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors"
-                  >
-                    <Download className="w-3.5 h-3.5 text-muted-foreground" />
-                  </button>
+                  {!isRider && (
+                    <button
+                      onClick={handleExportParticipantsCSV}
+                      className="w-7 h-7 rounded-full border border-border/50 flex items-center justify-center hover:bg-surface-container transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  )}
                 </div>
               </div>
 

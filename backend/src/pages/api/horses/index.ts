@@ -1,50 +1,87 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth } from '@/lib/auth-middleware';
+import { withAuth, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { validateInput } from '@/lib/validation';
 import { ApiResponse } from '@/types';
 
+async function getHorseAccessFilter(req: AuthenticatedRequest) {
+  if (!req.user?.id || !req.user.role || req.user.role === 'admin') {
+    return null;
+  }
+
+  if (req.user.role === 'rider') {
+    const rider = await prisma.rider.findFirst({
+      where: { userId: req.user.id },
+      select: { id: true },
+    });
+
+    return rider
+      ? { OR: [{ riderId: rider.id }, { ownerId: req.user.id }] }
+      : { ownerId: req.user.id };
+  }
+
+  if (req.user.role === 'club') {
+    const club = await prisma.club.findFirst({
+      where: { primaryContactId: req.user.id },
+      select: { id: true },
+    });
+
+    return club
+      ? { OR: [{ clubId: club.id }, { ownerId: req.user.id }] }
+      : { ownerId: req.user.id };
+  }
+
+  return { ownerId: req.user.id };
+}
+
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse>
 ) {
   const { method } = req;
 
-  // GET is public for form dropdowns, POST requires auth
   if (method === 'GET') {
     try {
       const { page = '1', limit = '10', search = '', format, gender, clubId, riderId, isActive } = req.query;
       const pageNum = Math.max(1, parseInt(page as string) || 1);
       const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
       const skip = (pageNum - 1) * limitNum;
-
-      const where: any = {};
+      const andFilters: any[] = [];
 
       if (search) {
-        where.OR = [
-          { name: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-          { color: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-          { gender: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-          { passportNumber: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-          { embassyId: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
-        ];
+        andFilters.push({
+          OR: [
+            { name: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+            { color: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+            { gender: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+            { passportNumber: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+            { embassyId: { contains: search as string, mode: 'insensitive' as 'insensitive' } },
+          ],
+        });
       }
 
       if (gender) {
-        where.gender = gender as string;
+        andFilters.push({ gender: gender as string });
       }
 
       if (clubId) {
-        where.clubId = clubId as string;
+        andFilters.push({ clubId: clubId as string });
       }
 
       if (riderId) {
-        where.riderId = riderId as string;
+        andFilters.push({ riderId: riderId as string });
       }
 
       if (isActive !== undefined && isActive !== '') {
-        where.isActive = isActive === 'true';
+        andFilters.push({ isActive: isActive === 'true' });
       }
+
+      const accessFilter = await getHorseAccessFilter(req);
+      if (accessFilter) {
+        andFilters.push(accessFilter);
+      }
+
+      const where = andFilters.length > 0 ? { AND: andFilters } : {};
 
       if (format === 'csv') {
         const allHorses = await prisma.horse.findMany({
@@ -195,6 +232,29 @@ async function handler(
         }
       }
 
+      let riderLink: { riderId?: string | null; clubId?: string | null; ownerId?: string | null } = {};
+
+      if (req.user?.role === 'rider' && req.user.id) {
+        const rider = await prisma.rider.findFirst({
+          where: { userId: req.user.id },
+          select: { id: true, clubId: true },
+        });
+        riderLink = {
+          ownerId: req.user.id,
+          riderId: rider?.id ?? null,
+          clubId: rider?.clubId ?? null,
+        };
+      } else if (req.user?.role === 'club' && req.user.id) {
+        const club = await prisma.club.findFirst({
+          where: { primaryContactId: req.user.id },
+          select: { id: true },
+        });
+        riderLink = {
+          ownerId: req.user.id,
+          clubId: club?.id ?? null,
+        };
+      }
+
       const horse = await prisma.horse.create({
         data: {
           name: name.trim(),
@@ -206,6 +266,7 @@ async function handler(
           passportNumber: passportNumber || null,
           horseCode: horseCode || null,
           embassyId: embassyId || null,
+          ...riderLink,
         },
       });
 
@@ -236,10 +297,4 @@ async function handler(
   });
 }
 
-// Apply auth only to POST/DELETE, not GET (GET is public for form dropdowns)
-export default async function wrappedHandler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    return handler(req, res);
-  }
-  return withAuth(handler)(req, res);
-}
+export default withAuth(handler);

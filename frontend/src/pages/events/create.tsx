@@ -255,14 +255,14 @@ export default function CreateEventPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={['admin']}>
         <PageSkeleton variant="form" />
       </ProtectedRoute>
     );
   }
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['admin']}>
       <Head><title>{isEdit ? 'Edit Event' : 'Create Event'} | Equestrian Events</title></Head>
       <div className="space-y-6 max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">

@@ -101,6 +101,15 @@ async function handler(
   if (method === 'POST') {
     return withAuth(async (authReq, authRes) => {
       try {
+        if (authReq.user?.role !== 'admin') {
+          return authRes.status(403).json({
+            success: false,
+            message: 'Only admins can create events',
+            error: 'FORBIDDEN',
+            statusCode: 403,
+          });
+        }
+
         const { 
           eventType, name, description, startDate, startTime, endDate, endTime, 
           fileUrl, venueAddress, venueLat, venueLng, venueName, 

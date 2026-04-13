@@ -1,6 +1,6 @@
 import type { NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma/client'
-import { withPermission, AuthenticatedRequest } from '@/lib/auth-middleware'
+import { withRole, AuthenticatedRequest } from '@/lib/auth-middleware'
 import { createAuditLog } from '@/lib/audit'
 import { ApiResponse } from '@/types'
 
@@ -83,4 +83,4 @@ async function handler(req: AuthenticatedRequest, res: NextApiResponse<ApiRespon
   }
 }
 
-export default withPermission('Create', 'Event')(handler)
+export default withRole('admin')(handler)

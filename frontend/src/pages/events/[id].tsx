@@ -8,6 +8,7 @@ import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Download, ChevronLeft, ChevronRight, MapPin, Clock, Search, X, Eye, ListOrdered, Zap, Loader2 } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { useAuth } from '@/hooks/useAuth';
 
 interface EventDetail {
   id: string;
@@ -80,6 +81,9 @@ async function fetchLogoBase64(): Promise<string | null> {
 
 export default function EventDetail() {
   const router = useRouter();
+  const { isAdmin, isRider } = useAuth();
+  const canManageEvent = isAdmin;
+  const canDownload = !isRider;
   const { id } = router.query;
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -547,11 +551,13 @@ export default function EventDetail() {
                 </p>
                 {event.venueAddress && <p className="text-[10px] text-muted-foreground ml-4.5">{event.venueAddress}</p>}
               </div>
-              <div className="flex items-end">
-                <Link href={`/events/${id}/stables`} className="btn-cta px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2">
-                  Manage Stables
-                </Link>
-              </div>
+              {canManageEvent && (
+                <div className="flex items-end">
+                  <Link href={`/events/${id}/stables`} className="btn-cta px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2">
+                    Manage Stables
+                  </Link>
+                </div>
+              )}
             </div>
 
             {event.description && (
@@ -591,14 +597,16 @@ export default function EventDetail() {
                 <h2 className="text-lg font-bold text-on-surface">Registered Members</h2>
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">{registeredCount} Athletes</p>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => void exportToExcel()} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright border border-border/30 transition-colors">
-                  <Download className="w-4 h-4" /> Excel
-                </button>
-                <button onClick={exportToCSV} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright border border-border/30 transition-colors">
-                  <Download className="w-4 h-4" /> CSV
-                </button>
-              </div>
+              {canDownload && (
+                <div className="flex gap-2">
+                  <button onClick={() => void exportToExcel()} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright border border-border/30 transition-colors">
+                    <Download className="w-4 h-4" /> Excel
+                  </button>
+                  <button onClick={exportToCSV} className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright border border-border/30 transition-colors">
+                    <Download className="w-4 h-4" /> CSV
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Filters */}
@@ -734,17 +742,19 @@ export default function EventDetail() {
                     ))}
                   </SelectContent>
                 </Select>
-                <button
-                  onClick={generateSchedule}
-                  disabled={!scheduleCategory || generating}
-                  className="flex items-center gap-2 px-4 py-2.5 btn-cta rounded-xl text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                  {generating
-                    ? <Loader2 className="w-4 h-4 animate-spin" />
-                    : <Zap className="w-4 h-4" />}
-                  {generating ? 'Generating…' : 'Generate'}
-                </button>
-                {scheduleData.length > 0 && (
+                {canManageEvent && (
+                  <button
+                    onClick={generateSchedule}
+                    disabled={!scheduleCategory || generating}
+                    className="flex items-center gap-2 px-4 py-2.5 btn-cta rounded-xl text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  >
+                    {generating
+                      ? <Loader2 className="w-4 h-4 animate-spin" />
+                      : <Zap className="w-4 h-4" />}
+                    {generating ? 'Generating…' : 'Generate'}
+                  </button>
+                )}
+                {canDownload && scheduleData.length > 0 && (
                   <button
                     onClick={() => void exportStartListToExcel()}
                     className="flex items-center gap-2 px-4 py-2.5 bg-surface-container/60 rounded-xl text-sm text-on-surface-variant hover:bg-surface-bright border border-border/30 transition-colors"
@@ -769,8 +779,12 @@ export default function EventDetail() {
                 <ListOrdered className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">
                   {scheduleCategory
-                    ? 'No start list yet. Click Generate to assign start positions.'
-                    : 'Select a category to view or generate the start list.'}
+                    ? canManageEvent
+                      ? 'No start list yet. Click Generate to assign start positions.'
+                      : 'No start list is available for this category yet.'
+                    : canManageEvent
+                      ? 'Select a category to view or generate the start list.'
+                      : 'Select a category to view the start list.'}
                 </p>
               </div>
             ) : (
