@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Calendar, Building2, Users,
   UserCog, Settings, User, LogOut,
   DollarSign, Activity, Shield, ClipboardList, CheckSquare,
-  ScrollText, Bell, BarChart3,
+  ScrollText, BarChart3,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -14,8 +14,12 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAppearance } from "@/contexts/AppearanceContext";
+import { useAuth } from "@/hooks/useAuth";
 
-const navGroups = [
+type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
+type NavGroup = { label: string; items: NavItem[] };
+
+const adminNavGroups: NavGroup[] = [
   {
     label: "Overview",
     items: [
@@ -50,6 +54,76 @@ const navGroups = [
   },
 ];
 
+const clubNavGroups: NavGroup[] = [
+  {
+    label: "Overview",
+    items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { title: "Events", url: "/events", icon: Calendar },
+      { title: "Registrations", url: "/registrations", icon: ClipboardList },
+      { title: "Financial", url: "/financial", icon: DollarSign },
+      { title: "Reports", url: "/reports", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { title: "Riders", url: "/riders", icon: Users },
+      { title: "Horses", url: "/horses", icon: Activity },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { title: "Settings", url: "/settings", icon: Settings },
+      { title: "Profile", url: "/account", icon: User },
+    ],
+  },
+];
+
+const riderNavGroups: NavGroup[] = [
+  {
+    label: "Overview",
+    items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { title: "Events", url: "/events", icon: Calendar },
+      { title: "Registrations", url: "/registrations", icon: ClipboardList },
+      { title: "Reports", url: "/reports", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { title: "Club", url: "/clubs", icon: Building2 },
+      { title: "Riders", url: "/riders", icon: Users },
+      { title: "Horses", url: "/horses", icon: Activity },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { title: "Settings", url: "/settings", icon: Settings },
+      { title: "Profile", url: "/account", icon: User },
+    ],
+  },
+];
+
+const ROLE_LABEL: Record<string, string> = {
+  admin: "Administrator",
+  club: "Club",
+  rider: "Rider",
+};
+
 const STARS = [
   [12, 8], [25, 45], [40, 18], [55, 72], [70, 30],
   [85, 60], [15, 85], [60, 5], [90, 40], [35, 92],
@@ -61,12 +135,22 @@ export function AppSidebar() {
   const router = useRouter();
   const pathname = router.pathname;
   useAppearance();
+  const { user, role, logout } = useAuth();
+
+  const navGroups =
+    role === "admin" ? adminNavGroups :
+    role === "club"  ? clubNavGroups  :
+    riderNavGroups;
+
+  const displayName = user?.email ?? "User";
+  const initial = displayName.charAt(0).toUpperCase();
+  const roleLabel = ROLE_LABEL[role ?? "rider"] ?? "User";
 
   // Prefetch all nav routes on mount for instant navigation
   useEffect(() => {
     const allUrls = navGroups.flatMap((g) => g.items.map((i) => i.url));
     allUrls.forEach((url) => router.prefetch(url));
-  }, [router]);
+  }, [router, navGroups]);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border sidebar-custom">
@@ -94,7 +178,7 @@ export function AppSidebar() {
           ))}
       </div>
 
-      {/* Header (Logo removed) */}
+      {/* Header (Logo) */}
       <div
         className={cn(
           "flex items-center py-5 px-4 border-b border-sidebar-border z-10",
@@ -140,11 +224,6 @@ export function AppSidebar() {
                   const isActive = pathname === item.url;
                   return (
                     <SidebarMenuItem key={item.title}>
-                      {/*
-                        Use asChild WITHOUT tooltip prop — tooltip wraps a Radix Tooltip
-                        that intercepts pointer events and breaks navigation clicks.
-                        Use plain `title` attribute for collapsed state instead.
-                      */}
                       <SidebarMenuButton asChild isActive={isActive}>
                         <Link
                           href={item.url}
@@ -212,18 +291,18 @@ export function AppSidebar() {
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black flex-shrink-0 border border-primary/30 text-primary"
                 style={{ background: "hsl(var(--primary)/0.12)" }}
               >
-                A
+                {initial}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-on-surface truncate">Admin User</p>
+                <p className="text-xs font-bold text-on-surface truncate">{displayName}</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <Shield className="w-2.5 h-2.5 text-muted-foreground" />
-                  <span className="text-[10px] text-muted-foreground">Administrator</span>
+                  <span className="text-[10px] text-muted-foreground">{roleLabel}</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground/50 mt-1 font-semibold tracking-wider">Powered by LookAround.</p>
               </div>
               <button
-                onClick={() => router.push("/auth/login")}
+                onClick={logout}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
                 title="Sign out"
               >
@@ -233,7 +312,7 @@ export function AppSidebar() {
           </div>
         ) : (
           <button
-            onClick={() => router.push("/auth/login")}
+            onClick={logout}
             className="w-10 h-10 mx-auto flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200"
             title="Sign out"
           >

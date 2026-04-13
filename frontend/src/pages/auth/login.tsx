@@ -36,8 +36,10 @@ export default function Login() {
     setError('');
     setLoading(true);
 
+    const role = activeTab === 'admin' ? 'admin' : loginType;
+
     try {
-      const response = await apiClient.post('/api/auth/login', formData);
+      const response = await apiClient.post('/api/auth/login', { ...formData, role });
       Cookies.set('authToken', response.data.data.token, { expires: 7 });
 
       const user = response.data.data.user;

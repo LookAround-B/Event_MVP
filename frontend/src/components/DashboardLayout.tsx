@@ -5,6 +5,7 @@ import { Bell, Search } from "lucide-react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAuth } from "@/hooks/useAuth";
 
 const pageTitles: Record<string, string> = {
   "/dashboard":        "Dashboard",
@@ -26,6 +27,8 @@ const pageTitles: Record<string, string> = {
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const title = pageTitles[router.pathname] || "Dashboard";
+  const { user } = useAuth();
+  const initial = (user?.email ?? "U").charAt(0).toUpperCase();
 
   return (
     <SidebarProvider>
@@ -80,7 +83,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               {/* Avatar */}
               <Link href="/account" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-sm font-bold border border-primary/30 shimmer-card hover:opacity-80 transition-opacity"
                 style={{ background: "hsl(var(--primary)/0.15)", color: "hsl(var(--primary))" }}>
-                A
+                {initial}
               </Link>
             </div>
           </header>
