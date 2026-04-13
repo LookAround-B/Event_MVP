@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Calendar, Building2, Users,
   UserCog, Settings, User, LogOut,
   DollarSign, Activity, Shield, ClipboardList, CheckSquare,
-  ScrollText, BarChart3,
+  ScrollText, BarChart3, // DollarSign kept for admin Financial nav
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -66,13 +66,13 @@ const clubNavGroups: NavGroup[] = [
     items: [
       { title: "Events", url: "/events", icon: Calendar },
       { title: "Registrations", url: "/registrations", icon: ClipboardList },
-      { title: "Financial", url: "/financial", icon: DollarSign },
       { title: "Reports", url: "/reports", icon: BarChart3 },
     ],
   },
   {
     label: "Community",
     items: [
+      { title: "My Club", url: "/clubs/my", icon: Building2 },
       { title: "Riders", url: "/riders", icon: Users },
       { title: "Horses", url: "/horses", icon: Activity },
     ],
@@ -104,7 +104,7 @@ const riderNavGroups: NavGroup[] = [
   {
     label: "Community",
     items: [
-      { title: "Club", url: "/clubs", icon: Building2 },
+      { title: "Club", url: "/clubs/my", icon: Building2 },
       { title: "Riders", url: "/riders", icon: Users },
       { title: "Horses", url: "/horses", icon: Activity },
     ],
@@ -221,7 +221,10 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu className="space-y-0.5">
                 {group.items.map((item) => {
-                  const isActive = pathname === item.url;
+                  // /clubs/my redirects to /clubs/[id], so treat any /clubs/* path as active
+                  const isActive =
+                    pathname === item.url ||
+                    (item.url === "/clubs/my" && pathname.startsWith("/clubs/"));
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={isActive}>

@@ -9,6 +9,7 @@ import { ArrowLeft, Plus, Trash2, Pencil, Save, X, ImageIcon } from 'lucide-reac
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Rider {
   id: string;
@@ -77,6 +78,7 @@ export default function ClubDetail() {
   const router = useRouter();
   const { id, mode } = router.query;
   const isViewMode = mode === 'view';
+  const { isAdmin } = useAuth();
   const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'riders' | 'horses'>('riders');
@@ -355,11 +357,13 @@ export default function ClubDetail() {
     <ProtectedRoute>
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/clubs" className="transition-colors flex items-center gap-2">
-            <ArrowLeft /> Back to Clubs
-          </Link>
+          {isAdmin && (
+            <Link href="/clubs" className="transition-colors flex items-center gap-2">
+              <ArrowLeft /> Back to Clubs
+            </Link>
+          )}
           {isViewMode && (
-            <Link href={`/clubs/${id}`} className="btn-secondary text-sm ml-auto">
+            <Link href={`/clubs/${id}`} className="btn btn-secondary text-sm ml-auto">
               <Pencil className="inline mr-1" /> Switch to Edit
             </Link>
           )}
@@ -383,7 +387,7 @@ export default function ClubDetail() {
               </div>
             </div>
             {!isViewMode && !editClub && (
-              <button onClick={() => setEditClub(true)} className="btn-secondary flex items-center gap-2">
+              <button onClick={() => setEditClub(true)} className="btn btn-secondary flex items-center gap-2">
                 <Pencil /> Edit Club
               </button>
             )}
@@ -474,8 +478,8 @@ export default function ClubDetail() {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <button onClick={saveClubEdit} className="btn-primary flex items-center gap-2"><Save /> Save</button>
-                <button onClick={() => setEditClub(false)} className="btn-secondary flex items-center gap-2"><X /> Cancel</button>
+                <button onClick={saveClubEdit} className="btn btn-primary flex items-center gap-2"><Save /> Save</button>
+                <button onClick={() => setEditClub(false)} className="btn btn-secondary flex items-center gap-2"><X /> Cancel</button>
               </div>
             </div>
           ) : (
@@ -602,7 +606,7 @@ export default function ClubDetail() {
               {!isViewMode && (
                 <button
                   onClick={() => setShowAddRider(!showAddRider)}
-                  className="btn-secondary mb-4 flex items-center gap-2"
+                  className="btn btn-secondary mb-4 flex items-center gap-2"
                 >
                   <Plus /> Add Rider
                 </button>
@@ -675,8 +679,8 @@ export default function ClubDetail() {
                     />
                   </div>
                   <div className="flex gap-2">
-                    <button type="submit" className="btn-primary">Save</button>
-                    <button type="button" onClick={() => setShowAddRider(false)} className="btn-secondary">Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save</button>
+                    <button type="button" onClick={() => setShowAddRider(false)} className="btn btn-secondary">Cancel</button>
                   </div>
                 </form>
               )}
@@ -772,7 +776,7 @@ export default function ClubDetail() {
               {!isViewMode && (
                 <button
                   onClick={() => setShowAddHorse(!showAddHorse)}
-                  className="btn-secondary mb-4 flex items-center gap-2"
+                  className="btn btn-secondary mb-4 flex items-center gap-2"
                 >
                   <Plus /> Add Horse
                 </button>
@@ -847,8 +851,8 @@ export default function ClubDetail() {
                     />
                   </div>
                   <div className="flex gap-2">
-                    <button type="submit" className="btn-primary">Save</button>
-                    <button type="button" onClick={() => setShowAddHorse(false)} className="btn-secondary">Cancel</button>
+                    <button type="submit" className="btn btn-primary">Save</button>
+                    <button type="button" onClick={() => setShowAddHorse(false)} className="btn btn-secondary">Cancel</button>
                   </div>
                 </form>
               )}
