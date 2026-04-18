@@ -31,11 +31,7 @@ function GoogleMark() {
   );
 }
 
-export default function GoogleAuthIconButton({
-  disabled = false,
-  onToken,
-  onError,
-}: GoogleAuthIconButtonProps) {
+function GoogleAuthIconButtonInner({ disabled, onToken, onError }: GoogleAuthIconButtonProps) {
   const login = useGoogleLogin({
     flow: 'implicit',
     scope: 'openid email profile',
@@ -44,15 +40,10 @@ export default function GoogleAuthIconButton({
         onError('Google login failed. Please try again.');
         return;
       }
-
       void onToken(tokenResponse.access_token);
     },
-    onError: () => {
-      onError('Google login failed. Please try again.');
-    },
-    onNonOAuthError: () => {
-      onError('Google login failed. Please try again.');
-    },
+    onError: () => onError('Google login failed. Please try again.'),
+    onNonOAuthError: () => onError('Google login failed. Please try again.'),
   });
 
   return (
@@ -68,4 +59,9 @@ export default function GoogleAuthIconButton({
       <GoogleMark />
     </Button>
   );
+}
+
+export default function GoogleAuthIconButton(props: GoogleAuthIconButtonProps) {
+  if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) return null;
+  return <GoogleAuthIconButtonInner {...props} />;
 }

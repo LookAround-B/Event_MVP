@@ -56,8 +56,6 @@ export default function App({ Component, pageProps }: AppProps) {
   const routeLoadingDelayTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxLoadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
-  const GoogleWrapper = ({ children }: { children: React.ReactNode }) =>
-    clientId ? <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider> : <>{children}</>;
   const isPublicRoute = PUBLIC_ROUTES.includes(router.pathname);
 
   useEffect(() => {
@@ -150,14 +148,14 @@ export default function App({ Component, pageProps }: AppProps) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <AppearanceProvider>
-            <GoogleWrapper>
+            <GoogleOAuthProvider clientId={clientId}>
               <ToastProvider />
               <Head>
                 <title>Equestrian Events</title>
                 <link rel="icon" type="image/png" href="/logo_new.png" />
               </Head>
               {isRouteLoading ? <PageSkeleton variant="public" /> : <Component {...pageProps} />}
-            </GoogleWrapper>
+            </GoogleOAuthProvider>
           </AppearanceProvider>
         </ThemeProvider>
       </QueryClientProvider>
