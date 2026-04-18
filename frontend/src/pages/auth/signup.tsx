@@ -288,7 +288,7 @@ export default function Signup() {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/rider/login" className="font-bold text-primary hover:text-primary/80 transition-colors">
+            <Link href="/auth/login" className="font-bold text-primary hover:text-primary/80 transition-colors">
               Log in
             </Link>
           </p>

@@ -61,7 +61,7 @@ export default function CompleteProfile() {
       const token = Cookies.get('authToken');
 
       if (!token) {
-        router.replace('/rider/login');
+        router.replace('/auth/login');
         return;
       }
 
@@ -87,7 +87,7 @@ export default function CompleteProfile() {
       } catch (err: any) {
         if (err.response?.status === 401) {
           Cookies.remove('authToken');
-          router.replace('/rider/login');
+          router.replace('/auth/login');
           return;
         }
         setError(err.response?.data?.message || 'Failed to load your profile');

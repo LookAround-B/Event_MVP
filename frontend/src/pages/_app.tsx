@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PUBLIC_ROUTES = ['/auth/login', '/auth/signup', '/pending-approval', '/complete-profile', '/', '/admin/login', '/rider/login'];
+const PUBLIC_ROUTES = ['/auth/login', '/auth/signup', '/pending-approval', '/complete-profile', '/'];
 
 function normalizeRoutePath(url: string) {
   return url.split('?')[0]?.split('#')[0] || url;

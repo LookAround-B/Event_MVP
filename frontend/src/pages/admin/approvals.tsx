@@ -52,12 +52,12 @@ export default function AdminApprovals() {
 
   useEffect(() => {
     const token = Cookies.get('authToken');
-    if (!token) { router.push('/admin/login'); return; }
+    if (!token) { router.push('/auth/login'); return; }
     try {
       const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('utf-8'));
       if (payload.role !== 'admin') { router.push('/dashboard'); return; }
       setIsAdmin(true);
-    } catch { router.push('/admin/login'); }
+    } catch { router.push('/auth/login'); }
   }, [router]);
 
   useEffect(() => {
