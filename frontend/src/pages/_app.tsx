@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PUBLIC_ROUTES = ['/auth/login', '/auth/signup', '/pending-approval', '/complete-profile', '/'];
+const PUBLIC_ROUTES = ['/auth/login', '/auth/signup', '/pending-approval', '/complete-profile', '/', '/admin/login', '/rider/login'];
 
 function normalizeRoutePath(url: string) {
   return url.split('?')[0]?.split('#')[0] || url;
@@ -152,7 +152,7 @@ export default function App({ Component, pageProps }: AppProps) {
               <ToastProvider />
               <Head>
                 <title>Equestrian Events</title>
-                <link rel="icon" type="image/png" href="/favicon.png" />
+                <link rel="icon" type="image/png" href="/logo_new.png" />
               </Head>
               {isRouteLoading ? <PageSkeleton variant="public" /> : <Component {...pageProps} />}
             </GoogleOAuthProvider>
@@ -170,7 +170,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <ToastProvider />
             <Head>
               <title>Equestrian Events</title>
-              <link rel="icon" type="image/png" href="/favicon.png" />
+              <link rel="icon" type="image/png" href="/logo_new.png" />
             </Head>
             <ProtectedRoute>
               <Layout>

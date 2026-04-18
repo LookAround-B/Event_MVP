@@ -244,9 +244,4 @@ async function handler(
   });
 }
 
-export default async function wrappedHandler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    return handler(req, res);
-  }
-  return withAuth(handler)(req, res);
-}
+export default withAuth(handler);

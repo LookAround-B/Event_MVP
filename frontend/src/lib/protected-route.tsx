@@ -50,7 +50,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     const token = Cookies.get('authToken');
     
     if (!token) {
-      rejectAccess('/auth/login');
+      rejectAccess('/rider/login');
       return;
     }
 
@@ -69,7 +69,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
       // Check if token is expired
       if (payload.exp && payload.exp * 1000 < Date.now()) {
         Cookies.remove('authToken');
-        rejectAccess('/auth/login');
+        rejectAccess('/rider/login');
         return;
       }
 
@@ -94,7 +94,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
       setIsAuthorized(true);
     } catch (error) {
       Cookies.remove('authToken');
-      rejectAccess('/auth/login');
+      rejectAccess('/rider/login');
     }
   }, [allowedRoles, isClient, router, router.asPath]);
 

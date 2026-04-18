@@ -46,7 +46,7 @@ export function useAuth(): UseAuthResult {
 
   const logout = () => {
     Cookies.remove('authToken');
-    window.location.href = '/auth/login';
+    window.location.href = '/rider/login';
   };
 
   const role = user?.role ?? null;

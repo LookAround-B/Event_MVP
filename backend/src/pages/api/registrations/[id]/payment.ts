@@ -1,6 +1,6 @@
 import type { NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth, AuthenticatedRequest } from '@/lib/auth-middleware';
+import { withRole, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { createAuditLog } from '@/lib/audit';
 import { sendPaymentReceipt } from '@/lib/email';
 import { ApiResponse } from '@/types';
@@ -138,4 +138,4 @@ async function handler(
   }
 }
 
-export default withAuth(handler);
+export default withRole('admin')(handler);

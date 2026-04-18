@@ -53,6 +53,7 @@ interface ManifestRegistration {
   category?: {
     id?: string;
     name?: string;
+    description?: string | null;
   };
   club?: {
     name?: string;
@@ -121,9 +122,9 @@ function getHcValue(entry: ManifestRegistration) {
 
 function getRiderCategoryLabel(entry: ManifestRegistration, referenceDateRaw: string) {
   const dob = entry.rider?.dob ? new Date(entry.rider.dob) : null;
-  if (!dob || Number.isNaN(dob.getTime()) || !referenceDateRaw) return entry.category?.name || '-';
+  if (!dob || Number.isNaN(dob.getTime()) || !referenceDateRaw) return '-';
   const referenceDate = new Date(referenceDateRaw);
-  if (Number.isNaN(referenceDate.getTime())) return entry.category?.name || '-';
+  if (Number.isNaN(referenceDate.getTime())) return '-';
 
   let age = referenceDate.getFullYear() - dob.getFullYear();
   const beforeBirthday =
@@ -136,9 +137,10 @@ function getRiderCategoryLabel(entry: ManifestRegistration, referenceDateRaw: st
   return 'OPEN (Age 19 and Above)';
 }
 
-async function fetchLogoBase64() {
+
+async function fetchFaviconBase64() {
   try {
-    const response = await fetch('/images/embassy-logo.png');
+    const response = await fetch('/logo_new.png');
     if (!response.ok) return null;
     const buffer = await response.arrayBuffer();
     const bytes = new Uint8Array(buffer);
@@ -349,7 +351,7 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
       const wb = new ExcelJS.Workbook();
       const startDateLabel = formatManifestHeaderDate(formData.startDate);
       const bannerTitle = `EQUESTRIAN PREMIER LEAGUE-${getManifestYear(formData.startDate)}`;
-      const logoBase64 = await fetchLogoBase64();
+      const faviconBase64 = await fetchFaviconBase64();
 
       // Group registrations by category
       const grouped: Record<string, { categoryName: string; entries: ManifestRegistration[] }> = {};
@@ -368,14 +370,15 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
         const sheetName = categoryName.substring(0, 31); // Excel sheet name max 31 chars
         const ws = wb.addWorksheet(sheetName);
 
-        // Column widths (A through G)
+        // Column widths (A through H)
         ws.getColumn(1).width = 11.8; // A - Time / logo square
         ws.getColumn(2).width = 7.2;  // B - Sr.No
         ws.getColumn(3).width = 26.5; // C - Rider Name
         ws.getColumn(4).width = 20.5; // D - Horse
-        ws.getColumn(5).width = 30.5; // E - Rider Category
-        ws.getColumn(6).width = 19.5; // F - Club
-        ws.getColumn(7).width = 8.5;  // G - HC
+        ws.getColumn(5).width = 22.0; // E - Event Category (NEW)
+        ws.getColumn(6).width = 30.5; // F - Rider Category
+        ws.getColumn(7).width = 19.5; // G - Club
+        ws.getColumn(8).width = 8.5;  // H - HC
 
         const thinBorder = {
           top: { style: 'thin', color: { argb: 'FF000000' } },
@@ -385,10 +388,10 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
         } as const;
         const orangeFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF08C00' } } as const;
 
-        // Row 1: Logo in A1 and title banner in B1:G1
+        // Row 1: Logo (A1), title banner (B1:H1)
         ws.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFFFF' } };
         ws.getCell('A1').border = thinBorder;
-        ws.mergeCells('B1:G1');
+        ws.mergeCells('B1:H1');
         const titleCell = ws.getCell('B1');
         titleCell.value = bannerTitle;
         titleCell.font = { name: 'Arial', size: 18, bold: true, color: { argb: 'FFFFFFFF' } };
@@ -396,25 +399,22 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
         titleCell.fill = orangeFill;
         titleCell.border = thinBorder;
         ws.getRow(1).height = 78;
-        for (let col = 2; col <= 7; col++) {
+        for (let col = 2; col <= 8; col++) {
           ws.getCell(1, col).fill = orangeFill;
           ws.getCell(1, col).border = thinBorder;
         }
 
-        if (logoBase64) {
-          const imageId = wb.addImage({
-            base64: logoBase64,
-            extension: 'png',
-          });
-          ws.addImage(imageId, {
-            tl: { col: 0.08, row: 0.1 } as any,
-            ext: { width: 76, height: 58 },
-            editAs: 'oneCell',
+        if (faviconBase64) {
+          const faviconId = wb.addImage({ base64: faviconBase64, extension: 'png' });
+          ws.addImage(faviconId, {
+            tl: { col: 0, row: 0 } as any,
+            br: { col: 1, row: 1 } as any,
+            editAs: 'twoCell',
           });
         }
 
-        // Row 2: Date + Category info (merged A2:G2)
-        ws.mergeCells('A2:G2');
+        // Row 2: Date + Category info (merged A2:H2)
+        ws.mergeCells('A2:H2');
         const subtitleCell = ws.getCell('A2');
         subtitleCell.value = `${startDateLabel}  -    ${categoryName.toUpperCase()}                                              CLASS : ${categoryName.toUpperCase()},OPEN`;
         subtitleCell.font = { name: 'Arial', size: 14, bold: true };
@@ -423,8 +423,8 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
         subtitleCell.border = thinBorder;
         ws.getRow(2).height = 28;
 
-        // Row 3: Course walk info (merged A3:G3)
-        ws.mergeCells('A3:G3');
+        // Row 3: Course walk info (merged A3:H3)
+        ws.mergeCells('A3:H3');
         const infoCell = ws.getCell('A3');
         infoCell.value = 'Course Walk - 13:30Hrs   First Rider - 1400 HRS';
         infoCell.font = { name: 'Arial', size: 14, bold: true };
@@ -434,9 +434,9 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
         ws.getRow(3).height = 28;
 
         // Row 4: Headers
-        const headers = ['Time', 'Sr.No', 'Rider Name', 'Horse ', 'Rider Category', 'Club ', 'HC'];
+        const headers = ['Time', 'Sr.No', 'Rider Name', 'Horse ', 'Event Category', 'Rider Category', 'Club ', 'HC'];
         headers.forEach((h, i) => {
-          const cell = ws.getCell(4, i + 1); // A4 through G4
+          const cell = ws.getCell(4, i + 1); // A4 through H4
           cell.value = h;
           cell.font = { name: 'Arial', size: 14, bold: true };
           cell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -475,25 +475,31 @@ export default function EditEventModal({ open, eventId, onClose, onUpdated }: Ed
           horseCell.font = { name: 'Arial', size: 11 };
           horseCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-          // E: Rider Category
-          const catCell = ws.getCell(rowNum, 5);
+          // E: Event Category — uses description if set, falls back to name
+          const eventCatCell = ws.getCell(rowNum, 5);
+          eventCatCell.value = toUpperDisplay(reg.category?.description || reg.category?.name || '-');
+          eventCatCell.font = { name: 'Arial', size: 11 };
+          eventCatCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+          // F: Rider Category (age-based)
+          const catCell = ws.getCell(rowNum, 6);
           catCell.value = getRiderCategoryLabel(reg, formData.startDate);
           catCell.font = { name: 'Arial', size: 11 };
           catCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-          // F: Club
-          const clubCell = ws.getCell(rowNum, 6);
+          // G: Club
+          const clubCell = ws.getCell(rowNum, 7);
           clubCell.value = toUpperDisplay(reg.club?.name || '-');
           clubCell.font = { name: 'Arial', size: 11 };
           clubCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-          // G: HC
-          const hcCell = ws.getCell(rowNum, 7);
+          // H: HC
+          const hcCell = ws.getCell(rowNum, 8);
           hcCell.value = getHcValue(reg);
           hcCell.font = { name: 'Arial', size: 11 };
           hcCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
-          for (let col = 1; col <= 7; col++) {
+          for (let col = 1; col <= 8; col++) {
             const cell = ws.getCell(rowNum, col);
             cell.border = thinBorder;
           }

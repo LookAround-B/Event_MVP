@@ -90,7 +90,7 @@ async function handler(
                 select: { id: true, name: true },
               },
               category: {
-                select: { id: true, name: true, price: true },
+                select: { id: true, name: true, description: true, price: true },
               },
             },
             orderBy: { createdAt: 'desc' },
@@ -130,7 +130,7 @@ async function handler(
                 select: { id: true, name: true },
               },
               category: {
-                select: { id: true, name: true, price: true },
+                select: { id: true, name: true, description: true, price: true },
               },
             },
             orderBy: { createdAt: 'desc' },

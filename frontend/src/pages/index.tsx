@@ -17,7 +17,7 @@ export default function Home() {
     if (token) {
       router.push('/dashboard');
     } else {
-      router.push('/auth/login');
+      router.push('/rider/login');
     }
   }, [isClient, router]);
 

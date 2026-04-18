@@ -133,6 +133,14 @@ async function handler(
           });
         }
 
+        const isAdmin = authReq.user?.role === 'admin';
+        if (!isAdmin) {
+          const club = await prisma.club.findUnique({ where: { id: clubId }, select: { primaryContactId: true } });
+          if (!club || club.primaryContactId !== authReq.user?.id) {
+            return authRes.status(403).json({ statusCode: 403, message: 'Forbidden' });
+          }
+        }
+
         const {
           name,
           shortCode,
@@ -208,6 +216,10 @@ async function handler(
             statusCode: 400,
             message: 'Club ID is required',
           });
+        }
+
+        if (authReq.user?.role !== 'admin') {
+          return authRes.status(403).json({ statusCode: 403, message: 'Forbidden' });
         }
 
         await prisma.club.delete({

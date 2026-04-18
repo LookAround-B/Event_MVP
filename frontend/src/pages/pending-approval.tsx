@@ -8,7 +8,7 @@ export default function PendingApproval() {
 
   const handleLogout = () => {
     Cookies.remove('authToken');
-    router.push('/auth/login');
+    router.push('/rider/login');
   };
 
   return (

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth, AuthenticatedRequest } from '@/lib/auth-middleware';
+import { withRole, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { createAuditLog } from '@/lib/audit';
 import { ApiResponse } from '@/types';
 
@@ -49,6 +49,9 @@ async function handler(
   }
 
   if (req.method === 'PUT') {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Forbidden', error: 'FORBIDDEN', statusCode: 403 });
+    }
     try {
       const { paymentStatus } = req.body;
 
@@ -121,6 +124,9 @@ async function handler(
   }
 
   if (req.method === 'DELETE') {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Forbidden', error: 'FORBIDDEN', statusCode: 403 });
+    }
     try {
       await prisma.registration.delete({
         where: { id: registrationId },
@@ -150,4 +156,4 @@ async function handler(
   });
 }
 
-export default withAuth(handler);
+export default withRole('admin', 'club', 'rider')(handler);

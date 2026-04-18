@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma/client';
-import { withAuth } from '@/lib/auth-middleware';
+import { withRole, AuthenticatedRequest } from '@/lib/auth-middleware';
 import { ApiResponse } from '@/types';
 
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<ApiResponse>
 ) {
   const { id } = req.query;
@@ -82,6 +82,12 @@ async function handler(
         });
       }
 
+      const isAdmin = req.user?.role === 'admin';
+      const isOwner = existing.userId && existing.userId === req.user?.id;
+      if (!isAdmin && !isOwner) {
+        return res.status(403).json({ success: false, message: 'Forbidden', error: 'FORBIDDEN', statusCode: 403 });
+      }
+
       const updateData: any = {};
 
       if (firstName !== undefined) updateData.firstName = (firstName || '').trim();
@@ -131,6 +137,9 @@ async function handler(
   }
 
   if (req.method === 'DELETE') {
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Forbidden', error: 'FORBIDDEN', statusCode: 403 });
+    }
     try {
       await prisma.rider.delete({
         where: { id: riderId },
@@ -160,4 +169,4 @@ async function handler(
   });
 }
 
-export default withAuth(handler);
+export default withRole('admin', 'club', 'rider')(handler);

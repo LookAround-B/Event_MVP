@@ -214,7 +214,7 @@ export default function AccountPage() {
     try {
       setLoading(true);
       const token = Cookies.get('authToken');
-      if (!token) { router.push('/auth/login'); return; }
+      if (!token) { router.push('/rider/login'); return; }
       const response = await api.get('/api/users/profile');
       setProfile(response.data.data);
     } catch (err: any) {

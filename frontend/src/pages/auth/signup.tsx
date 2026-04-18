@@ -5,7 +5,7 @@ import apiClient from '@/lib/api';
 import Cookies from 'js-cookie';
 import { Eye, EyeOff, ChevronRight } from 'lucide-react';
 import { ShaderAnimation } from '@/components/shader-lines';
-import { GoogleLogin } from '@react-oauth/google';
+import GoogleAuthIconButton from '@/components/auth/GoogleAuthIconButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -253,13 +253,14 @@ export default function Signup() {
 
             {/* Google Login */}
             <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={async (credentialResponse) => {
+              <GoogleAuthIconButton
+                disabled={loading}
+                onToken={async (token) => {
                   setError('');
                   setLoading(true);
                   try {
                     const response = await apiClient.post('/api/auth/google', {
-                      token: credentialResponse.credential,
+                      token,
                       role: signupRole,
                     });
                     Cookies.set('authToken', response.data.data.token, { expires: 7 });
@@ -277,9 +278,7 @@ export default function Signup() {
                     setLoading(false);
                   }
                 }}
-                onError={() => {
-                  setError('Google signup failed. Please try again.');
-                }}
+                onError={(message) => setError(message.replace('login', 'signup'))}
               />
             </div>
           </CardContent>
@@ -289,7 +288,7 @@ export default function Signup() {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/auth/login" className="font-bold text-primary hover:text-primary/80 transition-colors">
+            <Link href="/rider/login" className="font-bold text-primary hover:text-primary/80 transition-colors">
               Log in
             </Link>
           </p>
