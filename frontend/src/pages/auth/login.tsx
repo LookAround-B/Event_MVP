@@ -27,7 +27,9 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
+  const [failedVideos, setFailedVideos] = useState<Set<number>>(new Set());
 
+  const allVideosFailed = failedVideos.size >= backgroundVideos.length;
   const activeVideoSrc = backgroundVideos[activeVideoIndex];
 
   useEffect(() => {
@@ -113,7 +115,7 @@ export default function Login() {
   return (
     <div className="relative min-h-[100dvh] overflow-hidden bg-black">
       <div className="pointer-events-none absolute inset-0 z-0">
-        <video
+        {!allVideosFailed && <video
           key={activeVideoSrc}
           autoPlay
           muted
@@ -124,12 +126,19 @@ export default function Login() {
           }`}
           style={{ transitionDuration: '700ms' }}
           onCanPlay={() => setIsVideoVisible(true)}
-          onEnded={() => setActiveVideoIndex((currentIndex) => (currentIndex + 1) % backgroundVideos.length)}
-          onError={() => setActiveVideoIndex((currentIndex) => (currentIndex + 1) % backgroundVideos.length)}
+          onEnded={() => setActiveVideoIndex((i) => (i + 1) % backgroundVideos.length)}
+          onError={() => {
+            setFailedVideos((prev) => {
+              const next = new Set(prev);
+              next.add(activeVideoIndex);
+              return next;
+            });
+            setActiveVideoIndex((i) => (i + 1) % backgroundVideos.length);
+          }}
           aria-hidden="true"
         >
           <source src={activeVideoSrc} type="video/mp4" />
-        </video>
+        </video>}
       </div>
       <div className="pointer-events-none absolute inset-0 z-[1] bg-black/38" />
       <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),rgba(0,0,0,0.38)_40%,rgba(0,0,0,0.62)_100%)]" />
