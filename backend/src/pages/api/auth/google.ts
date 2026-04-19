@@ -10,6 +10,56 @@ import bcrypt from 'bcryptjs';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+type GoogleProfile = {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  picture?: string;
+};
+
+async function getGoogleProfile(token: string): Promise<GoogleProfile> {
+  const isAccessToken = token.startsWith('ya29.') || token.split('.').length !== 3;
+
+  if (!isAccessToken) {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    if (!payload?.email) throw new Error('Email not provided by Google');
+    return {
+      email: payload.email,
+      firstName: payload.given_name,
+      lastName: payload.family_name,
+      picture: payload.picture,
+    };
+  }
+
+  const userInfoResponse = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!userInfoResponse.ok) {
+    throw new Error('Failed to fetch Google user info');
+  }
+
+  const userInfo = (await userInfoResponse.json()) as {
+    email?: string;
+    given_name?: string;
+    family_name?: string;
+    picture?: string;
+  };
+
+  if (!userInfo.email) throw new Error('Email not provided by Google');
+
+  return {
+    email: userInfo.email,
+    firstName: userInfo.given_name,
+    lastName: userInfo.family_name,
+    picture: userInfo.picture,
+  };
+}
+
 async function handleGoogleAuth(
   req: NextApiRequest,
   res: NextApiResponse<ApiResponse<AuthToken | null>>
@@ -47,23 +97,7 @@ async function handleGoogleAuth(
       return sendErrorResponse(res, 400, 'Role must be admin, club, or rider', ErrorCode.VALIDATION_ERROR);
     }
 
-    // Verify the token
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const payload = ticket.getPayload();
-
-    if (!payload) {
-      return sendErrorResponse(res, 401, 'Invalid token', ErrorCode.INVALID_CREDENTIALS);
-    }
-
-    const { email, given_name: firstName, family_name: lastName, picture } = payload;
-
-    if (!email) {
-      return sendErrorResponse(res, 400, 'Email not provided by Google', ErrorCode.VALIDATION_ERROR);
-    }
+    const { email, firstName, lastName, picture } = await getGoogleProfile(token);
 
     // Find or create user
     let user = await prisma.user.findUnique({
@@ -187,6 +221,9 @@ async function handleGoogleAuth(
   } catch (error: any) {
     if (error.message?.includes('Token used too late')) {
       return sendErrorResponse(res, 401, 'Token expired. Please sign in again.', ErrorCode.INVALID_CREDENTIALS);
+    }
+    if (error.message?.includes('Wrong recipient') || error.message?.includes('invalid_token')) {
+      return sendErrorResponse(res, 401, 'Invalid Google token', ErrorCode.INVALID_CREDENTIALS);
     }
     console.error('Google Auth Error Details:', {
       message: error.message,
