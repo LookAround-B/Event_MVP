@@ -12,6 +12,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { DatePicker } from '@/components/DatePicker';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 // Dynamic import — TipTap uses browser APIs (document/window) for editor DOM
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
@@ -262,6 +263,7 @@ export default function CreateEventPage() {
   }
 
   return (
+    <BoneyardSkeleton name="events-create-page" loading={false}>
     <ProtectedRoute allowedRoles={['admin']}>
       <Head><title>{isEdit ? 'Edit Event' : 'Create Event'} | Equestrian Events</title></Head>
       <div className="space-y-6 max-w-4xl mx-auto">
@@ -595,5 +597,6 @@ export default function CreateEventPage() {
         </form>
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

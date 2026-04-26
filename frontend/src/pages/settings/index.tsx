@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import toast from 'react-hot-toast';
 import ProtectedRoute from '@/lib/protected-route';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false });
 
@@ -306,6 +307,7 @@ export default function Settings() {
   const settingsActionButtonClass = "btn-primary inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold shadow-lg shadow-primary/20 disabled:opacity-50";
 
   return (
+    <BoneyardSkeleton name="settings-page" loading={false}>
     <ProtectedRoute allowedRoles={['admin']}>
       <div className="p-4 sm:p-6">
         <Head><title>Settings | Equestrian Events</title></Head>
@@ -815,5 +817,6 @@ export default function Settings() {
       </div>
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

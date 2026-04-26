@@ -7,6 +7,7 @@ import ProtectedRoute from '@/lib/protected-route';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { TableSkeleton } from '@/components/TableSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Registration {
   id: string;
@@ -153,6 +154,7 @@ export default function RegistrationApprovals() {
   }
 
   return (
+    <BoneyardSkeleton name="registration-approvals-page" loading={false}>
     <ProtectedRoute>
       <Head><title>Registration Approvals | Equestrian</title></Head>
       <div className="space-y-6">
@@ -339,5 +341,6 @@ export default function RegistrationApprovals() {
         )}
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

@@ -8,6 +8,7 @@ import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, ClipboardCheck, Check, X } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Event { id: string; name: string; }
 interface Rider { id: string; firstName: string; lastName: string; }
@@ -95,6 +96,7 @@ export default function CreateRegistration() {
   const selectClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground appearance-none";
 
   return (
+    <BoneyardSkeleton name="registrations-create-page" loading={false}>
     <ProtectedRoute>
       <Head><title>New Registration | Equestrian Events</title></Head>
       <div className="animate-fade-in max-w-[1600px] mx-auto">
@@ -212,5 +214,6 @@ export default function CreateRegistration() {
         </div>
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

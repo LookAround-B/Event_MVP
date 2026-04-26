@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import { TableSkeleton } from '@/components/TableSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Stable {
   id: string;
@@ -115,6 +116,7 @@ export default function EventStables() {
   };
 
   return (
+    <BoneyardSkeleton name="event-stables-page" loading={false}>
     <ProtectedRoute allowedRoles={['admin']}>
       <div>
         <div className="flex items-center gap-4 mb-8">
@@ -295,5 +297,6 @@ export default function EventStables() {
         )}
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

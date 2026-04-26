@@ -8,6 +8,7 @@ import { ArrowLeft, Check, Paperclip } from 'lucide-react';
 import AddressMapPicker from '@/components/AddressMapPicker';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface SocialLinks {
   instagram: string;
@@ -203,6 +204,7 @@ export default function CreateRider() {
   const selectClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground appearance-none";
 
   return (
+    <BoneyardSkeleton name="riders-create-page" loading={false}>
     <ProtectedRoute>
       {/* ── Modal overlay ── */}
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -495,5 +497,6 @@ export default function CreateRider() {
           </div>
         </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

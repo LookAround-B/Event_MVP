@@ -1,0 +1,13 @@
+{
+  "breakpoints": [375, 768, 1280],
+  "out": "./src/bones",
+  "color": "hsl(240, 6%, 15%)",
+  "darkColor": "hsl(240, 6%, 15%)",
+  "animate": "shimmer",
+  "shimmerColor": "hsl(240, 6%, 18%)",
+  "darkShimmerColor": "hsl(240, 6%, 18%)",
+  "speed": "1.8s",
+  "shimmerAngle": 110,
+  "transition": 300,
+  "wait": 1200
+}

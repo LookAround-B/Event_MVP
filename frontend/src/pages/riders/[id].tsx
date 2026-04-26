@@ -11,6 +11,7 @@ import AddressMapPicker from '@/components/AddressMapPicker';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface SocialLinks {
   instagram?: string;
@@ -237,6 +238,7 @@ export default function RiderDetail() {
   }
 
   return (
+    <BoneyardSkeleton name="rider-detail-page" loading={false}>
     <ProtectedRoute>
       <Head><title>{rider.firstName} {rider.lastName} | Rider Details</title></Head>
       <div className="space-y-6">
@@ -685,5 +687,6 @@ export default function RiderDetail() {
         )}
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

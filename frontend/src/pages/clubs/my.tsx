@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import api from '@/lib/api';
 import { AppShellSkeleton } from '@/components/AppShellSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 export default function MyClub() {
   const router = useRouter();

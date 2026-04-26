@@ -5,6 +5,7 @@ import apiClient from '@/lib/api';
 import AddressMapPicker from '@/components/AddressMapPicker';
 import { DatePicker } from '@/components/DatePicker';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 import {
   Select,
   SelectTrigger,
@@ -169,7 +170,7 @@ export default function CompleteProfile() {
       const response = await apiClient.post('/api/users/complete-profile', payload);
 
       if (response.data.success && response.data.data?.token) {
-        Cookies.set('authToken', response.data.data.token, { expires: 7 });
+        Cookies.set('authToken', response.data.data.token, { expires: 7, path: '/' });
         router.push('/pending-approval');
       }
     } catch (err: any) {
@@ -196,6 +197,7 @@ export default function CompleteProfile() {
       : 'Submit your rider details. Admin approval will unlock platform access.';
 
   return (
+    <BoneyardSkeleton name="complete-profile-page" loading={false}>
     <div className="min-h-screen py-10 px-4 relative overflow-hidden">
       <div className="absolute top-0 -left-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
       <div className="absolute top-0 -right-40 w-80 h-80 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }} />
@@ -653,5 +655,6 @@ export default function CompleteProfile() {
         </div>
       </div>
     </div>
+    </BoneyardSkeleton>
   );
 }

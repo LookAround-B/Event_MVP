@@ -9,6 +9,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { TableSkeleton } from '@/components/TableSkeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface EventSummary {
   id: string;
@@ -116,6 +117,7 @@ export default function Reports() {
   };
 
   return (
+    <BoneyardSkeleton name="reports-page" loading={false}>
     <ProtectedRoute>
       <Head><title>Reports | Equestrian</title></Head>
       <div className="animate-fade-in max-w-[1600px] mx-auto space-y-6">
@@ -445,5 +447,6 @@ export default function Reports() {
         )}
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

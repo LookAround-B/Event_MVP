@@ -20,6 +20,7 @@ import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { exportBrandedExcel, exportCSV } from '@/utils/brandedExcel';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Club {
   id: string;
@@ -201,6 +202,7 @@ export default function ClubsList() {
   const getRiderCount = (club: Club) => club._count?.riders ?? 0;
 
   return (
+    <BoneyardSkeleton name="clubs-page" loading={false}>
     <ProtectedRoute>
       <Head><title>Clubs | Equestrian Events</title></Head>
       <div className="animate-fade-in max-w-[1600px] mx-auto">
@@ -403,5 +405,6 @@ export default function ClubsList() {
         <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} onExport={handleExport} />
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

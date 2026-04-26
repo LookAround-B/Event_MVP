@@ -6,6 +6,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 export default function CreateHorse() {
   const router = useRouter();
@@ -137,6 +138,7 @@ export default function CreateHorse() {
   const selectClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground appearance-none";
 
   return (
+    <BoneyardSkeleton name="horses-create-page" loading={false}>
     <ProtectedRoute>
       {/* ── Modal overlay ── */}
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -352,5 +354,6 @@ export default function CreateHorse() {
         </div>
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

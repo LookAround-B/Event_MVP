@@ -18,6 +18,7 @@ import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 /* ─── Types (preserved) ─── */
 interface FinanceRegistration {
@@ -291,6 +292,7 @@ export default function Financial() {
   const gstAccrued = transactions.reduce((acc, t) => acc + t.cgstAmount + t.sgstAmount + t.igstAmount, 0);
 
   return (
+    <BoneyardSkeleton name="financial-page" loading={false}>
     <ProtectedRoute>
       <Head><title>Financial | Equestrian Events</title></Head>
       <div className="animate-fade-in max-w-[1600px] mx-auto">
@@ -661,5 +663,6 @@ export default function Financial() {
         </div>
       )}
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

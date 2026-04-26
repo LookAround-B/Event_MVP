@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 type PortalTab = 'rider-club' | 'admin';
 type LoginRole = 'rider' | 'club';
@@ -49,7 +50,7 @@ export default function Login() {
 
     try {
       const response = await apiClient.post('/api/auth/login', { ...formData, role });
-      Cookies.set('authToken', response.data.data.token, { expires: 7 });
+      Cookies.set('authToken', response.data.data.token, { expires: 7, path: '/' });
 
       const user = response.data.data.user;
 
@@ -95,7 +96,7 @@ export default function Login() {
         token: credential,
         role: googleRole,
       });
-      Cookies.set('authToken', response.data.data.token, { expires: 7 });
+      Cookies.set('authToken', response.data.data.token, { expires: 7, path: '/' });
 
       const user = response.data.data.user;
       if (!user?.profileComplete && user?.isApproved === false) {
@@ -113,6 +114,7 @@ export default function Login() {
   };
 
   return (
+    <BoneyardSkeleton name="login-page" loading={false}>
     <div className="relative min-h-[100dvh] overflow-hidden bg-black">
       <div className="pointer-events-none absolute inset-0 z-0">
         {!allVideosFailed && <video
@@ -335,5 +337,6 @@ export default function Login() {
         </div>
       </div>
     </div>
+    </BoneyardSkeleton>
   );
 }

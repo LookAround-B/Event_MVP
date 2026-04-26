@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Role {
   id: string;
@@ -78,6 +79,7 @@ export default function CreateUser() {
   const selectClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground appearance-none";
 
   return (
+    <BoneyardSkeleton name="users-create-page" loading={false}>
     <ProtectedRoute>
       {/* ── Modal overlay ── */}
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -219,5 +221,6 @@ export default function CreateUser() {
         </div>
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

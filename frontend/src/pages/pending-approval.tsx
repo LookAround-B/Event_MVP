@@ -2,6 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie';
 import { Clock, LogOut, CheckCircle } from 'lucide-react';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 export default function PendingApproval() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function PendingApproval() {
   };
 
   return (
+    <BoneyardSkeleton name="pending-approval-page" loading={false}>
     <div className="min-h-screen  flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated floating blobs */}
       <div className="absolute top-0 -left-40 w-80 h-80  rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
@@ -64,5 +66,6 @@ export default function PendingApproval() {
         </div>
       </div>
     </div>
+    </BoneyardSkeleton>
   );
 }

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 export default function Signup() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function Signup() {
         ...formData,
         role: signupRole,
       });
-      Cookies.set('authToken', response.data.data.token, { expires: 7 });
+      Cookies.set('authToken', response.data.data.token, { expires: 7, path: '/' });
       const user = response.data.data.user;
 
       if (!user?.profileComplete && user?.isApproved === false) {
@@ -60,6 +61,7 @@ export default function Signup() {
   };
 
   return (
+    <BoneyardSkeleton name="signup-page" loading={false}>
     <div className="relative min-h-[100dvh] overflow-x-hidden bg-black">
       {/* Shader background */}
       <div className="pointer-events-none fixed inset-0 z-0 shadow-[inset_0_0_100px_rgba(var(--primary-rgb),0.05)]">
@@ -263,7 +265,7 @@ export default function Signup() {
                       token,
                       role: signupRole,
                     });
-                    Cookies.set('authToken', response.data.data.token, { expires: 7 });
+                    Cookies.set('authToken', response.data.data.token, { expires: 7, path: '/' });
                     const user = response.data.data.user;
                     if (!user?.profileComplete && user?.isApproved === false) {
                       router.push('/complete-profile');
@@ -303,5 +305,6 @@ export default function Signup() {
         </div>
       </div>
     </div>
+    </BoneyardSkeleton>
   );
 }

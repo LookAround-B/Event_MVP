@@ -3,6 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  transpilePackages: ['boneyard-js'],
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,

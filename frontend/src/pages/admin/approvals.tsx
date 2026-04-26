@@ -10,6 +10,7 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import AuditPagination from '@/components/AuditPagination';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface PendingUser {
   id: string;
@@ -312,12 +313,14 @@ export default function AdminApprovals() {
               {(() => {
                 const totalPages = Math.ceil(pendingRegs.length / perPage);
                 return (
+                  <BoneyardSkeleton name="admin-approvals-page" loading={false}>
                   <AuditPagination
                     page={regPage}
                     totalPages={totalPages}
                     onPageChange={setRegPage}
                     className="mt-0 border-t border-border/10 px-4 py-3"
                   />
+                  </BoneyardSkeleton>
                 );
               })()}
               </>

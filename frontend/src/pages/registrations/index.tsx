@@ -18,6 +18,7 @@ import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 import { useAuth } from '@/hooks/useAuth';
 
 /* ─── Types (preserved) ─── */
@@ -243,6 +244,7 @@ export default function Registrations() {
   return (
     <ProtectedRoute>
       <Head><title>Registrations | Equestrian Events</title></Head>
+      <BoneyardSkeleton name="registrations-page" loading={false}>
       <div className="animate-fade-in max-w-[1600px] mx-auto">
 
         {/* ═══ Page Header ═══ */}
@@ -568,6 +570,7 @@ export default function Registrations() {
           </DialogContent>
         </Dialog>
       </div>
+      </BoneyardSkeleton>
     </ProtectedRoute>
   );
 }

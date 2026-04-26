@@ -8,6 +8,7 @@ import Cropper, { Area } from 'react-easy-crop';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface UserProfile {
   id: string;
@@ -332,7 +333,9 @@ export default function AccountPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <PageSkeleton variant="detail" />
+        <BoneyardSkeleton name="account" loading={true}>
+          <PageSkeleton variant="detail" />
+        </BoneyardSkeleton>
       </ProtectedRoute>
     );
   }
@@ -354,6 +357,7 @@ export default function AccountPage() {
 
   return (
     <ProtectedRoute>
+      <BoneyardSkeleton name="account-page" loading={false}>
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Notifications */}
         {error && (
@@ -594,6 +598,7 @@ export default function AccountPage() {
           </div>
         )}
       </div>
+      </BoneyardSkeleton>
     </ProtectedRoute>
   );
 }

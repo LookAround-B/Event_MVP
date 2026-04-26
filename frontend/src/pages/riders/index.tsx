@@ -14,6 +14,7 @@ import { FilterDropdown } from '@/components/FilterDropdown';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Rider {
   id: string;
@@ -385,6 +386,7 @@ export default function Riders() {
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                     const pageNum = i + 1;
                     return (
+                      <BoneyardSkeleton name="riders-page" loading={false}>
                       <button
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
@@ -396,6 +398,7 @@ export default function Riders() {
                       >
                         {pageNum}
                       </button>
+                      </BoneyardSkeleton>
                     );
                   })}
                   <button

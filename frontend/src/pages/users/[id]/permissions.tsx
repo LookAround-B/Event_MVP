@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Save, Check, X } from 'lucide-react';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Permission {
   action: string;
@@ -141,6 +142,7 @@ export default function UserPermissions() {
 
   return (
     <ProtectedRoute>
+      <BoneyardSkeleton name="user-permissions-page" loading={false}>
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Link href="/users" className="text-muted-foreground hover:text-on-surface">
@@ -259,6 +261,7 @@ export default function UserPermissions() {
           </div>
         </div>
       </div>
+      </BoneyardSkeleton>
     </ProtectedRoute>
   );
 }

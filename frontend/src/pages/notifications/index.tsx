@@ -6,6 +6,7 @@ import { Bell, Check, CheckCircle } from 'lucide-react';
 import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Notification {
   id: string;
@@ -87,6 +88,7 @@ export default function Notifications() {
   };
 
   return (
+    <BoneyardSkeleton name="notifications-page" loading={false}>
     <ProtectedRoute>
       <Head><title>Notifications | Equestrian</title></Head>
       <div className="space-y-6">
@@ -153,5 +155,6 @@ export default function Notifications() {
         )}
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

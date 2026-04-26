@@ -13,6 +13,7 @@ import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Horse {
   id: string;
@@ -413,6 +414,7 @@ export default function Horses() {
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                     const pageNum = i + 1;
                     return (
+                      <BoneyardSkeleton name="horses-page" loading={false}>
                       <button
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
@@ -424,6 +426,7 @@ export default function Horses() {
                       >
                         {pageNum}
                       </button>
+                      </BoneyardSkeleton>
                     );
                   })}
                   <button

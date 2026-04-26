@@ -13,6 +13,7 @@ import AuditPagination from '@/components/AuditPagination';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 // Shared input class that stays visible inside dark modals
 const INPUT_CLS = "w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/15 placeholder:text-white/30 focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition-all";
@@ -513,7 +514,7 @@ export default function Users() {
   return (
     <ProtectedRoute>
       <Head><title>Users | Equestrian Events</title></Head>
-
+      <BoneyardSkeleton name="users-page" loading={false}>
       <div className="animate-fade-in max-w-[1600px] mx-auto space-y-5">
 
         {/* ── Header ── */}
@@ -867,6 +868,7 @@ export default function Users() {
           }}
         />
       )}
+      </BoneyardSkeleton>
     </ProtectedRoute>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 export default function Home() {
   const router = useRouter();
@@ -21,5 +22,9 @@ export default function Home() {
     }
   }, [isClient, router]);
 
-  return <PageSkeleton variant="public" />;
+  return (
+    <BoneyardSkeleton name="home-page" loading={true}>
+      <PageSkeleton variant="public" />
+    </BoneyardSkeleton>
+  );
 }

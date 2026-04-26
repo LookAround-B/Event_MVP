@@ -9,6 +9,7 @@ import { ArrowLeft, Download, ChevronLeft, ChevronRight, MapPin, Clock, Search, 
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface EventDetail {
   id: string;
@@ -506,6 +507,7 @@ export default function EventDetail() {
   }
 
   return (
+    <BoneyardSkeleton name="event-detail-page" loading={false}>
     <ProtectedRoute>
       <Head><title>{event.name} | Event Details</title></Head>
       <div className="space-y-6 lg:space-y-8 animate-fade-in">
@@ -917,5 +919,6 @@ export default function EventDetail() {
         )}
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

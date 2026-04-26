@@ -38,6 +38,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { PageSkeleton } from "@/components/PageSkeleton";
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -714,7 +715,9 @@ function DashboardContent() {
         <Head>
           <title>Dashboard | Equestrian Events</title>
         </Head>
-        <PageSkeleton variant="dashboard" />
+        <BoneyardSkeleton name="dashboard" loading={true}>
+          <PageSkeleton variant="dashboard" />
+        </BoneyardSkeleton>
       </ProtectedRoute>
     );
   }
@@ -1211,5 +1214,9 @@ function DashboardContent() {
 }
 
 export default function Dashboard() {
-  return <DashboardContent />;
+  return (
+    <BoneyardSkeleton name="dashboard-page" loading={false}>
+      <DashboardContent />
+    </BoneyardSkeleton>
+  );
 }

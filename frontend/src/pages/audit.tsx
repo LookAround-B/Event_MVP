@@ -4,6 +4,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import AuditPagination from '@/components/AuditPagination';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface AuditLog {
   id: string;
@@ -76,8 +77,11 @@ export default function AuditLogs() {
     <ProtectedRoute>
       <Head><title>Audit Logs | Equestrian Events</title></Head>
       {loading ? (
-        <PageSkeleton variant="table" rows={7} />
+        <BoneyardSkeleton name="audit" loading={true}>
+          <PageSkeleton variant="table" rows={7} />
+        </BoneyardSkeleton>
       ) : (
+        <BoneyardSkeleton name="audit-page" loading={false}>
         <div>
           <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl mb-8">Audit <span className="gradient-text">Trail</span></h1>
 
@@ -179,6 +183,7 @@ export default function AuditLogs() {
             )}
           </div>
         </div>
+        </BoneyardSkeleton>
       )}
     </ProtectedRoute>
   );

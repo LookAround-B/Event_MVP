@@ -8,6 +8,7 @@ import AddressMapPicker from '@/components/AddressMapPicker';
 import toast from 'react-hot-toast';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DatePicker } from '@/components/DatePicker';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 export default function CreateClub() {
   const router = useRouter();
@@ -78,6 +79,7 @@ export default function CreateClub() {
   const selectClass = "w-full px-4 py-3 rounded-xl bg-surface-container text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 border border-border/50 placeholder:text-muted-foreground appearance-none";
 
   return (
+    <BoneyardSkeleton name="clubs-create-page" loading={false}>
     <ProtectedRoute>
       {/* ── Modal overlay ── */}
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -440,5 +442,6 @@ export default function CreateClub() {
         </div>
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

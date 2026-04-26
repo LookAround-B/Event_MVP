@@ -11,6 +11,7 @@ import ProtectedRoute from '@/lib/protected-route';
 import ToastProvider from '@/components/ToastProvider';
 import { AppShellSkeleton } from '@/components/AppShellSkeleton';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
 import '@fontsource/manrope/600.css';
@@ -154,7 +155,9 @@ export default function App({ Component, pageProps }: AppProps) {
                 <title>Equestrian Events</title>
                 <link rel="icon" type="image/png" href="/logo_new.png" />
               </Head>
-              {isRouteLoading ? <PageSkeleton variant="public" /> : <Component {...pageProps} />}
+              <BoneyardSkeleton name={`page-${normalizeRoutePath(router.asPath).replace(/\//g, '-') || 'home'}`} loading={isRouteLoading}>
+                {isRouteLoading ? <PageSkeleton variant="public" /> : <Component {...pageProps} />}
+              </BoneyardSkeleton>
             </GoogleOAuthProvider>
           </AppearanceProvider>
         </ThemeProvider>
@@ -174,11 +177,13 @@ export default function App({ Component, pageProps }: AppProps) {
             </Head>
             <ProtectedRoute>
               <Layout>
-                {isRouteLoading ? (
-                  <PageSkeleton variant={getProtectedSkeletonVariant(routeLoadingPath)} />
-                ) : (
-                  <Component {...pageProps} />
-                )}
+                <BoneyardSkeleton name={`page-${normalizeRoutePath(routeLoadingPath).replace(/\//g, '-') || 'dashboard'}`} loading={isRouteLoading}>
+                  {isRouteLoading ? (
+                    <PageSkeleton variant={getProtectedSkeletonVariant(routeLoadingPath)} />
+                  ) : (
+                    <Component {...pageProps} />
+                  )}
+                </BoneyardSkeleton>
               </Layout>
             </ProtectedRoute>
           </GoogleOAuthProvider>

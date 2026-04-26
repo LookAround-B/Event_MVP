@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import ProtectedRoute from '@/lib/protected-route';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import { PageSkeleton } from '@/components/PageSkeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Horse {
   id: string;
@@ -87,6 +88,7 @@ export default function HorseDetail() {
   const age = horse.yearOfBirth ? currentYear - horse.yearOfBirth : 'Unknown';
 
   return (
+    <BoneyardSkeleton name="horse-detail-page" loading={false}>
     <ProtectedRoute>
       <div className="space-y-6 max-w-4xl mx-auto py-8">
         <div className="flex items-center justify-between mb-8">
@@ -181,5 +183,6 @@ export default function HorseDetail() {
           </div>
         </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

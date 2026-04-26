@@ -10,6 +10,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { DatePicker } from '@/components/DatePicker';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface Rider {
   id: string;
@@ -354,6 +355,7 @@ export default function ClubDetail() {
   }
 
   return (
+    <BoneyardSkeleton name="club-detail-page" loading={false}>
     <ProtectedRoute>
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-8">
@@ -934,5 +936,6 @@ export default function ClubDetail() {
         </div>
       </div>
     </ProtectedRoute>
+    </BoneyardSkeleton>
   );
 }

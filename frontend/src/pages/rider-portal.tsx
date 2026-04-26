@@ -8,6 +8,7 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 
 interface DashboardWidgets {
   horseCount: number;
@@ -208,6 +209,7 @@ export default function RiderPortal() {
   return (
     <ProtectedRoute>
       <Head><title>Rider Portal | Equestrian Events</title></Head>
+      <BoneyardSkeleton name="rider-portal" loading={false}>
       <div className="animate-fade-in max-w-[1600px] mx-auto">
         <div className="mb-6 lg:mb-8">
           <h1 className="text-3xl font-black text-on-surface tracking-tighter sm:text-4xl lg:text-5xl">
@@ -482,6 +484,7 @@ export default function RiderPortal() {
           </div>
         )}
       </div>
+      </BoneyardSkeleton>
     </ProtectedRoute>
   );
 }

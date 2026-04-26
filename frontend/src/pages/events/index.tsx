@@ -13,6 +13,7 @@ import { KPIGrid } from '@/components/dashboard/KPIGrid';
 import { FilterDropdown } from '@/components/FilterDropdown';
 import { CalendarView } from '@/components/CalendarView';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton as BoneyardSkeleton } from 'boneyard-js/react';
 import { cn } from '@/lib/utils';import CreateEventModal from '@/components/CreateEventModal';import EditEventModal from '@/components/EditEventModal';import { ActionItem } from '@/components/ActionsDropdown';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -233,6 +234,7 @@ export default function Events() {
   return (
     <ProtectedRoute>
       <Head><title>Events | Equestrian Events</title></Head>
+      <BoneyardSkeleton name="events-page" loading={false}>
       <div className="animate-fade-in max-w-[1600px] mx-auto">
 
         {/* Page heading */}
@@ -422,6 +424,7 @@ export default function Events() {
         </div>
         )}
       </div>
+      </BoneyardSkeleton>
 
       {canManageEvents && <CreateEventModal open={createOpen} onClose={() => setCreateOpen(false)} onCreated={fetchEvents} />}
       {canManageEvents && <EditEventModal open={!!editEventId} eventId={editEventId} onClose={() => setEditEventId(null)} onUpdated={fetchEvents} />}
